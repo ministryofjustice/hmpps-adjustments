@@ -18,8 +18,5 @@ generic-service:
     IDENTIFY_REMAND_PERIODS_URL: "https://identify-remand-periods-preprod.hmpps.service.justice.gov.uk"
     IDENTIFY_REMAND_PERIODS_API_URL: "https://identify-remand-periods-api-preprod.hmpps.service.justice.gov.uk"
 
-  # Switches off the allow list in the DEV env only.
-  allowlist: null
-  
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
