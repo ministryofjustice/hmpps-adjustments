@@ -1,0 +1,47 @@
+{% extends "../../partials/layout.njk" %}
+
+{% set pageTitle = applicationName + " - Home" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <h1 class="govuk-heading-xl">Adjustments</h1>
+            <table class="govuk-table govuk-!-margin-bottom-8">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header" scope="col">Type</th>
+                        <th class="govuk-table__header" scope="col">Period</th>
+                        <th class="govuk-table__header" scope="col">Days</th>
+                        <th class="govuk-table__header" scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    {% for adjustment in model.adjustments %}
+                        <tr class="govuk-table__row">
+                            <!-- Type -->
+                            <td class="govuk-table__cell">{{adjustment.adjustment.adjustmentType}}</td>
+                            <!-- Days -->
+                            <td class="govuk-table__cell">
+                                <span class="govuk-!-padding-top-3">
+                                    <b>From {{adjustment.adjustment.fromDate | date('dddd, DD MMMM YYYY') }} to {{adjustment.adjustment.toDate | date('dddd, DD MMMM YYYY') }}</b>
+                                </span>
+                            </td>
+                            <td class="govuk-table__cell">{{adjustment.adjustment.days}}</td>
+                            <td class="govuk-table__cell">
+                                <form action="/test/{{model.prisonerDetail.offenderNo}}/delete/{{adjustment.id}}" class="form" method="post">
+                                    <a href="/test/{{model.prisonerDetail.offenderNo}}/edit/{{adjustment.id}}" class="govuk-button">Edit</a>
+                                    <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+                                    <button class="govuk-button">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="govuk-grid-row">
+        <a href="/test/{{model.prisonerDetail.offenderNo}}/create" class="govuk-button">Create</a>
+    </div>
+{% endblock %}

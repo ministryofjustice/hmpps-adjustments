@@ -1,0 +1,115 @@
+{% extends "../../partials/layout.njk" %}
+
+{% set pageTitle = applicationName + " - Home" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            {% if model.message %}
+                <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                    <div class="govuk-notification-banner__header">
+                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                                Success
+                            </h2>
+                    </div>
+                    <div class="govuk-notification-banner__content">
+                        <h3 class="govuk-notification-banner__heading">
+                            {{model.message.days}} days of {{model.message.type.shortText}} have been applied
+                            </h3>
+                        <p class="govuk-body">The adjustments have been saved in NOMIS. You can continue to add adjustments for {{model.prisonerDetail.firstName | title}}
+                            {{model.prisonerDetail.lastName | title}}.</p>
+                        <p class="govuk-body">You must recalculate the release dates once all adjustments have been applied.
+                                <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-notification-banner__link">Calculate release date</a>
+                        </p>
+
+                    </div>
+                </div>
+            {% endif %}
+            <div class="moj-page-header-actions">
+
+                <div class="moj-page-header-actions__title">
+                    <h1 class="govuk-heading-xl">
+                        <span class="govuk-caption-xl">Adjustments</span>Review and apply adjustments</h1>
+                </div>
+            </div>
+
+            <p class="govuk-body">
+                        This page lists all the adjustments that have been recorded for {{model.prisonerDetail.firstName | title}}
+                {{model.prisonerDetail.lastName | title}}.
+                        You can add new adjustments or review remand time that has been identified from court outcomes logged in NOMIS.
+                    </p>
+        </div>
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            {% if model.displayReview() %}
+                <div class="custom-card">
+                    <h2 class="govuk-heading-m adj-card-heading">There is existing remand to review</h2>
+                    <p>Based on the data from court outcomes in NOMIS, Joe Bloggs may have {{model.getTotalDaysRelevantRemand()}} days remand. Review the remand to make sure it is relevant.</p>
+                    <a href="/{{model.prisonerDetail.offenderNo}}/remand" class="govuk-button" role="button">Review</a>
+                </div>
+            {% endif %}
+            <h2 class="govuk-heading-m govuk-!-padding-left-4">
+                        Deductions
+                    </h2>
+            <div class="adjustment-card-container govuk-body">
+                {% for adjustmentType in model.deductions()%}
+                    <div class="adjustment-card">
+                        <div class="adjustment-card_heading ">
+                            <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
+                        </div>
+                        <div class="adjustment-card_content">
+                            <span class="count govuk-body">{{model.getTotalDays(adjustmentType)}}</span>
+                            <span>Days</span>
+                            <ul class="govuk-list govuk-!-padding-top-3">
+                                <li>
+                                    <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}">
+                                        {% if adjustmentType.value != 'REMAND' %}
+                                            Add {{adjustmentType.shortText}}
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <h2 class="govuk-heading-m govuk-!-padding-left-4">
+                        Additions
+                    </h2>
+            <div class="adjustment-card-container govuk-body">
+                {% for adjustmentType in model.additions()%}
+                    <div class="adjustment-card">
+                        <div class="adjustment-card_heading ">
+                            <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
+                        </div>
+                        <div class="adjustment-card_content">
+                            <span class="count govuk-body">{{model.getTotalDays(adjustmentType)}}</span>
+                            <span>Days</span>
+                            <ul class="govuk-list govuk-!-padding-top-3">
+                                <li>
+                                    <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}">
+                                        Add {{adjustmentType.shortText}}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="govuk-inset-text govuk-!-margin-left-2 govuk-!-margin-top-9">
+        <h2 class="govuk-heading-m">Calculate release dates</h2>
+        <p>The changes may affect the release date for {{model.prisonerDetail.firstName | title}}
+            {{model.prisonerDetail.lastName | title}}
+        </p>
+        <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-button">
+                                Calculate release dates
+                            </a>
+    </div>
+{% endblock %}

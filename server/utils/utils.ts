@@ -21,3 +21,23 @@ export const initialiseName = (fullName?: string): string | null => {
   const array = fullName.split(' ')
   return `${array[0][0]}. ${array.reverse()[0]}`
 }
+
+export const dateItems = (year: string, month: string, day: string) => {
+  return [
+    {
+      name: 'day',
+      classes: 'govuk-input--width-2',
+      value: day,
+    },
+    {
+      name: 'month',
+      classes: 'govuk-input--width-2',
+      value: month,
+    },
+    {
+      name: 'year',
+      classes: 'govuk-input--width-4',
+      value: year,
+    },
+  ]
+}
