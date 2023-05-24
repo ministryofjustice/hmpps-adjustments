@@ -19,7 +19,7 @@ export default class AdjustmentsListViewModel {
     public relevantRemand: Remand[],
     public message: Message,
   ) {
-    this.messageType = message && this.adjustmentTypes.find(it => message.type)
+    this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
   }
 
   public deductions(): AdjustmentType[] {
