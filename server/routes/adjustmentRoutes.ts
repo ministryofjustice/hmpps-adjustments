@@ -29,6 +29,12 @@ export default class AdjustmentRoutes {
     })
   }
 
+  public success: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    req.flash('message', req.query.message as string)
+    return res.redirect(`/${nomsId}`)
+  }
+
   public list: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params

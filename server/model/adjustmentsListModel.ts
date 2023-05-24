@@ -11,12 +11,16 @@ export type Message = {
 export default class AdjustmentsListViewModel {
   public adjustmentTypes = adjustmentTypes
 
+  public messageType: AdjustmentType
+
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public relevantRemand: Remand[],
     public message: Message,
-  ) {}
+  ) {
+    this.messageType = message && this.adjustmentTypes.find(it => message.type)
+  }
 
   public deductions(): AdjustmentType[] {
     return this.adjustmentTypes.filter(it =>
