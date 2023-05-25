@@ -26,6 +26,7 @@ export default function routes(service: Services): Router {
   get('/:nomsId/start', adjustmentRoutes.start)
   get('/:nomsId', adjustmentRoutes.list)
   get('/:nomsId/remand', adjustmentRoutes.remand)
+  get('/:nomsId/success', adjustmentRoutes.success)
 
   get('/test/:nomsId', adjustmentTestRoutes.list)
   get('/test/:nomsId/create', adjustmentTestRoutes.create)
