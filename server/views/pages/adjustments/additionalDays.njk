@@ -1,0 +1,27 @@
+{% extends "../../partials/layout.njk" %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+
+{% set pageTitle = applicationName + " - Home" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+  {% if model.adjudications.length != 0 %}
+    {{ govukCheckboxes({
+  name: "nationality",
+  fieldset: {
+    legend: {
+      text: "Select adjudications you want to apply?",
+      isPageHeading: true,
+      classes: "govuk-fieldset__legend--l"
+    }
+  },
+  hint: {
+    text: "Based on the etc..."
+  },
+  items: model.toItems()
+}) }}
+  {% else %}
+    <p class="govuk-body">No adjudications</p>
+  {% endif %}
+
+{% endblock %}
