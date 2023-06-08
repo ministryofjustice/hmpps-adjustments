@@ -27,6 +27,7 @@ export default function routes(service: Services): Router {
   get('/:nomsId', adjustmentRoutes.list)
   get('/:nomsId/remand', adjustmentRoutes.remand)
   get('/:nomsId/success', adjustmentRoutes.success)
+  get('/:nomsId/additional-days', adjustmentRoutes.additionalDays)
 
   get('/test/:nomsId', adjustmentTestRoutes.list)
   get('/test/:nomsId/create', adjustmentTestRoutes.create)

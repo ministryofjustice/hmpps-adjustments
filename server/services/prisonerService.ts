@@ -1,6 +1,8 @@
 import type HmppsAuthClient from '../data/hmppsAuthClient'
 import PrisonApiClient from '../api/prisonApiClient'
 import {
+  PrisonApiAdjudication,
+  PrisonApiAdjudicationSearchResponse,
   PrisonApiAdjustment,
   PrisonApiBookingAndSentenceAdjustments,
   PrisonApiCharge,
@@ -24,6 +26,14 @@ export default class PrisonerService {
 
   async getPrisonerDetail(nomsId: string, userCaseloads: string[], token: string): Promise<PrisonApiPrisoner> {
     return this.getPrisonerDetailImpl(nomsId, userCaseloads, token, false)
+  }
+
+  async getAdjudications(nomsId: string, token: string): Promise<PrisonApiAdjudicationSearchResponse> {
+    return new PrisonApiClient(token).getAdjudications(nomsId)
+  }
+
+  async getAdjudication(nomsId: string, adjudicationNumber: number, token: string): Promise<PrisonApiAdjudication> {
+    return new PrisonApiClient(token).getAdjudication(nomsId, adjudicationNumber)
   }
 
   private async getPrisonerDetailImpl(

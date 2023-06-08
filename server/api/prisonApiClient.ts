@@ -1,6 +1,8 @@
 import config, { ApiConfig } from '../config'
 import RestClient from '../data/restClient'
 import type {
+  PrisonApiAdjudication,
+  PrisonApiAdjudicationSearchResponse,
   PrisonApiAdjustment,
   PrisonApiBookingAndSentenceAdjustments,
   PrisonApiCharge,
@@ -24,6 +26,18 @@ export default class PrisonApiClient {
 
   async getUsersCaseloads(): Promise<PrisonApiUserCaseloads[]> {
     return this.restClient.get({ path: `/api/users/me/caseLoads` }) as Promise<PrisonApiUserCaseloads[]>
+  }
+
+  async getAdjudications(nomsId: string): Promise<PrisonApiAdjudicationSearchResponse> {
+    return this.restClient.get({
+      path: `/api/offenders/${nomsId}/adjudications?finding=PROVED`, // TODO filter by date
+    }) as Promise<PrisonApiAdjudicationSearchResponse>
+  }
+
+  async getAdjudication(nomsId: string, adjudationNumber: number): Promise<PrisonApiAdjudication> {
+    return this.restClient.get({
+      path: `/api/offenders/${nomsId}/adjudications/${adjudationNumber}`,
+    }) as Promise<PrisonApiAdjudication>
   }
 
   async createCourtCase(bookingId: number, courtCase: PrisonApiCourtCase): Promise<number> {
