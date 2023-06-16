@@ -33,11 +33,11 @@ export default class AdjustmentForm {
   days: string
 
   fromItems() {
-    return dateItems(this['from-year'], this['from-month'], this['from-day'])
+    return dateItems(this['from-year'], this['from-month'], this['from-day'], 'from', [])
   }
 
   toItems() {
-    return dateItems(this['to-year'], this['to-month'], this['to-day'])
+    return dateItems(this['to-year'], this['to-month'], this['to-day'], 'to', [])
   }
 
   static fromAdjustment(adjustment: AdjustmentDetails): AdjustmentForm {

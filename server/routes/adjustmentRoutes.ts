@@ -95,6 +95,15 @@ export default class AdjustmentRoutes {
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = new RestoredAdditionalDaysForm(req.body)
+
+    adjustmentForm.validate()
+
+    if (adjustmentForm.errors.length) {
+      return res.render('pages/adjustments/restoredAdditionalDays', {
+        model: { prisonerDetail, form: adjustmentForm },
+      })
+    }
+
     const adjustment = adjustmentForm.toAdjustmentDetails(prisonerDetail.bookingId, nomsId)
 
     this.adjustmentsStoreService.store(req, nomsId, adjustment)

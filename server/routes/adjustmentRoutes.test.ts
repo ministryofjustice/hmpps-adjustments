@@ -102,6 +102,40 @@ describe('Adjustment routes tests', () => {
         expect(adjustmentsStoreService.store.mock.calls[0][2]).toStrictEqual(radaAdjustment)
       })
   })
+  it('POST /{nomsId}/restored-additional-days/add empty form validation', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('You must enter days')
+        expect(res.text).toContain('The date entered must include a valid day, month and a year.')
+      })
+  })
+  it('POST /{nomsId}/restored-additional-days/add missing day and month validation and not number days', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .send({ 'from-year': '2023', days: 'xyz' })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('You must enter days')
+        expect(res.text).toContain('The date entered must include a day and month.')
+      })
+  })
+  it('POST /{nomsId}/restored-additional-days/add invalid date and negative days', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .send({ 'from-day': '36', 'from-month': '13', 'from-year': '2023', days: -1 })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('You must enter days')
+        expect(res.text).toContain('The date entered must include a valid day, month and a year.')
+      })
+  })
 
   it('GET /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
