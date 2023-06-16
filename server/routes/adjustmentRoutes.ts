@@ -116,7 +116,7 @@ export default class AdjustmentRoutes {
   }
 
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
 
     if (this.adjustmentsStoreService.get(req, nomsId)?.length) {
