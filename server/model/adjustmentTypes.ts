@@ -31,7 +31,7 @@ const adjustmentTypes: AdjustmentType[] = [
     url: 'unlawfully-at-large',
   } as AdjustmentType,
   {
-    value: 'RESTORED_ADDITIONAL_DAYS_AWARDED',
+    value: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
     text: 'Restore additional days awarded (RADA)',
     shortText: 'RADA',
     url: 'restored-additional-days',

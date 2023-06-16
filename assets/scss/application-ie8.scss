@@ -3,5 +3,8 @@ $path: "/assets/images/";
 
 @import 'govuk/all-ie8';
 
+
+@import './components/adjustment-card';
+@import './components/review-list';
 @import './components/header-bar';
 @import 'assets/scss/local';

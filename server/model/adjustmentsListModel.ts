@@ -28,7 +28,7 @@ export default class AdjustmentsListViewModel {
         'REMAND',
         'TAGGED_BAIL',
         'LAWFULLY_AT_LARGE',
-        'RESTORED_ADDITIONAL_DAYS_AWARDED',
+        'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
         'SPECIAL_REMISSION',
         'TIME_SPENT_IN_CUSTODY_ABROAD',
       ].includes(it.value),

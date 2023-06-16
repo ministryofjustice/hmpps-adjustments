@@ -1,0 +1,37 @@
+.review-list {
+    .review-item {
+        display:block;
+        background-color: #f8f8f8;
+        padding:20px;
+        //border-left: 4px solid #6f72af;
+        border-left: 4px solid #ccc;
+        border-bottom:1px solid #ccc;
+        margin-bottom: 2em;
+    
+        &.ng {
+        border-left: 4px solid #ccc;
+        }
+        a {
+        padding-left:10px;
+        }
+    
+        ul {
+        margin-left:0;
+        padding-left:10px;
+        }
+    
+    .govuk-table__cell, .govuk-table__header {
+        border-bottom: none;
+        padding-bottom: 0;
+        }
+    
+    .govuk-button--secondary:visited, .govuk-button--secondary:active, .govuk-button--secondary:hover {
+        color: #0b0c0c !important;
+        }
+    
+        .govuk-summary-list__value {
+        width:66%;
+        }
+    
+    }
+}
