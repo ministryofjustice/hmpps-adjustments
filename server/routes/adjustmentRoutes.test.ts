@@ -1,6 +1,5 @@
 import type { Express } from 'express'
 import request from 'supertest'
-import { Session } from 'express-session'
 import { appWithAllRoutes } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
