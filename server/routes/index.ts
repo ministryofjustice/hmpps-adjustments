@@ -15,6 +15,7 @@ export default function routes(service: Services): Router {
     service.prisonerService,
     service.adjustmentsService,
     service.identifyRemandPeriodsService,
+    service.adjustmentsStoreService,
   )
   const adjustmentTestRoutes = new AdjustmentTestRoutes(service.prisonerService, service.adjustmentsService)
 
@@ -25,9 +26,14 @@ export default function routes(service: Services): Router {
   get('/', adjustmentRoutes.entry)
   get('/:nomsId/start', adjustmentRoutes.start)
   get('/:nomsId', adjustmentRoutes.list)
-  get('/:nomsId/remand', adjustmentRoutes.remand)
   get('/:nomsId/success', adjustmentRoutes.success)
-  get('/:nomsId/additional-days', adjustmentRoutes.additionalDays)
+  get('/:nomsId/review', adjustmentRoutes.review)
+  post('/:nomsId/review', adjustmentRoutes.submitReview)
+
+  get('/:nomsId/remand', adjustmentRoutes.remand)
+  get('/:nomsId/additional-days/add', adjustmentRoutes.additionalDays)
+  get('/:nomsId/restored-additional-days/add', adjustmentRoutes.restoredAdditionalDays)
+  post('/:nomsId/restored-additional-days/add', adjustmentRoutes.submitRestoredAdditionalDays)
 
   get('/test/:nomsId', adjustmentTestRoutes.list)
   get('/test/:nomsId/create', adjustmentTestRoutes.create)

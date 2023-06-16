@@ -1,0 +1,74 @@
+{% extends "../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{% set pageTitle = applicationName + " - Home" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+                                Check adjustment information
+                            </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+
+      <div class="review-list">
+        {% for adjustment in model.adjustments %}
+          <div class="review-item">
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">
+                        Adjustment type
+                    </dt>
+              <dd class="govuk-summary-list__value">
+                {{model.adjustmentType(adjustment).text}}
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">
+                          Date of days restored	
+                      </dt>
+              <dd class="govuk-summary-list__value">
+                {{adjustment.fromDate | date('DD MMMM YYYY')}}
+              </dd>
+              <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href="warrant-details.html">
+                              Change<span class="govuk-visually-hidden"> date</span>
+                </a>
+              </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">
+                          Number of days
+                      </dt>
+              <dd class="govuk-summary-list__value">
+                {{adjustment.days}}
+              </dd>
+              <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href="warrant-details.html">
+                              Change<span class="govuk-visually-hidden"> date</span>
+                </a>
+              </dd>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+
+        <button class="govuk-button" data-module="govuk-button">
+                    Accept and save
+                </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

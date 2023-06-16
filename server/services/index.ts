@@ -1,4 +1,5 @@
 import { dataAccess } from '../data'
+import AdjustmentsStoreService from './adjustmentsStoreService'
 import AdjustmentsService from './adjustmentsService'
 import IdentifyRemandPeriodsService from './identifyRemandPeriodsService'
 import PrisonerService from './prisonerService'
@@ -11,6 +12,7 @@ export const services = () => {
   const prisonerService = new PrisonerService(hmppsAuthClient)
   const adjustmentsService = new AdjustmentsService()
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()
+  const adjustmentsStoreService = new AdjustmentsStoreService()
 
   return {
     applicationInfo,
@@ -18,6 +20,7 @@ export const services = () => {
     prisonerService,
     adjustmentsService,
     identifyRemandPeriodsService,
+    adjustmentsStoreService,
   }
 }
 

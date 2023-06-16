@@ -8,5 +8,6 @@ $govuk-page-width: $moj-page-width;
 @import 'moj/all';
 
 @import './components/adjustment-card';
+@import './components/review-list';
 @import './components/header-bar';
 @import 'assets/scss/local';

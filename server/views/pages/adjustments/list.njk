@@ -47,7 +47,9 @@
             {% if model.displayReview() %}
                 <div class="custom-card">
                     <h2 class="govuk-heading-m adj-card-heading">There is existing remand to review</h2>
-                    <p>Based on the data from court outcomes in NOMIS, Joe Bloggs may have {{model.getTotalDaysRelevantRemand()}} days remand. Review the remand to make sure it is relevant.</p>
+                    <p>Based on the data from court outcomes in NOMIS, {{model.prisonerDetail.firstName | title}}
+                        {{model.prisonerDetail.lastName | title}} may have {{model.getTotalDaysRelevantRemand()}} days remand.
+                         Review the remand to make sure it is relevant.</p>
                     <a href="/{{model.prisonerDetail.offenderNo}}/remand" class="govuk-button" role="button">Review</a>
                 </div>
             {% endif %}
@@ -65,7 +67,7 @@
                             <span>Days</span>
                             <ul class="govuk-list govuk-!-padding-top-3">
                                 <li>
-                                    <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}">
+                                    <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add">
                                         {% if adjustmentType.value != 'REMAND' %}
                                             Add {{adjustmentType.shortText}}
                                         {% endif %}
