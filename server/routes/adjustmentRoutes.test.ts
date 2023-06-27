@@ -89,8 +89,9 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('POST /{nomsId}/restored-additional-days/add', () => {
+  it('POST /{nomsId}/restored-additional-days/add valid', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.validate.mockResolvedValue([])
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
@@ -124,6 +125,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('The date entered must include a day and month.')
       })
   })
+
   it('POST /{nomsId}/restored-additional-days/add invalid date and negative days', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
@@ -136,10 +138,109 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('The date entered must include a valid day, month and a year.')
       })
   })
+  it('POST /{nomsId}/restored-additional-days/add server side validation mesage', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.validate.mockResolvedValue([
+      {
+        code: 'MORE_RADAS_THAN_ADAS',
+        arguments: [],
+        message: 'The number of days restored cannot be more than the number of days rewarded.',
+        type: 'VALIDATION',
+      },
+    ])
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('The number of days restored cannot be more than the number of days rewarded.')
+      })
+  })
+  it('POST /{nomsId}/restored-additional-days/add server side warning mesage', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.validate.mockResolvedValue([
+      {
+        code: 'RADA_REDUCES_BY_MORE_THAN_HALF',
+        arguments: [],
+        message: 'Are you sure, as this reduction is more than 50% of the total additional days awarded?',
+        type: 'WARNING',
+      },
+    ])
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
+      .type('form')
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/warning`)
+      .expect(res => {
+        expect(adjustmentsStoreService.store.mock.calls).toHaveLength(1)
+        expect(adjustmentsStoreService.store.mock.calls[0][2]).toStrictEqual(radaAdjustment)
+      })
+  })
+
+  it('GET /{nomsId}/warning display server side warning', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
+    adjustmentsService.validate.mockResolvedValue([
+      {
+        code: 'RADA_REDUCES_BY_MORE_THAN_HALF',
+        arguments: [],
+        message: 'Are you sure, as this reduction is more than 50% of the total additional days awarded?',
+        type: 'WARNING',
+      },
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}/warning`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Are you sure, as this reduction is more than 50% of the total additional days awarded?',
+        )
+      })
+  })
+
+  it('POST /{nomsId}/warning submit warning agreement', () => {
+    return request(app)
+      .post(`/${NOMS_ID}/warning`)
+      .send({ confirm: 'yes' })
+      .type('form')
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/review`)
+  })
+
+  it('POST /{nomsId}/warning submit warning disagreement', () => {
+    return request(app)
+      .post(`/${NOMS_ID}/warning`)
+      .send({ confirm: 'no' })
+      .type('form')
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}`)
+  })
+  it('POST /{nomsId}/warning submit warning without an answer', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
+    adjustmentsService.validate.mockResolvedValue([
+      {
+        code: 'RADA_REDUCES_BY_MORE_THAN_HALF',
+        arguments: [],
+        message: 'Are you sure, as this reduction is more than 50% of the total additional days awarded?',
+        type: 'WARNING',
+      },
+    ])
+    return request(app)
+      .post(`/${NOMS_ID}/warning`)
+      .send({})
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Pick an answer')
+      })
+  })
 
   it('GET /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue([radaAdjustment])
+    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
 
     return request(app)
       .get(`/${NOMS_ID}/review`)
@@ -158,7 +259,7 @@ describe('Adjustment routes tests', () => {
 
   it('POST /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue([radaAdjustment])
+    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)

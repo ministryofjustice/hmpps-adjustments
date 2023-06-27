@@ -6,18 +6,12 @@ export default class AdjustmentsStoreService {
     if (!req.session.adjustments) {
       req.session.adjustments = {}
     }
-    if (!req.session.adjustments[nomsId]) {
-      req.session.adjustments[nomsId] = []
-    }
-    req.session.adjustments[nomsId].push(adjustment)
+    req.session.adjustments[nomsId] = adjustment
   }
 
-  public get(req: Request, nomsId: string): AdjustmentDetails[] {
+  public get(req: Request, nomsId: string): AdjustmentDetails {
     if (!req.session.adjustments) {
       req.session.adjustments = {}
-    }
-    if (!req.session.adjustments[nomsId]) {
-      req.session.adjustments[nomsId] = []
     }
     return req.session.adjustments[nomsId]
   }

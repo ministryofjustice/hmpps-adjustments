@@ -7,7 +7,7 @@ declare module 'express-session' {
   interface SessionData {
     returnTo: string
     nowInMinutes: number
-    adjustments: { string?: AdjustmentDetails[] }
+    adjustments: { string?: AdjustmentDetails }
   }
 }
 
