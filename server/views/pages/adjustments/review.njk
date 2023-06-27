@@ -18,44 +18,42 @@
     <div class="govuk-grid-column-two-thirds-from-desktop">
 
       <div class="review-list">
-        {% for adjustment in model.adjustments %}
-          <div class="review-item">
-            <div class="govuk-summary-list__row">
-              <dt class="govuk-summary-list__key">
+        <div class="review-item">
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
                         Adjustment type
                     </dt>
-              <dd class="govuk-summary-list__value">
-                {{model.adjustmentType(adjustment).text}}
-              </dd>
-            </div>
-            <div class="govuk-summary-list__row">
-              <dt class="govuk-summary-list__key">
+            <dd class="govuk-summary-list__value">
+              {{model.adjustmentType().text}}
+            </dd>
+          </div>
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
                           Date of days restored	
                       </dt>
-              <dd class="govuk-summary-list__value">
-                {{adjustment.fromDate | date('DD MMMM YYYY')}}
-              </dd>
-              <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="warrant-details.html">
+            <dd class="govuk-summary-list__value">
+              {{model.adjustment.fromDate | date('DD MMMM YYYY')}}
+            </dd>
+            <dd class="govuk-summary-list__actions">
+              <a class="govuk-link" href="warrant-details.html">
                               Change<span class="govuk-visually-hidden"> date</span>
-                </a>
-              </dd>
-            </div>
-            <div class="govuk-summary-list__row">
-              <dt class="govuk-summary-list__key">
+              </a>
+            </dd>
+          </div>
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
                           Number of days
                       </dt>
-              <dd class="govuk-summary-list__value">
-                {{adjustment.days}}
-              </dd>
-              <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="warrant-details.html">
+            <dd class="govuk-summary-list__value">
+              {{model.adjustment.days}}
+            </dd>
+            <dd class="govuk-summary-list__actions">
+              <a class="govuk-link" href="warrant-details.html">
                               Change<span class="govuk-visually-hidden"> date</span>
-                </a>
-              </dd>
-            </div>
+              </a>
+            </dd>
           </div>
-        {% endfor %}
+        </div>
       </div>
     </div>
   </div>

@@ -63,15 +63,22 @@ export interface paths {
   }
   '/adjustments': {
     /**
-     * Get adjustments
-     * @description Get adjustments for a given person.
+     * Get adjustments by person and source
+     * @description Get adjustments for a given person and adjustment source.
      */
-    get: operations['findByPerson']
+    get: operations['findByPerson_1']
     /**
      * Create an adjustments
      * @description Create an adjustment.
      */
     post: operations['create_1']
+  }
+  '/adjustments/validate': {
+    /**
+     * Validate an adjustments
+     * @description Validate an adjustment.
+     */
+    post: operations['validate']
   }
   '/queue-admin/get-dlq-messages/{dlqName}': {
     get: operations['getDlqMessages']
@@ -82,58 +89,16 @@ export type webhooks = Record<string, never>
 
 export interface components {
   schemas: {
-    Message: {
-      messageId?: string
-      receiptHandle?: string
-      body?: string
-      attributes?: {
-        [key: string]: string | undefined
+    DlqMessage: {
+      body: {
+        [key: string]: Record<string, never> | undefined
       }
-      messageAttributes?: {
-        [key: string]: components['schemas']['MessageAttributeValue'] | undefined
-      }
-      md5OfBody?: string
-      md5OfMessageAttributes?: string
-    }
-    MessageAttributeValue: {
-      stringValue?: string
-      binaryValue?: {
-        /** Format: int32 */
-        short?: number
-        char?: string
-        /** Format: int32 */
-        int?: number
-        /** Format: int64 */
-        long?: number
-        /** Format: float */
-        float?: number
-        /** Format: double */
-        double?: number
-        direct?: boolean
-        readOnly?: boolean
-      }
-      stringListValues?: string[]
-      binaryListValues?: {
-        /** Format: int32 */
-        short?: number
-        char?: string
-        /** Format: int32 */
-        int?: number
-        /** Format: int64 */
-        long?: number
-        /** Format: float */
-        float?: number
-        /** Format: double */
-        double?: number
-        direct?: boolean
-        readOnly?: boolean
-      }[]
-      dataType?: string
+      messageId: string
     }
     RetryDlqResult: {
       /** Format: int32 */
       messagesFoundCount: number
-      messages: components['schemas']['Message'][]
+      messages: components['schemas']['DlqMessage'][]
     }
     PurgeQueueResult: {
       /** Format: int32 */
@@ -213,7 +178,7 @@ export interface components {
        * Format: date
        * @description The start date of the adjustment
        */
-      fromDate: string
+      fromDate?: string
       /**
        * Format: int32
        * @description The number of adjustment days
@@ -228,11 +193,21 @@ export interface components {
       /** Format: uuid */
       adjustmentId: string
     }
-    DlqMessage: {
-      body: {
-        [key: string]: Record<string, never> | undefined
-      }
-      messageId: string
+    /** @description Validation message details */
+    ValidationMessage: {
+      /**
+       * @description Validation code details
+       * @enum {string}
+       */
+      code:
+        | 'RADA_REDUCES_BY_MORE_THAN_HALF'
+        | 'MORE_RADAS_THAN_ADAS'
+        | 'RADA_DATE_CANNOT_BE_FUTURE'
+        | 'RADA_DATA_MUST_BE_AFTER_SENTENCE_DATE'
+      arguments: string[]
+      message: string
+      /** @enum {string} */
+      type: 'VALIDATION' | 'WARNING'
     }
     GetDlqResult: {
       /** Format: int32 */
@@ -301,14 +276,14 @@ export interface operations {
       }
     }
   }
+  /**
+   * Get an adjustments
+   * @description Get details of an adjustment in the NOMIS system format.
+   */
   get: {
-    /**
-     * Get an adjustments
-     * @description Get details of an adjustment in the NOMIS system format.
-     */
     parameters: {
-      /** @description The adjustment UUID */
       path: {
+        /** @description The adjustment UUID */
         adjustmentId: string
       }
     }
@@ -333,14 +308,14 @@ export interface operations {
       }
     }
   }
+  /**
+   * Update an adjustments
+   * @description Synchronise an update from NOMIS into adjustments API.
+   */
   update: {
-    /**
-     * Update an adjustments
-     * @description Synchronise an update from NOMIS into adjustments API.
-     */
     parameters: {
-      /** @description The adjustment UUID */
       path: {
+        /** @description The adjustment UUID */
         adjustmentId: string
       }
     }
@@ -358,14 +333,14 @@ export interface operations {
       404: never
     }
   }
+  /**
+   * Delete an adjustments
+   * @description Synchronise a deletion from NOMIS into adjustments API.
+   */
   delete: {
-    /**
-     * Delete an adjustments
-     * @description Synchronise a deletion from NOMIS into adjustments API.
-     */
     parameters: {
-      /** @description The adjustment UUID */
       path: {
+        /** @description The adjustment UUID */
         adjustmentId: string
       }
     }
@@ -378,14 +353,14 @@ export interface operations {
       404: never
     }
   }
+  /**
+   * Get an adjustments
+   * @description Get details of an adjustment
+   */
   get_1: {
-    /**
-     * Get an adjustments
-     * @description Get details of an adjustment
-     */
     parameters: {
-      /** @description The adjustment UUID */
       path: {
+        /** @description The adjustment UUID */
         adjustmentId: string
       }
     }
@@ -410,14 +385,14 @@ export interface operations {
       }
     }
   }
+  /**
+   * Update an adjustments
+   * @description Update an adjustment.
+   */
   update_1: {
-    /**
-     * Update an adjustments
-     * @description Update an adjustment.
-     */
     parameters: {
-      /** @description The adjustment UUID */
       path: {
+        /** @description The adjustment UUID */
         adjustmentId: string
       }
     }
@@ -435,14 +410,14 @@ export interface operations {
       404: never
     }
   }
+  /**
+   * Delete an adjustments
+   * @description Delete an adjustment.
+   */
   delete_1: {
-    /**
-     * Delete an adjustments
-     * @description Delete an adjustment.
-     */
     parameters: {
-      /** @description The adjustment UUID */
       path: {
+        /** @description The adjustment UUID */
         adjustmentId: string
       }
     }
@@ -455,11 +430,11 @@ export interface operations {
       404: never
     }
   }
+  /**
+   * Create an adjustments
+   * @description Synchronise a creation from NOMIS into adjustments API.
+   */
   create: {
-    /**
-     * Create an adjustments
-     * @description Synchronise a creation from NOMIS into adjustments API.
-     */
     requestBody: {
       content: {
         'application/vnd.nomis-offence+json': components['schemas']['LegacyAdjustment']
@@ -480,11 +455,11 @@ export interface operations {
       }
     }
   }
+  /**
+   * Create an adjustment from the migration job
+   * @description Synchronise a creation from NOMIS into adjustments API. This endpoint is used for initial migration of data from NOMIS without raising any events.
+   */
   migration: {
-    /**
-     * Create an adjustment from the migration job
-     * @description Synchronise a creation from NOMIS into adjustments API. This endpoint is used for initial migration of data from NOMIS without raising any events.
-     */
     requestBody: {
       content: {
         'application/vnd.nomis-offence+json': components['schemas']['LegacyAdjustment']
@@ -505,15 +480,17 @@ export interface operations {
       }
     }
   }
-  findByPerson: {
-    /**
-     * Get adjustments
-     * @description Get adjustments for a given person.
-     */
+  /**
+   * Get adjustments by person and source
+   * @description Get adjustments for a given person and adjustment source.
+   */
+  findByPerson_1: {
     parameters: {
-      /** @description The noms ID of the person */
       query: {
+        /** @description The noms ID of the person */
         person: string
+        /** @description The noms ID of the person */
+        source: 'NOMIS' | 'DPS'
       }
     }
     responses: {
@@ -537,11 +514,11 @@ export interface operations {
       }
     }
   }
+  /**
+   * Create an adjustments
+   * @description Create an adjustment.
+   */
   create_1: {
-    /**
-     * Create an adjustments
-     * @description Create an adjustment.
-     */
     requestBody: {
       content: {
         'application/json': components['schemas']['AdjustmentDetailsDto']
@@ -558,6 +535,31 @@ export interface operations {
       401: {
         content: {
           'application/json': components['schemas']['CreateResponseDto']
+        }
+      }
+    }
+  }
+  /**
+   * Validate an adjustments
+   * @description Validate an adjustment.
+   */
+  validate: {
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdjustmentDetailsDto']
+      }
+    }
+    responses: {
+      /** @description Adjustment validation returned */
+      200: {
+        content: {
+          'application/json': components['schemas']['ValidationMessage'][]
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['ValidationMessage'][]
         }
       }
     }

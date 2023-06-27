@@ -7,8 +7,9 @@ import config from '../config'
 import AdditionalDaysModel from '../model/additionalDaysModel'
 import RestoredAdditionalDaysForm from '../model/restoredAdditionalDaysForm'
 import ReviewModel from '../model/reviewModel'
-import { AdjustmentDetails } from '../@types/adjustments/adjustmentsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
+import WarningModel from '../model/warningModel'
+import WarningForm from '../model/warningForm'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -106,7 +107,23 @@ export default class AdjustmentRoutes {
 
     const adjustment = adjustmentForm.toAdjustmentDetails(prisonerDetail.bookingId, nomsId)
 
+    const messages = await this.adjustmentsService.validate(adjustment, token)
+
+    const validationMessages = messages.filter(it => it.type === 'VALIDATION')
+
+    if (validationMessages.length) {
+      adjustmentForm.addErrors(validationMessages)
+      return res.render('pages/adjustments/restoredAdditionalDays', {
+        model: { prisonerDetail, form: adjustmentForm },
+      })
+    }
+
     this.adjustmentsStoreService.store(req, nomsId, adjustment)
+
+    const warnings = messages.filter(it => it.type === 'WARNING')
+    if (warnings.length) {
+      return res.redirect(`/${nomsId}/warning`)
+    }
 
     return res.redirect(`/${nomsId}/review`)
   }
@@ -116,7 +133,7 @@ export default class AdjustmentRoutes {
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
-    if (this.adjustmentsStoreService.get(req, nomsId)?.length) {
+    if (this.adjustmentsStoreService.get(req, nomsId)) {
       return res.render('pages/adjustments/review', {
         model: new ReviewModel(prisonerDetail, this.adjustmentsStoreService.get(req, nomsId)),
       })
@@ -128,12 +145,50 @@ export default class AdjustmentRoutes {
     const { token } = res.locals.user
     const { nomsId } = req.params
 
-    if (this.adjustmentsStoreService.get(req, nomsId)?.length) {
-      await Promise.all(
-        this.adjustmentsStoreService
-          .get(req, nomsId)
-          .map((it: AdjustmentDetails) => this.adjustmentsService.create(it, token)),
-      )
+    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    if (adjustment) {
+      await this.adjustmentsService.create(adjustment, token)
+    }
+    return res.redirect(`/${nomsId}`)
+  }
+
+  public warning: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+
+    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    if (adjustment) {
+      const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
+      if (warning) {
+        return res.render('pages/adjustments/warning', {
+          model: new WarningModel(prisonerDetail, adjustment, warning, new WarningForm({})),
+        })
+      }
+    }
+    return res.redirect(`/${nomsId}`)
+  }
+
+  public submitWarning: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+
+    const warningForm = new WarningForm(req.body)
+
+    warningForm.validate()
+
+    if (warningForm.errors.length) {
+      const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+      if (adjustment) {
+        const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
+        return res.render('pages/adjustments/warning', {
+          model: new WarningModel(prisonerDetail, adjustment, warning, warningForm),
+        })
+      }
+    }
+    if (warningForm.confirm === 'yes') {
+      return res.redirect(`/${nomsId}/review`)
     }
     return res.redirect(`/${nomsId}`)
   }

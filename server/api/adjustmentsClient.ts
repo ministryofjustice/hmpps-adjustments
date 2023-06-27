@@ -1,6 +1,11 @@
 import config, { ApiConfig } from '../config'
 import RestClient from '../data/restClient'
-import { Adjustment, AdjustmentDetails, CreateResponse } from '../@types/adjustments/adjustmentsTypes'
+import {
+  Adjustment,
+  AdjustmentDetails,
+  CreateResponse,
+  ValidationMessage,
+} from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentsClient {
   restClient: RestClient
@@ -31,5 +36,9 @@ export default class AdjustmentsClient {
 
   async delete(adjustmentsId: string): Promise<void> {
     return this.restClient.delete({ path: `/adjustments/${adjustmentsId}` }) as Promise<void>
+  }
+
+  async validate(adjustment: AdjustmentDetails): Promise<ValidationMessage[]> {
+    return this.restClient.post({ path: `/adjustments/validate`, data: adjustment }) as Promise<ValidationMessage[]>
   }
 }
