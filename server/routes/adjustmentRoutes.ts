@@ -148,6 +148,11 @@ export default class AdjustmentRoutes {
     const adjustment = this.adjustmentsStoreService.get(req, nomsId)
     if (adjustment) {
       await this.adjustmentsService.create(adjustment, token)
+      const message = JSON.stringify({
+        type: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
+        days: adjustment.days,
+      })
+      return res.redirect(`/${nomsId}/success?message=${message}`)
     }
     return res.redirect(`/${nomsId}`)
   }
