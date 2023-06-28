@@ -263,7 +263,10 @@ describe('Adjustment routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=${encodeURI('{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24}')}`,
+      )
       .expect(res => {
         expect(adjustmentsService.create.mock.calls).toHaveLength(1)
         expect(adjustmentsService.create.mock.calls[0][0]).toStrictEqual(radaAdjustment)
