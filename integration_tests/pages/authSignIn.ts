@@ -4,4 +4,6 @@ export default class AuthSignInPage extends Page {
   constructor() {
     super('Sign in')
   }
+
+  skipAxe = (): boolean => true
 }

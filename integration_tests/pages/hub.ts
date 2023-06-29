@@ -5,6 +5,8 @@ export default class HubPage extends Page {
     super('Review and apply adjustments')
   }
 
+  skipAxe = (): boolean => false
+
   public static goTo(prisonerId: string): HubPage {
     cy.visit(`/${prisonerId}`)
     return new HubPage()

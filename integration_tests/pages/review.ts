@@ -5,5 +5,7 @@ export default class ReviewPage extends Page {
     super('Check adjustment information')
   }
 
+  skipAxe = (): boolean => false
+
   public submit = (): PageElement => cy.get('[data-qa=submit]')
 }

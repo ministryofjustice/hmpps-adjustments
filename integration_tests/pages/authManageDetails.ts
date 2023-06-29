@@ -4,4 +4,6 @@ export default class AuthManageDetailsPage extends Page {
   constructor() {
     super('Your account details')
   }
+
+  skipAxe = (): boolean => true
 }

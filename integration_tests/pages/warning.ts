@@ -5,6 +5,8 @@ export default class WarningPage extends Page {
     super(title)
   }
 
+  skipAxe = (): boolean => false
+
   public yesRadio = (): PageElement => cy.get('[value=yes]')
 
   public submit = (): PageElement => cy.get('[data-qa=submit]')

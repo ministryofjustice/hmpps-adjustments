@@ -6,6 +6,8 @@ export default class FormPage extends Page {
     super(title)
   }
 
+  skipAxe = (): boolean => false
+
   public enterFromDate = (date: string): void => {
     const days = dayjs(date).get('date').toString()
     const months = (dayjs(date).get('month') + 1).toString()
