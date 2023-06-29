@@ -5,5 +5,7 @@ export default class AuthSignInPage extends Page {
     super('Sign in')
   }
 
-  skipAxe = (): boolean => true
+  public skipAxe() {
+    return true
+  }
 }

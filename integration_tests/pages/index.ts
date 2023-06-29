@@ -5,7 +5,9 @@ export default class IndexPage extends Page {
     super('This site is under construction...')
   }
 
-  skipAxe = (): boolean => false
+  public skipAxe() {
+    return false
+  }
 
   headerUserName = (): PageElement => cy.get('[data-qa=header-user-name]')
 

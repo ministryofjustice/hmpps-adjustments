@@ -5,5 +5,7 @@ export default class AuthManageDetailsPage extends Page {
     super('Your account details')
   }
 
-  skipAxe = (): boolean => true
+  public skipAxe() {
+    return true
+  }
 }
