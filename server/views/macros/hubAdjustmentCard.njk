@@ -4,9 +4,7 @@
         <div class="adjustment-card_heading">
             <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
             {% if adjustmentType.value != 'REMAND' %}
-                <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add" class="govuk-!-text-align-right">
-                                            Add {{adjustmentType.shortText}}
-                </a>
+                <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add" class="govuk-!-text-align-right" data-qa="{{adjustmentType.url}}">Add {{adjustmentType.shortText}}</a>
             {% endif %}
         </div>
         <div class="adjustment-card_content">
@@ -16,9 +14,9 @@
                 <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/view">view details</a>
             {% endif %}
             {{ govukDetails({
-                                summaryText: "More about " + adjustmentType.shortText,
-                                text: "More about " + adjustmentType.shortText
-                            }) }}
+                summaryText: "More about " + adjustmentType.shortText,
+                text: "More about " + adjustmentType.shortText
+            }) }}
         </div>
     </div>
 {% endmacro %}
