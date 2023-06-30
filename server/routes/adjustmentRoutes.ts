@@ -10,6 +10,8 @@ import ReviewModel from '../model/reviewModel'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import WarningModel from '../model/warningModel'
 import WarningForm from '../model/warningForm'
+import adjustmentTypes from '../model/adjustmentTypes'
+import ViewModel from '../model/viewModel'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -196,5 +198,19 @@ export default class AdjustmentRoutes {
       return res.redirect(`/${nomsId}/review`)
     }
     return res.redirect(`/${nomsId}`)
+  }
+
+  public view: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, adjustmentTypeUrl } = req.params
+    const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    return res.render('pages/adjustments/view', {
+      model: new ViewModel(prisonerDetail, adjustments, adjustmentType),
+    })
   }
 }

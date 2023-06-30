@@ -11,10 +11,11 @@
     border: 1px solid #b1b4b6;
   
     &_heading{
-      display:block;
       background-color: #f3f2f1;
       padding:16px;
       color:black;
+      display: flex;
+      justify-content: space-between;
     }
     &_content {
       padding:16px;
