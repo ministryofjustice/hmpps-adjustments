@@ -184,6 +184,8 @@ export interface components {
        * @description The number of adjustment days
        */
       days?: number
+      status?: string
+      lastUpdatedBy?: string
     }
     LegacyAdjustmentCreatedResponse: {
       /** Format: uuid */

@@ -1,4 +1,6 @@
 {% extends "../../partials/layout.njk" %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "../../macros/hubAdjustmentCard.njk" import adjustmentCard %}
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -7,24 +9,20 @@
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-full">
             {% if model.message %}
-                <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" data-qa="success-message">
-                    <div class="govuk-notification-banner__header">
-                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                                Success
-                            </h2>
-                    </div>
-                    <div class="govuk-notification-banner__content">
-                        <h3 class="govuk-notification-banner__heading">
-                            {{model.message.days}} days of {{model.messageType.shortText}} have been applied
-                            </h3>
-                        <p class="govuk-body">The adjustments have been saved in NOMIS. You can continue to add adjustments for {{model.prisonerDetail.firstName | title}}
-                            {{model.prisonerDetail.lastName | title}}.</p>
-                        <p class="govuk-body">You must recalculate the release dates once all adjustments have been applied.
+                {% set html %}
+                <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of {{model.messageType.shortText}} have been applied</h3>
+                <p class="govuk-body">The adjustments have been saved in NOMIS. You can continue to add adjustments for {{model.prisonerDetail.firstName | title}}
+                    {{model.prisonerDetail.lastName | title}}.</p>
+                <p class="govuk-body">You must recalculate the release dates once all adjustments have been applied.
                                 <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-notification-banner__link">Calculate release date</a>
-                        </p>
+                </p>
+                {% endset %}
 
-                    </div>
-                </div>
+                {{ govukNotificationBanner({
+                        html: html,
+                        type: 'success',
+                        attributes: {'data-qa': 'success-message'}
+                }) }}
             {% endif %}
             <div class="moj-page-header-actions">
 
@@ -58,24 +56,7 @@
                     </h2>
             <div class="adjustment-card-container govuk-body">
                 {% for adjustmentType in model.deductions()%}
-                    <div class="adjustment-card">
-                        <div class="adjustment-card_heading ">
-                            <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
-                        </div>
-                        <div class="adjustment-card_content">
-                            <span class="count govuk-body">{{model.getTotalDays(adjustmentType)}}</span>
-                            <span>Days</span>
-                            <ul class="govuk-list govuk-!-padding-top-3">
-                                <li>
-                                    {% if adjustmentType.value != 'REMAND' %}
-                                        <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add" data-qa="{{adjustmentType.url}}">
-                                            Add {{adjustmentType.shortText}}
-                                        </a>
-                                    {% endif %}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    {{ adjustmentCard(adjustmentType, model)}}
                 {% endfor %}
             </div>
 
@@ -84,22 +65,7 @@
                     </h2>
             <div class="adjustment-card-container govuk-body">
                 {% for adjustmentType in model.additions()%}
-                    <div class="adjustment-card">
-                        <div class="adjustment-card_heading ">
-                            <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
-                        </div>
-                        <div class="adjustment-card_content">
-                            <span class="count govuk-body">{{model.getTotalDays(adjustmentType)}}</span>
-                            <span>Days</span>
-                            <ul class="govuk-list govuk-!-padding-top-3">
-                                <li>
-                                    <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}" data-qa="{{adjustmentType.url}}">
-                                        Add {{adjustmentType.shortText}}
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    {{ adjustmentCard(adjustmentType, model)}}
                 {% endfor %}
             </div>
         </div>

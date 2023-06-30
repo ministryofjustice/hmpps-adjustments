@@ -50,6 +50,10 @@ export default class AdjustmentsListViewModel {
       .reduce((sum, current) => sum + current, 0)
   }
 
+  public showDetails(adjustmentType: AdjustmentType) {
+    return this.getTotalDays(adjustmentType) !== 0
+  }
+
   public getTotalDaysRelevantRemand() {
     return this.relevantRemand.map(a => a.days).reduce((sum, current) => sum + current, 0)
   }

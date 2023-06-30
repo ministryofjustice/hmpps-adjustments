@@ -36,6 +36,7 @@ export default function routes(service: Services): Router {
   get('/:nomsId/additional-days/add', adjustmentRoutes.additionalDays)
   get('/:nomsId/restored-additional-days/add', adjustmentRoutes.restoredAdditionalDays)
   post('/:nomsId/restored-additional-days/add', adjustmentRoutes.submitRestoredAdditionalDays)
+  get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
 
   get('/test/:nomsId', adjustmentTestRoutes.list)
   get('/test/:nomsId/create', adjustmentTestRoutes.create)

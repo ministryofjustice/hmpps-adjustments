@@ -272,4 +272,21 @@ describe('Adjustment routes tests', () => {
         expect(adjustmentsService.create.mock.calls[0][0]).toStrictEqual(radaAdjustment)
       })
   })
+
+  it('GET /{nomsId}/{adjustmentType}/view', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([
+      { id: 'this-is-an-id', adjustment: { ...radaAdjustment, lastUpdatedBy: 'Doris McNealy', status: 'Active' } },
+    ])
+
+    return request(app)
+      .get(`/${NOMS_ID}/restored-additional-days/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Doris McNealy')
+        expect(res.text).toContain('Active')
+        expect(res.text).toContain('edit/this-is-an-id')
+        expect(res.text).toContain('remove/this-is-an-id')
+      })
+  })
 })
