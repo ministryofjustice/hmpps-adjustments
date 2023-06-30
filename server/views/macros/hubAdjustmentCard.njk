@@ -3,11 +3,11 @@
     <div class="adjustment-card">
         <div class="adjustment-card_heading">
             <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
-            <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add" class="govuk-!-text-align-right">
-                {% if adjustmentType.value != 'REMAND' %}
+            {% if adjustmentType.value != 'REMAND' %}
+                <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add" class="govuk-!-text-align-right">
                                             Add {{adjustmentType.shortText}}
-                {% endif %}
-            </a>
+                </a>
+            {% endif %}
         </div>
         <div class="adjustment-card_content">
             <span class="count govuk-body">{{model.getTotalDays(adjustmentType)}}</span>
