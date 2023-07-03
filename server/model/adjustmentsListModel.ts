@@ -7,6 +7,7 @@ import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 export type Message = {
   type: string
   days: number
+  action: 'CREATE' | 'REMOVE'
 }
 export default class AdjustmentsListViewModel {
   public adjustmentTypes = adjustmentTypes

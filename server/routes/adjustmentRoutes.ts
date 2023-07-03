@@ -2,7 +2,7 @@ import { RequestHandler } from 'express'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import AdjustmentsListViewModel, { Message } from '../model/adjustmentsListModel'
+import AdjustmentsHubViewModel, { Message } from '../model/adjustmentsListModel'
 import config from '../config'
 import AdditionalDaysModel from '../model/additionalDaysModel'
 import RestoredAdditionalDaysForm from '../model/restoredAdditionalDaysForm'
@@ -12,6 +12,7 @@ import WarningModel from '../model/warningModel'
 import WarningForm from '../model/warningForm'
 import adjustmentTypes from '../model/adjustmentTypes'
 import ViewModel from '../model/viewModel'
+import RemoveModel from '../model/removeModel'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -44,15 +45,15 @@ export default class AdjustmentRoutes {
     return res.redirect(`/${nomsId}`)
   }
 
-  public list: RequestHandler = async (req, res): Promise<void> => {
+  public hub: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
     const message = req.flash('message')
-    return res.render('pages/adjustments/list', {
-      model: new AdjustmentsListViewModel(
+    return res.render('pages/adjustments/hub', {
+      model: new AdjustmentsHubViewModel(
         prisonerDetail,
         adjustments,
         relevantRemand.sentenceRemand,
@@ -153,7 +154,8 @@ export default class AdjustmentRoutes {
       const message = JSON.stringify({
         type: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
         days: adjustment.days,
-      })
+        action: 'CREATE',
+      } as Message)
       return res.redirect(`/${nomsId}/success?message=${message}`)
     }
     return res.redirect(`/${nomsId}`)
@@ -212,5 +214,33 @@ export default class AdjustmentRoutes {
     return res.render('pages/adjustments/view', {
       model: new ViewModel(prisonerDetail, adjustments, adjustmentType),
     })
+  }
+
+  public remove: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, adjustmentTypeUrl, id } = req.params
+    const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustment = await this.adjustmentsService.get(id, token)
+    return res.render('pages/adjustments/remove', {
+      model: new RemoveModel(prisonerDetail, adjustment, adjustmentType),
+    })
+  }
+
+  public submitRemove: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = await this.adjustmentsService.get(id, token)
+    await this.adjustmentsService.delete(id, token)
+    const message = JSON.stringify({
+      type: adjustment.adjustmentType,
+      days: adjustment.days,
+      action: 'REMOVE',
+    } as Message)
+    return res.redirect(`/${nomsId}/success?message=${message}`)
   }
 }

@@ -265,7 +265,9 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI('{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24}')}`,
+        `/${NOMS_ID}/success?message=${encodeURI(
+          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"CREATE"}',
+        )}`,
       )
       .expect(res => {
         expect(adjustmentsService.create.mock.calls).toHaveLength(1)
@@ -287,6 +289,39 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Active')
         expect(res.text).toContain('edit/this-is-an-id')
         expect(res.text).toContain('remove/this-is-an-id')
+      })
+  })
+
+  it('GET /{nomsId}/{adjustmentType}/remove/{id}', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.get.mockResolvedValue(radaAdjustment)
+
+    return request(app)
+      .get(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('5 Apr 2023')
+        expect(res.text).toContain('22')
+        expect(res.text).toContain('This will remove this record.')
+      })
+  })
+
+  it('POST /{nomsId}/{adjustmentType}/remove/{id}', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.get.mockResolvedValue(radaAdjustment)
+
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
+      .expect(302)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=${encodeURI(
+          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"REMOVE"}',
+        )}`,
+      )
+      .expect(res => {
+        expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
+        expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
       })
   })
 })

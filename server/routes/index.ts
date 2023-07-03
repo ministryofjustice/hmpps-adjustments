@@ -25,18 +25,20 @@ export default function routes(service: Services): Router {
 
   get('/', adjustmentRoutes.entry)
   get('/:nomsId/start', adjustmentRoutes.start)
-  get('/:nomsId', adjustmentRoutes.list)
+  get('/:nomsId', adjustmentRoutes.hub)
   get('/:nomsId/success', adjustmentRoutes.success)
   get('/:nomsId/warning', adjustmentRoutes.warning)
   post('/:nomsId/warning', adjustmentRoutes.submitWarning)
   get('/:nomsId/review', adjustmentRoutes.review)
   post('/:nomsId/review', adjustmentRoutes.submitReview)
+  get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
+  get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
+  post('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.submitRemove)
 
   get('/:nomsId/remand', adjustmentRoutes.remand)
   get('/:nomsId/additional-days/add', adjustmentRoutes.additionalDays)
   get('/:nomsId/restored-additional-days/add', adjustmentRoutes.restoredAdditionalDays)
   post('/:nomsId/restored-additional-days/add', adjustmentRoutes.submitRestoredAdditionalDays)
-  get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
 
   get('/test/:nomsId', adjustmentTestRoutes.list)
   get('/test/:nomsId/create', adjustmentTestRoutes.create)
