@@ -1,0 +1,43 @@
+{% extends "../../partials/layout.njk" %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% set pageTitle = applicationName + " - Home" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Remove {{model.adjustmentType.shortText}}
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      {{ govukSummaryList({
+        rows: model.summaryRows()
+      }) }}
+      {{ govukWarningText({
+        text: "This will remove this record.",
+        iconFallbackText: "Warning"
+      }) }}
+      <div class="govuk-button-group">
+        <form method="post">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+          {{ govukButton({
+            text: "Remove record",
+            classes: "govuk-button--warning"
+          }) }}
+        </form>
+        {{ govukButton({
+          text: "Cancel",
+          classes: "govuk-button--secondary",
+          href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/view"
+        }) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
