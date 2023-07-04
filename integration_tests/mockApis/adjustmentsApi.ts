@@ -92,7 +92,30 @@ export default {
         urlPattern: '/adjustments-api/adjustments',
       },
       response: {
+        jsonBody: { adjustmentId: 'this-is-an-id' },
         status: 201,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubGetAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/this-is-an-id',
+      },
+      response: {
+        jsonBody: {
+          id: 'this-is-an-id',
+          adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
+          bookingId: '1234',
+          fromDate: '2023-04-05',
+          toDate: null,
+          person: 'A1234AB',
+          days: 25,
+          sentenceSequence: null,
+        },
+        status: 200,
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       },
     })
