@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { AdjustmentDetails } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
 import { dateItems } from '../utils/utils'
 
 export default class AdjustmentForm {
@@ -7,14 +7,7 @@ export default class AdjustmentForm {
     Object.assign(this, params)
   }
 
-  type:
-    | 'REMAND'
-    | 'TAGGED_BAIL'
-    | 'UNLAWFULLY_AT_LARGE'
-    | 'LAWFULLY_AT_LARGE'
-    | 'ADDITIONAL_DAYS_AWARDED'
-    | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
-    | 'SPECIAL_REMISSION'
+  type: AdjustmentTypes
 
   'from-day': string
 
@@ -40,7 +33,7 @@ export default class AdjustmentForm {
     return dateItems(this['to-year'], this['to-month'], this['to-day'], 'to', [])
   }
 
-  static fromAdjustment(adjustment: AdjustmentDetails): AdjustmentForm {
+  static fromAdjustment(adjustment: Adjustment): AdjustmentForm {
     return new AdjustmentForm({
       type: adjustment.adjustmentType,
       'from-day': dayjs(adjustment.fromDate).get('date').toString(),
@@ -54,7 +47,7 @@ export default class AdjustmentForm {
     })
   }
 
-  toAdjustmentDetails(bookingId: number, nomsId: string): AdjustmentDetails {
+  toAdjustment(bookingId: number, nomsId: string): Adjustment {
     return {
       adjustmentType: this.type,
       bookingId,

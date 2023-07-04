@@ -1,4 +1,4 @@
-import { AdjustmentDetails } from '../adjustments/adjustmentsTypes'
+import { Adjustment } from '../adjustments/adjustmentsTypes'
 
 export default {}
 
@@ -7,7 +7,7 @@ declare module 'express-session' {
   interface SessionData {
     returnTo: string
     nowInMinutes: number
-    adjustments: { string?: AdjustmentDetails }
+    adjustments: { string?: Adjustment }
   }
 }
 

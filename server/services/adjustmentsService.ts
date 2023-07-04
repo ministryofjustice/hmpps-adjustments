@@ -1,17 +1,12 @@
 import AdjustmentsClient from '../api/adjustmentsClient'
-import {
-  Adjustment,
-  AdjustmentDetails,
-  CreateResponse,
-  ValidationMessage,
-} from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, CreateResponse, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentsService {
-  public async create(adjustment: AdjustmentDetails, token: string): Promise<CreateResponse> {
+  public async create(adjustment: Adjustment, token: string): Promise<CreateResponse> {
     return new AdjustmentsClient(token).create(adjustment)
   }
 
-  public async get(adjustmentId: string, token: string): Promise<AdjustmentDetails> {
+  public async get(adjustmentId: string, token: string): Promise<Adjustment> {
     return new AdjustmentsClient(token).get(adjustmentId)
   }
 
@@ -23,7 +18,7 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).findByPersonAndSource(person, source)
   }
 
-  public async update(adjustmentId: string, adjustment: AdjustmentDetails, token: string): Promise<void> {
+  public async update(adjustmentId: string, adjustment: Adjustment, token: string): Promise<void> {
     return new AdjustmentsClient(token).update(adjustmentId, adjustment)
   }
 
@@ -31,7 +26,7 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).delete(adjustmentId)
   }
 
-  public async validate(adjustment: AdjustmentDetails, token: string): Promise<ValidationMessage[]> {
+  public async validate(adjustment: Adjustment, token: string): Promise<ValidationMessage[]> {
     return new AdjustmentsClient(token).validate(adjustment)
   }
 }

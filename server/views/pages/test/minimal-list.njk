@@ -20,14 +20,14 @@
                     {% for adjustment in model.adjustments %}
                         <tr class="govuk-table__row">
                             <!-- Type -->
-                            <td class="govuk-table__cell">{{adjustment.adjustment.adjustmentType}}</td>
+                            <td class="govuk-table__cell">{{adjustment.adjument.adjustmentType}}</td>
                             <!-- Days -->
                             <td class="govuk-table__cell">
                                 <span class="govuk-!-padding-top-3">
-                                    <b>From {{adjustment.adjustment.fromDate | date('dddd, DD MMMM YYYY') }} to {{adjustment.adjustment.toDate | date('dddd, DD MMMM YYYY') }}</b>
+                                    <b>From {{adjustment.fromDate | date('dddd, DD MMMM YYYY') }} to {{adjustment.toDate | date('dddd, DD MMMM YYYY') }}</b>
                                 </span>
                             </td>
-                            <td class="govuk-table__cell">{{adjustment.adjustment.days}}</td>
+                            <td class="govuk-table__cell">{{adjustment.days}}</td>
                             <td class="govuk-table__cell">
                                 <form action="/test/{{model.prisonerDetail.offenderNo}}/delete/{{adjustment.id}}" class="form" method="post">
                                     <a href="/test/{{model.prisonerDetail.offenderNo}}/edit/{{adjustment.id}}" class="govuk-button">Edit</a>

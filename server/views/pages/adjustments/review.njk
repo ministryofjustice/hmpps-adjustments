@@ -36,7 +36,7 @@
                 {{model.adjustment.fromDate | date('DD MMMM YYYY')}}
               </dd>
               <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="warrant-details.html">
+                <a class="govuk-link" href="{{model.changeLink()}}">
                               Change<span class="govuk-visually-hidden"> date</span>
                 </a>
               </dd>
@@ -49,7 +49,7 @@
                 {{model.adjustment.days}}
               </dd>
               <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="warrant-details.html">
+                <a class="govuk-link" href="{{model.changeLink()}}">
                               Change<span class="govuk-visually-hidden"> date</span>
                 </a>
               </dd>

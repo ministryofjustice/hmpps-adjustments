@@ -11,7 +11,7 @@ export default class ViewModel {
     allAdjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
   ) {
-    this.adjustments = allAdjustments.filter(it => it.adjustment.adjustmentType === adjustmentType.value)
+    this.adjustments = allAdjustments.filter(it => it.adjustmentType === adjustmentType.value)
   }
 
   public table() {
@@ -34,7 +34,7 @@ export default class ViewModel {
     return [
       { text: 'From' },
       { text: 'Status' },
-      { text: 'To' },
+      ...(this.adjustmentType.value === 'REMAND' ? [{ text: 'To' }] : []),
       { text: 'Days', format: 'numeric' },
       { text: 'Entered by' },
       { text: 'Actions' },
@@ -45,21 +45,21 @@ export default class ViewModel {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return this.adjustments.map(it => {
         return [
-          { text: dayjs(it.adjustment.fromDate).format('D MMM YYYY') },
-          { html: `<strong class="govuk-tag">${it.adjustment.status}</strong>` },
-          { text: it.adjustment.lastUpdatedBy },
-          { text: it.adjustment.days, format: 'numeric' },
+          { text: dayjs(it.fromDate).format('D MMM YYYY') },
+          { html: `<strong class="govuk-tag">${it.status}</strong>` },
+          { text: it.lastUpdatedBy },
+          { text: it.days, format: 'numeric' },
           this.actionCell(it),
         ]
       })
     }
     return this.adjustments.map(it => {
       return [
-        { text: dayjs(it.adjustment.fromDate).format('D MMM YYYY') },
-        { html: `<strong class="govuk-tag">${it.adjustment.status}</strong>` },
-        { text: dayjs(it.adjustment.toDate).format('D MMM YYYY') },
-        { text: it.adjustment.days, format: 'numeric' },
-        { text: it.adjustment.lastUpdatedBy },
+        { text: dayjs(it.fromDate).format('D MMM YYYY') },
+        { html: `<strong class="govuk-tag">${it.status}</strong>` },
+        ...(this.adjustmentType.value === 'REMAND' ? [{ text: dayjs(it.toDate).format('D MMM YYYY') }] : []),
+        { text: it.days, format: 'numeric' },
+        { text: it.lastUpdatedBy },
         this.actionCell(it),
       ]
     })
@@ -68,8 +68,8 @@ export default class ViewModel {
   private actionCell(adjustment: Adjustment) {
     return {
       html: `
-      <a class="govuk-link" href="/${adjustment.adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}">Edit</a><br />
-      <a class="govuk-link" href="/${adjustment.adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}">Remove</a><br />
+      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}">Edit</a><br />
+      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}">Remove</a><br />
     `,
     }
   }
