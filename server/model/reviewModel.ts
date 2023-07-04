@@ -17,7 +17,19 @@ export default class ReviewModel {
   }
 
   public summaryRows() {
-    return ReviewModel.summaryRowsFromAdjustment(this.adjustment)
+    return ReviewModel.summaryRowsFromAdjustment(this.adjustment).map(it => {
+      return {
+        ...it,
+        actions: {
+          items: [
+            {
+              href: this.changeLink(),
+              text: 'Change',
+            },
+          ],
+        },
+      }
+    })
   }
 
   public static summaryRowsFromAdjustment(adjustment: Adjustment) {
