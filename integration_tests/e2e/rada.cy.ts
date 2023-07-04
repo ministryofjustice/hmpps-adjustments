@@ -14,6 +14,7 @@ context('Enter a RADA', () => {
     cy.task('stubGetRelevantRemand')
     cy.task('stubValidateAdjustmentWithWarning')
     cy.task('stubCreateAdjustment')
+    cy.task('stubGetAdjustment')
   })
 
   it('Enter a RADA', () => {

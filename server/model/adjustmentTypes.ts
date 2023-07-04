@@ -1,5 +1,7 @@
+import { AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
+
 export type AdjustmentType = {
-  value: string
+  value: AdjustmentTypes
   text: string
   shortText: string
   url: string

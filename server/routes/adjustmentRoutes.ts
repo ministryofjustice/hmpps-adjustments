@@ -5,7 +5,6 @@ import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsHubViewModel, { Message } from '../model/adjustmentsListModel'
 import config from '../config'
 import AdditionalDaysModel from '../model/additionalDaysModel'
-import RestoredAdditionalDaysForm from '../model/restoredAdditionalDaysForm'
 import ReviewModel from '../model/reviewModel'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import WarningModel from '../model/warningModel'
@@ -13,6 +12,7 @@ import WarningForm from '../model/warningForm'
 import adjustmentTypes from '../model/adjustmentTypes'
 import ViewModel from '../model/viewModel'
 import RemoveModel from '../model/removeModel'
+import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -83,32 +83,55 @@ export default class AdjustmentRoutes {
     })
   }
 
-  public restoredAdditionalDays: RequestHandler = async (req, res): Promise<void> => {
+  public form: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId } = req.params
+    const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
+
+    const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
-    return res.render('pages/adjustments/restoredAdditionalDays', {
-      model: { prisonerDetail, form: new RestoredAdditionalDaysForm({}) },
+    let adjustment = null
+    if (addOrEdit === 'edit') {
+      const sessionAdjustment = this.adjustmentsStoreService.get(req, nomsId)
+      if (id && sessionAdjustment?.id !== id) {
+        adjustment = await this.adjustmentsService.get(id, token)
+      } else {
+        adjustment = sessionAdjustment
+      }
+    }
+    const form = adjustment
+      ? AdjustmentsFormFactory.fromAdjustment(adjustment)
+      : AdjustmentsFormFactory.fromType(adjustmentType)
+
+    return res.render('pages/adjustments/form', {
+      model: { prisonerDetail, form },
     })
   }
 
-  public submitRestoredAdditionalDays: RequestHandler = async (req, res): Promise<void> => {
+  public submitForm: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId } = req.params
+    const { nomsId, adjustmentTypeUrl, id } = req.params
+
+    const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustmentForm = new RestoredAdditionalDaysForm(req.body)
+    const adjustmentForm = AdjustmentsFormFactory.fromRequest(req, adjustmentType)
 
     adjustmentForm.validate()
 
     if (adjustmentForm.errors.length) {
-      return res.render('pages/adjustments/restoredAdditionalDays', {
+      return res.render('pages/adjustments/form', {
         model: { prisonerDetail, form: adjustmentForm },
       })
     }
 
-    const adjustment = adjustmentForm.toAdjustmentDetails(prisonerDetail.bookingId, nomsId)
+    const adjustment = adjustmentForm.toAdjustment(prisonerDetail.bookingId, nomsId, id)
 
     const messages = await this.adjustmentsService.validate(adjustment, token)
 
@@ -116,7 +139,7 @@ export default class AdjustmentRoutes {
 
     if (validationMessages.length) {
       adjustmentForm.addErrors(validationMessages)
-      return res.render('pages/adjustments/restoredAdditionalDays', {
+      return res.render('pages/adjustments/form', {
         model: { prisonerDetail, form: adjustmentForm },
       })
     }
@@ -148,15 +171,23 @@ export default class AdjustmentRoutes {
     const { token } = res.locals.user
     const { nomsId } = req.params
 
-    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    let adjustment = this.adjustmentsStoreService.get(req, nomsId)
     if (adjustment) {
-      await this.adjustmentsService.create(adjustment, token)
-      const message = JSON.stringify({
+      let adjustmentId
+      if (adjustment.id) {
+        await this.adjustmentsService.update(adjustment.id, adjustment, token)
+        adjustmentId = adjustment.id
+      } else {
+        adjustmentId = (await this.adjustmentsService.create(adjustment, token)).adjustmentId
+      }
+      const message = {
         type: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
         days: adjustment.days,
-        action: 'CREATE',
-      } as Message)
-      return res.redirect(`/${nomsId}/success?message=${message}`)
+        action: adjustment.id ? 'UPDATE' : 'CREATE',
+      } as Message
+      adjustment = await this.adjustmentsService.get(adjustmentId, token)
+      message.days = adjustment.days
+      return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
     }
     return res.redirect(`/${nomsId}`)
   }

@@ -1,0 +1,64 @@
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+<div>
+  {{ govukDateInput({
+        id: "from",
+        namePrefix: "from",
+        items: model.form.fromItems(),
+        fieldset: {
+            legend: {
+                text: "From date"
+            }
+        },
+        hint: {
+            text: "For example, 27 3 2022"
+        },
+        errorMessage: model.form.messageForField('from-day', 'from-month', 'from-year')
+        })
+    }}
+  {% if model.form.options.hasToDate %}
+    {{ govukDateInput({
+        id: "to",
+        namePrefix: "to",
+        items: model.form.toItems(),
+        fieldset: {
+            legend: {
+                text: "To date"
+            }
+        },
+        hint: {
+            text: "For example, 27 3 2022"
+        },
+        errorMessage: model.form.messageForField('to-day', 'to-month', 'to-year')
+        })
+    }}
+  {% else %}
+    {{ govukInput({
+    label: {
+        text: "Number of days"
+    },
+    id: "days",
+    name: "days",
+    value: model.form.days,
+    classes: "govuk-input--width-4",
+    errorMessage: model.form.messageForField('days')
+  })
+    }}
+  {% endif %}
+
+  {% if model.form.options.hasSentence %}
+    {{ govukInput({
+    label: {
+        text: "Sentence sequence"
+    },
+    id: "sentence",
+    name: "sentence",
+    value: model.form.sentence,
+    classes: "govuk-input--width-4",
+    errorMessage: model.form.messageForField('sentence')
+  })
+    }}
+  {% endif %}
+</div>

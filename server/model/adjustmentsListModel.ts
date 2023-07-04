@@ -7,7 +7,7 @@ import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 export type Message = {
   type: string
   days: number
-  action: 'CREATE' | 'REMOVE'
+  action: 'CREATE' | 'REMOVE' | 'UPDATE'
 }
 export default class AdjustmentsListViewModel {
   public adjustmentTypes = adjustmentTypes
@@ -46,8 +46,8 @@ export default class AdjustmentsListViewModel {
 
   public getTotalDays(adjustmentType: AdjustmentType) {
     return this.adjustments
-      .filter(it => it.adjustment.adjustmentType === adjustmentType.value)
-      .map(a => a.adjustment.days)
+      .filter(it => it.adjustmentType === adjustmentType.value)
+      .map(a => a.days)
       .reduce((sum, current) => sum + current, 0)
   }
 

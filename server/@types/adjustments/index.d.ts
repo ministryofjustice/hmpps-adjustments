@@ -143,8 +143,20 @@ export interface components {
       /** @description The NOMIS active or inactive flag */
       active: boolean
     }
-    /** @description The details of an adjustment to release dates */
-    AdjustmentDetailsDto: {
+    /** @description The details of an additional days awarded (ADA) adjustment */
+    AdditionalDaysAwardedDto: {
+      /** @description The id of the adjudication that resulted in the ADA */
+      adjudicationId: string
+      /** @description Is the ADA consecutive or concurrent */
+      consecutive: boolean
+    }
+    /** @description The adjustment and its identifier */
+    AdjustmentDto: {
+      /**
+       * Format: uuid
+       * @description The ID of the adjustment
+       */
+      id?: string
       /**
        * Format: int64
        * @description The NOMIS booking ID of the adjustment
@@ -169,6 +181,7 @@ export interface components {
         | 'ADDITIONAL_DAYS_AWARDED'
         | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
         | 'SPECIAL_REMISSION'
+        | 'TIME_SPENT_IN_CUSTODY_ABROAD'
       /**
        * Format: date
        * @description The end date of the adjustment
@@ -184,8 +197,11 @@ export interface components {
        * @description The number of adjustment days
        */
       days?: number
-      status?: string
+      additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
+      /** @description The person last updating this adjustment */
       lastUpdatedBy?: string
+      /** @description The status of this adjustment */
+      status?: string
     }
     LegacyAdjustmentCreatedResponse: {
       /** Format: uuid */
@@ -217,15 +233,6 @@ export interface components {
       /** Format: int32 */
       messagesReturnedCount: number
       messages: components['schemas']['DlqMessage'][]
-    }
-    /** @description The adjustment and its identifier */
-    AdjustmentDto: {
-      /**
-       * Format: uuid
-       * @description The ID of the adjustment
-       */
-      id: string
-      adjustment: components['schemas']['AdjustmentDetailsDto']
     }
   }
   responses: never
@@ -370,19 +377,19 @@ export interface operations {
       /** @description Adjustment found */
       200: {
         content: {
-          'application/json': components['schemas']['AdjustmentDetailsDto']
+          'application/json': components['schemas']['AdjustmentDto']
         }
       }
       /** @description Unauthorised, requires a valid Oauth2 token */
       401: {
         content: {
-          'application/json': components['schemas']['AdjustmentDetailsDto']
+          'application/json': components['schemas']['AdjustmentDto']
         }
       }
       /** @description Adjustment not found */
       404: {
         content: {
-          'application/json': components['schemas']['AdjustmentDetailsDto']
+          'application/json': components['schemas']['AdjustmentDto']
         }
       }
     }
@@ -400,7 +407,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['AdjustmentDetailsDto']
+        'application/json': components['schemas']['AdjustmentDto']
       }
     }
     responses: {
@@ -523,7 +530,7 @@ export interface operations {
   create_1: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['AdjustmentDetailsDto']
+        'application/json': components['schemas']['AdjustmentDto']
       }
     }
     responses: {
@@ -548,7 +555,7 @@ export interface operations {
   validate: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['AdjustmentDetailsDto']
+        'application/json': components['schemas']['AdjustmentDto']
       }
     }
     responses: {

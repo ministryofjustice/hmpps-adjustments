@@ -62,7 +62,7 @@ export default class AdjustmentTestRoutes {
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = new AdjustmentForm(req.body)
-    const adjustment = adjustmentForm.toAdjustmentDetails(prisonerDetail.bookingId, nomsId)
+    const adjustment = adjustmentForm.toAdjustment(prisonerDetail.bookingId, nomsId)
 
     if (adjustmentId) {
       await this.adjustmentsService.update(adjustmentId, adjustment, token)

@@ -54,6 +54,10 @@ export default abstract class AbstractForm<T> {
     return null
   }
 
+  invalidNumber(value: string): boolean {
+    return !value || Number.isNaN(Number(value)) || Number(value) < 0
+  }
+
   fieldHasError(field: string): boolean {
     return fieldHasErrors(this.errors, field)
   }

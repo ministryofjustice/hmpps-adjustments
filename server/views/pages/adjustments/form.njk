@@ -1,35 +1,41 @@
 {% extends "../../partials/layout.njk" %}
 {% from "govuk/components/date-input/macro.njk" import govukDateInput %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
-{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
+
+  {% if model.form.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: model.form.errorList()
+        }) }}
+      </div>
+    </div>
+  {% endif %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-                                Check adjustment information
+                                Enter {{model.form.adjustmentType().shortText}} details
                             </h1>
     </div>
   </div>
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds-from-desktop">
-      {{ govukSummaryList({
-        rows: model.summaryRows()
-      }) }}
-    </div>
-  </div>
-  <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
-
       <form class="form" method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
 
-        <button class="govuk-button" data-module="govuk-button" data-qa="submit">
-                    Accept and save
+        {% include model
+          .form
+          .fragment() %}
+        <button id="court-details-button" class="govuk-button" data-module="govuk-button" data-qa="submit-form">
+                    Continue
                 </button>
       </form>
     </div>
