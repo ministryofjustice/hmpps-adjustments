@@ -171,19 +171,23 @@ export default class AdjustmentRoutes {
     const { token } = res.locals.user
     const { nomsId } = req.params
 
-    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    let adjustment = this.adjustmentsStoreService.get(req, nomsId)
     if (adjustment) {
+      let adjustmentId
       if (adjustment.id) {
         await this.adjustmentsService.update(adjustment.id, adjustment, token)
+        adjustmentId = adjustment.id
       } else {
-        await this.adjustmentsService.create(adjustment, token)
+        adjustmentId = (await this.adjustmentsService.create(adjustment, token)).adjustmentId
       }
-      const message = JSON.stringify({
+      const message = {
         type: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
         days: adjustment.days,
         action: adjustment.id ? 'UPDATE' : 'CREATE',
-      } as Message)
-      return res.redirect(`/${nomsId}/success?message=${message}`)
+      } as Message
+      adjustment = await this.adjustmentsService.get(adjustmentId, token)
+      message.days = adjustment.days
+      return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
     }
     return res.redirect(`/${nomsId}`)
   }

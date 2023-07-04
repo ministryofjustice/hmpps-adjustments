@@ -310,11 +310,9 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Adjustment type')
-        expect(res.text).toContain('Restore additional days awarded (RADA)')
         expect(res.text).toContain('Date of days restored')
-        expect(res.text).toContain('05 April 2023')
-        expect(res.text).toContain('Number of days')
+        expect(res.text).toContain('5 Apr 2023')
+        expect(res.text).toContain('Days')
         expect(res.text).toContain('24')
         expect(res.text).toContain('Accept and save')
       })
@@ -323,6 +321,8 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
+    adjustmentsService.create.mockResolvedValue({ adjustmentId: 'this-is-an-id' })
+    adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)
@@ -340,6 +340,7 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/review with a adjustment with an id', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: 'this-is-an-id' })
+    adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)
