@@ -18,6 +18,6 @@ export default class WarningModel {
   }
 
   hint() {
-    return 'This hint should help.'
+    return 'The RADA time should not be more than 50% of the ADA time.<br /><br /> The Governor can restore up to 50% of the total ADAs that have been imposed. In very exceptional circumstances Governors may remit up to 100%.'
   }
 }

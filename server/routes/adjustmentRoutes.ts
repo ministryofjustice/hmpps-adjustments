@@ -113,7 +113,7 @@ export default class AdjustmentRoutes {
 
   public submitForm: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId, adjustmentTypeUrl, id } = req.params
+    const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
 
     const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
     if (!adjustmentType) {
@@ -127,7 +127,7 @@ export default class AdjustmentRoutes {
 
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/form', {
-        model: { prisonerDetail, form: adjustmentForm },
+        model: { prisonerDetail, form: adjustmentForm, addOrEdit },
       })
     }
 
@@ -140,7 +140,7 @@ export default class AdjustmentRoutes {
     if (validationMessages.length) {
       adjustmentForm.addErrors(validationMessages)
       return res.render('pages/adjustments/form', {
-        model: { prisonerDetail, form: adjustmentForm },
+        model: { prisonerDetail, form: adjustmentForm, addOrEdit },
       })
     }
 
@@ -217,20 +217,24 @@ export default class AdjustmentRoutes {
 
     warningForm.validate()
 
-    if (warningForm.errors.length) {
-      const adjustment = this.adjustmentsStoreService.get(req, nomsId)
-      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-      if (adjustment) {
-        const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
-        return res.render('pages/adjustments/warning', {
-          model: new WarningModel(prisonerDetail, adjustment, warning, warningForm),
-        })
+    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    if (adjustment) {
+      if (warningForm.errors.length) {
+        const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+        if (adjustment) {
+          const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
+          return res.render('pages/adjustments/warning', {
+            model: new WarningModel(prisonerDetail, adjustment, warning, warningForm),
+          })
+        }
       }
+      if (warningForm.confirm === 'yes') {
+        return res.redirect(`/${nomsId}/review`)
+      }
+      const adjustmentType = adjustmentTypes.find(it => it.value === adjustment.adjustmentType)
+      return res.redirect(`/${nomsId}/${adjustmentType.url}/edit`)
     }
-    if (warningForm.confirm === 'yes') {
-      return res.redirect(`/${nomsId}/review`)
-    }
-    return res.redirect(`/${nomsId}`)
+    return res.redirect(`/${nomsId}/`)
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {

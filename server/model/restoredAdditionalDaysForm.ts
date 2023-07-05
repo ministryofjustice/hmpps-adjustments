@@ -38,7 +38,7 @@ export default class RestoredAdditionalDaysForm extends AdjustmentsForm<Restored
     }
     if (this.invalidNumber(this.days)) {
       errors.push({
-        message: 'You must enter days',
+        text: 'The number of days restored must entered.',
         fields: ['days'],
       })
     }

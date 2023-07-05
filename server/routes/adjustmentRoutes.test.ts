@@ -110,8 +110,8 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('You must enter days')
-        expect(res.text).toContain('The date entered must include a valid day, month and a year.')
+        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('This date must include a valid day, month and a year.')
       })
   })
   it('POST /{nomsId}/restored-additional-days/add missing day and month validation and not number days', () => {
@@ -122,8 +122,8 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('You must enter days')
-        expect(res.text).toContain('The date entered must include a day and month.')
+        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('This date must include a day and month.')
       })
   })
 
@@ -135,8 +135,8 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('You must enter days')
-        expect(res.text).toContain('The date entered must include a valid day, month and a year.')
+        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('This date does not exist.')
       })
   })
   it('POST /{nomsId}/restored-additional-days/add server side validation mesage', () => {
@@ -264,6 +264,7 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/warning submit warning agreement', () => {
+    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
     return request(app)
       .post(`/${NOMS_ID}/warning`)
       .send({ confirm: 'yes' })
@@ -273,14 +274,16 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/warning submit warning disagreement', () => {
+    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
     return request(app)
       .post(`/${NOMS_ID}/warning`)
       .send({ confirm: 'no' })
       .type('form')
       .expect(302)
-      .expect('Location', `/${NOMS_ID}`)
+      .expect('Location', `/${NOMS_ID}/restored-additional-days/edit`)
   })
   it('POST /{nomsId}/warning submit warning without an answer', () => {
+    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
     adjustmentsService.validate.mockResolvedValue([
@@ -297,7 +300,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Pick an answer')
+        expect(res.text).toContain('Select an answer')
       })
   })
 
