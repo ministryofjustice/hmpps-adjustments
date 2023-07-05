@@ -19,35 +19,35 @@ export default abstract class AbstractForm<T> {
   protected validateDate(day: string, month: string, year: string, fieldPrefix: string): ValidationError {
     if (!day && !month && !year) {
       return {
-        message: 'The date entered must include a valid day, month and a year.',
+        text: 'This date must include a valid day, month and a year.',
         fields: [`${fieldPrefix}-day`, `${fieldPrefix}-month`, `${fieldPrefix}-year`],
       }
     }
-    let message = 'The date entered must include a'
+    let text = 'This date must include a'
     const fields = []
     if (!day) {
-      message += ' day'
+      text += ' day'
       fields.push(`${fieldPrefix}-day`)
     }
     if (!month) {
-      message += `${fields.length ? ' and' : ''} month`
+      text += `${fields.length ? ' and' : ''} month`
       fields.push(`${fieldPrefix}-month`)
     }
     if (!year) {
-      message += `${fields.length ? ' and' : ''} year`
+      text += `${fields.length ? ' and' : ''} year`
       fields.push(`${fieldPrefix}-year`)
     }
     if (fields.length) {
-      message += '.'
+      text += '.'
       return {
-        message,
+        text,
         fields,
       }
     }
     const date = dayjs(`${month}-${day}-${year}`) // DayJS will only validate date if entered in american format (month first.)
     if (!date.isValid()) {
       return {
-        message: 'The date entered must include a valid day, month and a year.',
+        text: 'This date does not exist.',
         fields: [`${fieldPrefix}-day`, `${fieldPrefix}-month`, `${fieldPrefix}-year`],
       }
     }
@@ -65,7 +65,7 @@ export default abstract class AbstractForm<T> {
   messageForField(...fields: string[]): { text: string } {
     const error = this.errors.find(it => fields.find(field => it.fields.indexOf(field) !== -1))
     if (error) {
-      return { text: error.message }
+      return { text: error.text }
     }
     return null
   }
@@ -74,7 +74,9 @@ export default abstract class AbstractForm<T> {
     this.errors = validationMessages.map(it => {
       return {
         fields: [],
-        message: it.message,
+        html: `<div${it.message.indexOf('\n') !== -1 ? ' class="govuk-!-margin-bottom-2"' : ''}>
+          ${it.message.replace('\n', '<br />')}
+        </div>`,
       }
     })
   }
@@ -82,7 +84,8 @@ export default abstract class AbstractForm<T> {
   errorList() {
     return this.errors.map(it => {
       return {
-        text: it.message,
+        text: it.text,
+        html: it.html,
         href: it.fields.length ? `#${it.fields[0]}` : null,
       }
     })

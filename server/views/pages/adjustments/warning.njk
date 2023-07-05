@@ -32,17 +32,17 @@
             }
           },
           hint: {
-            text: model.hint()
+            html: model.hint()
           },
           errorMessage: model.form.messageForField('confirm'),
           items: [
             {
               value: "yes",
-              text: "Yes"
+              text: "Yes, add this ADA time"
             },
             {
               value: "no",
-              text: "No"
+              text: "No, go back and change the amount of ADA time"
             }
           ]
         }) }}

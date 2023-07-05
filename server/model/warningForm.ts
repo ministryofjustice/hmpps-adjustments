@@ -9,7 +9,7 @@ export default class WarningForm extends AbstractForm<WarningForm> {
       return [
         {
           fields: ['confirm'],
-          message: 'Pick an answer',
+          text: 'Select an answer',
         },
       ]
     }

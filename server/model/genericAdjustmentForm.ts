@@ -64,14 +64,14 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
       }
     } else if (this.invalidNumber(this.days)) {
       errors.push({
-        message: 'You must enter days',
+        text: 'You must enter days',
         fields: ['days'],
       })
     }
     if (this.options.hasSentence) {
       if (this.invalidNumber(this.sentence)) {
         errors.push({
-          message: 'You must enter a sentence sequence',
+          text: 'You must enter a sentence sequence',
           fields: ['sentence'],
         })
       }
