@@ -3,7 +3,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
-{% set pageTitle = applicationName + " - Home" %}
+{% set pageTitle = applicationName + " - Remove " +  model.adjustmentType.shortText %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
@@ -24,20 +24,22 @@
         text: "This will remove this record.",
         iconFallbackText: "Warning"
       }) }}
-      <div class="govuk-button-group">
-        <form method="post">
-          <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+      <form method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+        <div class="govuk-button-group">
           {{ govukButton({
             text: "Remove record",
-            classes: "govuk-button--warning"
+            classes: "govuk-button--warning",
+            type: submit,
+            preventDoubleClick: true
           }) }}
-        </form>
-        {{ govukButton({
+          {{ govukButton({
           text: "Cancel",
           classes: "govuk-button--secondary",
           href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/view"
         }) }}
-      </div>
+        </div>
+      </form>
     </div>
   </div>
 {% endblock %}

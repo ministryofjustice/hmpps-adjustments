@@ -107,7 +107,7 @@ export default class AdjustmentRoutes {
       : AdjustmentsFormFactory.fromType(adjustmentType)
 
     return res.render('pages/adjustments/form', {
-      model: { prisonerDetail, form },
+      model: { prisonerDetail, form, addOrEdit },
     })
   }
 
@@ -181,7 +181,7 @@ export default class AdjustmentRoutes {
         adjustmentId = (await this.adjustmentsService.create(adjustment, token)).adjustmentId
       }
       const message = {
-        type: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
+        type: adjustment.adjustmentType,
         days: adjustment.days,
         action: adjustment.id ? 'UPDATE' : 'CREATE',
       } as Message

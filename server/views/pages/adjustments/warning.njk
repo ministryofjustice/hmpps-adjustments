@@ -1,8 +1,9 @@
 {% extends "../../partials/layout.njk" %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
 
-{% set pageTitle = applicationName + " - Home" %}
+{% set pageTitle = applicationName + " - are you sure?" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
@@ -46,9 +47,12 @@
           ]
         }) }}
 
-        <button class="govuk-button" data-module="govuk-button" data-qa="submit">
-                    Confirm
-                </button>
+        {{ govukButton({
+            text: "Confirm",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit' }   
+        }) }}
       </form>
     </div>
   </div>

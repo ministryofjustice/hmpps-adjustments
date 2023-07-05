@@ -2,8 +2,9 @@
 {% from "govuk/components/date-input/macro.njk" import govukDateInput %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
 
-{% set pageTitle = applicationName + " - Home" %}
+{% set pageTitle = applicationName + " - " + model.addOrEdit + " " + model.form.adjustmentType().shortText %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
@@ -34,9 +35,13 @@
         {% include model
           .form
           .fragment() %}
-        <button id="court-details-button" class="govuk-button" data-module="govuk-button" data-qa="submit-form">
-                    Continue
-                </button>
+
+        {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }   
+        }) }}
       </form>
     </div>
   </div>
