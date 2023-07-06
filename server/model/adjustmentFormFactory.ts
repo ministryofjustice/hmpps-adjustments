@@ -25,7 +25,7 @@ export default class AdjustmentsFormFactory {
       'to-month': (dayjs(adjustment.toDate).get('month') + 1).toString(),
       'to-year': dayjs(adjustment.toDate).get('year').toString(),
       days: adjustment.days.toString(),
-      sentence: adjustment.sentenceSequence.toString(),
+      sentence: adjustment.sentenceSequence?.toString(),
     })
   }
 
