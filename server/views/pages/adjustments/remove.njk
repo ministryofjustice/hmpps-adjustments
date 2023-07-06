@@ -2,10 +2,20 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
 {% set pageTitle = applicationName + " - Remove " +  model.adjustmentType.shortText %}
 {% set mainClasses = "app-container govuk-body" %}
 
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+        text: "Back",
+        href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/view"
+    }) }}
+  </nav>
+{% endblock %}
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">

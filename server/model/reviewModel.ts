@@ -17,19 +17,7 @@ export default class ReviewModel {
   }
 
   public summaryRows() {
-    return ReviewModel.summaryRowsFromAdjustment(this.adjustment).map(it => {
-      return {
-        ...it,
-        actions: {
-          items: [
-            {
-              href: this.changeLink(),
-              text: 'Change',
-            },
-          ],
-        },
-      }
-    })
+    return ReviewModel.summaryRowsFromAdjustment(this.adjustment)
   }
 
   public static summaryRowsFromAdjustment(adjustment: Adjustment) {
@@ -37,7 +25,7 @@ export default class ReviewModel {
       return [
         {
           key: {
-            text: 'Date of days restored',
+            text: 'Date the days were restored',
           },
           value: {
             text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
@@ -45,7 +33,7 @@ export default class ReviewModel {
         },
         {
           key: {
-            text: 'Days',
+            text: 'Number of days restored',
           },
           value: {
             text: adjustment.days,

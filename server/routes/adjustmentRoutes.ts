@@ -107,7 +107,7 @@ export default class AdjustmentRoutes {
       : AdjustmentsFormFactory.fromType(adjustmentType)
 
     return res.render('pages/adjustments/form', {
-      model: { prisonerDetail, form, addOrEdit },
+      model: { prisonerDetail, form, addOrEdit, id },
     })
   }
 
@@ -127,7 +127,7 @@ export default class AdjustmentRoutes {
 
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/form', {
-        model: { prisonerDetail, form: adjustmentForm, addOrEdit },
+        model: { prisonerDetail, form: adjustmentForm, addOrEdit, id },
       })
     }
 
@@ -140,7 +140,7 @@ export default class AdjustmentRoutes {
     if (validationMessages.length) {
       adjustmentForm.addErrors(validationMessages)
       return res.render('pages/adjustments/form', {
-        model: { prisonerDetail, form: adjustmentForm, addOrEdit },
+        model: { prisonerDetail, form: adjustmentForm, addOrEdit, id },
       })
     }
 

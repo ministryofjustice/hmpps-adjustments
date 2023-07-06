@@ -24,16 +24,14 @@ export default class ViewModel {
   public columnHeadings() {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
-        { text: 'Date of days restored' },
-        { text: 'Status' },
+        { text: 'Date the days were restored' },
         { text: 'Entered by' },
-        { text: 'Number of additional days restored', format: 'numeric' },
+        { text: 'Number of days restored', format: 'numeric' },
         { text: 'Actions' },
       ]
     }
     return [
       { text: 'From' },
-      { text: 'Status' },
       ...(this.adjustmentType.value === 'REMAND' ? [{ text: 'To' }] : []),
       { text: 'Days', format: 'numeric' },
       { text: 'Entered by' },
@@ -46,7 +44,6 @@ export default class ViewModel {
       return this.adjustments.map(it => {
         return [
           { text: dayjs(it.fromDate).format('D MMM YYYY') },
-          { html: `<strong class="govuk-tag">${it.status}</strong>` },
           { text: it.lastUpdatedBy },
           { text: it.days, format: 'numeric' },
           this.actionCell(it),
@@ -56,7 +53,6 @@ export default class ViewModel {
     return this.adjustments.map(it => {
       return [
         { text: dayjs(it.fromDate).format('D MMM YYYY') },
-        { html: `<strong class="govuk-tag">${it.status}</strong>` },
         ...(this.adjustmentType.value === 'REMAND' ? [{ text: dayjs(it.toDate).format('D MMM YYYY') }] : []),
         { text: it.days, format: 'numeric' },
         { text: it.lastUpdatedBy },

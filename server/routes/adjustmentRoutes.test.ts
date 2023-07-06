@@ -85,7 +85,7 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Date of days restored')
+        expect(res.text).toContain('Number of additional days restored')
         expect(res.text).toContain('Continue')
       })
   })
@@ -189,7 +189,6 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Date of days restored')
         expect(res.text).toContain('value="5"')
         expect(res.text).toContain('value="4"')
         expect(res.text).toContain('value="2023"')
@@ -206,7 +205,6 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Date of days restored')
         expect(res.text).toContain('value="5"')
         expect(res.text).toContain('value="4"')
         expect(res.text).toContain('value="2023"')
@@ -313,11 +311,11 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Date of days restored')
+        expect(res.text).toContain('Date the days were restored')
         expect(res.text).toContain('5 Apr 2023')
-        expect(res.text).toContain('Days')
+        expect(res.text).toContain('Number of days restored')
         expect(res.text).toContain('24')
-        expect(res.text).toContain('Accept and save')
+        expect(res.text).toContain('Submit')
       })
   })
 
@@ -371,7 +369,6 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Doris McNealy')
-        expect(res.text).toContain('Active')
         expect(res.text).toContain('edit/this-is-an-id')
         expect(res.text).toContain('remove/this-is-an-id')
       })
