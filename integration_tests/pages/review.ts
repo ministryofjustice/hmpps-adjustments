@@ -2,7 +2,7 @@ import Page, { PageElement } from './page'
 
 export default class ReviewPage extends Page {
   constructor() {
-    super('Check adjustment information')
+    super('Check your answers')
   }
 
   public skipAxe() {
