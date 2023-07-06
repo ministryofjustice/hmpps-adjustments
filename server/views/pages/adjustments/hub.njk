@@ -11,11 +11,10 @@
             {% if model.message %}
                 {% if model.message.action === 'CREATE' %}
                     {% set html %}
-                    <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of {{model.messageType.shortText}} have been applied</h3>
-                    <p class="govuk-body">The adjustments have been saved in NOMIS. You can continue to add adjustments for {{model.prisonerDetail.firstName | title}}
-                        {{model.prisonerDetail.lastName | title}}.</p>
-                    <p class="govuk-body">You must recalculate the release dates once all adjustments have been applied.
-                                <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-notification-banner__link">Calculate release date</a>
+                    <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of {{model.messageType.shortText}} have been added</h3>
+                    <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on this page.</p>
+                    <p class="govuk-body">Once all adjustments have been applied, you must
+                                <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-notification-banner__link">recalculate the release dates.</a>
                     </p>
                     {% endset %}
                 {% elif model.message.action === 'REMOVE' %}

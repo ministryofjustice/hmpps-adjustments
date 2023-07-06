@@ -9,7 +9,8 @@
         items: model.form.fromItems(),
         fieldset: {
             legend: {
-                text: "Date of days restored"
+                text: "Date the days were restored",
+                classes: "govuk-fieldset__legend--s"
             }
         },
         hint: {
@@ -20,7 +21,8 @@
     }}
   {{ govukInput({
     label: {
-        text: "Number of additional days restored"
+        text: "Number of additional days restored",
+        classes: "govuk-label--s"
     },
     id: "days",
     name: "days",

@@ -3,9 +3,28 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
 {% set pageTitle = applicationName + " - " + model.addOrEdit + " " + model.form.adjustmentType().shortText %}
 {% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {% if model.addOrEdit == 'edit' and model.id %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/" + model
+        .form
+        .adjustmentType()
+        .url + "/view" %}
+    {% else %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
+    {% endif %}
+    {{ govukBackLink({
+            text: "Back",
+            href: backlink
+        }) }}
+  </nav>
+{% endblock %}
 
 {% block content %}
 

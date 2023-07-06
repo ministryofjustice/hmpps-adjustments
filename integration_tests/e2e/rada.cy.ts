@@ -31,6 +31,6 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().should('contain.text', '25 days of RADA have been applied')
+    hub.successMessage().should('contain.text', '25 days of RADA have been added')
   })
 })

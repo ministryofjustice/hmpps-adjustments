@@ -1,6 +1,7 @@
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
 import WarningForm from './warningForm'
+import adjustmentTypes from './adjustmentTypes'
 
 export default class WarningModel {
   constructor(
@@ -9,6 +10,10 @@ export default class WarningModel {
     public validationMessage: ValidationMessage,
     public form: WarningForm,
   ) {}
+
+  adjustmentType() {
+    return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)
+  }
 
   question() {
     if (this.validationMessage.code === 'RADA_REDUCES_BY_MORE_THAN_HALF') {
