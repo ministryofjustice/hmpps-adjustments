@@ -14,7 +14,9 @@ export default class HubPage extends Page {
     return new HubPage()
   }
 
-  public radaLink = (): PageElement => cy.get('[data-qa=restored-additional-days]')
+  public addRadaLink = (): PageElement => cy.get('[data-qa=add-restored-additional-days]')
+
+  public viewRadaLink = (): PageElement => cy.get('[data-qa=view-restored-additional-days]')
 
   public relevantRemandLink = (): PageElement => cy.get('[data-qa=relevant-remand]')
 
