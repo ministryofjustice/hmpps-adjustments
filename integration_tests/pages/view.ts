@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import Page, { PageElement } from './page'
 
 export default class ViewPage extends Page {
