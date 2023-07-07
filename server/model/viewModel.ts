@@ -64,8 +64,8 @@ export default class ViewModel {
   private actionCell(adjustment: Adjustment) {
     return {
       html: `
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}">Edit</a><br />
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}">Remove</a><br />
+      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
+      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Remove</a><br />
     `,
     }
   }

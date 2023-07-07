@@ -14,39 +14,33 @@ export default {
         jsonBody: [
           {
             id: '5d2b87ee-02de-4ec7-b0ed-d3113a213136',
-            adjustment: {
-              bookingId: 1204935,
-              sentenceSequence: 1,
-              person: 'A1032DZ',
-              adjustmentType: 'REMAND',
-              toDate: '2023-01-20',
-              fromDate: '2023-01-10',
-              days: 11,
-            },
+            bookingId: 1204935,
+            sentenceSequence: 1,
+            person: 'A1234AB',
+            adjustmentType: 'REMAND',
+            toDate: '2023-01-20',
+            fromDate: '2023-01-10',
+            days: 11,
           },
           {
             id: '5c618eb1-dcc9-4959-827e-27e6cd5fedf6',
-            adjustment: {
-              bookingId: 1204935,
-              sentenceSequence: null,
-              person: 'A1032DZ',
-              adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-              toDate: null,
-              fromDate: '2023-06-01',
-              days: 40,
-            },
+            bookingId: 1204935,
+            sentenceSequence: null,
+            person: 'A1234AB',
+            adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+            toDate: null,
+            fromDate: '2023-06-01',
+            days: 40,
           },
           {
             id: '4c3c057c-896d-4793-9022-f3001e209a36',
-            adjustment: {
-              bookingId: 1204935,
-              sentenceSequence: null,
-              person: 'A1032DZ',
-              adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
-              toDate: null,
-              fromDate: '2023-03-30',
-              days: 22,
-            },
+            bookingId: 1204935,
+            sentenceSequence: null,
+            person: 'A1234AB',
+            adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
+            toDate: null,
+            fromDate: '2023-03-30',
+            days: 22,
           },
         ],
       },
@@ -92,7 +86,7 @@ export default {
         urlPattern: '/adjustments-api/adjustments',
       },
       response: {
-        jsonBody: { adjustmentId: 'this-is-an-id' },
+        jsonBody: { adjustmentId: '4c3c057c-896d-4793-9022-f3001e209a36' },
         status: 201,
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       },
@@ -102,11 +96,11 @@ export default {
     return stubFor({
       request: {
         method: 'GET',
-        urlPattern: '/adjustments-api/adjustments/this-is-an-id',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
       },
       response: {
         jsonBody: {
-          id: 'this-is-an-id',
+          id: '4c3c057c-896d-4793-9022-f3001e209a36',
           adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
           bookingId: '1234',
           fromDate: '2023-04-05',
@@ -115,6 +109,30 @@ export default {
           days: 25,
           sentenceSequence: null,
         },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubRemoveAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
         status: 200,
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       },

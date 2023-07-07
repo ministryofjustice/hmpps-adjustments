@@ -41,7 +41,8 @@
             text: "Remove record",
             classes: "govuk-button--warning",
             type: submit,
-            preventDoubleClick: true
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'remove-button' } 
           }) }}
           {{ govukButton({
           text: "Cancel",
