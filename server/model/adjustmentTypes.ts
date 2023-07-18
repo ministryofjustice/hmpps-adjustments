@@ -3,6 +3,7 @@ import { AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
 export type AdjustmentType = {
   value: AdjustmentTypes
   text: string
+  alternativeText: string
   shortText: string
   url: string
 }
@@ -34,7 +35,8 @@ const adjustmentTypes: AdjustmentType[] = [
   } as AdjustmentType,
   {
     value: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
-    text: 'Restore additional days awarded (RADA)',
+    text: 'RADA (Restoration of added days)',
+    alternativeText: 'RADA',
     shortText: 'RADA',
     url: 'restored-additional-days',
   } as AdjustmentType,
