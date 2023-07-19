@@ -76,6 +76,17 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('24')
       })
   })
+  it('GET /{nomsId} relevant remand throws error', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([radaAdjustment])
+    identifyRemandPeriodsService.calculateRelevantRemand.mockRejectedValue(remandResult)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain('Nobody may have 20 days remand')
+      })
+  })
 
   it('GET /{nomsId}/restored-additional-days/add', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)

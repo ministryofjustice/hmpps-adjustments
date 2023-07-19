@@ -50,13 +50,18 @@ export default class AdjustmentRoutes {
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
-    const relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
+    let relevantRemand
+    try {
+      relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
+    } catch {
+      // Nothing to do, remand review won't be displayed.
+    }
     const message = req.flash('message')
     return res.render('pages/adjustments/hub', {
       model: new AdjustmentsHubViewModel(
         prisonerDetail,
         adjustments,
-        relevantRemand.sentenceRemand,
+        relevantRemand,
         message && message[0] && (JSON.parse(message[0]) as Message),
       ),
     })
