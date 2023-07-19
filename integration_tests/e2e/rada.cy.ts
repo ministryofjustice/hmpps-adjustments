@@ -42,7 +42,7 @@ context('Enter a RADA', () => {
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.viewRadaLink().click()
-    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'Restore additional days awarded (RADA) details')
+    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA details')
     const id = '4c3c057c-896d-4793-9022-f3001e209a36'
     viewPage.editLink(id).click()
     const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Enter RADA details')
@@ -61,7 +61,7 @@ context('Enter a RADA', () => {
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.viewRadaLink().click()
-    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'Restore additional days awarded (RADA) details')
+    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA details')
     const id = '4c3c057c-896d-4793-9022-f3001e209a36'
     viewPage.removeLink(id).click()
     const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Remove RADA')
