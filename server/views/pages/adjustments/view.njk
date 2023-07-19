@@ -3,16 +3,16 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{% set pageTitle = applicationName + " - view " + model.adjustmentType.shortText%}
+{% set pageTitle = applicationName + " - view " + model.adjustmentType.shortText %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
   {{ super() }}
   <nav>
     {{ govukBackLink({
-            text: "Back",
-            href: "/" + model.prisonerDetail.offenderNo
-        }) }}
+      text: "Back",
+      href: "/" + model.prisonerDetail.offenderNo
+    }) }}
   </nav>
 {% endblock %}
 
@@ -21,22 +21,22 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-        {{model.adjustmentType.text}} details
-                            </h1>
+        {{ model.adjustmentType.alternativeText or model.adjustmentType.text }} details
+      </h1>
     </div>
   </div>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      {{govukTable(
+      {{ govukTable(
         model.table()
-      )}}
+      ) }}
       <div>
         {{ govukButton({
-            text: "Add new",
+          text: "Add new",
           href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/add"
         }) }}
       </div>
-      <a href="/{{model.prisonerDetail.offenderNo}}" class="govuk-link">Return to dashboard</a>
+      <a href="/{{ model.prisonerDetail.offenderNo }}" class="govuk-link">Return to dashboard</a>
     </div>
   </div>
 {% endblock %}

@@ -17,7 +17,7 @@ export default class ViewModel {
   public table() {
     return {
       head: this.columnHeadings(),
-      rows: this.rows(),
+      rows: this.rows().concat(this.totalRow()),
     }
   }
 
@@ -59,6 +59,17 @@ export default class ViewModel {
         this.actionCell(it),
       ]
     })
+  }
+
+  public totalRow() {
+    const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
+      return [
+        [{ html: '<b>Total days</b>' }, { text: '' }, { html: `<b>${total}</b>`, format: 'numeric' }, { html: '' }],
+      ]
+    }
+
+    return [[{ html: '<b>Total days</b>' }, { html: `<b>${total}</b>`, format: 'numeric' }, { text: '' }, { html: '' }]]
   }
 
   private actionCell(adjustment: Adjustment) {

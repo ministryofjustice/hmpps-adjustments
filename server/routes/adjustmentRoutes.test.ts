@@ -371,6 +371,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Doris McNealy')
         expect(res.text).toContain('edit/this-is-an-id')
         expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
       })
   })
 
