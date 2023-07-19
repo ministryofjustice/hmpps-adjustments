@@ -1,5 +1,5 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { Remand } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import config from '../config'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
@@ -17,7 +17,7 @@ export default class AdjustmentsListViewModel {
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
-    public relevantRemand: Remand[],
+    public relevantRemand: RemandResult,
     public message: Message,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
@@ -41,7 +41,10 @@ export default class AdjustmentsListViewModel {
   }
 
   public displayReview() {
-    return this.getTotalDays(adjustmentTypes.find(it => it.value === 'REMAND')) !== this.getTotalDaysRelevantRemand()
+    return (
+      this.relevantRemand &&
+      this.getTotalDays(adjustmentTypes.find(it => it.value === 'REMAND')) !== this.getTotalDaysRelevantRemand()
+    )
   }
 
   public getTotalDays(adjustmentType: AdjustmentType) {
@@ -56,7 +59,7 @@ export default class AdjustmentsListViewModel {
   }
 
   public getTotalDaysRelevantRemand() {
-    return this.relevantRemand.map(a => a.days).reduce((sum, current) => sum + current, 0)
+    return this.relevantRemand.sentenceRemand.map(a => a.days).reduce((sum, current) => sum + current, 0)
   }
 
   public calculateReleaseDatesUrl() {
