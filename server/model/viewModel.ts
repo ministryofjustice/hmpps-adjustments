@@ -63,7 +63,10 @@ export default class ViewModel {
 
   public totalRow() {
     const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
-    if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
+    if (
+      this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED' ||
+      this.adjustmentType.value === 'REMAND'
+    ) {
       return [
         [{ html: '<b>Total days</b>' }, { text: '' }, { html: `<b>${total}</b>`, format: 'numeric' }, { html: '' }],
       ]

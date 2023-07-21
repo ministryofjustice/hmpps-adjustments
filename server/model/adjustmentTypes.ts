@@ -38,6 +38,8 @@ const adjustmentTypes: AdjustmentType[] = [
     text: 'RADA (Restoration of added days)',
     alternativeText: 'RADA',
     shortText: 'RADA',
+    moreAboutText:
+      "Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded). Any RADA's granted will bring forward release dates.",
     url: 'restored-additional-days',
   } as AdjustmentType,
   {
