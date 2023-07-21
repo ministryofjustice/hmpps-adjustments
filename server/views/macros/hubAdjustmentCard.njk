@@ -13,7 +13,7 @@
             {% endif %}
             {{ govukDetails({
                 summaryText: "More about " + adjustmentType.shortText,
-                text: "More about " + adjustmentType.shortText
+                text: adjustmentType.moreAboutText or "More about " + adjustmentType.shortText
             }) }}
         </div>
     </div>

@@ -74,6 +74,9 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Nobody may have 20 days remand')
         expect(res.text).toContain('24')
+        expect(res.text).toContain(
+          'Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded)',
+        )
       })
   })
   it('GET /{nomsId} relevant remand throws error', () => {
