@@ -62,14 +62,14 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
       if (toDateError) {
         errors.push(toDateError)
       }
-    } else if (this.invalidNumber(this.days)) {
+    } else if (this.invalidPostiveInteger(this.days)) {
       errors.push({
         text: 'You must enter days',
         fields: ['days'],
       })
     }
     if (this.options.hasSentence) {
-      if (this.invalidNumber(this.sentence)) {
+      if (this.invalidPostiveInteger(this.sentence)) {
         errors.push({
           text: 'You must enter a sentence sequence',
           fields: ['sentence'],
