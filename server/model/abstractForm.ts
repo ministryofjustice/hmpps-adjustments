@@ -55,7 +55,7 @@ export default abstract class AbstractForm<T> {
   }
 
   invalidPostiveInteger(value: string): boolean {
-    return !value || Number.isNaN(Number(value)) || Number(value) <= 0
+    return !value || Number.isNaN(Number(value)) || Number(value) <= 0 || !Number.isInteger(Number(value))
   }
 
   fieldHasError(field: string): boolean {
