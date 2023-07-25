@@ -124,10 +124,11 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('The number of days restored must be entered.')
         expect(res.text).toContain('This date must include a valid day, month and a year.')
       })
   })
+
   it('POST /{nomsId}/restored-additional-days/add missing day and month validation and not number days', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
@@ -136,7 +137,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('The number of days restored must be entered.')
         expect(res.text).toContain('This date must include a day and month.')
       })
   })
@@ -149,7 +150,31 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('This date does not exist.')
+      })
+  })
+
+  it('POST /{nomsId}/restored-additional-days/add 2 digit year', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .send({ 'from-day': '6', 'from-month': '3', 'from-year': '23', days: -1 })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Year must include 4 numbers')
+      })
+  })
+
+  it('POST /{nomsId}/restored-additional-days/add invalid date 29 Feb', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/add`)
+      .send({ 'from-day': '29', 'from-month': '02', 'from-year': '2023', days: 1 })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
         expect(res.text).toContain('This date does not exist.')
       })
   })
@@ -163,7 +188,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('The number of days restored must be entered.')
       })
   })
 
@@ -176,7 +201,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must entered.')
+        expect(res.text).toContain('The number of days restored must be entered.')
       })
   })
 
