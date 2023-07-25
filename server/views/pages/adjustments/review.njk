@@ -52,7 +52,7 @@
         {{ govukButton({
           text: "Cancel",
           classes: "govuk-button--secondary",
-          href: "/" + model.prisonerDetail.offenderNo
+          href: model.cancelLink()
         }) }}
       </form>
     </div>

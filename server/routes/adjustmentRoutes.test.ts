@@ -382,6 +382,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Number of days restored')
         expect(res.text).toContain('24')
         expect(res.text).toContain('Submit')
+        expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/view`)
       })
   })
 
