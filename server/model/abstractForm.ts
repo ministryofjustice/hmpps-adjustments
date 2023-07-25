@@ -1,7 +1,10 @@
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
 import { fieldHasErrors } from '../utils/utils'
 import ValidationError from './validationError'
+
+dayjs.extend(customParseFormat)
 
 export default abstract class AbstractForm<T> {
   constructor(params: Partial<T>) {
@@ -23,6 +26,14 @@ export default abstract class AbstractForm<T> {
         fields: [`${fieldPrefix}-day`, `${fieldPrefix}-month`, `${fieldPrefix}-year`],
       }
     }
+
+    if (year.length !== 4) {
+      return {
+        text: 'Year must include 4 numbers',
+        fields: [`${fieldPrefix}-year`],
+      }
+    }
+
     let text = 'This date must include a'
     const fields = []
     if (!day) {
@@ -44,7 +55,7 @@ export default abstract class AbstractForm<T> {
         fields,
       }
     }
-    const date = dayjs(`${month}-${day}-${year}`) // DayJS will only validate date if entered in american format (month first.)
+    const date = dayjs(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`, 'YYYY-MM-DD', true)
     if (!date.isValid()) {
       return {
         text: 'This date does not exist.',
