@@ -6,14 +6,20 @@ import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 export default class ReviewModel {
   constructor(public prisonerDetail: PrisonApiPrisoner, public adjustment: Adjustment) {}
 
-  adjustmentType(): AdjustmentType {
+  public adjustmentType(): AdjustmentType {
     return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)
   }
 
-  changeLink(): string {
+  public changeLink(): string {
     return `/${this.adjustment.person}/${this.adjustmentType().url}/edit${
       this.adjustment.id ? `/${this.adjustment.id}` : ''
     }`
+  }
+
+  public cancelLink(): string {
+    return this.adjustment.id
+      ? `/${this.adjustment.person}/${this.adjustmentType().url}/view`
+      : `/${this.adjustment.person}`
   }
 
   public summaryRows() {
