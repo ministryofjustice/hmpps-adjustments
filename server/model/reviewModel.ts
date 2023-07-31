@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
+import ualType from './ualType'
 
 export default class ReviewModel {
   constructor(public prisonerDetail: PrisonApiPrisoner, public adjustment: Adjustment) {}
@@ -47,6 +48,9 @@ export default class ReviewModel {
         },
       ]
     }
+    if (adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
+      return this.ualRows(adjustment)
+    }
     return [
       {
         key: {
@@ -80,6 +84,43 @@ export default class ReviewModel {
             },
           ]
         : []),
+    ]
+  }
+
+  private static ualRows(adjustment: Adjustment) {
+    return [
+      {
+        key: {
+          text: 'First day spent unlawfully at large',
+        },
+        value: {
+          text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+        },
+      },
+      {
+        key: {
+          text: 'Last day spent unlawfully at large',
+        },
+        value: {
+          text: dayjs(adjustment.toDate).format('D MMM YYYY'),
+        },
+      },
+      {
+        key: {
+          text: 'Number of days',
+        },
+        value: {
+          text: adjustment.days,
+        },
+      },
+      {
+        key: {
+          text: 'Type of UAL',
+        },
+        value: {
+          text: ualType.find(it => it.value === adjustment.unlawfullyAtLarge.type).text,
+        },
+      },
     ]
   }
 }

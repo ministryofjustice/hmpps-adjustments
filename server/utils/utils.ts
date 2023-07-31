@@ -47,3 +47,6 @@ export const dateItems = (year: string, month: string, day: string, prefix: stri
 export const fieldHasErrors = (errors: ValidationError[], field: string) => {
   return !!errors.find(error => error.fields.indexOf(field) !== -1)
 }
+
+// This date arithmetic is inclusive  of both end boundaries, e.g. 2023-01-01 to 2023-01-01 is 1 day
+export const daysBetween = (from: Date, to: Date) => (to.getTime() - from.getTime()) / (1000 * 3600 * 24) + 1

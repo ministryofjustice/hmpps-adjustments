@@ -181,7 +181,6 @@ export interface components {
         | 'ADDITIONAL_DAYS_AWARDED'
         | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
         | 'SPECIAL_REMISSION'
-        | 'TIME_SPENT_IN_CUSTODY_ABROAD'
       /**
        * Format: date
        * @description The end date of the adjustment
@@ -198,10 +197,19 @@ export interface components {
        */
       days?: number
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
+      unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
       /** @description The person last updating this adjustment */
       lastUpdatedBy?: string
       /** @description The status of this adjustment */
       status?: string
+    }
+    /** @description The details of a UAL adjustment */
+    UnlawfullyAtLargeDto: {
+      /**
+       * @description The type of UAL
+       * @enum {string}
+       */
+      type: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR'
     }
     LegacyAdjustmentCreatedResponse: {
       /** Format: uuid */
@@ -222,6 +230,7 @@ export interface components {
         | 'MORE_RADAS_THAN_ADAS'
         | 'RADA_DATE_CANNOT_BE_FUTURE'
         | 'RADA_DATA_MUST_BE_AFTER_SENTENCE_DATE'
+        | 'RADA_DAYS_MUST_BE_POSTIVE'
       arguments: string[]
       message: string
       /** @enum {string} */

@@ -1,0 +1,56 @@
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+<div>
+  <p class="govuk-body">
+    The rules for UAL (Unlawfully at large) can be found in
+    <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf#page=87">the policy framework</a>.
+  </p>
+  <p class="govuk-body">
+    Make sure you review the policy when entering the first and last day of UAL.
+  </p>
+  {{ govukDateInput({
+    id: "from",
+    namePrefix: "from",
+    items: model.form.fromItems(),
+    fieldset: {
+      legend: {
+        text: "First day spent unlawfully at large",
+        classes: "govuk-fieldset__legend--s"
+      }
+    },
+    hint: {
+      text: "For example, 27 3 2022"
+    },
+    errorMessage: model.form.messageForField('from-day', 'from-month', 'from-year')
+  }) }}
+  {{ govukDateInput({
+    id: "to",
+    namePrefix: "to",
+    items: model.form.toItems(),
+    fieldset: {
+      legend: {
+        text: "Last day spent unlawfully at large",
+        classes: "govuk-fieldset__legend--s"
+      }
+    },
+    hint: {
+      text: "For example, 27 3 2022"
+    },
+    errorMessage: model.form.messageForField('to-day', 'to-month', 'to-year')
+  }) }}
+
+  {{ govukRadios({
+    id: "type",
+    name: "type",
+    fieldset: {
+      legend: {
+        text: "Select the type of UAL",
+        classes: "govuk-fieldset__legend--s"
+      }
+    },
+    errorMessage: model.form.messageForField('type'),
+    items: model.form.typesOfUAL()
+  }) }}
+</div>
