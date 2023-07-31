@@ -54,12 +54,6 @@ const adjustmentTypes: AdjustmentType[] = [
     shortText: 'special remission',
     url: 'special-remission',
   } as AdjustmentType,
-  {
-    value: 'TIME_SPENT_IN_CUSTODY_ABROAD',
-    text: 'Time spent in custody abroad',
-    shortText: 'time spent in custody',
-    url: 'spent-abroad',
-  } as AdjustmentType,
 ]
 
 export default adjustmentTypes

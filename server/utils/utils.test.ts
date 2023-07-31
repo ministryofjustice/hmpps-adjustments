@@ -1,4 +1,4 @@
-import { convertToTitleCase, initialiseName } from './utils'
+import { convertToTitleCase, daysBetween, initialiseName } from './utils'
 
 describe('convert to title case', () => {
   it.each([
@@ -26,5 +26,16 @@ describe('initialise name', () => {
     ['Double barrelled', 'Robert-John Smith-Jones-Wilson', 'R. Smith-Jones-Wilson'],
   ])('%s initialiseName(%s, %s)', (_: string, a: string, expected: string) => {
     expect(initialiseName(a)).toEqual(expected)
+  })
+})
+
+describe('Days between dates', () => {
+  it.each([
+    ['Same day', new Date(2021, 0, 1), new Date(2021, 0, 1), 1],
+    ['Multiple days', new Date(2021, 0, 1), new Date(2021, 0, 3), 3],
+    ['Spanning months', new Date(2021, 1, 1), new Date(2021, 2, 3), 31],
+    ['Spanning February in leap year', new Date(2024, 1, 1), new Date(2024, 2, 3), 32],
+  ])('%s', (_: string, a: Date, b: Date, expected: number) => {
+    expect(daysBetween(a, b)).toEqual(expected)
   })
 })
