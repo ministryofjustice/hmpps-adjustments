@@ -60,9 +60,30 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       errors.push(toDateError)
     }
 
+    const fromDate = new Date(
+      dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD'),
+    )
+    const toDate = new Date(dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD'))
+    const today = new Date(new Date().toISOString().substring(0, 10))
+    if (fromDate > today)
+      errors.push({
+        text: 'The first day of unlawfully at large date must not be in the future',
+        fields: ['from'],
+      })
+    if (toDate > today)
+      errors.push({
+        text: 'The last day of unlawfully at large date must not be in the future',
+        fields: ['from'],
+      })
+    if (fromDate > toDate)
+      errors.push({
+        text: 'The first day of unlawfully at large date must be before the last day of unlawfully at large date',
+        fields: ['from'],
+      })
+
     if (!this.type)
       errors.push({
-        text: 'A type of UAL must be selected',
+        text: 'You must select the type of UAL',
         fields: ['type'],
       })
 
