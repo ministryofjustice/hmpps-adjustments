@@ -209,7 +209,7 @@ export interface components {
        * @description The type of UAL
        * @enum {string}
        */
-      type: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR'
+      type?: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR'
     }
     LegacyAdjustmentCreatedResponse: {
       /** Format: uuid */
@@ -226,11 +226,16 @@ export interface components {
        * @enum {string}
        */
       code:
+        | 'RADA_FROM_DATE_NOT_NULL'
         | 'RADA_REDUCES_BY_MORE_THAN_HALF'
         | 'MORE_RADAS_THAN_ADAS'
         | 'RADA_DATE_CANNOT_BE_FUTURE'
         | 'RADA_DATA_MUST_BE_AFTER_SENTENCE_DATE'
         | 'RADA_DAYS_MUST_BE_POSTIVE'
+        | 'UAL_FROM_DATE_NOT_NULL'
+        | 'UAL_TO_DATE_NOT_NULL'
+        | 'UAL_FROM_DATE_AFTER_TO_DATE'
+        | 'UAL_TYPE_NOT_NULL'
       arguments: string[]
       message: string
       /** @enum {string} */
