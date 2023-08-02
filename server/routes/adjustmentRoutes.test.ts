@@ -125,7 +125,7 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('The number of days restored must be entered.')
-        expect(res.text).toContain('This date must include a valid day, month and a year.')
+        expect(res.text).toContain('This date must include a valid day, month and year.')
       })
   })
 

@@ -22,7 +22,7 @@ export default abstract class AbstractForm<T> {
   protected validateDate(day: string, month: string, year: string, fieldPrefix: string): ValidationError {
     if (!day && !month && !year) {
       return {
-        text: 'This date must include a valid day, month and a year.',
+        text: 'This date must include a valid day, month and year.',
         fields: [`${fieldPrefix}-day`, `${fieldPrefix}-month`, `${fieldPrefix}-year`],
       }
     }

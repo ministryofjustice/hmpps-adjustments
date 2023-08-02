@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateItems, daysBetween } from '../utils/utils'
+import { dateItems, daysBetween, isDateInFuture } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
@@ -60,9 +60,21 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       errors.push(toDateError)
     }
 
+    if (isDateInFuture(this['from-year'], this['from-month'], this['from-day']))
+      errors.push({
+        text: 'The first day of unlawfully at large date must not be in the future',
+        fields: ['from'],
+      })
+
+    if (isDateInFuture(this['to-year'], this['to-month'], this['to-day']))
+      errors.push({
+        text: 'The last day of unlawfully at large date must not be in the future',
+        fields: ['from'],
+      })
+
     if (!this.type)
       errors.push({
-        text: 'A type of UAL must be selected',
+        text: 'You must select the type of UAL',
         fields: ['type'],
       })
 

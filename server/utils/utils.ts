@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import ValidationError from '../model/validationError'
 
 const properCase = (word: string): string =>
@@ -50,3 +51,9 @@ export const fieldHasErrors = (errors: ValidationError[], field: string) => {
 
 // This date arithmetic is inclusive  of both end boundaries, e.g. 2023-01-01 to 2023-01-01 is 1 day
 export const daysBetween = (from: Date, to: Date) => (to.getTime() - from.getTime()) / (1000 * 3600 * 24) + 1
+
+export const isDateInFuture = (year: string, month: string, day: string) => {
+  const today = new Date(new Date().toISOString().substring(0, 10))
+  const date = new Date(dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD'))
+  return date > today
+}
