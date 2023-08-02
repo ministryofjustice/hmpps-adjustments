@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateItems, daysBetween } from '../utils/utils'
+import { dateItems, daysBetween, isDateInFuture } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
@@ -60,24 +60,15 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       errors.push(toDateError)
     }
 
-    const fromDate = new Date(
-      dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD'),
-    )
-    const toDate = new Date(dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD'))
-    const today = new Date(new Date().toISOString().substring(0, 10))
-    if (fromDate > today)
+    if (isDateInFuture(this['from-year'], this['from-month'], this['from-day']))
       errors.push({
         text: 'The first day of unlawfully at large date must not be in the future',
         fields: ['from'],
       })
-    if (toDate > today)
+
+    if (isDateInFuture(this['to-year'], this['to-month'], this['to-day']))
       errors.push({
         text: 'The last day of unlawfully at large date must not be in the future',
-        fields: ['from'],
-      })
-    if (fromDate > toDate)
-      errors.push({
-        text: 'The first day of unlawfully at large date must be before the last day of unlawfully at large date',
         fields: ['from'],
       })
 

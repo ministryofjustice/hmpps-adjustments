@@ -1,4 +1,4 @@
-import { convertToTitleCase, daysBetween, initialiseName } from './utils'
+import { convertToTitleCase, daysBetween, initialiseName, isDateInFuture } from './utils'
 
 describe('convert to title case', () => {
   it.each([
@@ -37,5 +37,61 @@ describe('Days between dates', () => {
     ['Spanning February in leap year', new Date(2024, 1, 1), new Date(2024, 2, 3), 32],
   ])('%s', (_: string, a: Date, b: Date, expected: number) => {
     expect(daysBetween(a, b)).toEqual(expected)
+  })
+})
+
+describe('Future date tests', () => {
+  it.each([
+    [
+      'Same day',
+      new Date().getFullYear().toString(),
+      (new Date().getMonth() + 1).toString(),
+      new Date().getDate().toString(),
+      false,
+    ],
+    [
+      'One day in future',
+      new Date().getFullYear().toString(),
+      (new Date().getMonth() + 1).toString(),
+      (new Date().getDate() + 1).toString(),
+      true,
+    ],
+    [
+      'One day in past',
+      new Date().getFullYear().toString(),
+      (new Date().getMonth() + 1).toString(),
+      (new Date().getDate() - 1).toString(),
+      false,
+    ],
+    [
+      'One month in future',
+      new Date().getFullYear().toString(),
+      (new Date().getMonth() + 2).toString(),
+      new Date().getDate().toString(),
+      true,
+    ],
+    [
+      'One month in past',
+      new Date().getFullYear().toString(),
+      new Date().getMonth().toString(),
+      new Date().getDate().toString(),
+      false,
+    ],
+    [
+      'One year in future',
+      (new Date().getFullYear() + 1).toString(),
+      (new Date().getMonth() + 1).toString(),
+      new Date().getDate().toString(),
+      true,
+    ],
+    [
+      'One year in past',
+      (new Date().getFullYear() - 1).toString(),
+      (new Date().getMonth() + 1).toString(),
+      new Date().getDate().toString(),
+      false,
+    ],
+  ])('%s', (_: string, year: string, month: string, day: string, expected: boolean) => {
+    expect(isDateInFuture(year, month, day)).toEqual(expected)
   })
 })
