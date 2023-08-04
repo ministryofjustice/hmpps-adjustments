@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
+import ualType from './ualType'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
@@ -11,7 +12,9 @@ export default class ViewModel {
     allAdjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
   ) {
-    this.adjustments = allAdjustments.filter(it => it.adjustmentType === adjustmentType.value)
+    this.adjustments = allAdjustments
+      .filter(it => it.adjustmentType === adjustmentType.value)
+      .sort((a, b) => a.fromDate.localeCompare(b.fromDate))
   }
 
   public table() {
@@ -30,6 +33,16 @@ export default class ViewModel {
         { text: 'Actions' },
       ]
     }
+    if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
+      return [
+        { text: 'First day' },
+        { text: 'Last day' },
+        { text: 'Entered by' },
+        { text: 'Type' },
+        { text: 'Number of days', format: 'numeric' },
+        { text: 'Actions' },
+      ]
+    }
     return [
       { text: 'From' },
       ...(this.adjustmentType.value === 'REMAND' ? [{ text: 'To' }] : []),
@@ -45,6 +58,18 @@ export default class ViewModel {
         return [
           { text: dayjs(it.fromDate).format('D MMM YYYY') },
           { text: it.lastUpdatedBy },
+          { text: it.days, format: 'numeric' },
+          this.actionCell(it),
+        ]
+      })
+    }
+    if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
+      return this.adjustments.map(it => {
+        return [
+          { text: dayjs(it.fromDate).format('D MMM YYYY') },
+          { text: dayjs(it.toDate).format('D MMM YYYY') },
+          { text: it.lastUpdatedBy },
+          { text: it.unlawfullyAtLarge ? ualType.find(u => u.value === it.unlawfullyAtLarge.type)?.text : 'Unknown' },
           { text: it.days, format: 'numeric' },
           this.actionCell(it),
         ]
@@ -69,6 +94,18 @@ export default class ViewModel {
     ) {
       return [
         [{ html: '<b>Total days</b>' }, { text: '' }, { html: `<b>${total}</b>`, format: 'numeric' }, { html: '' }],
+      ]
+    }
+    if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
+      return [
+        [
+          { html: '<b>Total days</b>' },
+          { text: '' },
+          { text: '' },
+          { text: '' },
+          { html: `<b>${total}</b>`, format: 'numeric' },
+          { html: '' },
+        ],
       ]
     }
 
