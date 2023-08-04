@@ -25,7 +25,7 @@ export default class AdjustmentsFormFactory {
         'to-day': dayjs(adjustment.toDate).get('date').toString(),
         'to-month': (dayjs(adjustment.toDate).get('month') + 1).toString(),
         'to-year': dayjs(adjustment.toDate).get('year').toString(),
-        type: adjustment.unlawfullyAtLarge.type,
+        type: adjustment.unlawfullyAtLarge?.type,
       })
     }
     return new GenericAdjustmentForm({

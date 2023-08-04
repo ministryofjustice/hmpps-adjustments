@@ -30,6 +30,7 @@ const adjustmentTypes: AdjustmentType[] = [
   {
     value: 'UNLAWFULLY_AT_LARGE',
     text: 'Unlawfully at large (UAL)',
+    alternativeText: 'UAL',
     shortText: 'UAL',
     url: 'unlawfully-at-large',
   } as AdjustmentType,

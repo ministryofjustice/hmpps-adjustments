@@ -40,7 +40,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
   }
 
   toItems() {
-    return dateItems(this['to-year'], this['to-month'], this['to-day'], 'from', this.errors)
+    return dateItems(this['to-year'], this['to-month'], this['to-day'], 'to', this.errors)
   }
 
   typesOfUAL() {
@@ -69,7 +69,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
     if (isDateInFuture(this['to-year'], this['to-month'], this['to-day']))
       errors.push({
         text: 'The last day of unlawfully at large date must not be in the future',
-        fields: ['from'],
+        fields: ['to'],
       })
 
     if (!this.type)
