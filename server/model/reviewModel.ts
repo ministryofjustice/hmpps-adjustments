@@ -88,6 +88,7 @@ export default class ReviewModel {
   }
 
   private static ualRows(adjustment: Adjustment) {
+    const type = ualType.find(it => it.value === adjustment.unlawfullyAtLarge?.type)
     return [
       {
         key: {
@@ -118,7 +119,7 @@ export default class ReviewModel {
           text: 'Type of UAL',
         },
         value: {
-          text: ualType.find(it => it.value === adjustment.unlawfullyAtLarge?.type) || 'Unknown',
+          text: type ? type.text : 'Unknown',
         },
       },
     ]
