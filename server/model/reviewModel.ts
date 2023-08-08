@@ -118,7 +118,7 @@ export default class ReviewModel {
           text: 'Type of UAL',
         },
         value: {
-          text: ualType.find(it => it.value === adjustment.unlawfullyAtLarge.type).text,
+          text: ualType.find(it => it.value === adjustment.unlawfullyAtLarge?.type) || 'Unknown',
         },
       },
     ]

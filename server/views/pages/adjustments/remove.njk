@@ -21,7 +21,7 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-        Remove {{model.adjustmentType.shortText}}
+        Are you sure you want to remove {{model.adjustmentType.shortText}}?
       </h1>
     </div>
   </div>
@@ -38,7 +38,7 @@
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
         <div class="govuk-button-group">
           {{ govukButton({
-            text: "Remove record",
+            text: "Remove " + model.adjustmentType.shortText,
             classes: "govuk-button--warning",
             type: submit,
             preventDoubleClick: true,
