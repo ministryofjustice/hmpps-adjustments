@@ -27,13 +27,14 @@
                         <br/>
                         Reason for rejection: {{model.remandDecision.rejectComment}}
                         <br/>
-                        <a href="{{model.prisonerDetail.offenderNo}}/remand">Re-review{% endif %}
-                    </p>
-                {% endif %}
-                {{ govukDetails({
+                        <a href="{{model.prisonerDetail.offenderNo}}/remand">Re-review</a>
+                    {% endif %}
+                </p>
+            {% endif %}
+            {{ govukDetails({
                 summaryText: "More about " + adjustmentType.shortText,
                 text: adjustmentType.moreAboutText or "More about " + adjustmentType.shortText
             }) }}
-            </div>
         </div>
-    {% endmacro %}
+    </div>
+{% endmacro %}
