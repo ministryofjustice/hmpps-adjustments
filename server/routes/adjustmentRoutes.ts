@@ -2,7 +2,7 @@ import { RequestHandler } from 'express'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import AdjustmentsHubViewModel, { Message } from '../model/adjustmentsListModel'
+import AdjustmentsHubViewModel, { Message } from '../model/adjustmentsHubViewModel'
 import config from '../config'
 import AdditionalDaysModel from '../model/additionalDaysModel'
 import ReviewModel from '../model/reviewModel'
@@ -50,6 +50,7 @@ export default class AdjustmentRoutes {
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
     let relevantRemand
     try {
       relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
@@ -62,6 +63,7 @@ export default class AdjustmentRoutes {
         prisonerDetail,
         adjustments,
         relevantRemand,
+        remandDecision,
         message && message[0] && (JSON.parse(message[0]) as Message),
       ),
     })
@@ -251,8 +253,12 @@ export default class AdjustmentRoutes {
     }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const remandDecision =
+      adjustmentType.value === 'REMAND'
+        ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
+        : null
     return res.render('pages/adjustments/view', {
-      model: new ViewModel(prisonerDetail, adjustments, adjustmentType),
+      model: new ViewModel(prisonerDetail, adjustments, adjustmentType, remandDecision),
     })
   }
 

@@ -3,6 +3,7 @@ import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
+import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
@@ -11,6 +12,7 @@ export default class ViewModel {
     public prisonerDetail: PrisonApiPrisoner,
     allAdjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
+    public remandDecision: IdentifyRemandDecision,
   ) {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
@@ -112,7 +114,20 @@ export default class ViewModel {
     return [[{ html: '<b>Total days</b>' }, { html: `<b>${total}</b>`, format: 'numeric' }, { text: '' }, { html: '' }]]
   }
 
+  public showAddNewButton(): boolean {
+    return !this.viewingRemandThatIsIneditable()
+  }
+
+  private viewingRemandThatIsIneditable(): boolean {
+    return this.adjustmentType.value === 'REMAND' && (!this.remandDecision || this.remandDecision.accepted)
+  }
+
   private actionCell(adjustment: Adjustment) {
+    if (this.viewingRemandThatIsIneditable()) {
+      return {
+        html: `<a class="govuk-link" href="/${adjustment.person}/remand">Review</a><br />`,
+      }
+    }
     return {
       html: `
       <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
