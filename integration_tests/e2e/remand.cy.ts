@@ -9,6 +9,7 @@ context('Enter a RADA', () => {
     cy.task('stubGetUserCaseloads')
     cy.task('stubGetAdjustments')
     cy.task('stubGetRelevantRemand')
+    cy.task('stubGetRemandDecision')
   })
 
   it('Enter a RADA', () => {
