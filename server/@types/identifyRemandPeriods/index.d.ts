@@ -11,6 +11,18 @@ export interface paths {
      */
     post: operations['calculate']
   }
+  '/relevant-remand/{prisonerId}/decision': {
+    /**
+     * Get the latest decision for a given person
+     * @description This endpoint return the latest decision for a given person.
+     */
+    get: operations['getDecision']
+    /**
+     * Saves a decision to accept or reject relevant remand
+     * @description This endpoint will save a decision to accept or reject relevant remand, and also call the adjustments api to save the data.
+     */
+    post: operations['saveDecision']
+  }
 }
 
 export type webhooks = Record<string, never>
@@ -23,12 +35,14 @@ export interface components {
       offence: components['schemas']['Offence']
       /** Format: date */
       offenceDate: string
+      /** Format: int64 */
+      bookingId: number
       /** Format: date */
       offenceEndDate?: string
       /** Format: int32 */
       sentenceSequence?: number
-      /** Format: int64 */
-      bookingId: number
+      /** Format: date */
+      sentenceDate?: string
       courtCaseRef?: string
       courtLocation?: string
       resultDescription?: string
@@ -45,11 +59,41 @@ export interface components {
       to: string
       charge: components['schemas']['Charge']
       /** Format: int64 */
-      days: number
+      days?: number
     }
     RemandResult: {
       chargeRemand: components['schemas']['Remand'][]
       sentenceRemand: components['schemas']['Remand'][]
+      intersectingSentences: components['schemas']['SentencePeriod'][]
+      issuesWithLegacyData: string[]
+    }
+    Sentence: {
+      /** Format: int32 */
+      sequence: number
+      /** Format: date */
+      sentenceDate: string
+      /** Format: date */
+      recallDate?: string
+      /** Format: int64 */
+      bookingId: number
+    }
+    SentencePeriod: {
+      /** Format: date */
+      from: string
+      /** Format: date */
+      to: string
+      sentence: components['schemas']['Sentence']
+      /** Format: int64 */
+      days?: number
+    }
+    IdentifyRemandDecisionDto: {
+      accepted: boolean
+      rejectComment?: string
+      /** Format: int32 */
+      days?: number
+      /** Format: date-time */
+      decisionOn?: string
+      decisionBy?: string
     }
   }
   responses: never
@@ -62,17 +106,17 @@ export interface components {
 export type external = Record<string, never>
 
 export interface operations {
+  /**
+   * Calculates relevant remand
+   * @description This endpoint will calculate relevant remand based on the data from NOMIS before returning it to the user
+   */
   calculate: {
-    /**
-     * Calculates relevant remand
-     * @description This endpoint will calculate relevant remand based on the data from NOMIS before returning it to the user
-     */
     parameters: {
-      /**
-       * @description The prisoners ID (aka nomsId)
-       * @example A1234AB
-       */
       path: {
+        /**
+         * @description The prisoners ID (aka nomsId)
+         * @example A1234AB
+         */
         prisonerId: string
       }
     }
@@ -95,6 +139,69 @@ export interface operations {
           'application/json': components['schemas']['RemandResult']
         }
       }
+    }
+  }
+  /**
+   * Get the latest decision for a given person
+   * @description This endpoint return the latest decision for a given person.
+   */
+  getDecision: {
+    parameters: {
+      path: {
+        /**
+         * @description The prisoners ID (aka nomsId)
+         * @example A1234AB
+         */
+        prisonerId: string
+      }
+    }
+    responses: {
+      /** @description Gets latest remand decision for person. */
+      200: {
+        content: {
+          'application/json': components['schemas']['IdentifyRemandDecisionDto']
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['IdentifyRemandDecisionDto']
+        }
+      }
+      /** @description Forbidden, requires an appropriate role */
+      403: {
+        content: {
+          'application/json': components['schemas']['IdentifyRemandDecisionDto']
+        }
+      }
+    }
+  }
+  /**
+   * Saves a decision to accept or reject relevant remand
+   * @description This endpoint will save a decision to accept or reject relevant remand, and also call the adjustments api to save the data.
+   */
+  saveDecision: {
+    parameters: {
+      path: {
+        /**
+         * @description The prisoners ID (aka nomsId)
+         * @example A1234AB
+         */
+        prisonerId: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentifyRemandDecisionDto']
+      }
+    }
+    responses: {
+      /** @description Decision created okay. */
+      201: never
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: never
+      /** @description Forbidden, requires an appropriate role */
+      403: never
     }
   }
 }

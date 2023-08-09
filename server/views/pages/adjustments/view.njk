@@ -27,15 +27,23 @@
   </div>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
+      {% if model.adjustmentType.value == 'REMAND' and model.remandDecision %}
+        <p class="govuk-body">{{model.remandDecision.days}} days of suggested remand was 
+                    {{ "accepted" if model.remandDecision.accepted else "rejected" }}
+                     on {{model.remandDecision.decisionOn | date("DD MMMM YYYY")}}
+                      by {{model.remandDecision.decisionBy}}</p>
+      {% endif %}
       {{ govukTable(
         model.table()
       ) }}
-      <div>
-        {{ govukButton({
+      {% if model.showAddNewButton() %}
+        <div>
+          {{ govukButton({
           text: "Add new",
           href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/add"
         }) }}
-      </div>
+        </div>
+      {% endif %}
       <a href="/{{ model.prisonerDetail.offenderNo }}" class="govuk-link">Return to dashboard</a>
     </div>
   </div>

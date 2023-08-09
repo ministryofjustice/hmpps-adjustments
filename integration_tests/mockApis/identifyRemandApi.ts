@@ -110,4 +110,22 @@ export default {
       },
     })
   },
+  stubGetRemandDecision: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/identify-remand-api/relevant-remand/A1234AB/decision',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: [
+          {
+            accepted: true,
+            decisionBy: 'User',
+          },
+        ],
+      },
+    })
+  },
 }

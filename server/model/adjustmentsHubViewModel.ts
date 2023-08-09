@@ -1,5 +1,5 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import config from '../config'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
@@ -7,9 +7,9 @@ import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 export type Message = {
   type: string
   days: number
-  action: 'CREATE' | 'REMOVE' | 'UPDATE'
+  action: 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED'
 }
-export default class AdjustmentsListViewModel {
+export default class AdjustmentsHubViewModel {
   public adjustmentTypes = adjustmentTypes
 
   public messageType: AdjustmentType
@@ -18,6 +18,7 @@ export default class AdjustmentsListViewModel {
     public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public relevantRemand: RemandResult,
+    public remandDecision: IdentifyRemandDecision,
     public message: Message,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
@@ -40,11 +41,14 @@ export default class AdjustmentsListViewModel {
     return this.adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
   }
 
-  public displayReview() {
+  public displayReview(): boolean {
     return (
-      this.relevantRemand &&
-      this.getTotalDays(adjustmentTypes.find(it => it.value === 'REMAND')) !== this.getTotalDaysRelevantRemand()
+      this.relevantRemand && (!this.remandDecision || this.remandDecision.days !== this.getTotalDaysRelevantRemand())
     )
+  }
+
+  public displayAddLink(adjustmentType: AdjustmentType): boolean {
+    return adjustmentType.value !== 'REMAND' || (this.remandDecision && !this.remandDecision.accepted)
   }
 
   public getTotalDays(adjustmentType: AdjustmentType) {
