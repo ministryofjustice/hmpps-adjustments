@@ -22,12 +22,18 @@
                 <p class="govuk-body">{{model.remandDecision.days}} days of suggested remand was 
                     {{ "accepted" if model.remandDecision.accepted else "rejected" }}
                      on {{model.remandDecision.decisionOn | date("DD MMMM YYYY")}}
-                      by {{model.remandDecision.decisionBy}}</p>
-            {% endif %}
-            {{ govukDetails({
+                      by {{model.remandDecision.decisionBy}}.
+                    {% if not model.remandDecision.accepted %}
+                        <br/>
+                        Reason for rejection: {{model.remandDecision.rejectComment}}
+                        <br/>
+                        <a href="{{model.prisonerDetail.offenderNo}}/remand">Re-review{% endif %}
+                    </p>
+                {% endif %}
+                {{ govukDetails({
                 summaryText: "More about " + adjustmentType.shortText,
                 text: adjustmentType.moreAboutText or "More about " + adjustmentType.shortText
             }) }}
+            </div>
         </div>
-    </div>
-{% endmacro %}
+    {% endmacro %}
