@@ -41,6 +41,13 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
     },
   )
 
+  // Expose the google tag manager container ID to the nunjucks environment
+  const {
+    analytics: { tagManagerContainerId },
+  } = config
+
+  njkEnv.addGlobal('tagManagerContainerId', tagManagerContainerId)
+
   njkEnv.addGlobal('digitalPrisonServicesUrl', config.services.digitalPrisonServices.url)
 
   njkEnv.addFilter('initialiseName', initialiseName)
