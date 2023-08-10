@@ -14,10 +14,6 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).findByPerson(person)
   }
 
-  public async findByPersonAndSource(person: string, source: 'DPS' | 'NOMIS', token: string): Promise<Adjustment[]> {
-    return new AdjustmentsClient(token).findByPersonAndSource(person, source)
-  }
-
   public async update(adjustmentId: string, adjustment: Adjustment, token: string): Promise<void> {
     return new AdjustmentsClient(token).update(adjustmentId, adjustment)
   }

@@ -63,10 +63,10 @@ export interface paths {
   }
   '/adjustments': {
     /**
-     * Get adjustments by person and source
-     * @description Get adjustments for a given person and adjustment source.
+     * Get current adjustments by person
+     * @description Get current adjustments for a given person.
      */
-    get: operations['findByPerson_1']
+    get: operations['findByPerson']
     /**
      * Create an adjustments
      * @description Create an adjustment.
@@ -202,6 +202,11 @@ export interface components {
       lastUpdatedBy?: string
       /** @description The status of this adjustment */
       status?: string
+      /**
+       * Format: date-time
+       * @description The date and time this adjustment was last updated
+       */
+      lastUpdatedDate?: string
     }
     /** @description The details of a UAL adjustment */
     UnlawfullyAtLargeDto: {
@@ -236,6 +241,9 @@ export interface components {
         | 'UAL_TO_DATE_NOT_NULL'
         | 'UAL_FROM_DATE_AFTER_TO_DATE'
         | 'UAL_TYPE_NOT_NULL'
+        | 'UAL_FIRST_DATE_CANNOT_BE_FUTURE'
+        | 'UAL_LAST_DATE_CANNOT_BE_FUTURE'
+        | 'UAL_DATE_MUST_BE_AFTER_SENTENCE_DATE'
       arguments: string[]
       message: string
       /** @enum {string} */
@@ -504,16 +512,14 @@ export interface operations {
     }
   }
   /**
-   * Get adjustments by person and source
-   * @description Get adjustments for a given person and adjustment source.
+   * Get current adjustments by person
+   * @description Get current adjustments for a given person.
    */
-  findByPerson_1: {
+  findByPerson: {
     parameters: {
       query: {
         /** @description The noms ID of the person */
         person: string
-        /** @description The noms ID of the person */
-        source: 'NOMIS' | 'DPS'
       }
     }
     responses: {
