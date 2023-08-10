@@ -13,16 +13,16 @@
   <nav>
     {% if model.addOrEdit == 'edit' and model.id %}
       {% set backlink = "/" + model.prisonerDetail.offenderNo + "/" + model
-        .form
+      .form
         .adjustmentType()
-        .url + "/view" %}
+      .url + "/view" %}
     {% else %}
       {% set backlink = "/" + model.prisonerDetail.offenderNo %}
     {% endif %}
     {{ govukBackLink({
-            text: "Back",
-            href: backlink
-        }) }}
+      text: "Back",
+      href: backlink
+    }) }}
   </nav>
 {% endblock %}
 
@@ -42,8 +42,8 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-                                Edit {{model.form.adjustmentType().shortText}} details
-                            </h1>
+        {{ 'Edit' if model.addOrEdit == 'edit' else 'Enter' }} {{ model.form.adjustmentType().shortText }} details
+      </h1>
     </div>
   </div>
   <div class="govuk-grid-row">
@@ -56,10 +56,10 @@
           .fragment() %}
 
         {{ govukButton({
-            text: "Continue",
-            type: submit,
-            preventDoubleClick: true,
-            attributes: { 'data-qa': 'submit-form' }   
+          text: "Continue",
+          type: submit,
+          preventDoubleClick: true,
+          attributes: { 'data-qa': 'submit-form' }
         }) }}
       </form>
     </div>
