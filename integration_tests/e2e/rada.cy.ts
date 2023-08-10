@@ -26,7 +26,7 @@ context('Enter a RADA', () => {
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.addRadaLink().click()
-    const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit RADA details')
+    const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Enter RADA details')
     form.enterFromDate('2023-04-05')
     form.enterDays('25')
     form.submitButton().click()
