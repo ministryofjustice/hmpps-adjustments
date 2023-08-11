@@ -58,11 +58,13 @@ export default class AdjustmentsHubViewModel {
       .reduce((sum, current) => sum + current, 0)
   }
 
-  public getLastUpdatedDate(adjustmentType: AdjustmentType) {
+  public getLastUpdated(adjustmentType: AdjustmentType) {
     return this.adjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
-      .map(a => new Date(a.lastUpdatedDate))
-      .reduce((a, b) => (a > b ? a : b))
+      .map(a => {
+        return { ...a, lastUpdatedDate: new Date(a.lastUpdatedDate) }
+      })
+      .reduce((a, b) => (a.lastUpdatedDate > b.lastUpdatedDate ? a : b))
   }
 
   public showDetails(adjustmentType: AdjustmentType) {

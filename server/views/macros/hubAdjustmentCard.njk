@@ -1,41 +1,45 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 {% macro adjustmentCard(adjustmentType, model) %}
-    <div class="adjustment-card">
-        <div class="adjustment-card_heading">
-            <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{adjustmentType.text}}</h2>
+  <div class="adjustment-card">
+    <div class="adjustment-card_heading">
+      <h2 class="govuk-heading-s adj-card-heading govuk-!-margin-bottom-0">{{ adjustmentType.text }}</h2>
 
-            {% if model.displayAddLink(adjustmentType) %}
-                <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/add" class="govuk-!-text-align-right" data-qa="add-{{adjustmentType.url}}">Add {{adjustmentType.shortText}}</a>
-            {% else %}
-                <a href="/{{model.prisonerDetail.offenderNo}}/remand" class="govuk-!-text-align-right">Review remand</a>
-            {% endif %}
+      {% if model.displayAddLink(adjustmentType) %}
+        <a href="/{{ model.prisonerDetail.offenderNo }}/{{ adjustmentType.url }}/add" class="govuk-!-text-align-right"
+           data-qa="add-{{ adjustmentType.url }}">Add {{ adjustmentType.shortText }}</a>
+      {% else %}
+        <a href="/{{ model.prisonerDetail.offenderNo }}/remand" class="govuk-!-text-align-right">Review remand</a>
+      {% endif %}
 
-        </div>
-        <div class="adjustment-card_content">
-            <span class="count govuk-body">{{model.getTotalDays(adjustmentType)}}</span>
-            <span>Days</span>
-            {% if model.showDetails(adjustmentType) %}
-                <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/view" data-qa="view-{{adjustmentType.url}}">view details</a>
-                <p class="govuk-body govuk-!-font-size-14">Last update on {{ model.getLastUpdatedDate(adjustmentType) | date("DD MMMM YYYY") }} by {{model.remandDecision.decisionBy}}.</p>
-            {% endif %}
-
-            {% if adjustmentType.value == 'REMAND' and model.remandDecision %}
-                <p class="govuk-body">{{model.remandDecision.days}} days of suggested remand was 
-                    {{ "accepted" if model.remandDecision.accepted else "rejected" }}
-                     on {{model.remandDecision.decisionOn | date("DD MMMM YYYY")}}
-                      by {{model.remandDecision.decisionBy}}.
-                    {% if not model.remandDecision.accepted %}
-                        <br/>
-                        Reason for rejection: {{model.remandDecision.rejectComment}}
-                        <br/>
-                        <a href="{{model.prisonerDetail.offenderNo}}/remand">Re-review</a>
-                    {% endif %}
-                </p>
-            {% endif %}
-            {{ govukDetails({
-                summaryText: "More about " + adjustmentType.shortText,
-                html: adjustmentType.moreAboutHtml or "More about " + adjustmentType.shortText
-            }) }}
-        </div>
     </div>
+    <div class="adjustment-card_content">
+      <span class="count govuk-body">{{ model.getTotalDays(adjustmentType) }}</span>
+      <span>Days</span>
+      {% if model.showDetails(adjustmentType) %}
+        <a href="/{{ model.prisonerDetail.offenderNo }}/{{ adjustmentType.url }}/view"
+           data-qa="view-{{ adjustmentType.url }}">view details</a>
+        <p class="govuk-body govuk-!-font-size-14">Last update
+          on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMMM YYYY") }}
+          by {{ model.getLastUpdated(adjustmentType).lastUpdatedBy }}.</p>
+      {% endif %}
+
+      {% if adjustmentType.value == 'REMAND' and model.remandDecision %}
+        <p class="govuk-body">{{ model.remandDecision.days }} days of suggested remand was
+          {{ "accepted" if model.remandDecision.accepted else "rejected" }}
+          on {{ model.remandDecision.decisionOn | date("DD MMMM YYYY") }}
+          by {{ model.remandDecision.decisionBy }}.
+          {% if not model.remandDecision.accepted %}
+            <br/>
+            Reason for rejection: {{ model.remandDecision.rejectComment }}
+            <br/>
+            <a href="{{ model.prisonerDetail.offenderNo }}/remand">Re-review</a>
+          {% endif %}
+        </p>
+      {% endif %}
+      {{ govukDetails({
+        summaryText: "More about " + adjustmentType.shortText,
+        html: adjustmentType.moreAboutHtml or "More about " + adjustmentType.shortText
+      }) }}
+    </div>
+  </div>
 {% endmacro %}
