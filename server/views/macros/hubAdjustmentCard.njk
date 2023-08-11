@@ -16,6 +16,7 @@
             <span>Days</span>
             {% if model.showDetails(adjustmentType) %}
                 <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/view" data-qa="view-{{adjustmentType.url}}">view details</a>
+                <p class="govuk-body govuk-!-font-size-14">Last update on {{ model.getLastUpdatedDate(adjustmentType) | date("DD MMMM YYYY") }} by {{model.remandDecision.decisionBy}}.</p>
             {% endif %}
 
             {% if adjustmentType.value == 'REMAND' and model.remandDecision %}
@@ -33,7 +34,7 @@
             {% endif %}
             {{ govukDetails({
                 summaryText: "More about " + adjustmentType.shortText,
-                text: adjustmentType.moreAboutText or "More about " + adjustmentType.shortText
+                html: adjustmentType.moreAboutHtml or "More about " + adjustmentType.shortText
             }) }}
         </div>
     </div>
