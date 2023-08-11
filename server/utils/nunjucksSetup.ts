@@ -52,5 +52,9 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
 
   njkEnv.addFilter('initialiseName', initialiseName)
 
+  njkEnv.addFilter('formatListAsString', (list?: string[]) => {
+    return list ? `[${list.map(i => `'${i}'`).join(',')}]` : '[]'
+  })
+
   njkEnv.addFilter('date', (date, format) => dayjs(date).format(format))
 }
