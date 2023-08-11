@@ -16,7 +16,7 @@
             <span>Days</span>
             {% if model.showDetails(adjustmentType) %}
                 <a href="/{{model.prisonerDetail.offenderNo}}/{{adjustmentType.url}}/view" data-qa="view-{{adjustmentType.url}}">view details</a>
-                <p class="govuk-body govuk-!-font-size-14">Last update on {{ model.getLastUpdatedDate(adjustmentType) | date("DD MMMM YYYY") }} by {{model.remandDecision.decisionBy}}.</p>
+                <p class="govuk-body govuk-!-font-size-14">Last update on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMMM YYYY") }} by {{model.getLastUpdated(adjustmentType).lastUpdatedBy}}.</p>
             {% endif %}
 
             {% if adjustmentType.value == 'REMAND' and model.remandDecision %}
