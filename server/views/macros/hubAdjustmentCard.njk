@@ -34,7 +34,7 @@
             {% endif %}
             {{ govukDetails({
                 summaryText: "More about " + adjustmentType.shortText,
-                html: adjustmentType.moreAboutText or "More about " + adjustmentType.shortText
+                html: adjustmentType.moreAboutHtml or "More about " + adjustmentType.shortText
             }) }}
         </div>
     </div>

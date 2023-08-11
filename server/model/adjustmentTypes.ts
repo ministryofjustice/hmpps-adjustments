@@ -32,7 +32,7 @@ const adjustmentTypes: AdjustmentType[] = [
     text: 'Unlawfully at large (UAL)',
     alternativeText: 'UAL',
     shortText: 'UAL',
-    moreAboutText:
+    moreAboutHtml:
       'There are times when a person is not in custody when they are required to be.  This is known as being Unlawfully at Large (UAL). A person can be UAL where they: ' +
       '<br><ul>' +
       '<li>Are recalled from licence and do not return to custody on the day of recall or the day after.</li>' +
@@ -48,7 +48,7 @@ const adjustmentTypes: AdjustmentType[] = [
     text: 'RADA (Restoration of added days)',
     alternativeText: 'RADA',
     shortText: 'RADA',
-    moreAboutText:
+    moreAboutHtml:
       "Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded). Any RADA's granted will bring forward release dates.",
     url: 'restored-additional-days',
   } as AdjustmentType,
