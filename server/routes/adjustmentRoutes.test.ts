@@ -137,7 +137,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('Enter a valid number of additional days restored.')
         expect(res.text).toContain('This date must include a day and month.')
       })
   })
@@ -150,7 +150,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('Enter a valid number of additional days restored.')
         expect(res.text).toContain('This date does not exist.')
       })
   })
@@ -188,7 +188,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('Enter a valid number of additional days restored.')
       })
   })
 
@@ -201,7 +201,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('Enter a valid number of additional days restored.')
       })
   })
 
