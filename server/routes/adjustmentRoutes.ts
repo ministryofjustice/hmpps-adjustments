@@ -98,6 +98,20 @@ export default class AdjustmentRoutes {
     if (!adjustmentType) {
       return res.redirect(`/${nomsId}`)
     }
+    if (adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
+      const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+      if (!adjustments.some(a => a.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')) {
+        req.flash(
+          'message',
+          JSON.stringify({
+            type: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
+            action: 'VALIDATION',
+            text: 'There are currently no ADAs (Additional days awarded) recorded. You must record the ADAs before applying any RADAs.',
+          }),
+        )
+        return res.redirect(`/${nomsId}`)
+      }
+    }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
     let adjustment = null
