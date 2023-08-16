@@ -1,96 +1,117 @@
 {% extends "../../partials/layout.njk" %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "../../macros/hubAdjustmentCard.njk" import adjustmentCard %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            {% if model.message %}
-                {% if model.message.action === 'CREATE' %}
-                    {% set html %}
-                    <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of {{model.messageType.shortText}} have been added</h3>
-                    <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on this page.</p>
-                    <p class="govuk-body">Once all adjustments have been applied, you must
-                                <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-notification-banner__link">recalculate the release dates.</a>
-                    </p>
-                    {% endset %}
-                {% elif model.message.action === 'REMOVE' %}
-                    {% set html %}
-                    <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of {{model.messageType.shortText}} have been removed</h3>
-                    {% endset %}
-                {% elif model.message.action === 'UPDATE' %}
-                    {% set html %}
-                    <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of {{model.messageType.shortText}} have been updated</h3>
-                    {% endset %}
-                {% elif model.message.action === 'REJECTED' %}
-                    {% set html %}
-                    <h3 class="govuk-notification-banner__heading">{{model.message.days}} days of suggested remand have been rejected</h3>
-                    {% endset %}
-                {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      {% if model.message %}
+        {% if model.message.action === 'CREATE' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
+              of {{ model.messageType.shortText }} have been added</h3>
+            <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on
+              this page.</p>
+            <p class="govuk-body">Once all adjustments have been applied, you must
+              <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
+                release dates.</a>
+            </p>
+          {% endset %}
+          {% elif model.message.action === 'REMOVE' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
+              of {{ model.messageType.shortText }} have been removed</h3>
+          {% endset %}
+          {% elif model.message.action === 'UPDATE' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
+              of {{ model.messageType.shortText }} have been updated</h3>
+          {% endset %}
+          {% elif model.message.action === 'REJECTED' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of suggested remand have been
+              rejected</h3>
+          {% endset %}
+        {% endif %}
 
-                {{ govukNotificationBanner({
-                        html: html,
-                        type: 'success',
-                        attributes: {'data-qa': 'success-message'}
-                }) }}
-            {% endif %}
-            <div class="moj-page-header-actions">
+        {% if model.message.action === 'VALIDATION' %}
+          {{ govukErrorSummary({
+            titleText: "There is a problem",
+            errorList: [
+              {
+                text: model.message.text
+              }
+            ],
+            attributes: {'data-qa': 'error-message'}
+          }) }}
+        {% else %}
+          {{ govukNotificationBanner({
+            html: html,
+            type: 'success',
+            attributes: {'data-qa': 'success-message'}
+          }) }}
+        {% endif %}
+      {% endif %}
+      <div class="moj-page-header-actions">
 
-                <div class="moj-page-header-actions__title">
-                    <h1 class="govuk-heading-xl">
-                        <span class="govuk-caption-xl">Adjustments</span>Review and apply adjustments</h1>
-                </div>
-            </div>
-
-            <p class="govuk-body">
-                        This page lists all the adjustments that have been recorded for {{model.prisonerDetail.firstName | title}}
-                {{model.prisonerDetail.lastName | title}}.
-                        You can add new adjustments or review remand time that has been identified from court outcomes logged in NOMIS.
-                    </p>
+        <div class="moj-page-header-actions__title">
+          <h1 class="govuk-heading-xl">
+            <span class="govuk-caption-xl">Adjustments</span>Review and apply adjustments</h1>
         </div>
+      </div>
+
+      <p class="govuk-body">
+        This page lists all the adjustments that have been recorded for {{ model.prisonerDetail.firstName | title }}
+        {{ model.prisonerDetail.lastName | title }}.
+        You can add new adjustments or review remand time that has been identified from court outcomes logged in NOMIS.
+      </p>
     </div>
+  </div>
 
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            {% if model.displayReview() %}
-                <div class="custom-card">
-                    <h2 class="govuk-heading-m adj-card-heading">There is existing remand to review</h2>
-                    <p data-qa="relevant-remand-message">Based on the data from court outcomes in NOMIS, {{model.prisonerDetail.firstName | title}}
-                        {{model.prisonerDetail.lastName | title}} may have {{model.getTotalDaysRelevantRemand()}} days remand.
-                         Review the remand to make sure it is relevant.</p>
-                    <a href="/{{model.prisonerDetail.offenderNo}}/remand" class="govuk-button" role="button" data-qa="relevant-remand">Review</a>
-                </div>
-            {% endif %}
-            <h2 class="govuk-heading-m govuk-!-padding-left-4">
-                        Deductions
-                    </h2>
-            <div class="adjustment-card-container govuk-body">
-                {% for adjustmentType in model.deductions()%}
-                    {{ adjustmentCard(adjustmentType, model)}}
-                {% endfor %}
-            </div>
-
-            <h2 class="govuk-heading-m govuk-!-padding-left-4">
-                        Additions
-                    </h2>
-            <div class="adjustment-card-container govuk-body">
-                {% for adjustmentType in model.additions()%}
-                    {{ adjustmentCard(adjustmentType, model)}}
-                {% endfor %}
-            </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      {% if model.displayReview() %}
+        <div class="custom-card">
+          <h2 class="govuk-heading-m adj-card-heading">There is existing remand to review</h2>
+          <p data-qa="relevant-remand-message">Based on the data from court outcomes in
+            NOMIS, {{ model.prisonerDetail.firstName | title }}
+            {{ model.prisonerDetail.lastName | title }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
+            Review the remand to make sure it is relevant.</p>
+          <a href="/{{ model.prisonerDetail.offenderNo }}/remand" class="govuk-button" role="button"
+             data-qa="relevant-remand">Review</a>
         </div>
-    </div>
+      {% endif %}
+      <h2 class="govuk-heading-m govuk-!-padding-left-4">
+        Deductions
+      </h2>
+      <div class="adjustment-card-container govuk-body">
+        {% for adjustmentType in model.deductions() %}
+          {{ adjustmentCard(adjustmentType, model) }}
+        {% endfor %}
+      </div>
 
-    <div class="govuk-inset-text govuk-!-margin-left-2 govuk-!-margin-top-9">
-        <h2 class="govuk-heading-m">Calculate release dates</h2>
-        <p>The changes may affect the release date for {{model.prisonerDetail.firstName | title}}
-            {{model.prisonerDetail.lastName | title}}
-        </p>
-        <a href="{{model.calculateReleaseDatesUrl()}}" class="govuk-button">
-                                Calculate release dates
-                            </a>
+      <h2 class="govuk-heading-m govuk-!-padding-left-4">
+        Additions
+      </h2>
+      <div class="adjustment-card-container govuk-body">
+        {% for adjustmentType in model.additions() %}
+          {{ adjustmentCard(adjustmentType, model) }}
+        {% endfor %}
+      </div>
     </div>
+  </div>
+
+  <div class="govuk-inset-text govuk-!-margin-left-2 govuk-!-margin-top-9">
+    <h2 class="govuk-heading-m">Calculate release dates</h2>
+    <p>The changes may affect the release date for {{ model.prisonerDetail.firstName | title }}
+      {{ model.prisonerDetail.lastName | title }}
+    </p>
+    <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-button">
+      Calculate release dates
+    </a>
+  </div>
 {% endblock %}

@@ -36,7 +36,20 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().should('contain.text', '25 days of RADA have been added')
+    hub.successMessage().contains('25 days of RADA have been added')
+  })
+
+  it('Add a RADA when no ADAs exist produces error message', () => {
+    cy.task('stubGetAdjustmentsNoAdas')
+    cy.signIn()
+    let hub = HubPage.goTo('A1234AB')
+    hub.addRadaLink().click()
+    hub = HubPage.verifyOnPage(HubPage)
+    hub
+      .errorMessage()
+      .contains(
+        'There are currently no ADAs (Additional days awarded) recorded. You must record the ADAs before applying any RADAs',
+      )
   })
 
   it('View and edit a RADA', () => {
@@ -55,7 +68,7 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().should('contain.text', '25 days of RADA have been update')
+    hub.successMessage().contains('25 days of RADA have been update')
   })
 
   it('View and remove a RADA', () => {
@@ -68,6 +81,6 @@ context('Enter a RADA', () => {
     const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Are you sure you want to remove RADA')
     removePage.removeButton().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().should('contain.text', '25 days of RADA have been removed')
+    hub.successMessage().contains('25 days of RADA have been removed')
   })
 })

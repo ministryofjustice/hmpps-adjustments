@@ -13,6 +13,7 @@ import adjustmentTypes from '../model/adjustmentTypes'
 import ViewModel from '../model/viewModel'
 import RemoveModel from '../model/removeModel'
 import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
+import hubValidationMessages from '../model/hubValidationMessages'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -98,6 +99,14 @@ export default class AdjustmentRoutes {
     if (!adjustmentType) {
       return res.redirect(`/${nomsId}`)
     }
+    if (adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
+      const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+      if (!adjustments.some(a => a.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')) {
+        req.flash('message', JSON.stringify(hubValidationMessages.RADA_NO_ADAS_EXIST))
+        return res.redirect(`/${nomsId}`)
+      }
+    }
+
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
     let adjustment = null
