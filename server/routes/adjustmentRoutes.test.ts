@@ -1,14 +1,13 @@
-import type { Express } from 'express'
+import type {Express} from 'express'
 import request from 'supertest'
-import { appWithAllRoutes } from './testutils/appSetup'
+import {appWithAllRoutes} from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import {PrisonApiPrisoner} from '../@types/prisonApi/prisonClientTypes'
+import {Adjustment} from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
-import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import {Remand, RemandResult} from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import hubValidationMessages from '../model/hubValidationMessages'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
