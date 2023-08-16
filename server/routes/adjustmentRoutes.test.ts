@@ -8,6 +8,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
+import hubValidationMessages from '../model/hubValidationMessages'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -41,6 +42,17 @@ const remandResult = {
 const radaAdjustment = {
   id: '1',
   adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
+  toDate: null,
+  fromDate: '2023-04-05',
+  person: 'ABC123',
+  days: 24,
+  bookingId: 12345,
+  sentenceSequence: null,
+} as Adjustment
+
+const adaAdjustment = {
+  id: '1',
+  adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
   toDate: null,
   fromDate: '2023-04-05',
   person: 'ABC123',
@@ -93,6 +105,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/restored-additional-days/add', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
@@ -102,6 +115,12 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Number of additional days restored')
         expect(res.text).toContain('Continue')
       })
+  })
+
+  it('GET /{nomsId}/restored-additional-days/add with validation error redirect', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    return request(app).get(`/${NOMS_ID}/restored-additional-days/add`).redirects(1)
   })
 
   it('POST /{nomsId}/restored-additional-days/add valid', () => {
@@ -248,6 +267,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/restored-additional-days/edit should load adjustment from session', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/edit`)
@@ -264,6 +284,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/restored-additional-days/edit should load adjustment from server', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     adjustmentsService.get.mockResolvedValue(radaAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/edit/this-is-an-id`)
