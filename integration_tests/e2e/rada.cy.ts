@@ -39,6 +39,19 @@ context('Enter a RADA', () => {
     hub.successMessage().contains('25 days of RADA have been added')
   })
 
+  it('Add a RADA when no ADAs exist produces error message', () => {
+    cy.task('stubGetAdjustmentsNoAdas')
+    cy.signIn()
+    let hub = HubPage.goTo('A1234AB')
+    hub.addRadaLink().click()
+    hub = HubPage.verifyOnPage(HubPage)
+    hub
+      .errorMessage()
+      .contains(
+        'There are currently no ADAs (Additional days awarded) recorded. You must record the ADAs before applying any RADAs',
+      )
+  })
+
   it('View and edit a RADA', () => {
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')

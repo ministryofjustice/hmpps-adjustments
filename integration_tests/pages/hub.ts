@@ -23,4 +23,6 @@ export default class HubPage extends Page {
   public relevantRemandMessage = (): PageElement => cy.get('[data-qa=relevant-remand-message]')
 
   public successMessage = (): PageElement => cy.get('[data-qa=success-message]')
+
+  public errorMessage = (): PageElement => cy.get('[data-qa=error-message]')
 }

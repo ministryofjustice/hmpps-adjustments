@@ -45,7 +45,8 @@
               {
                 text: model.message.text
               }
-            ]
+            ],
+            attributes: {'data-qa': 'error-message'}
           }) }}
         {% else %}
           {{ govukNotificationBanner({
