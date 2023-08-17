@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import nunjucks from 'nunjucks'
-import express from 'express'
 import path from 'path'
+import express from 'express'
+import nunjucks from 'nunjucks'
 import dayjs from 'dayjs'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
