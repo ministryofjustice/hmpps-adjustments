@@ -5,7 +5,10 @@ import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 
 export default class ReviewModel {
-  constructor(public prisonerDetail: PrisonApiPrisoner, public adjustment: Adjustment) {}
+  constructor(
+    public prisonerDetail: PrisonApiPrisoner,
+    public adjustment: Adjustment,
+  ) {}
 
   public adjustmentType(): AdjustmentType {
     return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)

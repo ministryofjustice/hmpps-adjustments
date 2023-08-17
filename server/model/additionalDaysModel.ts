@@ -5,7 +5,10 @@ import AdjudicationModel from './adjudicationModel'
 export default class AdditionalDaysModel {
   public adjudications: AdjudicationModel[]
 
-  constructor(public prisonerDetail: PrisonApiPrisoner, adjudications: PrisonApiAdjudication[]) {
+  constructor(
+    public prisonerDetail: PrisonApiPrisoner,
+    adjudications: PrisonApiAdjudication[],
+  ) {
     this.adjudications = adjudications
       .flatMap(adj => {
         return adj.hearings.flatMap(hearing => {
