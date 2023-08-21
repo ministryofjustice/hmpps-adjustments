@@ -198,6 +198,16 @@ export interface components {
       days?: number
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
+      /**
+       * @description The prison where the prisoner was located at the time the adjustment was created (a 3 character code identifying the prison)
+       * @example LDS
+       */
+      prisonId?: string
+      /**
+       * @description The name name of the prison where the prisoner was located at the time the adjustment was created
+       * @example Leeds
+       */
+      prisonName?: string
       /** @description The person last updating this adjustment */
       lastUpdatedBy?: string
       /** @description The status of this adjustment */

@@ -4,6 +4,7 @@ import { dateItems, daysBetween, isDateInFuture } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
+import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 
 export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtLargeForm> {
   'from-day': string
@@ -20,18 +21,19 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
 
   type: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR'
 
-  toAdjustment(bookingId: number, nomsId: string, id: string): Adjustment {
+  toAdjustment(prisonerDetails: PrisonApiPrisoner, nomsId: string, id: string): Adjustment {
     const fromDate = dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD')
     const toDate = dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD')
     return {
       id,
       adjustmentType: 'UNLAWFULLY_AT_LARGE',
-      bookingId,
+      bookingId: prisonerDetails.bookingId,
       fromDate,
       toDate,
       person: nomsId,
       unlawfullyAtLarge: { type: this.type },
       days: daysBetween(new Date(fromDate), new Date(toDate)),
+      prisonId: prisonerDetails.agencyId,
     }
   }
 

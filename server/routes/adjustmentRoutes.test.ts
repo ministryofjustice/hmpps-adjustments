@@ -27,6 +27,7 @@ const stubbedPrisonerData = {
   lastName: 'Nobody',
   dateOfBirth: '24/06/2000',
   bookingId: 12345,
+  agencyId: 'LDS',
 } as PrisonApiPrisoner
 
 const remandResult = {
@@ -47,6 +48,7 @@ const radaAdjustment = {
   days: 24,
   bookingId: 12345,
   sentenceSequence: null,
+  prisonId: 'LDS',
 } as Adjustment
 
 const adaAdjustment = {
@@ -58,6 +60,7 @@ const adaAdjustment = {
   days: 24,
   bookingId: 12345,
   sentenceSequence: null,
+  prisonId: 'LDS',
 } as Adjustment
 
 let app: Express
@@ -448,14 +451,14 @@ describe('Adjustment routes tests', () => {
   it('GET /{nomsId}/{adjustmentType}/view', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'Active' },
+      { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'Active', prisonName: 'Leeds' },
     ])
 
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/view`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Doris McNealy')
+        expect(res.text).toContain('Leeds')
         expect(res.text).toContain('edit/this-is-an-id')
         expect(res.text).toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
