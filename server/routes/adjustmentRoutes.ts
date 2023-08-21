@@ -147,7 +147,7 @@ export default class AdjustmentRoutes {
       })
     }
 
-    const adjustment = adjustmentForm.toAdjustment(prisonerDetail.bookingId, nomsId, id)
+    const adjustment = adjustmentForm.toAdjustment(prisonerDetail, nomsId, id)
 
     const messages = await this.adjustmentsService.validate(adjustment, token)
 

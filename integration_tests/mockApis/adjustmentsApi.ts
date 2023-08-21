@@ -21,6 +21,7 @@ export default {
             toDate: '2023-01-20',
             fromDate: '2023-01-10',
             days: 11,
+            prisonName: 'Leeds',
           },
           {
             id: '5c618eb1-dcc9-4959-827e-27e6cd5fedf6',
@@ -31,6 +32,7 @@ export default {
             toDate: null,
             fromDate: '2023-06-01',
             days: 40,
+            prisonName: 'Leeds',
           },
           {
             id: '4c3c057c-896d-4793-9022-f3001e209a36',
@@ -41,6 +43,7 @@ export default {
             toDate: null,
             fromDate: '2023-03-30',
             days: 22,
+            prisonName: 'Leeds',
           },
         ],
       },

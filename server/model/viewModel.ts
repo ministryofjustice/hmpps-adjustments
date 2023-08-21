@@ -23,6 +23,7 @@ export default class ViewModel {
     return {
       head: this.columnHeadings(),
       rows: this.rows().concat(this.totalRow()),
+      attributes: { 'data-qa': 'view-table' },
     }
   }
 
@@ -59,7 +60,7 @@ export default class ViewModel {
       return this.adjustments.map(it => {
         return [
           { text: dayjs(it.fromDate).format('D MMM YYYY') },
-          { text: it.lastUpdatedBy },
+          { text: it.prisonName || 'Unknown' },
           { text: it.days, format: 'numeric' },
           this.actionCell(it),
         ]
@@ -70,7 +71,7 @@ export default class ViewModel {
         return [
           { text: dayjs(it.fromDate).format('D MMM YYYY') },
           { text: dayjs(it.toDate).format('D MMM YYYY') },
-          { text: it.lastUpdatedBy },
+          { text: it.prisonName || 'Unknown' },
           { text: it.unlawfullyAtLarge ? ualType.find(u => u.value === it.unlawfullyAtLarge.type)?.text : 'Unknown' },
           { text: it.days, format: 'numeric' },
           this.actionCell(it),
@@ -82,7 +83,7 @@ export default class ViewModel {
         { text: dayjs(it.fromDate).format('D MMM YYYY') },
         ...(this.adjustmentType.value === 'REMAND' ? [{ text: dayjs(it.toDate).format('D MMM YYYY') }] : []),
         { text: it.days, format: 'numeric' },
-        { text: it.lastUpdatedBy },
+        { text: it.prisonName || 'Unknown' },
         this.actionCell(it),
       ]
     })
