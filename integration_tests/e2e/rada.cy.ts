@@ -1,9 +1,5 @@
-import FormPage from '../pages/form'
 import HubPage from '../pages/hub'
-import RemovePage from '../pages/remove'
-import ReviewPage from '../pages/review'
 import ViewPage from '../pages/view'
-import WarningPage from '../pages/warning'
 
 context('Enter a RADA', () => {
   beforeEach(() => {
