@@ -30,8 +30,8 @@
       {% if model.adjustmentType.value == 'REMAND' and model.remandDecision %}
         <p class="govuk-body">{{model.remandDecision.days}} days of suggested remand was 
                     {{ "accepted" if model.remandDecision.accepted else "rejected" }}
-                     on {{model.remandDecision.decisionOn | date("DD MMMM YYYY")}}
-                      by {{model.remandDecision.decisionBy}}</p>
+                     on {{model.remandDecision.decisionOn | date("DD MMMM YYYY HH:mm")}}
+                      by {{model.remandDecision.decisionByPrisonDescription}}</p>
       {% endif %}
       {{ govukTable(
         model.table()
