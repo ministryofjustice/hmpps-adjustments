@@ -78,7 +78,9 @@ afterEach(() => {
 describe('Adjustment routes tests', () => {
   it('GET /{nomsId}', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsService.findByPerson.mockResolvedValue([radaAdjustment])
+    adjustmentsService.findByPerson.mockResolvedValue([
+      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+    ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     return request(app)
       .get(`/${NOMS_ID}`)
@@ -91,6 +93,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain(
           'Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded)',
         )
+        expect(res.text).toContain('Last update\n          on 05 April 2023\n          by Leeds')
       })
   })
   it('GET /{nomsId} relevant remand throws error', () => {

@@ -20,7 +20,7 @@
            data-qa="view-{{ adjustmentType.url }}">view details</a>
         <p class="govuk-body govuk-!-font-size-14">Last update
           on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMMM YYYY") }}
-          by {{ model.getLastUpdated(adjustmentType).lastUpdatedBy }}.</p>
+          by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</p>
       {% endif %}
 
       {% if adjustmentType.value == 'REMAND' and model.remandDecision %}
