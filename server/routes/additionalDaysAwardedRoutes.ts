@@ -14,6 +14,6 @@ export default class AdditionalDaysAwardedRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjudications = await this.additionalDaysAwardedService.getAdjudications(nomsId, token)
 
-    return res.render('pages/adjustments/ada/review', { prisonerDetail, adjudications })
+    return res.render('pages/adjustments/ada/review', { prisonerDetail, adjudications: adjudications.results })
   }
 }

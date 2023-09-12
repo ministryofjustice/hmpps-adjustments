@@ -5,8 +5,8 @@
 
 {# TODO Just a placeholder screen at the moment #}
 {% block content %}
-  {% if adjudications.length != 0 %}
-    <p class="govuk-body">{{ adjudications.length }} adjudications</p>
+  {% if adjudications.size > 0 %}
+    <p class="govuk-body">{{ adjudications.size }} adjudications</p>
   {% else %}
     <p class="govuk-body">No adjudications</p>
   {% endif %}
