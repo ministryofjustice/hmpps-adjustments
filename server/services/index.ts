@@ -4,6 +4,7 @@ import AdjustmentsService from './adjustmentsService'
 import IdentifyRemandPeriodsService from './identifyRemandPeriodsService'
 import PrisonerService from './prisonerService'
 import UserService from './userService'
+import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 
 export const services = () => {
   const { hmppsAuthClient, applicationInfo } = dataAccess()
@@ -13,6 +14,7 @@ export const services = () => {
   const adjustmentsService = new AdjustmentsService()
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()
   const adjustmentsStoreService = new AdjustmentsStoreService()
+  const additionalDaysAwardedService = new AdditionalDaysAwardedService()
 
   return {
     applicationInfo,
@@ -21,6 +23,7 @@ export const services = () => {
     adjustmentsService,
     identifyRemandPeriodsService,
     adjustmentsStoreService,
+    additionalDaysAwardedService,
   }
 }
 

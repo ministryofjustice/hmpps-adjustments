@@ -17,6 +17,7 @@ generic-service:
     DIGITAL_PRISON_SERVICES_URL: "https://digital-dev.prison.service.justice.gov.uk"
     IDENTIFY_REMAND_PERIODS_URL: "https://identify-remand-periods-dev.hmpps.service.justice.gov.uk"
     IDENTIFY_REMAND_PERIODS_API_URL: "https://identify-remand-periods-api-dev.hmpps.service.justice.gov.uk"
+    ADJUDICATIONS_API_URL: "https://manage-adjudications-api-dev.hmpps.service.justice.gov.uk"
 
   # Switches off the allow list in the DEV env only.
   allowlist: null

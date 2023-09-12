@@ -3,6 +3,7 @@ import { type RequestHandler, Router } from 'express'
 import asyncMiddleware from '../middleware/asyncMiddleware'
 import type { Services } from '../services'
 import AdjustmentRoutes from './adjustmentRoutes'
+import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -17,6 +18,11 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
   )
 
+  const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
+    service.prisonerService,
+    service.additionalDaysAwardedService,
+  )
+
   get('/', (req, res, next) => {
     res.render('pages/index')
   })
@@ -29,6 +35,9 @@ export default function routes(service: Services): Router {
   post('/:nomsId/warning', adjustmentRoutes.submitWarning)
   get('/:nomsId/review', adjustmentRoutes.review)
   post('/:nomsId/review', adjustmentRoutes.submitReview)
+
+  get('/:nomsId/ada/review', additionalDaysAwardedRoutes.review)
+
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
   post('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.submitRemove)
