@@ -3,7 +3,8 @@ import { Adjustment, AdjustmentTypes } from '../@types/adjustments/adjustmentsTy
 import { dateItems } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import ValidationError from './validationError'
 
 export type GenericAdjustmentFormOptions = {
   hasToDate: boolean
@@ -53,7 +54,7 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
     return dateItems(this['to-year'], this['to-month'], this['to-day'], 'to', this.errors)
   }
 
-  validation() {
+  async validation(getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>): Promise<ValidationError[]> {
     const errors = []
     const fromDateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
     if (fromDateError) {
@@ -86,6 +87,15 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
           text: 'Enter a valid sentence sequence',
           fields: ['sentence'],
         })
+      } else {
+        const sentences = await getSentences()
+        const sequences = sentences.filter(it => it.sentenceStatus === 'A').map(it => it.sentenceSequence)
+        if (sequences.indexOf(Number(this.sentence)) === -1) {
+          errors.push({
+            text: `The sentence sequence ${this.sentence} does not exist on the active booking.`,
+            fields: ['sentence'],
+          })
+        }
       }
     }
     return errors

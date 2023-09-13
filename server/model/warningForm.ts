@@ -4,7 +4,7 @@ import ValidationError from './validationError'
 export default class WarningForm extends AbstractForm<WarningForm> {
   confirm: 'yes' | 'no'
 
-  validation(): ValidationError[] {
+  async validation(): Promise<ValidationError[]> {
     if (this.confirm === null || this.confirm === undefined) {
       return [
         {

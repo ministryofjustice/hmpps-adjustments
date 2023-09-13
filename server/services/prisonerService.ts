@@ -8,6 +8,7 @@ import {
   PrisonApiCharge,
   PrisonApiCourtCase,
   PrisonApiCourtDateResult,
+  PrisonApiOffenderSentenceAndOffences,
   PrisonApiPrisoner,
   PrisonApiSentence,
 } from '../@types/prisonApi/prisonClientTypes'
@@ -34,6 +35,10 @@ export default class PrisonerService {
 
   async getAdjudication(nomsId: string, adjudicationNumber: number, token: string): Promise<PrisonApiAdjudication> {
     return new PrisonApiClient(token).getAdjudication(nomsId, adjudicationNumber)
+  }
+
+  async getSentencesAndOffences(bookingId: number, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
+    return new PrisonApiClient(token).getSentencesAndOffences(bookingId)
   }
 
   private async getPrisonerDetailImpl(

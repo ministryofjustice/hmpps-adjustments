@@ -11,3 +11,4 @@ export type PrisonApiBookingAndSentenceAdjustments = components['schemas']['Book
 export type PrisonApiSentenceAdjustments = components['schemas']['SentenceAdjustmentValues']
 export type PrisonApiAdjudicationSearchResponse = components['schemas']['AdjudicationSearchResponse']
 export type PrisonApiAdjudication = components['schemas']['AdjudicationDetail']
+export type PrisonApiOffenderSentenceAndOffences = components['schemas']['OffenderSentenceAndOffences']

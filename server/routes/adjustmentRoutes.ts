@@ -139,7 +139,7 @@ export default class AdjustmentRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = AdjustmentsFormFactory.fromRequest(req, adjustmentType)
 
-    adjustmentForm.validate()
+    await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token))
 
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/form', {
@@ -231,7 +231,7 @@ export default class AdjustmentRoutes {
 
     const warningForm = new WarningForm(req.body)
 
-    warningForm.validate()
+    await warningForm.validate()
 
     const adjustment = this.adjustmentsStoreService.get(req, nomsId)
     if (adjustment) {

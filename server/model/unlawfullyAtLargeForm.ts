@@ -51,7 +51,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
     })
   }
 
-  validation() {
+  async validation() {
     const errors = []
     const fromDateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
     if (fromDateError) {
