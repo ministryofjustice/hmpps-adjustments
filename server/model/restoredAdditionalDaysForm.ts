@@ -32,7 +32,7 @@ export default class RestoredAdditionalDaysForm extends AdjustmentsForm<Restored
     return dateItems(this['from-year'], this['from-month'], this['from-day'], 'from', this.errors)
   }
 
-  validation() {
+  async validation() {
     const errors = []
     const dateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
     if (dateError) {
