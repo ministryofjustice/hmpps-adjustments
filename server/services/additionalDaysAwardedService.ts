@@ -1,8 +1,12 @@
 import AdjudicationClient from '../api/adjudicationsClient'
 import { AdjudicationSearchResponse } from '../@types/adjudications/adjudicationTypes'
+import { HmppsAuthClient } from '../data'
 
 export default class AdditionalDaysAwardedService {
-  public async getAdjudications(nomsId: string, token: string): Promise<AdjudicationSearchResponse> {
-    return new AdjudicationClient(token).getAdjudications(nomsId)
+  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+
+  public async getAdjudications(nomsId: string, username: string): Promise<AdjudicationSearchResponse> {
+    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
+    return new AdjudicationClient(systemToken).getAdjudications(nomsId)
   }
 }

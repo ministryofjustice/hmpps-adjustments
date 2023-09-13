@@ -14,7 +14,7 @@ export const services = () => {
   const adjustmentsService = new AdjustmentsService()
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()
   const adjustmentsStoreService = new AdjustmentsStoreService()
-  const additionalDaysAwardedService = new AdditionalDaysAwardedService()
+  const additionalDaysAwardedService = new AdditionalDaysAwardedService(hmppsAuthClient)
 
   return {
     applicationInfo,

@@ -9,10 +9,10 @@ export default class AdditionalDaysAwardedRoutes {
   ) {}
 
   public review: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjudications = await this.additionalDaysAwardedService.getAdjudications(nomsId, token)
+    const adjudications = await this.additionalDaysAwardedService.getAdjudications(nomsId, username)
 
     return res.render('pages/adjustments/ada/review', { prisonerDetail, adjudications: adjudications.results })
   }
