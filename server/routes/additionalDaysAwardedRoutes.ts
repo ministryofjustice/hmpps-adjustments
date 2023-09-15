@@ -12,8 +12,13 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjudications = await this.additionalDaysAwardedService.getAdjudications(nomsId, username)
+    await this.additionalDaysAwardedService.getAdjudications(nomsId, username)
 
-    return res.render('pages/adjustments/ada/review', { prisonerDetail, adjudications: adjudications.results })
+    return res.render('pages/adjustments/ada/review', {
+      model: {
+        prisonerDetail,
+      },
+      adjudications: [],
+    })
   }
 }
