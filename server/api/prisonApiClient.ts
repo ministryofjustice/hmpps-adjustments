@@ -82,8 +82,8 @@ export default class PrisonApiClient {
   }
 
   async getSentencesAndOffences(bookingId: number): Promise<PrisonApiOffenderSentenceAndOffences[]> {
-    return this.restClient.get({
+    return (await this.restClient.get({
       path: `/api/offender-sentences/booking/${bookingId}/sentences-and-offences`,
-    }) as Promise<PrisonApiOffenderSentenceAndOffences[]>
+    })) as Promise<PrisonApiOffenderSentenceAndOffences[]>
   }
 }

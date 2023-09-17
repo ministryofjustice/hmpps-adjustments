@@ -2,7 +2,7 @@ import nock from 'nock'
 import HmppsAuthClient from '../data/hmppsAuthClient'
 import config from '../config'
 import PrisonerService from './prisonerService'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import FullPageErrorType from '../model/FullPageErrorType'
 
 jest.mock('../data/hmppsAuthClient')
@@ -59,6 +59,19 @@ describe('Prisoner service related tests', () => {
           expect(error.errorKey).toBe(FullPageErrorType.NOT_IN_CASELOAD)
           expect(error.status).toBe(404)
         }
+      })
+
+      it('Test getting start of sentence envelope', async () => {
+        fakeApi
+          .get(`/api/offender-sentences/booking/9991/sentences-and-offences`)
+          .reply(200, [
+            { sentenceDate: '2023-03-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
+            { sentenceDate: '2023-01-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
+            { sentenceDate: '2023-02-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
+          ])
+
+        const minDate = await prisonerService.getStartOfSentenceEnvelope(9991, token)
+        expect(minDate.getTime()).toEqual(new Date('2023-01-01').getTime())
       })
     })
   })

@@ -1,15 +1,11 @@
-import { when } from 'jest-when'
 import nock from 'nock'
-import { Offence } from '../@types/manageOffences/manageOffencesClientTypes'
 import HmppsAuthClient from '../data/hmppsAuthClient'
-import { PageOffenceDto } from '../@types/prisonApi/prisonApiTypes'
 import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import TokenStore from '../data/tokenStore'
-import AdjudicationClient from '../api/adjudicationsClient'
 import config from '../config'
-import FullPageErrorType from '../model/FullPageErrorType'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
+import { AdasToReview } from '../@types/AdaTypes'
 
 jest.mock('../data/hmppsAuthClient')
 
@@ -141,8 +137,61 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwo)
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeWithTwoSanctions)
-      const data = await adaService.getAdjudications('AA1234A', 'username')
-      expect(nock.isDone()).toBe(true)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const adaToReview: AdasToReview = await adaService.getAdjudications(
+        'AA1234A',
+        startOfSentenceEnvelope,
+        'username',
+      )
+      expect(adaToReview).toEqual({
+        adas: [
+          {
+            dateChargeProved: new Date('2023-08-03'),
+            charges: [
+              {
+                chargeNumber: 1525916,
+                dateChargeProved: new Date('2023-08-03'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'Immediate',
+                toBeServed: 'TODO',
+              },
+              {
+                chargeNumber: 1525917,
+                dateChargeProved: new Date('2023-08-03'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'Immediate',
+                toBeServed: 'TODO',
+              },
+            ],
+          },
+          {
+            dateChargeProved: new Date('2023-08-04'),
+            charges: [
+              {
+                chargeNumber: 1525918,
+                dateChargeProved: new Date('2023-08-04'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'Immediate',
+                toBeServed: 'TODO',
+              },
+              {
+                chargeNumber: 1525918,
+                dateChargeProved: new Date('2023-08-04'),
+                days: 99,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'Immediate',
+                toBeServed: 'TODO',
+              },
+            ],
+          },
+        ],
+        suspendedAdas: [],
+        totalAdas: 114,
+        totalSuspendedAdas: 114,
+      } as AdasToReview)
     })
   })
 })
