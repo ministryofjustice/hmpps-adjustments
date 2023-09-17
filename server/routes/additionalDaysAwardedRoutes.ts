@@ -21,6 +21,7 @@ export default class AdditionalDaysAwardedRoutes {
       nomsId,
       startOfSentenceEnvelope,
       username,
+      token,
     )
 
     return res.render('pages/adjustments/ada/review', {

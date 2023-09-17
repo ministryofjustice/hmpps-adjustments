@@ -91,7 +91,7 @@ export interface components {
   schemas: {
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never> | undefined
+        [key: string]: Record<string, never>
       }
       messageId: string
     }
@@ -145,8 +145,11 @@ export interface components {
     }
     /** @description The details of an additional days awarded (ADA) adjustment */
     AdditionalDaysAwardedDto: {
-      /** @description The id of the adjudication that resulted in the ADA */
-      adjudicationId: string
+      /**
+       * Format: int32
+       * @description The id of the adjudication that resulted in the ADA
+       */
+      adjudicationId: number
       /** @description Is the ADA consecutive or concurrent */
       consecutive: boolean
     }
@@ -274,6 +277,8 @@ export interface components {
   pathItems: never
 }
 
+export type $defs = Record<string, never>
+
 export type external = Record<string, never>
 
 export interface operations {
@@ -367,11 +372,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -387,11 +398,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -444,11 +461,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -464,11 +487,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**

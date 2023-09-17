@@ -1,0 +1,56 @@
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% macro adaTable(tableId, adas, total, title) %}
+  <table id="{{ tableId }}" class="govuk-table govuk-!-margin-bottom-8">
+    <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th class="govuk-table__header" scope="col">Date charge proved</th>
+      <th class="govuk-table__header" scope="col">Charge details</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ada in adas %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">
+          {{ ada.dateChargeProved | date("DD MMM YYYY") }}
+        </td>
+        <td class="govuk-table__cell">
+          <table class="govuk-table">
+            <tr>
+              <th class="govuk-table__header" scope="col">Charge number</th>
+              <th class="govuk-table__header" scope="col">To be served</th>
+              <th class="govuk-table__header" scope="col">Heard at</th>
+              <th class="govuk-table__header " scope="col">Status</th>
+              <th class="govuk-table__header govuk-!-text-align-centre" scope="col">Days</th>
+            </tr>
+            {% for charge in ada.charges %}
+              <tr>
+                <td class="govuk-table__cell">
+                  {{ charge.chargeNumber }}
+                </td>
+                <td class="govuk-table__cell">
+                  {{ charge.toBeServed }}
+                </td>
+                <td class="govuk-table__cell">
+                  {{ charge.heardAt }}
+                </td>
+                <td class="govuk-table__cell">
+                  <span class="moj-badge moj-badge--blue">{{ charge.status }}</span>
+                </td>
+                <!-- Days -->
+                <td class="govuk-table__cell govuk-!-text-align-centre">{{ charge.days }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+
+    <tfoot>
+    <tr class="govuk-table__row">
+      <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="1">{{ totalTitle }}</th>
+      <td class="govuk-table__cell govuk-!-text-align-right govuk-!-padding-right-4">{{ total }}</td>
+    </tr>
+    </tfoot>
+  </table>
+{% endmacro %}
