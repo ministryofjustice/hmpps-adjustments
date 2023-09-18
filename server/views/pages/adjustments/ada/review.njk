@@ -30,10 +30,7 @@
             {% endif %}
 
             <h2 class="govuk-heading-m">Review and approve pending ADAs</h2>
-            <p>Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence
-              calculation.</p>
-            {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval,
-              'Total ADAs awaiting approval') }}
+            {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval, 'Total ADAs awaiting approval', 'Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.', 'No ADA records waiting for approval exist for this offender') }}
 
           </div>
 
