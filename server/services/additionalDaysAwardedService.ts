@@ -105,6 +105,7 @@ export default class AdditionalDaysAwardedService {
         }
         return acc
       }, [])
+      .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
   }
 
   private getAdas(
