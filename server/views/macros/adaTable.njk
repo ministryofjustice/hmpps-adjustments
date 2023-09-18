@@ -1,4 +1,6 @@
-{% macro adaTable(tableId, adas, total, totalTitle) %}
+{% macro adaTable(tableId, adas, total, totalTitle, mainTitle, emptyTitle) %}
+  {% if adas | length  %}
+    <p>{{ mainTitle }}</p>
   <table id="{{ tableId }}" class="govuk-table govuk-!-margin-bottom-8">
     <thead class="govuk-table__head">
     <tr class="govuk-table__row">
@@ -52,4 +54,7 @@
     </tr>
     </tfoot>
   </table>
+  {% else %}
+    <p>{{ emptyTitle }}</p>
+  {% endif %}
 {% endmacro %}

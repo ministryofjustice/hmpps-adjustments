@@ -58,7 +58,7 @@ export default class AdditionalDaysAwardedService {
     token: string,
   ): Promise<AdasToReview> {
     const existingAdaChargeIds = (await new AdjustmentsClient(token).findByPerson(nomsId))
-      .filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
+      .filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.additionalDaysAwarded)
       .map(ada => ada.additionalDaysAwarded.adjudicationId)
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
     const adjudicationClient = new AdjudicationClient(systemToken)
