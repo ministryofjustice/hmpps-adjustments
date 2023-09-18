@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express'
 import PrisonerService from '../services/prisonerService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
+import { AdasToReview } from '../@types/AdaTypes'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
@@ -12,8 +13,22 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjudications = await this.additionalDaysAwardedService.getAdjudications(nomsId, username)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      prisonerDetail.bookingId,
+      token,
+    )
+    const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToReview(
+      nomsId,
+      startOfSentenceEnvelope,
+      username,
+      token,
+    )
 
-    return res.render('pages/adjustments/ada/review', { prisonerDetail, adjudications: adjudications.results })
+    return res.render('pages/adjustments/ada/review', {
+      model: {
+        prisonerDetail,
+      },
+      adasToReview,
+    })
   }
 }

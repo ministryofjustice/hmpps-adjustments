@@ -88,4 +88,14 @@ export default class PrisonerService {
   ): Promise<PrisonApiBookingAndSentenceAdjustments> {
     return new PrisonApiClient(token).getBookingAndSentenceAdjustments(bookingId)
   }
+
+  async getStartOfSentenceEnvelope(bookingId: number, token: string): Promise<Date> {
+    const sentences = await this.getSentencesAndOffences(bookingId, token)
+    return new Date(
+      Math.min.apply(
+        null,
+        sentences.filter(it => it.sentenceStatus === 'A').map(it => new Date(it.sentenceDate)),
+      ),
+    )
+  }
 }
