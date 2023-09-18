@@ -4,7 +4,7 @@ import { HmppsAuthClient } from '../data'
 import { Ada, AdasByDateCharged, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 
-/* The adjudications status from NOMIS DB mapped to the adjudications API status (listed here temporarily to make it easier to implement the stories which use the NOMIS status)
+/* The adjudications status from NOMIS DB mapped to the adjudications API status are listed here temporarily to make it easier to implement the stories which use the NOMIS status
  * 'AS_AWARDED' = 'Activated as Awarded'
  * 'AWARD_RED' = 'Activated with Quantum Reduced'
  * 'IMMEDIATE' = 'Immediate'
