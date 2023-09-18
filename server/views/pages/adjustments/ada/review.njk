@@ -4,8 +4,6 @@
 {% set pageTitle = applicationName + " - Review additional days awarded" %}
 {% set mainClasses = "app-container govuk-body" %}
 
-{# TODO Just a placeholder screen at the moment #}
-
 {% block content %}
   <div class="moj-width-container">
     <div class="">
@@ -25,16 +23,16 @@
 
               <h2 class="govuk-heading-m">Awarded ADAs</h2>
               <p>Awarded ADAs will be included in the calculation.</p>
-              {{ adaTable('awarded-adas', adaToReview.adas, adaToReview.totalAdas, 'Total ADAs taken into calculation') }}
+              {{ adaTable('awarded-adas', adasToReview.adas, adasToReview.totalAdas, 'Total ADAs taken into calculation') }}
 
               <h2 class="govuk-heading-m">Suspended and Quashed ADAs</h2>
               <p>Suspended  and Quashed ADAs have not been added to the calculation.</p>
-              {{ adaTable('suspended-adas', adaToReview.suspendedOrQuashed, adaToReview.totalSuspendedOrQuashed, 'Total
+              {{ adaTable('suspended-adas', adasToReview.suspendedOrQuashed, adasToReview.totalSuspendedOrQuashed, 'Total
               suspended and quashed ADAs') }}
 
               <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
               <p>Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.</p>
-              {{ adaTable('awaiting-approval-adas', adaToReview.awaitingApproval, adaToReview.totalAwaitingApproval,
+              {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval,
                 'Total ADAs awaiting approval') }}
 
             </div>

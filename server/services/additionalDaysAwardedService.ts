@@ -4,16 +4,18 @@ import { HmppsAuthClient } from '../data'
 import { Ada, AdasByDateCharged, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 
-// 'AS_AWARDED', null, null, 'Activated as Awarded', 3, 'Y',
-//     'AWARD_RED', null, null, 'Activated with Quantum Reduced'
-// 'IMMEDIATE', null, null, 'Immediate', 1, 'Y', 'N', null);
-// 'PROSPECTIVE', null, null, 'Prospective', 7, 'Y', 'N', nu
-// 'QUASHED', null, null, 'Quashed', 9, 'Y', 'N', null);
-// 'REDAPP', null, null, 'Reduced on Appeal', 10, 'Y', 'N',
-//     'SUSPENDED', null, null, 'Suspended', 2, 'Y', 'N', null);
-// 'SUSPEN_EXT', null, null, 'Period of Suspension Extended'
-// 'SUSPEN_RED', null, null, 'Period of Suspension Shortened
-// 'SUSP_PROSP', null, null, 'Suspended and Prospective', 8,
+/* The adjudications status from NOMIS DB mapped to the adjudications API status- listed here temporarily to make it easier to implement the stories which use the NOMIS status
+ * 'AS_AWARDED' = 'Activated as Awarded'
+ * 'AWARD_RED' = 'Activated with Quantum Reduced'
+ * 'IMMEDIATE' = 'Immediate'
+ * 'PROSPECTIVE' = 'Prospective'
+ * 'QUASHED' = 'Quashed'
+ * 'REDAPP' = 'Reduced on Appeal'
+ * 'SUSPENDED' = 'Suspended'
+ * 'SUSPEN_EXT' = 'Period of Suspension Extended'
+ * 'SUSPEN_RED' = 'Period of Suspension Shortened
+ * 'SUSP_PROSP' = 'Suspended and Prospective'
+ */
 const sanctionIsProspective = (s: Sanction) => s.status === 'Prospective' || s.status === 'Suspended and Prospective'
 
 const sanctionIsAda = (s: Sanction) => s.sanctionType === 'Additional Days Added'
@@ -49,7 +51,7 @@ function deriveStatus(chargeId: number, sanction: Sanction, existingAdaChargeIds
 export default class AdditionalDaysAwardedService {
   constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
 
-  public async getAdjudications(
+  public async getAdasToReview(
     nomsId: string,
     startOfSentenceEnvelope: Date,
     username: string,
@@ -139,7 +141,7 @@ export default class AdditionalDaysAwardedService {
               const ada = {
                 dateChargeProved: new Date(hearing.hearingTime.substring(0, 10)),
                 chargeNumber: cur.adjudicationNumber,
-                toBeServed: 'TODO',
+                toBeServed: 'TODO', // TODO this field to be populated in a subsequent story
                 heardAt: hearing.establishment,
                 status: deriveStatus(cur.adjudicationNumber, sanction, existingAdaChargeIds),
                 days: sanction.sanctionDays,

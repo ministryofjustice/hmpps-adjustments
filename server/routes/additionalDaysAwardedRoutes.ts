@@ -17,7 +17,7 @@ export default class AdditionalDaysAwardedRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const adaToReview: AdasToReview = await this.additionalDaysAwardedService.getAdjudications(
+    const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToReview(
       nomsId,
       startOfSentenceEnvelope,
       username,
@@ -28,7 +28,7 @@ export default class AdditionalDaysAwardedRoutes {
       model: {
         prisonerDetail,
       },
-      adaToReview,
+      adasToReview,
     })
   }
 }
