@@ -154,11 +154,11 @@ describe('Additional Days Added Service', () => {
             ],
           },
         ],
-        suspendedOrQuashed: [],
+        suspended: [],
         awaitingApproval: [],
         totalAdas: 114,
         totalAwaitingApproval: 0,
-        totalSuspendedOrQuashed: 0,
+        totalSuspended: 0,
       } as AdasToReview)
     })
   })

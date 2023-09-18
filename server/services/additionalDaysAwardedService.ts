@@ -4,7 +4,7 @@ import { HmppsAuthClient } from '../data'
 import { Ada, AdasByDateCharged, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 
-/* The adjudications status from NOMIS DB mapped to the adjudications API status- listed here temporarily to make it easier to implement the stories which use the NOMIS status
+/* The adjudications status from NOMIS DB mapped to the adjudications API status (listed here temporarily to make it easier to implement the stories which use the NOMIS status)
  * 'AS_AWARDED' = 'Activated as Awarded'
  * 'AWARD_RED' = 'Activated with Quantum Reduced'
  * 'IMMEDIATE' = 'Immediate'
@@ -74,9 +74,7 @@ export default class AdditionalDaysAwardedService {
     const totalAdas: number = this.getTotalDaysByStatus(allAdas, AWARDED)
 
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, SUSPENDED)
-    const quashed: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, QUASHED)
-    const totalSuspendedOrQuashed: number =
-      this.getTotalDaysByStatus(allAdas, SUSPENDED) + this.getTotalDaysByStatus(allAdas, QUASHED)
+    const totalSuspended: number = this.getTotalDaysByStatus(allAdas, SUSPENDED)
 
     const awaitingApproval: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWAITING_APPROVAL)
     const totalAwaitingApproval: number = this.getTotalDaysByStatus(allAdas, AWAITING_APPROVAL)
@@ -84,15 +82,15 @@ export default class AdditionalDaysAwardedService {
     return {
       totalAdas,
       adas,
-      totalSuspendedOrQuashed,
-      suspendedOrQuashed: [...suspended, ...quashed],
+      totalSuspended,
+      suspended,
       awaitingApproval,
       totalAwaitingApproval,
     } as AdasToReview
   }
 
-  private getTotalDaysByStatus(allAadas: Ada[], status: string) {
-    return allAadas.filter(it => it.status === status).reduce((acc, cur) => acc + cur.days, 0)
+  private getTotalDaysByStatus(allAdas: Ada[], status: string) {
+    return allAdas.filter(it => it.status === status).reduce((acc, cur) => acc + cur.days, 0)
   }
 
   private getAdasByDateCharged(adas: Ada[], filterStatus: string) {

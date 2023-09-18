@@ -18,8 +18,8 @@ interface Ada extends ChargeDetails {
 type AdasToReview = {
   adas: AdasByDateCharged[]
   totalAdas: number
-  suspendedOrQuashed: AdasByDateCharged[]
-  totalSuspendedOrQuashed: number
+  suspended: AdasByDateCharged[]
+  totalSuspended: number
   awaitingApproval: AdasByDateCharged[]
   totalAwaitingApproval: number
 }

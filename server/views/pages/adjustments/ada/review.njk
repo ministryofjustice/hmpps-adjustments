@@ -6,50 +6,49 @@
 
 {% block content %}
   <div class="moj-width-container">
-    <div class="">
-      <a href="../" class="govuk-back-link">Back</a>
 
-      <main class="govuk-main-wrapper offence-outcome " id="main-content" role="main">
-        <div class="govuk-grid-row">
-          <div class="govuk-grid-column-full">
-            <div class="govuk-form-group govuk-body">
-              <h1 class="govuk-heading-l">
-                <span class="govuk-caption-xl">Adjust release dates</span>
-                Review and Approve ADAs
-              </h1>
-              <p>
-                Check that the existing ADAs are correct, then review and approve pending ADAs.
-              </p>
+    <a href="../" class="govuk-back-link">Back</a>
 
-              <h2 class="govuk-heading-m">Awarded ADAs</h2>
-              <p>Awarded ADAs will be included in the calculation.</p>
-              {{ adaTable('awarded-adas', adasToReview.adas, adasToReview.totalAdas, 'Total ADAs taken into calculation') }}
+    <main class="govuk-main-wrapper offence-outcome " id="main-content" role="main">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+          <div class="govuk-form-group govuk-body">
+            <h1 class="govuk-heading-l">
+              <span class="govuk-caption-xl">Adjust release dates</span>
+              Review and Approve ADAs
+            </h1>
+            <p>
+              Check that the existing ADAs are correct, then review and approve pending ADAs.
+            </p>
 
-              <h2 class="govuk-heading-m">Suspended and Quashed ADAs</h2>
-              <p>Suspended  and Quashed ADAs have not been added to the calculation.</p>
-              {{ adaTable('suspended-adas', adasToReview.suspendedOrQuashed, adasToReview.totalSuspendedOrQuashed, 'Total
+            <h2 class="govuk-heading-m">Awarded ADAs</h2>
+            <p>Awarded ADAs will be included in the calculation.</p>
+            {{ adaTable('awarded-adas', adasToReview.adas, adasToReview.totalAdas, 'Total ADAs taken into calculation') }}
+
+            <h2 class="govuk-heading-m">Suspended ADAs</h2>
+            <p>Suspended ADAs will not be included in the calculation.</p>
+            {{ adaTable('suspended-adas', adasToReview.suspended, adasToReview.totalSuspended, 'Total
               suspended and quashed ADAs') }}
 
-              <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
-              <p>Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.</p>
-              {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval,
-                'Total ADAs awaiting approval') }}
+            <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
+            <p>Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence
+              calculation.</p>
+            {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval,
+              'Total ADAs awaiting approval') }}
 
-            </div>
-            <h2 class="govuk-heading-m">Approve pending ADAs</h2>
-
-            <div class="govuk-!-margin-top-8 govuk-button-group">
-              <a href="check-your-answers-4.html" class="govuk-button" data-module="govuk-button">
-                Approve
-              </a>
-            </div>
-            <a href="adjustments-dashboard-d3.html">Cancel and return to dashboard</a>
-            <div class="govuk-inset-text">
-              If you think some information is wrong,  contact the team responsible for adjudications.
-            </div>
           </div>
+
+          <div class="govuk-inset-text">
+            If you think some information is wrong, contact the team responsible for adjudications.
+          </div>
+          <div class="govuk-!-margin-top-8 govuk-button-group">
+            <a href="#" class="govuk-button" data-module="govuk-button">
+              Approve
+            </a>
+          </div>
+          <a href="../">Cancel and return to dashboard</a>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   </div>
 {% endblock %}
