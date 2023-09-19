@@ -73,8 +73,6 @@ export default class AdditionalDaysAwardedService {
     const allAdas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope, existingAdaChargeIds)
 
     const adas: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWARDED)
-
-    // const adas = this.getAdasByConsecutiveToSequence(allAdas)
     const totalAdas: number = this.getTotalDaysByStatus(allAdas, AWARDED)
 
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, SUSPENDED)

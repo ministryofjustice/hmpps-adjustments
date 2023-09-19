@@ -4,7 +4,7 @@ import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import TokenStore from '../data/tokenStore'
 import config from '../config'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
-import { Ada, AdasToReview } from '../@types/AdaTypes'
+import { AdasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 jest.mock('../data/hmppsAuthClient')
