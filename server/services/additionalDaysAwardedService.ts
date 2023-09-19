@@ -26,6 +26,8 @@ const isSanctionedAda = (s: Sanction, hearingDate: Date, startOfSentenceEnvelope
   hearingDate.getTime() >= startOfSentenceEnvelope.getTime()
 const isProspectiveAda = (s: Sanction) => sanctionIsAda(s) && sanctionIsProspective(s)
 
+const adaHasSequence = (sequence: number, ada: Ada) => sequence === ada.sequence
+
 function isSuspended(sanction: Sanction) {
   return (
     sanction.status === 'Suspended' ||
@@ -93,8 +95,8 @@ export default class AdditionalDaysAwardedService {
     return allAdas.filter(it => it.status === status).reduce((acc, cur) => acc + cur.days, 0)
   }
 
-  private getAdasByDateCharged(adas: Ada[], filterStatus: string) {
-    return adas
+  private getAdasByDateCharged(adas: Ada[], filterStatus: string): AdasByDateCharged[] {
+    const adasByDateCharged = adas
       .filter(it => it.status === filterStatus)
       .reduce((acc: AdasByDateCharged[], cur) => {
         if (acc.some(it => it.dateChargeProved.getTime() === cur.dateChargeProved.getTime())) {
@@ -106,6 +108,52 @@ export default class AdditionalDaysAwardedService {
         return acc
       }, [])
       .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
+
+    return this.associateConsecutiveAdas(adasByDateCharged, adas)
+  }
+
+  /*
+   * Sets the toBeServed of the groupedAdas for the review screen, can be either Consecutive, Concurrent or Forthwith
+   */
+  private associateConsecutiveAdas(adasByDateCharged: AdasByDateCharged[], adas: Ada[]) {
+    const consecutiveSourceAdas = this.getSourceAdaForConsecutive(adas)
+    return adasByDateCharged.map(it => {
+      const { charges } = it
+      // Only one charge in group
+      if (charges.length === 1) {
+        return { ...it, charges: [{ ...charges[0], toBeServed: 'Forthwith' } as Ada] }
+      }
+
+      // Label consecutive or concurrent adas
+      const consecutiveAndConcurrentCharges = charges.map(charge => {
+        if (this.validConsecutiveSequence(charge, consecutiveSourceAdas)) {
+          const consecutiveAda = consecutiveSourceAdas.find(c => adaHasSequence(charge.consecutiveToSequence, c))
+          return { ...charge, toBeServed: `Consecutive to ${consecutiveAda.chargeNumber}` } as Ada
+        }
+
+        if (
+          !this.validConsecutiveSequence(charge, consecutiveSourceAdas) &&
+          !this.isSourceForConsecutiveChain(consecutiveSourceAdas, charge)
+        ) {
+          return { ...charge, toBeServed: 'Concurrent' } as Ada
+        }
+
+        return { ...charge, toBeServed: 'Forthwith' } as Ada
+      })
+
+      return { ...it, charges: consecutiveAndConcurrentCharges }
+    })
+  }
+
+  private isSourceForConsecutiveChain(consecutiveSourceAdas: Ada[], charge: Ada) {
+    return consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.sequence, consecutiveAda))
+  }
+
+  private validConsecutiveSequence(charge: Ada, consecutiveSourceAdas: Ada[]) {
+    return (
+      charge.consecutiveToSequence &&
+      consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.consecutiveToSequence, consecutiveAda))
+    )
   }
 
   private getAdas(
@@ -121,6 +169,8 @@ export default class AdditionalDaysAwardedService {
         )
       }),
     )
+
+    adasToTransform.map(a => a.hearings) // chech reliability of consecutive to sequence.. for a given set of adjudocations, where does the consec seq sit?
     return adasToTransform.reduce((acc: Ada[], cur) => {
       cur.hearings
         .filter(h => {
@@ -140,15 +190,24 @@ export default class AdditionalDaysAwardedService {
               const ada = {
                 dateChargeProved: new Date(hearing.hearingTime.substring(0, 10)),
                 chargeNumber: cur.adjudicationNumber,
-                toBeServed: 'TODO', // TODO this field to be populated in a subsequent story
                 heardAt: hearing.establishment,
                 status: deriveStatus(cur.adjudicationNumber, sanction, existingAdaChargeIds),
                 days: sanction.sanctionDays,
+                sequence: sanction.sanctionSeq,
+                consecutiveToSequence: sanction.consecutiveSanctionSeq,
               } as Ada
               acc.push(ada)
             })
         })
       return acc
     }, [])
+  }
+
+  private getSourceAdaForConsecutive(allAdas: Ada[]): Ada[] {
+    return allAdas
+      .filter(
+        ada => ada.consecutiveToSequence && allAdas.some(sourceAda => sourceAda.sequence === ada.consecutiveToSequence),
+      )
+      .map(consecutiveAda => allAdas.find(sourceAda => sourceAda.sequence === consecutiveAda.consecutiveToSequence))
   }
 }

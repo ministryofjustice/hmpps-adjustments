@@ -4,6 +4,8 @@ type ChargeDetails = {
   heardAt: string
   status: string
   days: number
+  sequence: number
+  consecutiveToSequence: number
 }
 
 type AdasByDateCharged = {
