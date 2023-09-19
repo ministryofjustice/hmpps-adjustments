@@ -97,21 +97,6 @@ export default class AdditionalDaysAwardedService {
     return allAdas.filter(it => it.status === status).reduce((acc, cur) => acc + cur.days, 0)
   }
 
-  private getAdasByDateChargedOld(adas: Ada[], filterStatus: string) {
-    return adas
-      .filter(it => it.status === filterStatus)
-      .reduce((acc: AdasByDateCharged[], cur) => {
-        if (acc.some(it => it.dateChargeProved.getTime() === cur.dateChargeProved.getTime())) {
-          const record = acc.find(it => it.dateChargeProved.getTime() === cur.dateChargeProved.getTime())
-          record.charges.push(cur)
-        } else {
-          acc.push({ dateChargeProved: cur.dateChargeProved, charges: [cur] } as AdasByDateCharged)
-        }
-        return acc
-      }, [])
-      .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
-  }
-
   private getAdasByDateCharged(adas: Ada[], filterStatus: string): AdasByDateCharged[] {
     const adasByDateCharged = adas
       .filter(it => it.status === filterStatus)
@@ -141,32 +126,21 @@ export default class AdditionalDaysAwardedService {
         return { ...it, charges: [{ ...charges[0], toBeServed: 'Forthwith' } as Ada] }
       }
 
-      // Label consecutive or concurrent
+      // Label consecutive or concurrent adas
       const consecutiveAndConcurrentCharges = charges.map(charge => {
         if (charge.consecutiveToSequence) {
-          return {
-            ...charge,
-            toBeServed: `Consecutive to ${
-              consecutiveSourceAdas.find(consecutiveAda => adaHasSequence(charge.consecutiveToSequence, consecutiveAda))
-                .chargeNumber
-            }`,
-          } as Ada
+          const consecutiveAda = consecutiveSourceAdas.find(c => adaHasSequence(charge.consecutiveToSequence, c))
+          return { ...charge, toBeServed: `Consecutive to ${consecutiveAda.chargeNumber}` } as Ada
         }
 
         if (
           !charge.consecutiveToSequence &&
           !consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.sequence, consecutiveAda))
         ) {
-          return {
-            ...charge,
-            toBeServed: 'Concurrent',
-          } as Ada
+          return { ...charge, toBeServed: 'Concurrent' } as Ada
         }
 
-        return {
-          ...charge,
-          toBeServed: 'Forthwith',
-        } as Ada
+        return { ...charge, toBeServed: 'Forthwith' } as Ada
       })
 
       return { ...it, charges: consecutiveAndConcurrentCharges }
