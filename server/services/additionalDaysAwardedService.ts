@@ -71,6 +71,8 @@ export default class AdditionalDaysAwardedService {
     const allAdas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope, existingAdaChargeIds)
 
     const adas: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWARDED)
+
+    // const adas = this.getAdasByConsecutiveToSequence(allAdas)
     const totalAdas: number = this.getTotalDaysByStatus(allAdas, AWARDED)
 
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, SUSPENDED)
@@ -93,7 +95,7 @@ export default class AdditionalDaysAwardedService {
     return allAdas.filter(it => it.status === status).reduce((acc, cur) => acc + cur.days, 0)
   }
 
-  private getAdasByDateCharged(adas: Ada[], filterStatus: string) {
+  private getAdasByDateChargedOld(adas: Ada[], filterStatus: string) {
     return adas
       .filter(it => it.status === filterStatus)
       .reduce((acc: AdasByDateCharged[], cur) => {
@@ -106,6 +108,71 @@ export default class AdditionalDaysAwardedService {
         return acc
       }, [])
       .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
+  }
+
+  private getAdasByDateCharged(adas: Ada[], filterStatus: string): AdasByDateCharged[] {
+    const consecutiveSourceAdas = this.getSourceAdaForConsecutive(adas)
+    const adasByDateCharged = adas
+      .filter(it => it.status === filterStatus)
+      .reduce((acc: AdasByDateCharged[], cur) => {
+        if (acc.some(it => it.dateChargeProved.getTime() === cur.dateChargeProved.getTime())) {
+          const record = acc.find(it => it.dateChargeProved.getTime() === cur.dateChargeProved.getTime())
+          record.charges.push(cur)
+        } else {
+          acc.push({ dateChargeProved: cur.dateChargeProved, charges: [cur] } as AdasByDateCharged)
+        }
+        return acc
+      }, [])
+      .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
+
+    const x = adasByDateCharged.map(it => {
+      const { charges } = it
+      // Only one charge in group
+      if (charges.length === 1) {
+        return {
+          ...it,
+          charges: charges.map(charge => {
+            return { ...charge, toBeServed: 'Forthwith' } as Ada
+          }),
+        }
+      }
+
+      // All are concurrent
+      console.log('################################################')
+      console.log('################################################')
+      console.log('################################################')
+      if (!charges.some(c => c.consecutiveToSequence)) {
+        const ret = {
+          ...it,
+          charges: charges.map(charge => {
+            return { ...charge, toBeServed: 'Concurrent' } as Ada
+          }),
+        }
+        return ret
+      }
+
+      // Final possibility - Consecutive charges
+      const consecutiveCharges = charges.map(charge => {
+        if (charge.consecutiveToSequence) {
+          console.log('YES ################################################')
+          return {
+            ...charge,
+            toBeServed: `Consecutive to ${
+              consecutiveSourceAdas.find(consecutiveAda => consecutiveAda.sequence === charge.consecutiveToSequence)
+                .chargeNumber
+            }`,
+          } as Ada
+        }
+        return {
+          ...charge,
+          toBeServed: 'Forthwith',
+        } as Ada
+      })
+
+      console.log(`Y1ES ################################################${JSON.stringify(consecutiveCharges)}`)
+      return { ...it, charges: consecutiveCharges }
+    })
+    return x
   }
 
   private getAdas(
@@ -121,6 +188,8 @@ export default class AdditionalDaysAwardedService {
         )
       }),
     )
+
+    adasToTransform.map(a => a.hearings) // chech reliability of consecutive to sequence.. for a given set of adjudocations, where does the consec seq sit?
     return adasToTransform.reduce((acc: Ada[], cur) => {
       cur.hearings
         .filter(h => {
@@ -144,11 +213,19 @@ export default class AdditionalDaysAwardedService {
                 heardAt: hearing.establishment,
                 status: deriveStatus(cur.adjudicationNumber, sanction, existingAdaChargeIds),
                 days: sanction.sanctionDays,
+                sequence: sanction.sanctionSeq,
+                consecutiveToSequence: sanction.consecutiveSanctionSeq,
               } as Ada
               acc.push(ada)
             })
         })
       return acc
     }, [])
+  }
+
+  private getSourceAdaForConsecutive(allAdas: Ada[]): Ada[] {
+    return allAdas
+      .filter(ada => ada.consecutiveToSequence)
+      .map(consecutiveAda => allAdas.find(sourceAda => sourceAda.sequence === consecutiveAda.consecutiveToSequence))
   }
 }
