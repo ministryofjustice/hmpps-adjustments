@@ -78,6 +78,14 @@ const adjudicationThreeConcurrentToOne = JSON.parse(
   '{"adjudicationNumber":1525918,"incidentTime":"2023-08-01T09:00:00","establishment":"Moorland (HMP & YOI)","interiorLocation":"Circuit","incidentDetails":"some details","reportNumber":1503215,"reportType":"Governor\'s Report","reporterFirstName":"TIM","reporterLastName":"WRIGHT","reportTime":"2023-08-02T09:09:00","hearings":[{"oicHearingId":2012687,"hearingType":"Governor\'s Hearing Adult","hearingTime":"2023-08-03T16:45:00","establishment":"Moorland (HMP & YOI)","location":"Adj","heardByFirstName":"JOHN","heardByLastName":"FERGUSON","results":[{"oicOffenceCode":"51:16","offenceType":"Prison Rule 51","offenceDescription":"Intentionally or recklessly sets fire to any part of a prison or any other property, whether or not his own","plea":"Guilty","finding":"Charge Proved","sanctions":[{"sanctionType":"Additional Days Added","sanctionDays":5,"effectiveDate":"2023-08-09T00:00:00","status":"Immediate","sanctionSeq":17}]}]}]}',
 ) as IndividualAdjudication
 
+const adjudicationTwoConsecToNonAda = JSON.parse(
+  '{"adjudicationNumber":1525917,"incidentTime":"2023-08-01T09:00:00","establishment":"Moorland (HMP & YOI)","interiorLocation":"Circuit","incidentDetails":"some details","reportNumber":1503215,"reportType":"Governor\'s Report","reporterFirstName":"TIM","reporterLastName":"WRIGHT","reportTime":"2023-08-02T09:09:00","hearings":[{"oicHearingId":2012687,"hearingType":"Governor\'s Hearing Adult","hearingTime":"2023-08-03T16:45:00","establishment":"Moorland (HMP & YOI)","location":"Adj","heardByFirstName":"JOHN","heardByLastName":"FERGUSON","results":[{"oicOffenceCode":"51:16","offenceType":"Prison Rule 51","offenceDescription":"Intentionally or recklessly sets fire to any part of a prison or any other property, whether or not his own","plea":"Guilty","finding":"Charge Proved","sanctions":[{"sanctionType":"Additional Days Added","sanctionDays":5,"effectiveDate":"2023-08-09T00:00:00","status":"Immediate","sanctionSeq":16, "consecutiveSanctionSeq": 17}]}]}]}',
+) as IndividualAdjudication
+
+const adjudicationThreeNonAda = JSON.parse(
+  '{"adjudicationNumber":1525918,"incidentTime":"2023-08-01T09:00:00","establishment":"Moorland (HMP & YOI)","interiorLocation":"Circuit","incidentDetails":"some details","reportNumber":1503215,"reportType":"Governor\'s Report","reporterFirstName":"TIM","reporterLastName":"WRIGHT","reportTime":"2023-08-02T09:09:00","hearings":[{"oicHearingId":2012687,"hearingType":"Governor\'s Hearing Adult","hearingTime":"2023-08-03T16:45:00","establishment":"Moorland (HMP & YOI)","location":"Adj","heardByFirstName":"JOHN","heardByLastName":"FERGUSON","results":[{"oicOffenceCode":"51:16","offenceType":"Prison Rule 51","offenceDescription":"Intentionally or recklessly sets fire to any part of a prison or any other property, whether or not his own","plea":"Guilty","finding":"Charge Proved","sanctions":[{"sanctionType":"non-ADA","sanctionDays":5,"effectiveDate":"2023-08-09T00:00:00","status":"Immediate","sanctionSeq":17}]}]}]}',
+) as IndividualAdjudication
+
 const adjudicationOneAdjustment = {
   adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
   additionalDaysAwarded: { adjudicationId: 1525916 },
@@ -337,6 +345,59 @@ describe('Additional Days Added Service', () => {
         suspended: [],
         awaitingApproval: [],
         totalAdas: 15,
+        totalAwaitingApproval: 0,
+        totalSuspended: 0,
+      } as AdasToReview)
+    })
+
+    it('Get adjudication where ada is consecutive to a non-ada - edge case, this  really stems from bad data in nomis ', async () => {
+      const nomsId = 'AA1234A'
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, threeAdjudicationsSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecToNonAda)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeNonAda)
+      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+
+      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+        nomsId,
+        startOfSentenceEnvelope,
+        'username',
+        token,
+      )
+
+      expect(adaToReview).toEqual({
+        adas: [
+          {
+            dateChargeProved: new Date('2023-08-03'),
+            charges: [
+              {
+                chargeNumber: 1525916,
+                dateChargeProved: new Date('2023-08-03'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'AWARDED',
+                toBeServed: 'Concurrent',
+                sequence: 15,
+              },
+              {
+                chargeNumber: 1525917,
+                dateChargeProved: new Date('2023-08-03'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'AWARDED',
+                toBeServed: 'Concurrent',
+                sequence: 16,
+                consecutiveToSequence: 17,
+              },
+            ],
+          },
+        ],
+        suspended: [],
+        awaitingApproval: [],
+        totalAdas: 10,
         totalAwaitingApproval: 0,
         totalSuspended: 0,
       } as AdasToReview)

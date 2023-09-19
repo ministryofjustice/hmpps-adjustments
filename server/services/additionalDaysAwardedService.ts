@@ -126,14 +126,14 @@ export default class AdditionalDaysAwardedService {
 
       // Label consecutive or concurrent adas
       const consecutiveAndConcurrentCharges = charges.map(charge => {
-        if (charge.consecutiveToSequence) {
+        if (this.validConsecutiveSequence(charge, consecutiveSourceAdas)) {
           const consecutiveAda = consecutiveSourceAdas.find(c => adaHasSequence(charge.consecutiveToSequence, c))
           return { ...charge, toBeServed: `Consecutive to ${consecutiveAda.chargeNumber}` } as Ada
         }
 
         if (
-          !charge.consecutiveToSequence &&
-          !consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.sequence, consecutiveAda))
+          !this.validConsecutiveSequence(charge, consecutiveSourceAdas) &&
+          !this.isSourceForConsecutiveChain(consecutiveSourceAdas, charge)
         ) {
           return { ...charge, toBeServed: 'Concurrent' } as Ada
         }
@@ -143,6 +143,17 @@ export default class AdditionalDaysAwardedService {
 
       return { ...it, charges: consecutiveAndConcurrentCharges }
     })
+  }
+
+  private isSourceForConsecutiveChain(consecutiveSourceAdas: Ada[], charge: Ada) {
+    return consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.sequence, consecutiveAda))
+  }
+
+  private validConsecutiveSequence(charge: Ada, consecutiveSourceAdas: Ada[]) {
+    return (
+      charge.consecutiveToSequence &&
+      consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.consecutiveToSequence, consecutiveAda))
+    )
   }
 
   private getAdas(
@@ -194,7 +205,9 @@ export default class AdditionalDaysAwardedService {
 
   private getSourceAdaForConsecutive(allAdas: Ada[]): Ada[] {
     return allAdas
-      .filter(ada => ada.consecutiveToSequence)
+      .filter(
+        ada => ada.consecutiveToSequence && allAdas.some(sourceAda => sourceAda.sequence === ada.consecutiveToSequence),
+      )
       .map(consecutiveAda => allAdas.find(sourceAda => sourceAda.sequence === consecutiveAda.consecutiveToSequence))
   }
 }
