@@ -26,6 +26,8 @@ const isSanctionedAda = (s: Sanction, hearingDate: Date, startOfSentenceEnvelope
   hearingDate.getTime() >= startOfSentenceEnvelope.getTime()
 const isProspectiveAda = (s: Sanction) => sanctionIsAda(s) && sanctionIsProspective(s)
 
+const adaHasSequence = (sequence: number, ada: Ada) => sequence === ada.sequence
+
 function isSuspended(sanction: Sanction) {
   return (
     sanction.status === 'Suspended' ||
@@ -111,7 +113,6 @@ export default class AdditionalDaysAwardedService {
   }
 
   private getAdasByDateCharged(adas: Ada[], filterStatus: string): AdasByDateCharged[] {
-    const consecutiveSourceAdas = this.getSourceAdaForConsecutive(adas)
     const adasByDateCharged = adas
       .filter(it => it.status === filterStatus)
       .reduce((acc: AdasByDateCharged[], cur) => {
@@ -125,54 +126,51 @@ export default class AdditionalDaysAwardedService {
       }, [])
       .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
 
-    const x = adasByDateCharged.map(it => {
+    return this.associateConsecutiveAdas(adasByDateCharged, adas)
+  }
+
+  /*
+   * Sets the toBeServed of the groupedAdas for the review screen, can be either Consecutive, Concurrent or Forthwith
+   */
+  private associateConsecutiveAdas(adasByDateCharged: AdasByDateCharged[], adas: Ada[]) {
+    const consecutiveSourceAdas = this.getSourceAdaForConsecutive(adas)
+    return adasByDateCharged.map(it => {
       const { charges } = it
       // Only one charge in group
       if (charges.length === 1) {
-        return {
-          ...it,
-          charges: charges.map(charge => {
-            return { ...charge, toBeServed: 'Forthwith' } as Ada
-          }),
-        }
+        return { ...it, charges: [{ ...charges[0], toBeServed: 'Forthwith' } as Ada] }
       }
 
-      // All are concurrent
-      console.log('################################################')
-      console.log('################################################')
-      console.log('################################################')
-      if (!charges.some(c => c.consecutiveToSequence)) {
-        const ret = {
-          ...it,
-          charges: charges.map(charge => {
-            return { ...charge, toBeServed: 'Concurrent' } as Ada
-          }),
-        }
-        return ret
-      }
-
-      // Final possibility - Consecutive charges
-      const consecutiveCharges = charges.map(charge => {
+      // Label consecutive or concurrent
+      const consecutiveAndConcurrentCharges = charges.map(charge => {
         if (charge.consecutiveToSequence) {
-          console.log('YES ################################################')
           return {
             ...charge,
             toBeServed: `Consecutive to ${
-              consecutiveSourceAdas.find(consecutiveAda => consecutiveAda.sequence === charge.consecutiveToSequence)
+              consecutiveSourceAdas.find(consecutiveAda => adaHasSequence(charge.consecutiveToSequence, consecutiveAda))
                 .chargeNumber
             }`,
           } as Ada
         }
+
+        if (
+          !charge.consecutiveToSequence &&
+          !consecutiveSourceAdas.some(consecutiveAda => adaHasSequence(charge.sequence, consecutiveAda))
+        ) {
+          return {
+            ...charge,
+            toBeServed: 'Concurrent',
+          } as Ada
+        }
+
         return {
           ...charge,
           toBeServed: 'Forthwith',
         } as Ada
       })
 
-      console.log(`Y1ES ################################################${JSON.stringify(consecutiveCharges)}`)
-      return { ...it, charges: consecutiveCharges }
+      return { ...it, charges: consecutiveAndConcurrentCharges }
     })
-    return x
   }
 
   private getAdas(
