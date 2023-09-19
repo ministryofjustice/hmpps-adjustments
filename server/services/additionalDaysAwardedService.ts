@@ -179,7 +179,6 @@ export default class AdditionalDaysAwardedService {
               const ada = {
                 dateChargeProved: new Date(hearing.hearingTime.substring(0, 10)),
                 chargeNumber: cur.adjudicationNumber,
-                toBeServed: 'TODO', // TODO this field to be populated in a subsequent story
                 heardAt: hearing.establishment,
                 status: deriveStatus(cur.adjudicationNumber, sanction, existingAdaChargeIds),
                 days: sanction.sanctionDays,
