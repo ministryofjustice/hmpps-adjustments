@@ -11,6 +11,7 @@ type ChargeDetails = {
 type AdasByDateCharged = {
   dateChargeProved: Date
   charges: Ada[]
+  total: number
 }
 
 interface Ada extends ChargeDetails {

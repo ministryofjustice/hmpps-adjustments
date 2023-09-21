@@ -73,13 +73,13 @@ export default class AdditionalDaysAwardedService {
     const allAdas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope, existingAdaChargeIds)
 
     const adas: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWARDED)
-    const totalAdas: number = this.getTotalDaysByStatus(allAdas, AWARDED)
+    const totalAdas: number = this.getTotalDays(adas)
 
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, SUSPENDED)
-    const totalSuspended: number = this.getTotalDaysByStatus(allAdas, SUSPENDED)
+    const totalSuspended: number = this.getTotalDays(suspended)
 
     const awaitingApproval: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWAITING_APPROVAL)
-    const totalAwaitingApproval: number = this.getTotalDaysByStatus(allAdas, AWAITING_APPROVAL)
+    const totalAwaitingApproval: number = this.getTotalDays(awaitingApproval)
 
     return {
       totalAdas,
@@ -91,8 +91,8 @@ export default class AdditionalDaysAwardedService {
     } as AdasToReview
   }
 
-  private getTotalDaysByStatus(allAdas: Ada[], status: string) {
-    return allAdas.filter(it => it.status === status).reduce((acc, cur) => acc + cur.days, 0)
+  private getTotalDays(adas: AdasByDateCharged[]) {
+    return adas.reduce((acc, cur) => acc + cur.total, 0)
   }
 
   private getAdasByDateCharged(adas: Ada[], filterStatus: string): AdasByDateCharged[] {
@@ -109,13 +109,45 @@ export default class AdditionalDaysAwardedService {
       }, [])
       .sort((a, b) => a.dateChargeProved.getTime() - b.dateChargeProved.getTime())
 
-    return this.associateConsecutiveAdas(adasByDateCharged, adas)
+    return this.associateConsecutiveAdas(adasByDateCharged, adas).map(it => {
+      return { ...it, total: this.calculateTotal(it) }
+    })
+  }
+
+  private calculateTotal(adaByDateCharge: AdasByDateCharged): number {
+    if (adaByDateCharge.charges.length === 1) {
+      return adaByDateCharge.charges[0].days
+    }
+    const baseCharges = adaByDateCharge.charges.filter(it => !it.consecutiveToSequence)
+    const consecCharges = adaByDateCharge.charges.filter(it => !!it.consecutiveToSequence)
+
+    const chains: Ada[][] = []
+
+    baseCharges.forEach(it => {
+      const chain = [it]
+      chains.push(chain)
+      this.createChain(it, chain, consecCharges)
+    })
+
+    const calculatedDays = chains
+      .filter(it => it.length > 0)
+      .map(chain => chain.reduce((acc, cur) => acc + cur.days, 0))
+
+    return Math.max(...calculatedDays)
+  }
+
+  createChain(ada: Ada, chain: Ada[], consecCharges: Ada[]) {
+    const consecFrom = consecCharges.find(it => it.consecutiveToSequence === ada.sequence)
+    if (consecFrom) {
+      chain.push(consecFrom)
+      this.createChain(consecFrom, chain, consecCharges)
+    }
   }
 
   /*
    * Sets the toBeServed of the groupedAdas for the review screen, can be either Consecutive, Concurrent or Forthwith
    */
-  private associateConsecutiveAdas(adasByDateCharged: AdasByDateCharged[], adas: Ada[]) {
+  private associateConsecutiveAdas(adasByDateCharged: AdasByDateCharged[], adas: Ada[]): AdasByDateCharged[] {
     const consecutiveSourceAdas = this.getSourceAdaForConsecutive(adas)
     return adasByDateCharged.map(it => {
       const { charges } = it
