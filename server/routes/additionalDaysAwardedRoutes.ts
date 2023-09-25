@@ -2,8 +2,6 @@ import { RequestHandler } from 'express'
 import PrisonerService from '../services/prisonerService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import { AdasToReview } from '../@types/AdaTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import AdjustmentsService from '../services/adjustmentsService'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
