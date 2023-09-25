@@ -2,6 +2,8 @@ import { RequestHandler } from 'express'
 import PrisonerService from '../services/prisonerService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import { AdasToReview } from '../@types/AdaTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import AdjustmentsService from '../services/adjustmentsService'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
@@ -30,5 +32,23 @@ export default class AdditionalDaysAwardedRoutes {
       },
       adasToReview,
     })
+  }
+
+  public approve: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token, username } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      prisonerDetail.bookingId,
+      token,
+    )
+    await this.additionalDaysAwardedService.approveAdjudications(
+      prisonerDetail,
+      startOfSentenceEnvelope,
+      username,
+      token,
+    )
+
+    return res.redirect(`/${nomsId}`)
   }
 }

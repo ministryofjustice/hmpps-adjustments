@@ -3,6 +3,8 @@ import { AdjudicationSearchResponse, IndividualAdjudication, Sanction } from '..
 import { HmppsAuthClient } from '../data'
 import { Ada, AdasByDateCharged, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
+import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 /* The adjudications status from NOMIS DB mapped to the adjudications API status are listed here temporarily to make it easier to implement the stories which use the NOMIS status
  * 'AS_AWARDED' = 'Activated as Awarded'
@@ -61,7 +63,7 @@ export default class AdditionalDaysAwardedService {
   ): Promise<AdasToReview> {
     const existingAdaChargeIds = (await new AdjustmentsClient(token).findByPerson(nomsId))
       .filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.additionalDaysAwarded)
-      .map(ada => ada.additionalDaysAwarded.adjudicationId)
+      .flatMap(ada => ada.additionalDaysAwarded.adjudicationId)
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
     const adjudicationClient = new AdjudicationClient(systemToken)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
@@ -132,11 +134,13 @@ export default class AdditionalDaysAwardedService {
     const calculatedDays = chains
       .filter(it => it.length > 0)
       .map(chain => chain.reduce((acc, cur) => acc + cur.days, 0))
-
+    if (!calculatedDays.length) {
+      return 0
+    }
     return Math.max(...calculatedDays)
   }
 
-  createChain(ada: Ada, chain: Ada[], consecCharges: Ada[]) {
+  private createChain(ada: Ada, chain: Ada[], consecCharges: Ada[]) {
     const consecFrom = consecCharges.find(it => it.consecutiveToSequence === ada.sequence)
     if (consecFrom) {
       chain.push(consecFrom)
@@ -241,5 +245,59 @@ export default class AdditionalDaysAwardedService {
         ada => ada.consecutiveToSequence && allAdas.some(sourceAda => sourceAda.sequence === ada.consecutiveToSequence),
       )
       .map(consecutiveAda => allAdas.find(sourceAda => sourceAda.sequence === consecutiveAda.consecutiveToSequence))
+  }
+
+  public async approveAdjudications(
+    prisonerDetail: PrisonApiPrisoner,
+    startOfSentenceEnvelope: Date,
+    username: string,
+    token: string,
+  ) {
+    const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)).filter(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
+    )
+    const existingAdaChargeIds = allAdaAdjustments
+      .filter(it => it.additionalDaysAwarded)
+      .flatMap(ada => ada.additionalDaysAwarded.adjudicationId)
+    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
+    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(
+      prisonerDetail.offenderNo,
+    )
+    const individualAdjudications = await Promise.all(
+      adjudications.results.content.map(async it => {
+        return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
+      }),
+    )
+    const allAdas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope, existingAdaChargeIds)
+
+    const adas: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWARDED)
+
+    const adjustments = adas.map(it => {
+      return {
+        person: prisonerDetail.offenderNo,
+        bookingId: prisonerDetail.bookingId,
+        adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+        fromDate: it.dateChargeProved.toISOString().substring(0, 10),
+        days: it.total,
+        prisonId: prisonerDetail.agencyId,
+        additionalDaysAwarded: { adjudicationId: it.charges.map(charge => charge.chargeNumber) },
+      } as Adjustment
+    })
+
+    // Delete all unlinked ADAs.
+    await Promise.all(
+      allAdaAdjustments
+        .filter(it => !it.additionalDaysAwarded)
+        .map(it => {
+          return new AdjustmentsClient(token).delete(it.id)
+        }),
+    )
+    // Create adjustments
+    await Promise.all(
+      adjustments.map(it => {
+        return new AdjustmentsClient(token).create(it)
+      }),
+    )
   }
 }

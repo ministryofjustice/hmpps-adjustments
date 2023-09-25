@@ -91,7 +91,7 @@ export interface components {
   schemas: {
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never>
+        [key: string]: Record<string, never> | undefined
       }
       messageId: string
     }
@@ -145,13 +145,8 @@ export interface components {
     }
     /** @description The details of an additional days awarded (ADA) adjustment */
     AdditionalDaysAwardedDto: {
-      /**
-       * Format: int32
-       * @description The id of the adjudication that resulted in the ADA
-       */
-      adjudicationId: number
-      /** @description Is the ADA consecutive or concurrent */
-      consecutive: boolean
+      /** @description The id of the adjudication that resulted in the ADA */
+      adjudicationId: number[]
     }
     /** @description The adjustment and its identifier */
     AdjustmentDto: {
@@ -213,8 +208,11 @@ export interface components {
       prisonName?: string
       /** @description The person last updating this adjustment */
       lastUpdatedBy?: string
-      /** @description The status of this adjustment */
-      status?: string
+      /**
+       * @description The status of this adjustment
+       * @enum {string}
+       */
+      status?: 'ACTIVE' | 'INACTIVE' | 'DELETED'
       /**
        * Format: date-time
        * @description The date and time this adjustment was last updated
@@ -276,8 +274,6 @@ export interface components {
   headers: never
   pathItems: never
 }
-
-export type $defs = Record<string, never>
 
 export type external = Record<string, never>
 
@@ -372,17 +368,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -398,17 +388,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -461,17 +445,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -487,17 +465,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**

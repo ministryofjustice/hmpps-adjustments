@@ -88,15 +88,15 @@ const adjudicationThreeNonAda = JSON.parse(
 
 const adjudicationOneAdjustment = {
   adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-  additionalDaysAwarded: { adjudicationId: 1525916 },
+  additionalDaysAwarded: { adjudicationId: [1525916] },
 } as Adjustment
 const adjudicationTwoAdjustment = {
   adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-  additionalDaysAwarded: { adjudicationId: 1525917 },
+  additionalDaysAwarded: { adjudicationId: [1525917] },
 } as Adjustment
 const adjudicationThreeAdjustment = {
   adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-  additionalDaysAwarded: { adjudicationId: 1525918 },
+  additionalDaysAwarded: { adjudicationId: [1525918] },
 } as Adjustment
 
 const adjustmentResponsesWithChargeNumber = [
