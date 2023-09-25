@@ -454,7 +454,7 @@ describe('Adjustment routes tests', () => {
   it('GET /{nomsId}/{adjustmentType}/view', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'Active', prisonName: 'Leeds' },
+      { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'ACTIVE', prisonName: 'Leeds' },
     ])
 
     return request(app)
