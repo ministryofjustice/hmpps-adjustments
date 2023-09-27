@@ -19,27 +19,27 @@
               Review and Approve ADAs
             </h1>
             <p>
-              Check that the existing ADAs are correct, then review and approve pending ADAs.
+               Check that the existing ADAs are correct, then review and approve pending ADAs.
             </p>
 
             <h2 class="govuk-heading-m">Awarded ADAs</h2>
-            {{ adaTable('awarded-adas', adasToReview.adas, adasToReview.totalAdas, 'Total ADAs taken into calculation', 'Awarded ADAs will be included in the calculation.', 'No active ADA adjudications exist for this offender') }}
+            {{ adaTable('awarded-adas', adasToReview.adas, adasToReview.totalAdas, 'Awarded ADAs will be included in the calculation.', model.prisonerDetail.firstName | title + ' ' + model.prisonerDetail.lastName | title + ' has no ADAs that are applicable to the current sentences.') }}
 
             {% if adasToReview.suspended | length %}
               <h2 class="govuk-heading-m">Suspended ADAs</h2>
-              {{ adaTable('suspended-adas', adasToReview.suspended, adasToReview.totalSuspended, 'Total suspended ADAs', 'Suspended ADAs will not be included in the calculation.') }}
+              {{ adaTable('suspended-adas', adasToReview.suspended, adasToReview.totalSuspended, 'Suspended ADAs will not be included in the calculation.') }}
             {% endif %}
 
-            <h2 class="govuk-heading-m">Review and approve pending ADAs</h2>
-            {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval, 'Total ADAs awaiting approval', 'Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.', 'No ADA records waiting for approval exist for this offender') }}
+            <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
+            {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval, 'Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.', 'No ADA records waiting for approval exist for this offender') }}
 
           </div>
 
           <div class="govuk-inset-text">
-            If you think some information is wrong, contact the team responsible for adjudications.
+            If you think some information is wrong, ask the team responsible for adjudications in your prison to correct it, then <a href="">reload this page.</a>
           </div>
-          <div class="govuk-!-margin-top-8 govuk-button-group">
-
+          <div class="govuk-!-margin-top-8">
+            <p class="govuk-body">By approving the ADA information you are confirming the details match the DIS7 adjudication result form.The ADAs will be saved to NOMIS.</p>
             <form class="form" method="post">
               <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
               {{ govukButton({
