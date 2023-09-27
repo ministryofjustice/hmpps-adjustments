@@ -39,4 +39,40 @@ export default {
       },
     })
   },
+  stubGetSentencesAndOffences: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/prison-api/api/offender-sentences/booking/1234/sentences-and-offences',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: [
+          {
+            terms: [
+              {
+                years: 3,
+              },
+            ],
+            sentenceCalculationType: 'ADIMP',
+            sentenceTypeDescription: 'SDS Standard Sentence',
+            caseSequence: 1,
+            lineSequence: 1,
+            caseReference: 'ABC123',
+            sentenceSequence: 1,
+            sentenceStatus: 'A',
+            offences: [
+              {
+                offenceEndDate: '2021-02-03',
+                offenceCode: 'abc',
+                offenderChargeId: 111,
+                offenceDescription: 'Doing a crime',
+              },
+            ],
+          },
+        ],
+      },
+    })
+  },
 }
