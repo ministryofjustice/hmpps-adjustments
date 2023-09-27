@@ -14,6 +14,7 @@ import ViewModel from '../model/viewModel'
 import RemoveModel from '../model/removeModel'
 import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
+import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -21,6 +22,7 @@ export default class AdjustmentRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
+    private readonly additionalDaysAwardedService: AdditionalDaysAwardedService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -47,10 +49,28 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const message = req.flash('message')
+    if (!(message && message[0])) {
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+        prisonerDetail.bookingId,
+        token,
+      )
+      const intercept = await this.additionalDaysAwardedService.shouldIntercept(
+        req,
+        prisonerDetail,
+        adjustments,
+        startOfSentenceEnvelope,
+        username,
+      )
+
+      if (intercept.type !== 'NONE') {
+        return res.redirect(`/${nomsId}/additional-days/intercept`)
+      }
+    }
     const remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
     let relevantRemand
     try {
@@ -58,7 +78,6 @@ export default class AdjustmentRoutes {
     } catch {
       // Nothing to do, remand review won't be displayed.
     }
-    const message = req.flash('message')
     return res.render('pages/adjustments/hub', {
       model: new AdjustmentsHubViewModel(
         prisonerDetail,

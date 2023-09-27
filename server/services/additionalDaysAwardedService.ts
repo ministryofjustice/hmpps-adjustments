@@ -1,10 +1,13 @@
+import { Request } from 'express'
+import dayjs from 'dayjs'
 import AdjudicationClient from '../api/adjudicationsClient'
 import { AdjudicationSearchResponse, IndividualAdjudication, Sanction } from '../@types/adjudications/adjudicationTypes'
 import { HmppsAuthClient } from '../data'
-import { Ada, AdasByDateCharged, AdasToReview } from '../@types/AdaTypes'
+import { Ada, AdaIntercept, AdasByDateCharged, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 
 /* The adjudications status from NOMIS DB mapped to the adjudications API status are listed here temporarily to make it easier to implement the stories which use the NOMIS status
  * 'AS_AWARDED' = 'Activated as Awarded'
@@ -43,17 +46,22 @@ const AWARDED = 'AWARDED'
 const SUSPENDED = 'SUSPENDED'
 const QUASHED = 'QUASHED'
 const AWAITING_APPROVAL = 'AWAITING APPROVAL'
+const PROSPECTIVE = 'PROSPECTIVE'
 
 function deriveStatus(chargeId: number, sanction: Sanction, existingAdaChargeIds: number[]) {
   if (isSuspended(sanction)) return SUSPENDED
   if (sanction.status === 'Quashed' && existingAdaChargeIds.some(it => it === chargeId)) return AWAITING_APPROVAL
   if (sanction.status === 'Quashed') return QUASHED
   if (!isSuspended(sanction) && existingAdaChargeIds.some(it => it === chargeId)) return AWARDED
+  if (isProspectiveAda(sanction)) return PROSPECTIVE
   return AWAITING_APPROVAL
 }
 
 export default class AdditionalDaysAwardedService {
-  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+  constructor(
+    private readonly hmppsAuthClient: HmppsAuthClient,
+    private readonly additionalDaysAwardedStoreService: AdditionalDaysAwardedStoreService,
+  ) {}
 
   public async getAdasToReview(
     nomsId: string,
@@ -247,7 +255,63 @@ export default class AdditionalDaysAwardedService {
       .map(consecutiveAda => allAdas.find(sourceAda => sourceAda.sequence === consecutiveAda.consecutiveToSequence))
   }
 
+  public async shouldIntercept(
+    req: Request,
+    prisonerDetail: PrisonApiPrisoner,
+    adjustments: Adjustment[],
+    startOfSentenceEnvelope: Date,
+    username: string,
+  ): Promise<AdaIntercept> {
+    const lastApproved = this.additionalDaysAwardedStoreService.get(req, prisonerDetail.offenderNo)
+    if (lastApproved && dayjs(lastApproved).add(1, 'hour').isAfter(dayjs())) {
+      return { type: 'NONE', number: 0 }
+    }
+    const allAdaAdjustments = adjustments.filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
+    const anyUnlinkedAda = allAdaAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
+    const anyLinkedAda = allAdaAdjustments.some(it => !!it.additionalDaysAwarded?.adjudicationId?.length)
+
+    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
+    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(
+      prisonerDetail.offenderNo,
+    )
+    const individualAdjudications = await Promise.all(
+      adjudications.results.content.map(async it => {
+        return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
+      }),
+    )
+    const existingAdaChargeIds = allAdaAdjustments
+      .filter(it => it.additionalDaysAwarded)
+      .flatMap(ada => ada.additionalDaysAwarded.adjudicationId)
+    const allAdas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope, existingAdaChargeIds)
+
+    const prospective: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, PROSPECTIVE)
+    const awaitingApproval: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWAITING_APPROVAL)
+    if (allAdaAdjustments.length && anyUnlinkedAda) {
+      return {
+        type: 'FIRST_TIME',
+        number: prospective.length + awaitingApproval.length,
+      }
+    }
+
+    if (prospective.length) {
+      return {
+        type: 'PADA',
+        number: prospective.length,
+      }
+    }
+
+    if (awaitingApproval.length) {
+      if (anyLinkedAda) {
+        return { type: 'UPDATE', number: awaitingApproval.length }
+      }
+      return { type: 'FIRST_TIME', number: awaitingApproval.length }
+    }
+    return { type: 'NONE', number: 0 }
+  }
+
   public async approveAdjudications(
+    req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
     username: string,
@@ -271,7 +335,7 @@ export default class AdditionalDaysAwardedService {
     )
     const allAdas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope, existingAdaChargeIds)
 
-    const adas: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWARDED)
+    const adas: AdasByDateCharged[] = this.getAdasByDateCharged(allAdas, AWAITING_APPROVAL)
 
     const adjustments = adas.map(it => {
       return {
@@ -299,5 +363,7 @@ export default class AdditionalDaysAwardedService {
         return new AdjustmentsClient(token).create(it)
       }),
     )
+
+    this.additionalDaysAwardedStoreService.approve(req, prisonerDetail.offenderNo)
   }
 }

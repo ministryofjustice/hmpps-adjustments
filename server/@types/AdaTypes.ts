@@ -27,4 +27,10 @@ type AdasToReview = {
   totalAwaitingApproval: number
 }
 
-export { ChargeDetails, AdasByDateCharged, Ada, AdasToReview }
+type InterceptType = 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'
+
+type AdaIntercept = {
+  type: InterceptType
+  number: number
+}
+export { ChargeDetails, AdasByDateCharged, Ada, AdasToReview, InterceptType, AdaIntercept }

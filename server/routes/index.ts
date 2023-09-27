@@ -16,6 +16,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
+    service.additionalDaysAwardedService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -36,8 +37,9 @@ export default function routes(service: Services): Router {
   get('/:nomsId/review', adjustmentRoutes.review)
   post('/:nomsId/review', adjustmentRoutes.submitReview)
 
-  get('/:nomsId/ada/review', additionalDaysAwardedRoutes.review)
-  post('/:nomsId/ada/review', additionalDaysAwardedRoutes.approve)
+  get('/:nomsId/additional-days/intercept', additionalDaysAwardedRoutes.intercept)
+  get('/:nomsId/additional-days/review', additionalDaysAwardedRoutes.review)
+  post('/:nomsId/additional-days/review', additionalDaysAwardedRoutes.approve)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
