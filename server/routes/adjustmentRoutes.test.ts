@@ -8,16 +8,22 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
+import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/additionalDaysAwardedService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const additionalDaysAwardedService = new AdditionalDaysAwardedService(
+  null,
+  null,
+) as jest.Mocked<AdditionalDaysAwardedService>
 
 const NOMS_ID = 'ABC123'
 
@@ -67,7 +73,13 @@ let app: Express
 
 beforeEach(() => {
   app = appWithAllRoutes({
-    services: { prisonerService, adjustmentsService, identifyRemandPeriodsService, adjustmentsStoreService },
+    services: {
+      prisonerService,
+      adjustmentsService,
+      identifyRemandPeriodsService,
+      adjustmentsStoreService,
+      additionalDaysAwardedService,
+    },
   })
 })
 
@@ -82,6 +94,7 @@ describe('Adjustment routes tests', () => {
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0 })
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -96,6 +109,15 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Last update\n          on 05 April 2023\n          by Leeds')
       })
   })
+  it('GET /{nomsId} is intercepted if there is adas to review', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([
+      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+    ])
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'FIRST_TIME', number: 5 })
+    return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', `/${NOMS_ID}/additional-days/intercept`)
+  })
+
   it('GET /{nomsId} relevant remand throws error', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([radaAdjustment])

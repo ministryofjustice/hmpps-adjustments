@@ -1,16 +1,21 @@
 import nock from 'nock'
+import { Request } from 'express'
 import HmppsAuthClient from '../data/hmppsAuthClient'
 import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import TokenStore from '../data/tokenStore'
 import config from '../config'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
-import { AdasToReview } from '../@types/AdaTypes'
+import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 
 jest.mock('../data/hmppsAuthClient')
+jest.mock('./additionalDaysApprovalStoreService')
 
 const hmppsAuthClient = new HmppsAuthClient({} as TokenStore) as jest.Mocked<HmppsAuthClient>
-const adaService = new AdditionalDaysAwardedService(hmppsAuthClient)
+const storeService = new AdditionalDaysAwardedStoreService() as jest.Mocked<AdditionalDaysAwardedStoreService>
+const adaService = new AdditionalDaysAwardedService(hmppsAuthClient, storeService)
 
 const token = 'token'
 
@@ -407,6 +412,117 @@ describe('Additional Days Added Service', () => {
         totalAwaitingApproval: 0,
         totalSuspended: 0,
       } as AdasToReview)
+    })
+
+    it('Approve ADAs where a mix of consecutive and concurrent charges exist', async () => {
+      const nomsId = 'AA1234A'
+      const bookingId = 1234
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, threeAdjudicationsSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.approve.mockReturnValue()
+      await adaService.approveAdjudications(
+        request,
+        {
+          offenderNo: nomsId,
+          bookingId,
+        } as PrisonApiPrisoner,
+        startOfSentenceEnvelope,
+        'username',
+        token,
+      )
+      expect(storeService.approve.mock.calls).toHaveLength(1)
+    })
+    it('Should intercept mix of concurrent consec', async () => {
+      const nomsId = 'AA1234A'
+      const bookingId = 1234
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, threeAdjudicationsSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.get.mockReturnValue(null)
+      const intercept = await adaService.shouldIntercept(
+        request,
+        {
+          offenderNo: nomsId,
+          bookingId,
+        } as PrisonApiPrisoner,
+        [],
+        startOfSentenceEnvelope,
+        'username',
+      )
+
+      expect(intercept).toEqual({
+        type: 'FIRST_TIME',
+        number: 1,
+      } as AdaIntercept)
+    })
+    it('Shouldnt intercept when already persisted in adjustment api', async () => {
+      const nomsId = 'AA1234A'
+      const bookingId = 1234
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, threeAdjudicationsSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.get.mockReturnValue(null)
+      const intercept = await adaService.shouldIntercept(
+        request,
+        {
+          offenderNo: nomsId,
+          bookingId,
+        } as PrisonApiPrisoner,
+        adjustmentResponsesWithChargeNumber,
+        startOfSentenceEnvelope,
+        'username',
+      )
+
+      expect(intercept).toEqual({
+        type: 'NONE',
+        number: 0,
+      } as AdaIntercept)
+    })
+
+    it('Shouldnt intercept when recently saved', async () => {
+      const nomsId = 'AA1234A'
+      const bookingId = 1234
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, threeAdjudicationsSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.get.mockReturnValue(new Date())
+      const intercept = await adaService.shouldIntercept(
+        request,
+        {
+          offenderNo: nomsId,
+          bookingId,
+        } as PrisonApiPrisoner,
+        [],
+        startOfSentenceEnvelope,
+        'username',
+      )
+
+      expect(intercept).toEqual({
+        type: 'NONE',
+        number: 0,
+      } as AdaIntercept)
     })
   })
 })

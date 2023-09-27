@@ -25,14 +25,14 @@ export default {
           },
           {
             id: '5c618eb1-dcc9-4959-827e-27e6cd5fedf6',
-            bookingId: 1204935,
-            sentenceSequence: null,
             person: 'A1234AB',
+            bookingId: 1204935,
             adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-            toDate: null,
             fromDate: '2023-06-01',
             days: 40,
+            prisonId: 'KMI',
             prisonName: 'Leeds',
+            additionalDaysAwarded: { adjudicationId: [1296861, 1296857, 1296855, 1296846, 1296839] },
           },
           {
             id: '4c3c057c-896d-4793-9022-f3001e209a36',
