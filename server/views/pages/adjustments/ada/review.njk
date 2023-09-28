@@ -23,7 +23,7 @@
             </p>
 
             <h2 class="govuk-heading-m">Awarded ADAs</h2>
-            {{ adaTable('awarded-adas', adasToReview.adas, adasToReview.totalAdas, 'Awarded ADAs will be included in the calculation.', model.prisonerDetail.firstName | title + ' ' + model.prisonerDetail.lastName | title + ' has no ADAs that are applicable to the current sentences.') }}
+            {{ adaTable('awarded-adas', adasToReview.awarded, adasToReview.totalAwarded, 'Awarded ADAs will be included in the calculation.', model.prisonerDetail.firstName | title + ' ' + model.prisonerDetail.lastName | title + ' has no ADAs that are applicable to the current sentences.') }}
 
             {% if adasToReview.suspended | length %}
               <h2 class="govuk-heading-m">Suspended ADAs</h2>

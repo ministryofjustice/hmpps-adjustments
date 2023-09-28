@@ -21,7 +21,7 @@
             The first time you use the adjustments service, you need to check if the existing adjustment information from NOMIS is correct.
             {% elif model.intercept.type == 'PADA' %}
             There is a prospective ADA recorded for Joe Bloggs.
-            {% elif model.intercept.type == 'UPDATED' %}
+            {% elif model.intercept.type == 'UPDATE' %}
             Updates have been made to {{ model.prisonerDetail.firstName | title }}
               {{ model.prisonerDetail.lastName | title }}'s adjustment information, which need to be approved.
             {% endif %}
@@ -37,7 +37,7 @@
                 <h2 class="govuk-heading-m">Review PADA{% if model.intercept.number > 1%}s{% endif %}
                 </h2>
                 <p class="govuk-body">Review and approve the PADAs that are relevant to the current sentence.</p>
-              {% elif model.intercept.type == 'UPDATED' %}
+              {% elif model.intercept.type == 'UPDATE' %}
                 <h2 class="govuk-heading-m">Review ADA updates</h2>
                 <p class="govuk-body">Review and approve the changes that have been made to the ADAs</p>
               {% endif %}
