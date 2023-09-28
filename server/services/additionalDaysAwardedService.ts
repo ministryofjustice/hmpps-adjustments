@@ -218,7 +218,22 @@ export default class AdditionalDaysAwardedService {
         return { ...charge, toBeServed: 'Forthwith' } as Ada
       })
 
-      return { ...it, charges: consecutiveAndConcurrentCharges }
+      return {
+        ...it,
+        charges: this.sortChargesSoThatForthwithIsFirst(consecutiveAndConcurrentCharges),
+      }
+    })
+  }
+
+  private sortChargesSoThatForthwithIsFirst(charges: Ada[]): Ada[] {
+    return charges.sort((a, b) => {
+      if (a.toBeServed === 'Forthwith') {
+        return -1
+      }
+      if (b.toBeServed === 'Forthwith') {
+        return 1
+      }
+      return 0
     })
   }
 
