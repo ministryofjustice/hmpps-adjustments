@@ -3,6 +3,7 @@ import PrisonerService from '../services/prisonerService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
+import { Message } from '../model/adjustmentsHubViewModel'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
@@ -79,6 +80,9 @@ export default class AdditionalDaysAwardedRoutes {
       token,
     )
 
-    return res.redirect(`/${nomsId}`)
+    const message = {
+      action: 'ADDITIONAL_DAYS_UPDATED',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
 }
