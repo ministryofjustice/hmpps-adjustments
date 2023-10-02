@@ -6,7 +6,8 @@ import { PrisonApiUserCaseloads } from '../@types/prisonApi/prisonClientTypes'
 
 jest.mock('../data/hmppsAuthClient')
 
-const token = 'some token'
+const token =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJhdXRob3JpdGllcyI6W119.KYD1Sm0h9_mwhDXxRIx5tm4NfSSgS-B0sljBRH0vmNY'
 
 describe('User service', () => {
   let hmppsAuthClient: jest.Mocked<HmppsAuthClient>

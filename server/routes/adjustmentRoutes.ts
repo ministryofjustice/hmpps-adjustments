@@ -49,7 +49,7 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token, username, roles } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
@@ -84,6 +84,7 @@ export default class AdjustmentRoutes {
         adjustments,
         relevantRemand,
         remandDecision,
+        roles,
         message && message[0] && (JSON.parse(message[0]) as Message),
       ),
     })
