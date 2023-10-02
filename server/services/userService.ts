@@ -28,7 +28,7 @@ export default class UserService {
       displayName: convertToTitleCase(user.name),
       caseloads: userCaseloads.map(uc => uc.caseLoadId),
       caseloadDescriptions: userCaseloads.map(uc => uc.description),
-      roles: decoded.authorities.map(authority => authority.substring(authority.indexOf('_') + 1)),
+      roles: decoded?.authorities?.map(authority => authority.substring(authority.indexOf('_') + 1)) || [],
     }
   }
 }
