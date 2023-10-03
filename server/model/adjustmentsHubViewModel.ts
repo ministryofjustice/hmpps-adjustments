@@ -43,7 +43,7 @@ export default class AdjustmentsHubViewModel {
     return this.adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
   }
 
-  private hasRemandToolRole(): boolean {
+  public hasRemandToolRole(): boolean {
     return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }
 

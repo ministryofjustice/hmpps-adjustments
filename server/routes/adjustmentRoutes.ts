@@ -274,7 +274,7 @@ export default class AdjustmentRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { caseloads, token, roles } = res.locals.user
     const { nomsId, adjustmentTypeUrl } = req.params
     const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
     if (!adjustmentType) {
@@ -287,7 +287,7 @@ export default class AdjustmentRoutes {
         ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
         : null
     return res.render('pages/adjustments/view', {
-      model: new ViewModel(prisonerDetail, adjustments, adjustmentType, remandDecision),
+      model: new ViewModel(prisonerDetail, adjustments, adjustmentType, remandDecision, roles),
     })
   }
 
