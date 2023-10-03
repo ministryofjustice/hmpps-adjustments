@@ -71,13 +71,15 @@ export default class AdjustmentRoutes {
         return res.redirect(`/${nomsId}/additional-days/intercept`)
       }
     }
-    const remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
+    let remandDecision
     let relevantRemand
-    try {
-      relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
-    } catch {
-      // Nothing to do, remand review won't be displayed.
-    }
+    if (roles.includes('REMAND_IDENTIFIER'))
+      try {
+        remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
+        relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
+      } catch {
+        // Nothing to do, remand review won't be displayed.
+      }
     return res.render('pages/adjustments/hub', {
       model: new AdjustmentsHubViewModel(
         prisonerDetail,

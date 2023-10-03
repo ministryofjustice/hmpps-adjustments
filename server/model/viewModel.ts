@@ -129,7 +129,7 @@ export default class ViewModel {
   }
 
   public hasRemandToolRole(): boolean {
-    return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
+    return this.roles.includes('REMAND_IDENTIFIER')
   }
 
   private actionCell(adjustment: Adjustment) {
