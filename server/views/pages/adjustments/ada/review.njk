@@ -33,6 +33,11 @@
             <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
             {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval, 'Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.', 'No ADA records waiting for approval exist for this offender') }}
 
+            {% if adasToReview.quashed | length %}
+              <h2 class="govuk-heading-m">Review and approve quashed ADAs</h2>
+              {{ adaTable('quashed-approval-adas', adasToReview.quashed, adasToReview.totalQuashed, 'Once you have reviewed and approved the quashed ADAs, they will not be included in the sentence calculation') }}
+            {% endif %}
+
           </div>
 
           <div class="govuk-inset-text">
