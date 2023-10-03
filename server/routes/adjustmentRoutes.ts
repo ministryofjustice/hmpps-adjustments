@@ -285,7 +285,7 @@ export default class AdjustmentRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const remandDecision =
-      adjustmentType.value === 'REMAND'
+      adjustmentType.value === 'REMAND' && roles.includes('REMAND_IDENTIFIER')
         ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
         : null
     return res.render('pages/adjustments/view', {
