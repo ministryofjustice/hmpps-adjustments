@@ -1,6 +1,6 @@
 import type { Express } from 'express'
 import request from 'supertest'
-import { appWithAllRoutes } from './testutils/appSetup'
+import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
@@ -71,6 +71,11 @@ const adaAdjustment = {
 
 let app: Express
 
+const defaultUser = user
+const userWithRemandRole = { ...user, roles: ['REMAND_IDENTIFIER'] }
+
+let userInTest = defaultUser
+
 beforeEach(() => {
   app = appWithAllRoutes({
     services: {
@@ -80,10 +85,12 @@ beforeEach(() => {
       adjustmentsStoreService,
       additionalDaysAwardedService,
     },
+    userSupplier: () => userInTest,
   })
 })
 
 afterEach(() => {
+  userInTest = defaultUser
   jest.resetAllMocks()
 })
 
@@ -101,12 +108,27 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Nobody may have 20 days remand')
+        expect(res.text).not.toContain('Nobody may have 20 days remand')
         expect(res.text).toContain('24')
         expect(res.text).toContain(
           'Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded)',
         )
         expect(res.text).toContain('Last update\n          on 05 April 2023\n          by Leeds')
+      })
+  })
+  it('GET /{nomsId} with remand role', () => {
+    userInTest = userWithRemandRole
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsService.findByPerson.mockResolvedValue([
+      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+    ])
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0 })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Nobody may have 20 days remand')
       })
   })
   it('GET /{nomsId} is intercepted if there is adas to review', () => {

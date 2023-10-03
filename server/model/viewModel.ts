@@ -13,6 +13,7 @@ export default class ViewModel {
     allAdjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
     public remandDecision: IdentifyRemandDecision,
+    public roles: string[],
   ) {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
@@ -120,7 +121,15 @@ export default class ViewModel {
   }
 
   private viewingRemandThatIsIneditable(): boolean {
-    return this.adjustmentType.value === 'REMAND' && (!this.remandDecision || this.remandDecision.accepted)
+    return (
+      this.adjustmentType.value === 'REMAND' &&
+      (!this.remandDecision || this.remandDecision.accepted) &&
+      this.hasRemandToolRole()
+    )
+  }
+
+  public hasRemandToolRole(): boolean {
+    return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }
 
   private actionCell(adjustment: Adjustment) {

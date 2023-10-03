@@ -6,7 +6,9 @@ import { PrisonApiUserCaseloads } from '../@types/prisonApi/prisonClientTypes'
 
 jest.mock('../data/hmppsAuthClient')
 
-const token = 'some token'
+// Token generated from https://jwt.io/
+const token =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJhdXRob3JpdGllcyI6WyJST0xFX1JFTUFORF9JREVOVElGSUVSIl19.NGFqJz3OSXNPh3qsofGdUgDn-IxcEtgq65kn1u41WMM'
 
 describe('User service', () => {
   let hmppsAuthClient: jest.Mocked<HmppsAuthClient>
@@ -32,6 +34,7 @@ describe('User service', () => {
 
       expect(result.displayName).toEqual('Anon Nobody')
       expect(result.caseloads).toEqual(['MDI'])
+      expect(result.roles).toEqual(['REMAND_IDENTIFIER'])
     })
     it('Propagates error', async () => {
       hmppsAuthClient.getUser.mockRejectedValue(new Error('some error'))

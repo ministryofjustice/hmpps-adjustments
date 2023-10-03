@@ -20,6 +20,7 @@ export default class AdjustmentsHubViewModel {
     public adjustments: Adjustment[],
     public relevantRemand: RemandResult,
     public remandDecision: IdentifyRemandDecision,
+    public roles: string[],
     public message: Message,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
@@ -42,14 +43,24 @@ export default class AdjustmentsHubViewModel {
     return this.adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
   }
 
+  public hasRemandToolRole(): boolean {
+    return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
+  }
+
   public displayReview(): boolean {
     return (
-      this.relevantRemand && (!this.remandDecision || this.remandDecision.days !== this.getTotalDaysRelevantRemand())
+      this.hasRemandToolRole() &&
+      this.relevantRemand &&
+      (!this.remandDecision || this.remandDecision.days !== this.getTotalDaysRelevantRemand())
     )
   }
 
   public displayAddLink(adjustmentType: AdjustmentType): boolean {
-    return adjustmentType.value !== 'REMAND' || (this.remandDecision && !this.remandDecision.accepted)
+    return (
+      !this.hasRemandToolRole() ||
+      adjustmentType.value !== 'REMAND' ||
+      (this.remandDecision && !this.remandDecision.accepted)
+    )
   }
 
   public getTotalDays(adjustmentType: AdjustmentType) {
