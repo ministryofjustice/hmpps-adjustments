@@ -86,7 +86,8 @@ export default class AdditionalDaysAwardedService {
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'SUSPENDED')
     const totalSuspended: number = this.getTotalDays(suspended)
 
-    const quashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
+    const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
     const totalQuashed: number = this.getTotalDays(quashed)
 
     return {
@@ -99,6 +100,20 @@ export default class AdditionalDaysAwardedService {
       quashed,
       totalQuashed,
     } as AdasToReview
+  }
+
+  private filterQuashedAdasByMatchingChargeIds(
+    adas: AdasByDateCharged[],
+    adjustments: Adjustment[],
+  ): AdasByDateCharged[] {
+    const chargeIds = adjustments.flatMap(it => it.additionalDaysAwarded.adjudicationId)
+    return adas
+      .filter(adaByDate => {
+        return adaByDate.charges.some(it => chargeIds.includes(it.chargeNumber))
+      })
+      .map(it => {
+        return { ...it, status: 'PENDING APPROVAL' }
+      })
   }
 
   private filterAdasByMatchingAdjustment(
@@ -338,6 +353,13 @@ export default class AdditionalDaysAwardedService {
         return { type: 'UPDATE', number: awaitingApproval.length }
       }
       return { type: 'FIRST_TIME', number: awaitingApproval.length }
+    }
+
+    const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+
+    if (quashed.length) {
+      return { type: 'UPDATE', number: quashed.length }
     }
 
     if (prospective.length) {
