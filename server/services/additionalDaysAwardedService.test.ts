@@ -147,7 +147,7 @@ describe('Additional Days Added Service', () => {
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -226,7 +226,7 @@ describe('Additional Days Added Service', () => {
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -272,7 +272,7 @@ describe('Additional Days Added Service', () => {
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -339,7 +339,7 @@ describe('Additional Days Added Service', () => {
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -420,7 +420,7 @@ describe('Additional Days Added Service', () => {
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -486,7 +486,7 @@ describe('Additional Days Added Service', () => {
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adaToReview: AdasToReview = await adaService.getAdasToReview(
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -550,7 +550,7 @@ describe('Additional Days Added Service', () => {
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
       storeService.approve.mockReturnValue()
-      await adaService.approveAdjudications(
+      await adaService.submitAdjustments(
         request,
         {
           offenderNo: nomsId,
