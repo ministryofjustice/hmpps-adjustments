@@ -655,4 +655,45 @@ describe('Additional Days Added Service', () => {
       } as AdaIntercept)
     })
   })
+
+  it('Should intercept if all adas quashed', async () => {
+    const nomsId = 'AA1234A'
+    const bookingId = 1234
+    adjudicationsApi
+      .get('/adjudications/AA1234A/adjudications?size=1000', '')
+      .reply(200, threeAdjudicationsSearchResponse)
+    adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneQuashed)
+    adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOneQuashed)
+    adjudicationsApi
+      .get('/adjudications/AA1234A/charge/1525918', '')
+      .reply(200, adjudicationThreeConcurrentToOneQuashed)
+    const startOfSentenceEnvelope = new Date('2023-01-01')
+    const request = {} as jest.Mocked<Request>
+
+    const intercept = await adaService.shouldIntercept(
+      request,
+      {
+        offenderNo: nomsId,
+        bookingId,
+      } as PrisonApiPrisoner,
+      [
+        {
+          id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
+          person: 'AA1234A',
+          bookingId: 1234,
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          fromDate: '2023-08-03',
+          days: 10,
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+        },
+      ],
+      startOfSentenceEnvelope,
+      'username',
+    )
+
+    expect(intercept).toEqual({
+      type: 'UPDATE',
+      number: 1,
+    } as AdaIntercept)
+  })
 })

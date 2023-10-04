@@ -355,6 +355,13 @@ export default class AdditionalDaysAwardedService {
       return { type: 'FIRST_TIME', number: awaitingApproval.length }
     }
 
+    const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+
+    if (quashed.length) {
+      return { type: 'UPDATE', number: quashed.length }
+    }
+
     if (prospective.length) {
       const lastApproved = this.additionalDaysAwardedStoreService.get(req, prisonerDetail.offenderNo)
       if (lastApproved && dayjs(lastApproved).add(1, 'hour').isAfter(dayjs())) {
