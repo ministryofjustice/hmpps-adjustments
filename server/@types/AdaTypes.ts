@@ -32,6 +32,7 @@ type AdasToReview = {
   totalQuashed: number
   awaitingApproval: AdasByDateCharged[]
   totalAwaitingApproval: number
+  intercept: AdaIntercept
 }
 
 type InterceptType = 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'

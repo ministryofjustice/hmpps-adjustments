@@ -61,9 +61,10 @@ export default class AdditionalDaysAwardedService {
     username: string,
     token: string,
   ): Promise<AdasToReview> {
-    const existingAdasWithChargeIds = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
-      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.additionalDaysAwarded,
+    const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
+    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
     const adjudicationClient = new AdjudicationClient(systemToken)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
@@ -90,6 +91,7 @@ export default class AdditionalDaysAwardedService {
     const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
     const totalQuashed: number = this.getTotalDays(quashed)
 
+    const prospective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
     return {
       totalAwarded,
       awarded,
@@ -99,6 +101,7 @@ export default class AdditionalDaysAwardedService {
       totalAwaitingApproval,
       quashed,
       totalQuashed,
+      intercept: this.shouldInterceptLogic(null, nomsId, allAdaAdjustments, prospective, awaitingApproval, quashed),
     } as AdasToReview
   }
 
@@ -322,8 +325,6 @@ export default class AdditionalDaysAwardedService {
     username: string,
   ): Promise<AdaIntercept> {
     const allAdaAdjustments = adjustments.filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
-    const anyUnlinkedAda = allAdaAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
-    const anyLinkedAda = allAdaAdjustments.some(it => !!it.additionalDaysAwarded?.adjudicationId?.length)
 
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
     const adjudicationClient = new AdjudicationClient(systemToken)
@@ -341,6 +342,30 @@ export default class AdditionalDaysAwardedService {
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
     const { awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
     const prospective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+
+    return this.shouldInterceptLogic(
+      req,
+      prisonerDetail.offenderNo,
+      allAdaAdjustments,
+      prospective,
+      awaitingApproval,
+      quashed,
+    )
+  }
+
+  private shouldInterceptLogic(
+    req: Request,
+    nomsId: string,
+    allAdaAdjustments: Adjustment[],
+    prospective: AdasByDateCharged[],
+    awaitingApproval: AdasByDateCharged[],
+    quashed: AdasByDateCharged[],
+  ): AdaIntercept {
+    const anyUnlinkedAda = allAdaAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
+    const anyLinkedAda = allAdaAdjustments.some(it => !!it.additionalDaysAwarded?.adjudicationId?.length)
+
     if (allAdaAdjustments.length && anyUnlinkedAda) {
       return {
         type: 'FIRST_TIME',
@@ -355,17 +380,16 @@ export default class AdditionalDaysAwardedService {
       return { type: 'FIRST_TIME', number: awaitingApproval.length }
     }
 
-    const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
-    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
-
     if (quashed.length) {
       return { type: 'UPDATE', number: quashed.length }
     }
 
     if (prospective.length) {
-      const lastApproved = this.additionalDaysAwardedStoreService.get(req, prisonerDetail.offenderNo)
-      if (lastApproved && dayjs(lastApproved).add(1, 'hour').isAfter(dayjs())) {
-        return { type: 'NONE', number: 0 }
+      if (req) {
+        const lastApproved = this.additionalDaysAwardedStoreService.get(req, nomsId)
+        if (lastApproved && dayjs(lastApproved).add(1, 'hour').isAfter(dayjs())) {
+          return { type: 'NONE', number: 0 }
+        }
       }
       return {
         type: 'PADA',
