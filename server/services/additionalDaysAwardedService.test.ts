@@ -214,6 +214,10 @@ describe('Additional Days Added Service', () => {
         totalQuashed: 0,
         totalAwaitingApproval: 104,
         totalSuspended: 0,
+        intercept: {
+          number: 2,
+          type: 'UPDATE',
+        },
       } as AdasToReview)
     })
 
@@ -259,6 +263,10 @@ describe('Additional Days Added Service', () => {
         totalQuashed: 0,
         totalAwaitingApproval: 5,
         totalSuspended: 0,
+        intercept: {
+          number: 1,
+          type: 'UPDATE',
+        },
       } as AdasToReview)
     })
 
@@ -315,6 +323,10 @@ describe('Additional Days Added Service', () => {
         totalQuashed: 0,
         totalAwaitingApproval: 10,
         totalSuspended: 0,
+        intercept: {
+          number: 1,
+          type: 'UPDATE',
+        },
       } as AdasToReview)
     })
 
@@ -392,6 +404,10 @@ describe('Additional Days Added Service', () => {
         totalQuashed: 0,
         totalAwaitingApproval: 0,
         totalSuspended: 0,
+        intercept: {
+          number: 0,
+          type: 'NONE',
+        },
       } as AdasToReview)
     })
 
@@ -472,6 +488,10 @@ describe('Additional Days Added Service', () => {
         totalQuashed: 10,
         totalAwaitingApproval: 0,
         totalSuspended: 0,
+        intercept: {
+          number: 1,
+          type: 'UPDATE',
+        },
       } as AdasToReview)
     })
 
@@ -529,6 +549,10 @@ describe('Additional Days Added Service', () => {
         totalAwaitingApproval: 5,
         totalQuashed: 0,
         totalSuspended: 0,
+        intercept: {
+          number: 1,
+          type: 'UPDATE',
+        },
       } as AdasToReview)
     })
 
