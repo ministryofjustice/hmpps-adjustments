@@ -4,6 +4,7 @@ import AdditionalDaysAwardedService from '../services/additionalDaysAwardedServi
 import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { Message } from '../model/adjustmentsHubViewModel'
+import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
@@ -33,7 +34,7 @@ export default class AdditionalDaysAwardedRoutes {
       return res.redirect(`/${nomsId}`)
     }
 
-    return res.render('pages/adjustments/ada/intercept', {
+    return res.render('pages/adjustments/additional-days/intercept', {
       model: {
         prisonerDetail,
         intercept,
@@ -41,7 +42,7 @@ export default class AdditionalDaysAwardedRoutes {
     })
   }
 
-  public review: RequestHandler = async (req, res): Promise<void> => {
+  public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
@@ -49,14 +50,14 @@ export default class AdditionalDaysAwardedRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToReview(
+    const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToApprove(
       nomsId,
       startOfSentenceEnvelope,
       username,
       token,
     )
 
-    return res.render('pages/adjustments/ada/review', {
+    return res.render('pages/adjustments/additional-days/review-and-approve', {
       model: {
         prisonerDetail,
       },
@@ -65,6 +66,11 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public approve: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    return res.redirect(`/${nomsId}/additional-days/review-and-submit`)
+  }
+
+  public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
@@ -72,7 +78,27 @@ export default class AdditionalDaysAwardedRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    await this.additionalDaysAwardedService.approveAdjudications(
+    const adjustments = await this.additionalDaysAwardedService.getAdjustmentsToSubmit(
+      prisonerDetail,
+      startOfSentenceEnvelope,
+      username,
+      token,
+    )
+
+    return res.render('pages/adjustments/additional-days/review-and-submit', {
+      model: new ReviewAndSubmitAdaViewModel(prisonerDetail, adjustments),
+    })
+  }
+
+  public submit: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token, username } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      prisonerDetail.bookingId,
+      token,
+    )
+    await this.additionalDaysAwardedService.submitAdjustments(
       req,
       prisonerDetail,
       startOfSentenceEnvelope,

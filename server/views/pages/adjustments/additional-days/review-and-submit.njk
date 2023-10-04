@@ -1,0 +1,50 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = applicationName + " - Review additional days awarded" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+  <div class="moj-width-container">
+
+    <a href="/{{model.prisonerDetail.offenderNo}}/additional-days/review-and-approve" class="govuk-back-link">Back</a>
+
+    <main class="govuk-main-wrapper offence-outcome " id="main-content" role="main">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="govuk-form-group govuk-body">
+            <h1 class="govuk-heading-l">
+              <span class="govuk-caption-xl">Adjust release dates</span>
+              Review and submit ADAs
+            </h1>
+            <p>
+               Check that the ADA details are correct, then submit the adjustments.
+            </p>
+          </div>
+
+          {{ govukTable(
+              model.table()
+          ) }}
+
+          <div class="govuk-inset-text">
+            If you think some information is wrong, ask the team responsible for adjudications in your prison to correct it, then <a href="">reload this page.</a>
+          </div>
+          <div class="govuk-!-margin-top-8">
+            <h2 class="govuk-heading-m">Submit adjustment details</h2>
+            <p class="govuk-body">Once submitted, the ADA adjustment details will be saved in NOMIS. You will then need to recalculate the release dates.</p>
+            <form class="form" method="post">
+              <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+              {{ govukButton({
+                text: "Submit",
+                type: submit,
+                preventDoubleClick: true
+              }) }}
+            </form>
+          </div>
+          <a href="../">Cancel</a>
+        </div>
+      </div>
+    </main>
+  </div>
+{% endblock %}

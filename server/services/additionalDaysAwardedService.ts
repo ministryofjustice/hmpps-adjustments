@@ -55,7 +55,7 @@ export default class AdditionalDaysAwardedService {
     private readonly additionalDaysAwardedStoreService: AdditionalDaysAwardedStoreService,
   ) {}
 
-  public async getAdasToReview(
+  public async getAdasToApprove(
     nomsId: string,
     startOfSentenceEnvelope: Date,
     username: string,
@@ -375,13 +375,12 @@ export default class AdditionalDaysAwardedService {
     return { type: 'NONE', number: 0 }
   }
 
-  public async approveAdjudications(
-    req: Request,
+  private async getAdasToSubmitAndDelete(
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
     username: string,
     token: string,
-  ) {
+  ): Promise<{ adjustmentsToCreate: Adjustment[]; awarded: AdasByDateCharged[]; allAdaAdjustments: Adjustment[] }> {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
@@ -405,17 +404,51 @@ export default class AdditionalDaysAwardedService {
       existingAdasWithChargeIds,
     )
 
-    const adjustments = awaitingApproval.map(it => {
-      return {
-        person: prisonerDetail.offenderNo,
-        bookingId: prisonerDetail.bookingId,
-        adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-        fromDate: it.dateChargeProved.toISOString().substring(0, 10),
-        days: it.total,
-        prisonId: prisonerDetail.agencyId,
-        additionalDaysAwarded: { adjudicationId: it.charges.map(charge => charge.chargeNumber) },
-      } as Adjustment
-    })
+    return {
+      awarded,
+      allAdaAdjustments,
+      adjustmentsToCreate: awaitingApproval.map(it => {
+        return {
+          person: prisonerDetail.offenderNo,
+          bookingId: prisonerDetail.bookingId,
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          fromDate: it.dateChargeProved.toISOString().substring(0, 10),
+          days: it.total,
+          prisonId: prisonerDetail.agencyId,
+          additionalDaysAwarded: { adjudicationId: it.charges.map(charge => charge.chargeNumber) },
+        } as Adjustment
+      }),
+    }
+  }
+
+  public async getAdjustmentsToSubmit(
+    prisonerDetail: PrisonApiPrisoner,
+    startOfSentenceEnvelope: Date,
+    username: string,
+    token: string,
+  ): Promise<Adjustment[]> {
+    const { adjustmentsToCreate } = await this.getAdasToSubmitAndDelete(
+      prisonerDetail,
+      startOfSentenceEnvelope,
+      username,
+      token,
+    )
+    return adjustmentsToCreate
+  }
+
+  public async submitAdjustments(
+    req: Request,
+    prisonerDetail: PrisonApiPrisoner,
+    startOfSentenceEnvelope: Date,
+    username: string,
+    token: string,
+  ) {
+    const { awarded, adjustmentsToCreate, allAdaAdjustments } = await this.getAdasToSubmitAndDelete(
+      prisonerDetail,
+      startOfSentenceEnvelope,
+      username,
+      token,
+    )
 
     const awardedIds = awarded.map(it => it.adjustmentId)
     // Delete all ADAs which were not in the awarded table.
@@ -428,7 +461,7 @@ export default class AdditionalDaysAwardedService {
     )
     // Create adjustments
     await Promise.all(
-      adjustments.map(it => {
+      adjustmentsToCreate.map(it => {
         return new AdjustmentsClient(token).create(it)
       }),
     )

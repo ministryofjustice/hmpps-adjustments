@@ -38,8 +38,10 @@ export default function routes(service: Services): Router {
   post('/:nomsId/review', adjustmentRoutes.submitReview)
 
   get('/:nomsId/additional-days/intercept', additionalDaysAwardedRoutes.intercept)
-  get('/:nomsId/additional-days/review', additionalDaysAwardedRoutes.review)
-  post('/:nomsId/additional-days/review', additionalDaysAwardedRoutes.approve)
+  get('/:nomsId/additional-days/review-and-approve', additionalDaysAwardedRoutes.reviewAndApprove)
+  post('/:nomsId/additional-days/review-and-approve', additionalDaysAwardedRoutes.approve)
+  get('/:nomsId/additional-days/review-and-submit', additionalDaysAwardedRoutes.reviewAndSubmit)
+  post('/:nomsId/additional-days/review-and-submit', additionalDaysAwardedRoutes.submit)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
