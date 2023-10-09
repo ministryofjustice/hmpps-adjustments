@@ -35,10 +35,26 @@ type AdasToReview = {
   intercept: AdaIntercept
 }
 
+type PadasToReview = {
+  prospective: AdasByDateCharged[]
+  totalProspective: number
+}
+
 type InterceptType = 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'
 
 type AdaIntercept = {
   type: InterceptType
   number: number
+  anyProspective: boolean
 }
-export { ChargeDetails, AdasByDateCharged, Ada, AdasToReview, InterceptType, AdaIntercept, AdaStatus, ChargeStatus }
+export {
+  ChargeDetails,
+  AdasByDateCharged,
+  Ada,
+  AdasToReview,
+  InterceptType,
+  AdaIntercept,
+  AdaStatus,
+  ChargeStatus,
+  PadasToReview,
+}

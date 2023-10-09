@@ -15,6 +15,7 @@ import RemoveModel from '../model/removeModel'
 import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
+import FullPageError from '../model/FullPageError'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -116,6 +117,10 @@ export default class AdjustmentRoutes {
   public form: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
     const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
+
+    if (!['edit', 'add'].includes(addOrEdit)) {
+      throw FullPageError.notFoundError()
+    }
 
     const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
     if (!adjustmentType) {

@@ -3,11 +3,12 @@ import dayjs from 'dayjs'
 import AdjudicationClient from '../api/adjudicationsClient'
 import { AdjudicationSearchResponse, IndividualAdjudication, Sanction } from '../@types/adjudications/adjudicationTypes'
 import { HmppsAuthClient } from '../data'
-import { Ada, AdaIntercept, AdasByDateCharged, AdasToReview, ChargeStatus } from '../@types/AdaTypes'
+import { Ada, AdaIntercept, AdasByDateCharged, AdasToReview, ChargeStatus, PadasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
+import PadaForm from '../model/padaForm'
 
 /* The adjudications status from NOMIS DB mapped to the adjudications API status are listed here temporarily to make it easier to implement the stories which use the NOMIS status
  * 'AS_AWARDED' = 'Activated as Awarded'
@@ -56,6 +57,7 @@ export default class AdditionalDaysAwardedService {
   ) {}
 
   public async getAdasToApprove(
+    req: Request,
     nomsId: string,
     startOfSentenceEnvelope: Date,
     username: string,
@@ -76,13 +78,7 @@ export default class AdditionalDaysAwardedService {
     const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
-    const { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(
-      awardedOrPending,
-      existingAdasWithChargeIds,
-    )
-
-    const totalAwarded: number = this.getTotalDays(awarded)
-    const totalAwaitingApproval: number = this.getTotalDays(awaitingApproval)
+    let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
 
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'SUSPENDED')
     const totalSuspended: number = this.getTotalDays(suspended)
@@ -91,7 +87,22 @@ export default class AdditionalDaysAwardedService {
     const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
     const totalQuashed: number = this.getTotalDays(quashed)
 
-    const prospective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const { awarded: prospectiveAwarded, awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
+      allProspective,
+      existingAdasWithChargeIds,
+    )
+
+    awarded = awarded.concat(prospectiveAwarded)
+
+    const selectedProspectiveAdaDates = this.additionalDaysAwardedStoreService.getSelectedPadas(req, nomsId)
+    const selectedProspectiveAdas = prospective.filter(it => {
+      return selectedProspectiveAdaDates.includes(it.dateChargeProved.toISOString().substring(0, 10))
+    })
+    awaitingApproval = awaitingApproval.concat(selectedProspectiveAdas)
+
+    const totalAwarded: number = this.getTotalDays(awarded)
+    const totalAwaitingApproval: number = this.getTotalDays(awaitingApproval)
     return {
       totalAwarded,
       awarded,
@@ -101,8 +112,45 @@ export default class AdditionalDaysAwardedService {
       totalAwaitingApproval,
       quashed,
       totalQuashed,
-      intercept: this.shouldInterceptLogic(null, nomsId, allAdaAdjustments, prospective, awaitingApproval, quashed),
+      intercept: this.shouldInterceptLogic(req, nomsId, allAdaAdjustments, prospective, awaitingApproval, quashed),
     } as AdasToReview
+  }
+
+  public async getPadasToApprove(
+    nomsId: string,
+    startOfSentenceEnvelope: Date,
+    username: string,
+    token: string,
+  ): Promise<PadasToReview> {
+    const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
+    )
+    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
+    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
+    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
+    const individualAdjudications = await Promise.all(
+      adjudications.results.content.map(async it => {
+        return adjudicationClient.getAdjudication(nomsId, it.adjudicationNumber)
+      }),
+    )
+    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+
+    const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
+      allProspective,
+      existingAdasWithChargeIds,
+    )
+    const totalProspective: number = this.getTotalDays(prospective)
+
+    return {
+      prospective,
+      totalProspective,
+    } as PadasToReview
+  }
+
+  public storeSelectedPadas(req: Request, nomsId: string, padaForm: PadaForm): void {
+    this.additionalDaysAwardedStoreService.storeSelectedPadas(req, nomsId, padaForm.getSelectedProspectiveAdas())
   }
 
   private filterQuashedAdasByMatchingChargeIds(
@@ -341,7 +389,11 @@ export default class AdditionalDaysAwardedService {
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
     const { awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
-    const prospective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
+      allProspective,
+      existingAdasWithChargeIds,
+    )
     const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
     const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
 
@@ -370,36 +422,39 @@ export default class AdditionalDaysAwardedService {
       return {
         type: 'FIRST_TIME',
         number: prospective.length + awaitingApproval.length,
+        anyProspective: !!prospective.length,
       }
     }
 
     if (awaitingApproval.length) {
       if (anyLinkedAda) {
-        return { type: 'UPDATE', number: awaitingApproval.length }
+        return { type: 'UPDATE', number: awaitingApproval.length, anyProspective: !!prospective.length }
       }
-      return { type: 'FIRST_TIME', number: awaitingApproval.length }
+      return { type: 'FIRST_TIME', number: awaitingApproval.length, anyProspective: !!prospective.length }
     }
 
     if (quashed.length) {
-      return { type: 'UPDATE', number: quashed.length }
+      return { type: 'UPDATE', number: quashed.length, anyProspective: !!prospective.length }
     }
 
     if (prospective.length) {
       if (req) {
-        const lastApproved = this.additionalDaysAwardedStoreService.get(req, nomsId)
+        const lastApproved = this.additionalDaysAwardedStoreService.getLastApprovedDate(req, nomsId)
         if (lastApproved && dayjs(lastApproved).add(1, 'hour').isAfter(dayjs())) {
-          return { type: 'NONE', number: 0 }
+          return { type: 'NONE', number: 0, anyProspective: false }
         }
       }
       return {
         type: 'PADA',
         number: prospective.length,
+        anyProspective: !!prospective.length,
       }
     }
-    return { type: 'NONE', number: 0 }
+    return { type: 'NONE', number: 0, anyProspective: false }
   }
 
   private async getAdasToSubmitAndDelete(
+    req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
     username: string,
@@ -423,10 +478,24 @@ export default class AdditionalDaysAwardedService {
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
 
-    const { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(
-      awardedOrPending,
+    let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
+
+    const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const { awarded: prospectiveAwarded, awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
+      allProspective,
       existingAdasWithChargeIds,
     )
+
+    awarded = awarded.concat(prospectiveAwarded)
+
+    const selectedProspectiveAdaDates = this.additionalDaysAwardedStoreService.getSelectedPadas(
+      req,
+      prisonerDetail.offenderNo,
+    )
+    const selectedProspectiveAdas = prospective.filter(it => {
+      return selectedProspectiveAdaDates.includes(it.dateChargeProved.toISOString().substring(0, 10))
+    })
+    awaitingApproval = awaitingApproval.concat(selectedProspectiveAdas)
 
     return {
       awarded,
@@ -446,12 +515,14 @@ export default class AdditionalDaysAwardedService {
   }
 
   public async getAdjustmentsToSubmit(
+    req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
     username: string,
     token: string,
   ): Promise<Adjustment[]> {
     const { adjustmentsToCreate } = await this.getAdasToSubmitAndDelete(
+      req,
       prisonerDetail,
       startOfSentenceEnvelope,
       username,
@@ -468,6 +539,7 @@ export default class AdditionalDaysAwardedService {
     token: string,
   ) {
     const { awarded, adjustmentsToCreate, allAdaAdjustments } = await this.getAdasToSubmitAndDelete(
+      req,
       prisonerDetail,
       startOfSentenceEnvelope,
       username,
@@ -490,6 +562,7 @@ export default class AdditionalDaysAwardedService {
       }),
     )
 
-    this.additionalDaysAwardedStoreService.approve(req, prisonerDetail.offenderNo)
+    this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.offenderNo)
+    this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.offenderNo)
   }
 }

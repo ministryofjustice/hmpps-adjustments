@@ -5,7 +5,7 @@ import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import TokenStore from '../data/tokenStore'
 import config from '../config'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
-import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
+import { AdaIntercept, AdasToReview, PadasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
@@ -146,8 +146,10 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeWithTwoSanctions)
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
 
       const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -217,6 +219,7 @@ describe('Additional Days Added Service', () => {
         intercept: {
           number: 2,
           type: 'UPDATE',
+          anyProspective: false,
         },
       } as AdasToReview)
     })
@@ -229,8 +232,10 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
 
       const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -266,6 +271,7 @@ describe('Additional Days Added Service', () => {
         intercept: {
           number: 1,
           type: 'UPDATE',
+          anyProspective: false,
         },
       } as AdasToReview)
     })
@@ -279,8 +285,10 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
 
       const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -326,6 +334,7 @@ describe('Additional Days Added Service', () => {
         intercept: {
           number: 1,
           type: 'UPDATE',
+          anyProspective: false,
         },
       } as AdasToReview)
     })
@@ -350,8 +359,10 @@ describe('Additional Days Added Service', () => {
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
 
       const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -407,6 +418,7 @@ describe('Additional Days Added Service', () => {
         intercept: {
           number: 0,
           type: 'NONE',
+          anyProspective: false,
         },
       } as AdasToReview)
     })
@@ -435,8 +447,10 @@ describe('Additional Days Added Service', () => {
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
 
       const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -491,8 +505,138 @@ describe('Additional Days Added Service', () => {
         intercept: {
           number: 1,
           type: 'UPDATE',
+          anyProspective: false,
         },
       } as AdasToReview)
+    })
+    it('Get adjudication where prospective ada exists and selected', async () => {
+      const nomsId = 'AA1234A'
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, oneAdjudicationSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
+      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.getSelectedPadas.mockReturnValue(['2023-08-03'])
+
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
+        nomsId,
+        startOfSentenceEnvelope,
+        'username',
+        token,
+      )
+
+      expect(adaToReview).toEqual({
+        awaitingApproval: [
+          {
+            dateChargeProved: new Date('2023-08-03'),
+            charges: [
+              {
+                chargeNumber: 1525916,
+                dateChargeProved: new Date('2023-08-03'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'PROSPECTIVE',
+                toBeServed: 'Forthwith',
+                sequence: 15,
+              },
+            ],
+            total: 5,
+            status: 'PENDING APPROVAL',
+          },
+        ],
+        suspended: [],
+        awarded: [],
+        quashed: [],
+        totalAwarded: 0,
+        totalQuashed: 0,
+        totalAwaitingApproval: 5,
+        totalSuspended: 0,
+        intercept: {
+          number: 1,
+          type: 'FIRST_TIME',
+          anyProspective: true,
+        },
+      } as AdasToReview)
+    })
+
+    it('Get adjudication where prospective ada exists and not selected', async () => {
+      const nomsId = 'AA1234A'
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, oneAdjudicationSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
+      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.getSelectedPadas.mockReturnValue([])
+
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
+        nomsId,
+        startOfSentenceEnvelope,
+        'username',
+        token,
+      )
+
+      expect(adaToReview).toEqual({
+        awaitingApproval: [],
+        suspended: [],
+        awarded: [],
+        quashed: [],
+        totalAwarded: 0,
+        totalQuashed: 0,
+        totalAwaitingApproval: 0,
+        totalSuspended: 0,
+        intercept: {
+          number: 1,
+          type: 'PADA',
+          anyProspective: true,
+        },
+      } as AdasToReview)
+    })
+
+    it('Get padas where prospective ada exists', async () => {
+      const nomsId = 'AA1234A'
+      adjudicationsApi
+        .get('/adjudications/AA1234A/adjudications?size=1000', '')
+        .reply(200, oneAdjudicationSearchResponse)
+      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
+      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+
+      const padaToReview: PadasToReview = await adaService.getPadasToApprove(
+        nomsId,
+        startOfSentenceEnvelope,
+        'username',
+        token,
+      )
+
+      expect(padaToReview).toEqual({
+        prospective: [
+          {
+            dateChargeProved: new Date('2023-08-03'),
+            charges: [
+              {
+                chargeNumber: 1525916,
+                dateChargeProved: new Date('2023-08-03'),
+                days: 5,
+                heardAt: 'Moorland (HMP & YOI)',
+                status: 'PROSPECTIVE',
+                toBeServed: 'Forthwith',
+                sequence: 15,
+              },
+            ],
+            total: 5,
+            status: 'PENDING APPROVAL',
+          },
+        ],
+        totalProspective: 5,
+      } as PadasToReview)
     })
 
     it('Get adjudication where ada is consecutive to a non-ada - edge case, this  really stems from bad data in nomis ', async () => {
@@ -505,8 +649,10 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeNonAda)
       adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
 
       const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
         nomsId,
         startOfSentenceEnvelope,
         'username',
@@ -552,6 +698,7 @@ describe('Additional Days Added Service', () => {
         intercept: {
           number: 1,
           type: 'UPDATE',
+          anyProspective: false,
         },
       } as AdasToReview)
     })
@@ -573,7 +720,7 @@ describe('Additional Days Added Service', () => {
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
-      storeService.approve.mockReturnValue()
+      storeService.setLastApprovedDate.mockReturnValue()
       await adaService.submitAdjustments(
         request,
         {
@@ -584,7 +731,7 @@ describe('Additional Days Added Service', () => {
         'username',
         token,
       )
-      expect(storeService.approve.mock.calls).toHaveLength(1)
+      expect(storeService.setLastApprovedDate.mock.calls).toHaveLength(1)
     })
     it('Should intercept mix of concurrent consec', async () => {
       const nomsId = 'AA1234A'
@@ -597,7 +744,7 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
-      storeService.get.mockReturnValue(null)
+      storeService.getLastApprovedDate.mockReturnValue(null)
       const intercept = await adaService.shouldIntercept(
         request,
         {
@@ -612,6 +759,7 @@ describe('Additional Days Added Service', () => {
       expect(intercept).toEqual({
         type: 'FIRST_TIME',
         number: 1,
+        anyProspective: false,
       } as AdaIntercept)
     })
     it('Shouldnt intercept when already persisted in adjustment api', async () => {
@@ -625,7 +773,7 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
-      storeService.get.mockReturnValue(null)
+      storeService.getLastApprovedDate.mockReturnValue(null)
       const intercept = await adaService.shouldIntercept(
         request,
         {
@@ -649,6 +797,7 @@ describe('Additional Days Added Service', () => {
       expect(intercept).toEqual({
         type: 'NONE',
         number: 0,
+        anyProspective: false,
       } as AdaIntercept)
     })
 
@@ -661,7 +810,7 @@ describe('Additional Days Added Service', () => {
       adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
-      storeService.get.mockReturnValue(new Date())
+      storeService.getLastApprovedDate.mockReturnValue(new Date())
       const intercept = await adaService.shouldIntercept(
         request,
         {
@@ -676,6 +825,7 @@ describe('Additional Days Added Service', () => {
       expect(intercept).toEqual({
         type: 'NONE',
         number: 0,
+        anyProspective: false,
       } as AdaIntercept)
     })
   })
@@ -718,6 +868,7 @@ describe('Additional Days Added Service', () => {
     expect(intercept).toEqual({
       type: 'UPDATE',
       number: 1,
+      anyProspective: false,
     } as AdaIntercept)
   })
 })

@@ -101,7 +101,7 @@ describe('Adjustment routes tests', () => {
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0 })
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0, anyProspective: false })
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -123,7 +123,7 @@ describe('Adjustment routes tests', () => {
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0 })
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0, anyProspective: false })
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -136,7 +136,11 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'FIRST_TIME', number: 5 })
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+      type: 'FIRST_TIME',
+      number: 5,
+      anyProspective: true,
+    })
     return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', `/${NOMS_ID}/additional-days/intercept`)
   })
 
