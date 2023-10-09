@@ -1,9 +1,16 @@
-{% macro adaTable(tableId, adas, total, mainTitle, emptyTitle) %}
+{% macro adaTable(tableId, adas, total, mainTitle, emptyTitle, checkboxes) %}
   {% if adas | length %}
-    <p>{{ mainTitle }}</p>
-    <table id="{{ tableId }}" class="govuk-table govuk-!-margin-bottom-8">
+    {% if mainTitle %}
+      <p>{{ mainTitle }}</p>
+    {% endif %}
+    <table id="{{ tableId }}" class="govuk-table {{'govuk-!-margin-bottom-8' if not checkboxes else 'govuk-!-margin-bottom-2'}}">
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
+          {% if checkboxes %}
+            <th class="govuk-table__header" scope="col">
+              <span class="govuk-visually-hidden">Select adjudication</span>
+            </th>
+          {% endif %}
           <th class="govuk-table__header" scope="col">Date charge proved</th>
           <th class="govuk-table__header" scope="col">Charge details</th>
         </tr>
@@ -11,6 +18,18 @@
       <tbody>
         {% for ada in adas %}
           <tr class="govuk-table__row">
+            {% if checkboxes %}
+              <td class="govuk-table__cell">
+                <div class="govuk-checkboxes__item govuk-checkboxes--small moj-multi-select__checkbox">
+                  {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
+                  <input type="checkbox" class="govuk-checkboxes__input row-checkbox" id="prospective-{{isoDate}}" name="prospective" value="{{isoDate}}">
+                  <label class="govuk-label govuk-checkboxes__label" for="prospective-{{isoDate}}">
+                    <span class="govuk-visually-hidden">Select 
+              {{ ada.dateChargeProved | date("DD MMM YYYY") }}</span>
+                  </label>
+                </div>
+              </td>
+            {% endif %}
             <td class="govuk-table__cell govuk-!-width-one-fifth">
               {{ ada.dateChargeProved | date("DD MMM YYYY") }}
             </td>
@@ -35,7 +54,12 @@
                       {{ charge.heardAt }}
                     </td>
                     <td class="govuk-table__cell">
-                      <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
+                      {% if not checkboxes %}
+                        <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
+                      {% endif %}
+                      {% if charge.status === 'PROSPECTIVE' %}
+                        <span class="moj-badge moj-badge--purple">{{ charge.status }}</span>
+                      {% endif %}
                     </td>
                     <!-- Days -->
                     <td class="govuk-table__cell govuk-!-text-align-centre">{{ charge.days }}</td>
@@ -47,13 +71,26 @@
         {% endfor %}
       </tbody>
 
-      <tfoot>
-        <tr class="govuk-table__row">
-          <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="1">Total</th>
-          <td class="govuk-table__cell govuk-!-text-align-right govuk-!-padding-right-4">{{ total }}</td>
-        </tr>
-      </tfoot>
+      {% if not checkboxes %}
+        <tfoot>
+          <tr class="govuk-table__row">
+            <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="1">Total</th>
+            <td class="govuk-table__cell govuk-!-text-align-right govuk-!-padding-right-4">{{ total }}</td>
+          </tr>
+        </tfoot>
+      {% endif %}
     </table>
+
+    {% if checkboxes %}
+      <div class="govuk-form-group govuk-!-margin-bottom-4">
+        <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+          <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input" id="unselect-all" name="none" type="checkbox" value="none">
+            <label class="govuk-label govuk-checkboxes__label" for="unselect-all">None of these PADAs apply</label>
+          </div>
+        </div>
+      </div>
+    {% endif %}
   {% else %}
     <p>{{ emptyTitle }}</p>
   {% endif %}

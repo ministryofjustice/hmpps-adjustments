@@ -42,7 +42,13 @@
                 <p class="govuk-body">Review and approve the changes that have been made to the ADAs</p>
               {% endif %}
 
-              <a class="govuk-link" href="/{{model.prisonerDetail.offenderNo}}/additional-days/review-and-approve">Review</a>
+              {% if model.intercept.anyProspective %}
+                {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/review-prospective" %}
+              {% else %}
+                {% set url =  "/" + model.prisonerDetail.offenderNo + "/additional-days/review-and-approve" %}
+              {% endif %}
+              <a class="govuk-link" href="{{url}}">Review</a>
+
             </section>
           </article>
         </div>

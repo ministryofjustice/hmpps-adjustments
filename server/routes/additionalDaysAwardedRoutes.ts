@@ -5,6 +5,7 @@ import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { Message } from '../model/adjustmentsHubViewModel'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
+import PadaForm from '../model/padaForm'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
@@ -51,18 +52,87 @@ export default class AdditionalDaysAwardedRoutes {
       token,
     )
     const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToApprove(
+      req,
       nomsId,
       startOfSentenceEnvelope,
       username,
       token,
     )
 
+    if (adasToReview.intercept.type === 'PADA' && !adasToReview.awaitingApproval.length) {
+      // Intercepted for PADAs, none have been selected.
+      await this.additionalDaysAwardedService.submitAdjustments(
+        req,
+        prisonerDetail,
+        startOfSentenceEnvelope,
+        username,
+        token,
+      )
+      return res.redirect(`/${nomsId}`)
+    }
     return res.render('pages/adjustments/additional-days/review-and-approve', {
       model: {
         prisonerDetail,
       },
       adasToReview,
     })
+  }
+
+  public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token, username } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      prisonerDetail.bookingId,
+      token,
+    )
+    const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
+      nomsId,
+      startOfSentenceEnvelope,
+      username,
+      token,
+    )
+
+    return res.render('pages/adjustments/additional-days/review-prospective', {
+      model: {
+        prisonerDetail,
+      },
+      padasToReview,
+    })
+  }
+
+  public submitPadas: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token, username } = res.locals.user
+    const { nomsId } = req.params
+
+    const padaForm = new PadaForm(req.body)
+
+    await padaForm.validate()
+
+    if (padaForm.errors.length) {
+      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+        prisonerDetail.bookingId,
+        token,
+      )
+      const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
+        nomsId,
+        startOfSentenceEnvelope,
+        username,
+        token,
+      )
+      return res.render('pages/adjustments/additional-days/review-prospective', {
+        model: {
+          prisonerDetail,
+        },
+        padasToReview,
+        padaForm,
+      })
+    }
+
+    this.additionalDaysAwardedService.storeSelectedPadas(req, nomsId, padaForm)
+
+    return res.redirect(`/${nomsId}/additional-days/review-and-approve`)
   }
 
   public approve: RequestHandler = async (req, res): Promise<void> => {
@@ -79,6 +149,7 @@ export default class AdditionalDaysAwardedRoutes {
       token,
     )
     const adjustments = await this.additionalDaysAwardedService.getAdjustmentsToSubmit(
+      req,
       prisonerDetail,
       startOfSentenceEnvelope,
       username,

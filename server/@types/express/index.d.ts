@@ -9,6 +9,7 @@ declare module 'express-session' {
     nowInMinutes: number
     adjustments: { string?: Adjustment }
     additionalDayApprovals: { string?: Date }
+    additionalDayPadas: { string?: string[] }
   }
 }
 
