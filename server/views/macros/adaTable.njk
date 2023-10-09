@@ -8,7 +8,7 @@
         <tr class="govuk-table__row">
           {% if checkboxes %}
             <th class="govuk-table__header" scope="col">
-              <!-- todo visually hidden -->
+              <span class="govuk-visually-hidden">Select adjudication</span>
             </th>
           {% endif %}
           <th class="govuk-table__header" scope="col">Date charge proved</th>
@@ -24,7 +24,8 @@
                   {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
                   <input type="checkbox" class="govuk-checkboxes__input row-checkbox" id="prospective-{{isoDate}}" name="prospective" value="{{isoDate}}">
                   <label class="govuk-label govuk-checkboxes__label" for="prospective-{{isoDate}}">
-                    <span class="govuk-visually-hidden">Select Aconcagua</span>
+                    <span class="govuk-visually-hidden">Select 
+              {{ ada.dateChargeProved | date("DD MMM YYYY") }}</span>
                   </label>
                 </div>
               </td>
