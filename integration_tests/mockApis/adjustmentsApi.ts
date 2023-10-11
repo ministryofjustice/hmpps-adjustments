@@ -163,11 +163,23 @@ export default {
       },
     })
   },
-  stubRemoveAdjustment: (): SuperAgentRequest => {
+  stubDeleteRada: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'DELETE',
         urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteAda: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/5c618eb1-dcc9-4959-827e-27e6cd5fedf6',
       },
       response: {
         status: 200,

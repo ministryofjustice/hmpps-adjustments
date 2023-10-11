@@ -1,12 +1,9 @@
+import AdjustmentsPage from './adjustmentsPage'
 import Page, { PageElement } from './page'
 
-export default class HubPage extends Page {
+export default class HubPage extends AdjustmentsPage {
   constructor() {
     super('Review and apply adjustments')
-  }
-
-  public skipAxe() {
-    return false
   }
 
   public static goTo(prisonerId: string): HubPage {

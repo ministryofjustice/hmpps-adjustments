@@ -62,9 +62,10 @@ export default {
             caseReference: 'ABC123',
             sentenceSequence: 1,
             sentenceStatus: 'A',
+            sentenceDate: '2001-01-01',
             offences: [
               {
-                offenceEndDate: '2021-02-03',
+                offenceEndDate: '2000-02-03',
                 offenceCode: 'abc',
                 offenderChargeId: 111,
                 offenceDescription: 'Doing a crime',

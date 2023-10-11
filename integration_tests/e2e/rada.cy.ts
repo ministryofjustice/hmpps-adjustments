@@ -18,10 +18,10 @@ context('Enter a RADA', () => {
     cy.task('stubCreateAdjustment')
     cy.task('stubGetAdjustment')
     cy.task('stubUpdateAdjustment')
-    cy.task('stubRemoveAdjustment')
+    cy.task('stubDeleteRada')
     cy.task('stubGetRemandDecision')
-    cy.task('stubSearchAdjudications')
-    cy.task('stubIndividualAdjudications')
+    cy.task('stubSearchAdjudicationsNoReview')
+    cy.task('stubIndividualAdjudicationsNoReview')
     cy.task('stubGetSentencesAndOffences')
   })
 

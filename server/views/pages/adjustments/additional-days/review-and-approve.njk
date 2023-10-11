@@ -6,69 +6,66 @@
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
-  <div class="moj-width-container">
 
-    {% if adasToReview.intercept.anyProspective %}
-      {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/review-prospective" %}
-    {% else %}
-      {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/intercept" %}
-    {% endif %}
-    <a href="{{url}}" class="govuk-back-link">Back</a>
+  {% if adasToReview.intercept.anyProspective %}
+    {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/review-prospective" %}
+  {% else %}
+    {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/intercept" %}
+  {% endif %}
+  <a href="{{url}}" class="govuk-back-link">Back</a>
 
-    <main class="govuk-main-wrapper offence-outcome " id="main-content" role="main">
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-          <div class="govuk-form-group govuk-body">
-            <h1 class="govuk-heading-l">
-              <span class="govuk-caption-xl">Adjust release dates</span>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="govuk-form-group govuk-body">
+        <h1 class="govuk-heading-l">
+          <span class="govuk-caption-xl">Adjust release dates</span>
               Review and approve ADAs
             </h1>
 
-            <p>
-              {% if adasToReview.intercept.type == 'FIRST_TIME'%}
+        <p>
+          {% if adasToReview.intercept.type == 'FIRST_TIME'%}
                 ADA adjustments are based on adjudication records. To apply ADAs, you must confirm that the adjustment information below is correct.
                {% else %}
                Check that the existing ADAs are correct, then review and approve pending ADAs.
                {% endif %}
-            </p>
+        </p>
 
-            {% if adasToReview.intercept.type != 'FIRST_TIME'%}
-              <h2 class="govuk-heading-m">Awarded ADAs</h2>
-              {{ adaTable('awarded-adas', adasToReview.awarded, adasToReview.totalAwarded, 'Awarded ADAs will be included in the calculation.', model.prisonerDetail.firstName | title + ' ' + model.prisonerDetail.lastName | title + ' has no ADAs that are applicable to the current sentences.') }}
-            {% endif %}
+        {% if adasToReview.intercept.type != 'FIRST_TIME'%}
+          <h2 class="govuk-heading-m">Awarded ADAs</h2>
+          {{ adaTable('awarded-adas', adasToReview.awarded, adasToReview.totalAwarded, 'Awarded ADAs will be included in the calculation.', model.prisonerDetail.firstName | title + ' ' + model.prisonerDetail.lastName | title + ' has no ADAs that are applicable to the current sentences.') }}
+        {% endif %}
 
-            {% if adasToReview.suspended | length %}
-              <h2 class="govuk-heading-m">Suspended ADAs</h2>
-              {{ adaTable('suspended-adas', adasToReview.suspended, adasToReview.totalSuspended, 'Suspended ADAs will not be included in the calculation.') }}
-            {% endif %}
+        {% if adasToReview.suspended | length %}
+          <h2 class="govuk-heading-m">Suspended ADAs</h2>
+          {{ adaTable('suspended-adas', adasToReview.suspended, adasToReview.totalSuspended, 'Suspended ADAs will not be included in the calculation.') }}
+        {% endif %}
 
-            <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
-            {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval, 'Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.', 'No ADA records waiting for approval exist for this offender') }}
+        <h2 class="govuk-heading-m">Awarded ADAs pending approval</h2>
+        {{ adaTable('awaiting-approval-adas', adasToReview.awaitingApproval, adasToReview.totalAwaitingApproval, 'Once you have reviewed and approved the ADAs pending approval, they will be added to the sentence calculation.', 'No ADA records waiting for approval exist for this offender') }}
 
-            {% if adasToReview.quashed | length %}
-              <h2 class="govuk-heading-m">Review and approve quashed ADAs</h2>
-              {{ adaTable('quashed-approval-adas', adasToReview.quashed, adasToReview.totalQuashed, 'Once you have reviewed and approved the quashed ADAs, they will not be included in the sentence calculation') }}
-            {% endif %}
+        {% if adasToReview.quashed | length %}
+          <h2 class="govuk-heading-m">Review and approve quashed ADAs</h2>
+          {{ adaTable('quashed-approval-adas', adasToReview.quashed, adasToReview.totalQuashed, 'Once you have reviewed and approved the quashed ADAs, they will not be included in the sentence calculation') }}
+        {% endif %}
 
-          </div>
+      </div>
 
-          <div class="govuk-inset-text">
+      <div class="govuk-inset-text">
             If you think some information is wrong, ask the team responsible for adjudications in your prison to correct it, then <a href="">reload this page.</a>
-          </div>
-          <div class="govuk-!-margin-top-8">
-            <p class="govuk-body">By approving the ADA information you are confirming the details match the DIS7 adjudication result form.The ADAs will be saved to NOMIS.</p>
-            <form class="form" method="post">
-              <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
-              {{ govukButton({
+      </div>
+      <div class="govuk-!-margin-top-8">
+        <p class="govuk-body">By approving the ADA information you are confirming the details match the DIS7 adjudication result form.The ADAs will be saved to NOMIS.</p>
+        <form class="form" method="post">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+          {{ govukButton({
                 text: "Approve",
                 type: submit,
-                preventDoubleClick: true
+                preventDoubleClick: true,
+                attributes: {'data-qa': 'approve-button'}
               }) }}
-            </form>
-          </div>
-          <a href="../">Cancel and return to dashboard</a>
-        </div>
+        </form>
       </div>
-    </main>
+      <a href="../">Cancel and return to dashboard</a>
+    </div>
   </div>
 {% endblock %}

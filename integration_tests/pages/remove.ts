@@ -1,12 +1,9 @@
+import AdjustmentsPage from './adjustmentsPage'
 import Page, { PageElement } from './page'
 
-export default class RemovePage extends Page {
+export default class RemovePage extends AdjustmentsPage {
   constructor(title: string) {
     super(title)
-  }
-
-  public skipAxe() {
-    return false
   }
 
   public removeButton = (): PageElement => cy.get(`[data-qa=remove-button]`)

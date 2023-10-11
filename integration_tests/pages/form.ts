@@ -1,13 +1,10 @@
 import dayjs from 'dayjs'
 import Page, { PageElement } from './page'
+import AdjustmentsPage from './adjustmentsPage'
 
-export default class FormPage extends Page {
+export default class FormPage extends AdjustmentsPage {
   constructor(title: string) {
     super(title)
-  }
-
-  public skipAxe() {
-    return false
   }
 
   public enterFromDate = (date: string): void => {
