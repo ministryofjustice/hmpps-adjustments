@@ -29,6 +29,23 @@ export default {
       },
     })
   },
+  sstubSearchAdjudicationsNoResults: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjudications-api/adjudications/A1234AB/adjudications\\?size=1000',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          results: {
+            content: [],
+          },
+        },
+      },
+    })
+  },
   stubIndividualAdjudicationsNoReview: (): Promise<unknown> => {
     return Promise.all(
       adjudicationsNoReview.map(it => {

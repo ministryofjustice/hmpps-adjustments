@@ -28,7 +28,7 @@ export default {
             person: 'A1234AB',
             bookingId: 1204935,
             adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-            fromDate: '2023-06-01',
+            fromDate: '2016-05-12',
             days: 40,
             prisonId: 'KMI',
             prisonName: 'Leeds',

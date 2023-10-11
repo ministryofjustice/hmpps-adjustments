@@ -44,6 +44,7 @@ context('Enter a RADA', () => {
 
   it('Add a RADA when no ADAs exist produces error message', () => {
     cy.task('stubGetAdjustmentsNoAdas')
+    cy.task('sstubSearchAdjudicationsNoResults')
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.addRadaLink().click()
