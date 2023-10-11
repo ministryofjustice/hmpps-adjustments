@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import Page, { PageElement } from './page'
+import { PageElement } from './page'
 import AdjustmentsPage from './adjustmentsPage'
 
 export default class FormPage extends AdjustmentsPage {

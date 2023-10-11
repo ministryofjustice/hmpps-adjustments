@@ -1,5 +1,5 @@
 import AdjustmentsPage from './adjustmentsPage'
-import Page, { PageElement } from './page'
+import { PageElement } from './page'
 
 export default class HubPage extends AdjustmentsPage {
   constructor() {
