@@ -1,12 +1,9 @@
-import Page, { PageElement } from './page'
+import AdjustmentsPage from './adjustmentsPage'
+import { PageElement } from './page'
 
-export default class ReviewPage extends Page {
+export default class ReviewPage extends AdjustmentsPage {
   constructor() {
     super('Check your answers')
-  }
-
-  public skipAxe() {
-    return false
   }
 
   public submit = (): PageElement => cy.get('[data-qa=submit]')

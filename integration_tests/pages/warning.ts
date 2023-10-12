@@ -1,12 +1,9 @@
-import Page, { PageElement } from './page'
+import AdjustmentsPage from './adjustmentsPage'
+import { PageElement } from './page'
 
-export default class WarningPage extends Page {
+export default class WarningPage extends AdjustmentsPage {
   constructor(title: string) {
     super(title)
-  }
-
-  public skipAxe() {
-    return false
   }
 
   public yesRadio = (): PageElement => cy.get('[value=yes]')

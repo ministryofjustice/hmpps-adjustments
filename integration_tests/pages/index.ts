@@ -1,12 +1,9 @@
-import Page, { PageElement } from './page'
+import AdjustmentsPage from './adjustmentsPage'
+import { PageElement } from './page'
 
-export default class IndexPage extends Page {
+export default class IndexPage extends AdjustmentsPage {
   constructor() {
     super('This site is under construction...')
-  }
-
-  public skipAxe() {
-    return false
   }
 
   headerUserName = (): PageElement => cy.get('[data-qa=header-user-name]')

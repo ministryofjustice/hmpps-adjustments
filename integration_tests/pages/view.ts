@@ -1,12 +1,9 @@
-import Page, { PageElement } from './page'
+import AdjustmentsPage from './adjustmentsPage'
+import { PageElement } from './page'
 
-export default class ViewPage extends Page {
+export default class ViewPage extends AdjustmentsPage {
   constructor(title: string) {
     super(title)
-  }
-
-  public skipAxe() {
-    return false
   }
 
   public editLink = (id: string): PageElement => cy.get(`[data-qa=edit-${id}]`)

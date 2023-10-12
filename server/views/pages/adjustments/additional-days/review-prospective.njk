@@ -7,54 +7,50 @@
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
-  <div class="moj-width-container">
 
-    <a href="/{{model.prisonerDetail.offenderNo}}/additional-days/intercept" class="govuk-back-link">Back</a>
+  <a href="/{{model.prisonerDetail.offenderNo}}/additional-days/intercept" class="govuk-back-link">Back</a>
 
-    <main class="govuk-main-wrapper offence-outcome " id="main-content" role="main">
-
-      {% if padaForm.errors.length %}
-        <div class="govuk-grid-row">
-          <div class="govuk-grid-column-full">
-            {{ govukErrorSummary({
+  {% if padaForm.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
                 titleText: "There is a problem",
                 errorList: padaForm.errorList()
               }) }}
-          </div>
-        </div>
-      {% endif %}
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-          <div class="govuk-form-group govuk-body">
+      </div>
+    </div>
+  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="govuk-form-group govuk-body">
 
-            <h1 class="govuk-heading-l">
-              <span class="govuk-caption-xl">Adjust release dates</span>
+        <h1 class="govuk-heading-l">
+          <span class="govuk-caption-xl">Adjust release dates</span>
               Review PADAs
             </h1>
 
-            <p>
+        <p>
               Select the PADA adjudications that apply to the prisoner's sentence calculation
             </p>
-            <p>
+        <p>
               The rules for PADAs can be found in the <a class="govuk-link" href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1154896/psi-05-2018-prison-adjudications-may-2023.pdf">policy framework</a>.
             </p>
 
-            <form class="form" method="post">
-              <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
-              {{ adaTable('prospective-adas', padasToReview.prospective, padasToReview.totalProspective, null, null, true) }}
+        <form class="form" method="post">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+          {{ adaTable('prospective-adas', padasToReview.prospective, padasToReview.totalProspective, null, null, true) }}
 
-              {{ govukButton({
+          {{ govukButton({
                 text: "Continue",
                 type: submit,
-                preventDoubleClick: true
+                preventDoubleClick: true,
+                attributes: {'data-qa': 'continue-button'}
               }) }}
 
-            </form>
-            <a href="../">Cancel and return to dashboard</a>
-          </div>
-        </div>
+        </form>
+        <a href="../">Cancel and return to dashboard</a>
       </div>
-    </main>
+    </div>
   </div>
 {% endblock %}
 
