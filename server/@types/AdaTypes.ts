@@ -35,6 +35,11 @@ type AdasToReview = {
   intercept: AdaIntercept
 }
 
+type AdasToView = {
+  awarded: AdasByDateCharged[]
+  totalAwarded: number
+}
+
 type PadasToReview = {
   prospective: AdasByDateCharged[]
   totalProspective: number
@@ -57,4 +62,5 @@ export {
   AdaStatus,
   ChargeStatus,
   PadasToReview,
+  AdasToView,
 }

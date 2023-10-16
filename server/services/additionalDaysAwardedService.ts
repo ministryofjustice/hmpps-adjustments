@@ -3,7 +3,15 @@ import dayjs from 'dayjs'
 import AdjudicationClient from '../api/adjudicationsClient'
 import { AdjudicationSearchResponse, IndividualAdjudication, Sanction } from '../@types/adjudications/adjudicationTypes'
 import { HmppsAuthClient } from '../data'
-import { Ada, AdaIntercept, AdasByDateCharged, AdasToReview, ChargeStatus, PadasToReview } from '../@types/AdaTypes'
+import {
+  Ada,
+  AdaIntercept,
+  AdasByDateCharged,
+  AdasToReview,
+  AdasToView,
+  ChargeStatus,
+  PadasToReview,
+} from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
@@ -55,6 +63,39 @@ export default class AdditionalDaysAwardedService {
     private readonly hmppsAuthClient: HmppsAuthClient,
     private readonly additionalDaysAwardedStoreService: AdditionalDaysAwardedStoreService,
   ) {}
+
+  public async viewAdjustments(
+    nomsId: string,
+    startOfSentenceEnvelope: Date,
+    username: string,
+    token: string,
+  ): Promise<AdasToView> {
+    const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
+    )
+    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
+    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
+    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
+    const individualAdjudications = await Promise.all(
+      adjudications.results.content.map(async it => {
+        return adjudicationClient.getAdjudication(nomsId, it.adjudicationNumber)
+      }),
+    )
+    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+    const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
+    let { awarded } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
+    const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
+    const { awarded: prospectiveAwarded } = this.filterAdasByMatchingAdjustment(
+      allProspective,
+      existingAdasWithChargeIds,
+    )
+
+    awarded = awarded.concat(prospectiveAwarded)
+    const totalAwarded: number = this.getTotalDays(awarded)
+
+    return { awarded, totalAwarded }
+  }
 
   public async getAdasToApprove(
     req: Request,

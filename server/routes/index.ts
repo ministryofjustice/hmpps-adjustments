@@ -44,6 +44,7 @@ export default function routes(service: Services): Router {
   post('/:nomsId/additional-days/review-and-approve', additionalDaysAwardedRoutes.approve)
   get('/:nomsId/additional-days/review-and-submit', additionalDaysAwardedRoutes.reviewAndSubmit)
   post('/:nomsId/additional-days/review-and-submit', additionalDaysAwardedRoutes.submit)
+  get('/:nomsId/additional-days/view', additionalDaysAwardedRoutes.view)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
