@@ -443,7 +443,6 @@ describe('Additional Days Added Service', () => {
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
-      const request = {} as jest.Mocked<Request>
 
       const adasToView: AdasToView = await adaService.viewAdjustments(
         nomsId,
