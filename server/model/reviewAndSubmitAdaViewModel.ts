@@ -10,7 +10,7 @@ export default class ReviewAndSubmitAdaViewModel {
 
   public table() {
     return {
-      caption: 'Ada details',
+      caption: 'ADA details',
       head: [{ text: 'Date charge proved' }, { text: 'Charge number(s)' }, { text: 'Days', format: 'numeric' }],
       rows: [
         ...this.adjustments.map(it => {
