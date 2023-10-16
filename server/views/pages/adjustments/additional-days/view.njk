@@ -1,0 +1,29 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "../../../macros/adaTable.njk" import adaTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = applicationName + " - Review additional days awarded" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+
+  <a href="/{{model.prisonerDetail.offenderNo}}" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="govuk-form-group govuk-body">
+        <h1 class="govuk-heading-l">
+          <span class="govuk-caption-xl">Adjust release dates</span>
+              ADA details
+            </h1>
+        {{ adaTable({
+            tableId:'awarded-adas',
+            adas: model.adas.awarded,
+            total: model.adas.totalAwarded,
+            hideStatuses: true,
+            totalText: 'Total ADAs taken into calculation'
+          }) }}
+
+      </div>
+    </div>
+  {% endblock %}

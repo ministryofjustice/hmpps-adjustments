@@ -1,24 +1,36 @@
-{% macro adaTable(tableId, adas, total, mainTitle, emptyTitle, checkboxes) %}
-  {% if adas | length %}
-    {% if mainTitle %}
-      <p>{{ mainTitle }}</p>
+{#
+This macro creates a table of ADAs. It has the following params
+
+tableId: required, id of the table
+adas: required, the data to display
+total: required, the total number of days.
+mainTitle: optional, title above table
+emptyTitle: optional, displayed if table is empty
+checkboxes: optional, defaults to false, does table have checkboxes
+hideStatuses: optional,  defaults to false , should the status of the ada be displayed
+totalText: optional,  defaults to 'Total' , the text displayed next to the total.
+#}
+{% macro adaTable(params) %}
+  {% if params.adas | length %}
+    {% if params.mainTitle %}
+      <p>{{ params.mainTitle }}</p>
     {% endif %}
-    <table id="{{ tableId }}" class="govuk-table {{'govuk-!-margin-bottom-8' if not checkboxes else 'govuk-!-margin-bottom-2'}}">
+    <table id="{{ params.tableId }}" class="govuk-table {{'govuk-!-margin-bottom-8' if not params.checkboxes else 'govuk-!-margin-bottom-2'}}">
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
-          {% if checkboxes %}
+          {% if params.checkboxes %}
             <th class="govuk-table__header" scope="col">
               <span class="govuk-visually-hidden">Select adjudication</span>
             </th>
           {% endif %}
-          <th class="govuk-table__header" scope="col">Date charge proved</th>
+          <th class="govuk-table__header  {{'govuk-!-width-two-fifths' if params.hideStatuses else 'govuk-!-width-one-fifth'}}" scope="col">Date charge proved</th>
           <th class="govuk-table__header" scope="col">Charge details</th>
         </tr>
       </thead>
       <tbody>
-        {% for ada in adas %}
+        {% for ada in params.adas %}
           <tr class="govuk-table__row">
-            {% if checkboxes %}
+            {% if params.checkboxes %}
               <td class="govuk-table__cell">
                 <div class="govuk-checkboxes__item govuk-checkboxes--small moj-multi-select__checkbox">
                   {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
@@ -30,17 +42,19 @@
                 </div>
               </td>
             {% endif %}
-            <td class="govuk-table__cell govuk-!-width-one-fifth">
+            <td class="govuk-table__cell">
               {{ ada.dateChargeProved | date("DD MMM YYYY") }}
             </td>
             <td class="govuk-table__cell">
               <table class="govuk-table">
                 <tr>
-                  <th class="govuk-table__header govuk-!-width-one-fifth" scope="col">Charge number</th>
+                  <th class="govuk-table__header {{'govuk-!-width-two-fifths' if params.hideStatuses else 'govuk-!-width-one-fifth'}}" scope="col">Charge number</th>
                   <th class="govuk-table__header govuk-!-width-one-quarter" scope="col">To be served</th>
                   <th class="govuk-table__header govuk-!-width-one-quarter" scope="col">Heard at</th>
-                  <th class="govuk-table__header" scope="col">Status</th>
-                  <th class="govuk-table__header govuk-!-text-align-centre" scope="col">Days</th>
+                  {% if not params.hideStatuses %}
+                    <th class="govuk-table__header" scope="col">Status</th>
+                  {% endif %}
+                  <th class="govuk-table__header govuk-!-text-align-right" scope="col">Days</th>
                 </tr>
                 {% for charge in ada.charges %}
                   <tr>
@@ -53,16 +67,18 @@
                     <td class="govuk-table__cell">
                       {{ charge.heardAt }}
                     </td>
-                    <td class="govuk-table__cell">
-                      {% if not checkboxes %}
-                        <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
-                      {% endif %}
-                      {% if charge.status === 'PROSPECTIVE' %}
-                        <span class="moj-badge moj-badge--purple">{{ charge.status }}</span>
-                      {% endif %}
-                    </td>
+                    {% if not params.hideStatuses %}
+                      <td class="govuk-table__cell">
+                        {% if not params.checkboxes %}
+                          <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
+                        {% endif %}
+                        {% if charge.status === 'PROSPECTIVE' %}
+                          <span class="moj-badge moj-badge--purple">{{ charge.status }}</span>
+                        {% endif %}
+                      </td>
+                    {% endif %}
                     <!-- Days -->
-                    <td class="govuk-table__cell govuk-!-text-align-centre">{{ charge.days }}</td>
+                    <td class="govuk-table__cell govuk-!-text-align-right">{{ charge.days }}</td>
                   </tr>
                 {% endfor %}
               </table>
@@ -71,17 +87,19 @@
         {% endfor %}
       </tbody>
 
-      {% if not checkboxes %}
+      {% if not params.checkboxes %}
         <tfoot>
           <tr class="govuk-table__row">
-            <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="1">Total</th>
-            <td class="govuk-table__cell govuk-!-text-align-right govuk-!-padding-right-4">{{ total }}</td>
+            <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="1">
+              {{params.totalText if params.totalText else 'Total'}}
+            </th>
+            <td class="govuk-table__cell govuk-!-text-align-right">{{ params.total }}</td>
           </tr>
         </tfoot>
       {% endif %}
     </table>
 
-    {% if checkboxes %}
+    {% if params.checkboxes %}
       <div class="govuk-form-group govuk-!-margin-bottom-4">
         <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
           <div class="govuk-checkboxes__item">
@@ -92,6 +110,6 @@
       </div>
     {% endif %}
   {% else %}
-    <p>{{ emptyTitle }}</p>
+    <p>{{ params.emptyTitle }}</p>
   {% endif %}
 {% endmacro %}

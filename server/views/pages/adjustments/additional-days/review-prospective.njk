@@ -38,7 +38,12 @@
 
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
-          {{ adaTable('prospective-adas', padasToReview.prospective, padasToReview.totalProspective, null, null, true) }}
+          {{ adaTable({
+            tableId:'prospective-adas',
+            adas: padasToReview.prospective,
+            total: padasToReview.totalProspective,
+            checkboxes: true
+          }) }}
 
           {{ govukButton({
                 text: "Continue",
