@@ -6,7 +6,18 @@ export default class ReviewAndSubmitAdaViewModel {
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
+    public existingAdjustments: Adjustment[],
   ) {}
+
+  public displayBanner(): boolean {
+    const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
+    if (anyUnlinkedAdas) {
+      const existingDays = this.existingAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
+      const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
+      return existingDays !== newDays
+    }
+    return false
+  }
 
   public table() {
     return {

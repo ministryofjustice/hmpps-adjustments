@@ -17,6 +17,7 @@ import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import PadaForm from '../model/padaForm'
+import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 
 /* The adjudications status from NOMIS DB mapped to the adjudications API status are listed here temporarily to make it easier to implement the stories which use the NOMIS status
  * 'AS_AWARDED' = 'Activated as Awarded'
@@ -500,7 +501,11 @@ export default class AdditionalDaysAwardedService {
     startOfSentenceEnvelope: Date,
     username: string,
     token: string,
-  ): Promise<{ adjustmentsToCreate: Adjustment[]; awarded: AdasByDateCharged[]; allAdaAdjustments: Adjustment[] }> {
+  ): Promise<{
+    adjustmentsToCreate: Adjustment[]
+    awarded: AdasByDateCharged[]
+    allAdaAdjustments: Adjustment[]
+  }> {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
@@ -555,21 +560,21 @@ export default class AdditionalDaysAwardedService {
     }
   }
 
-  public async getAdjustmentsToSubmit(
+  public async getReviewAndSubmitModel(
     req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
     username: string,
     token: string,
-  ): Promise<Adjustment[]> {
-    const { adjustmentsToCreate } = await this.getAdasToSubmitAndDelete(
+  ): Promise<ReviewAndSubmitAdaViewModel> {
+    const { adjustmentsToCreate, allAdaAdjustments } = await this.getAdasToSubmitAndDelete(
       req,
       prisonerDetail,
       startOfSentenceEnvelope,
       username,
       token,
     )
-    return adjustmentsToCreate
+    return new ReviewAndSubmitAdaViewModel(prisonerDetail, adjustmentsToCreate, allAdaAdjustments)
   }
 
   public async submitAdjustments(

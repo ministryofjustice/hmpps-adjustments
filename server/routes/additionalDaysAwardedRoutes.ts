@@ -4,7 +4,6 @@ import AdditionalDaysAwardedService from '../services/additionalDaysAwardedServi
 import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { Message } from '../model/adjustmentsHubViewModel'
-import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 import PadaForm from '../model/padaForm'
 
 export default class AdditionalDaysAwardedRoutes {
@@ -148,16 +147,15 @@ export default class AdditionalDaysAwardedRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const adjustments = await this.additionalDaysAwardedService.getAdjustmentsToSubmit(
-      req,
-      prisonerDetail,
-      startOfSentenceEnvelope,
-      username,
-      token,
-    )
 
     return res.render('pages/adjustments/additional-days/review-and-submit', {
-      model: new ReviewAndSubmitAdaViewModel(prisonerDetail, adjustments),
+      model: await this.additionalDaysAwardedService.getReviewAndSubmitModel(
+        req,
+        prisonerDetail,
+        startOfSentenceEnvelope,
+        username,
+        token,
+      ),
     })
   }
 
