@@ -505,6 +505,7 @@ export default class AdditionalDaysAwardedService {
     adjustmentsToCreate: Adjustment[]
     awarded: AdasByDateCharged[]
     allAdaAdjustments: Adjustment[]
+    quashed: AdasByDateCharged[]
   }> {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
@@ -543,6 +544,9 @@ export default class AdditionalDaysAwardedService {
     })
     awaitingApproval = awaitingApproval.concat(selectedProspectiveAdas)
 
+    const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+
     return {
       awarded,
       allAdaAdjustments,
@@ -557,6 +561,7 @@ export default class AdditionalDaysAwardedService {
           additionalDaysAwarded: { adjudicationId: it.charges.map(charge => charge.chargeNumber) },
         } as Adjustment
       }),
+      quashed,
     }
   }
 
@@ -567,14 +572,18 @@ export default class AdditionalDaysAwardedService {
     username: string,
     token: string,
   ): Promise<ReviewAndSubmitAdaViewModel> {
-    const { adjustmentsToCreate, allAdaAdjustments } = await this.getAdasToSubmitAndDelete(
+    const { adjustmentsToCreate, allAdaAdjustments, quashed } = await this.getAdasToSubmitAndDelete(
       req,
       prisonerDetail,
       startOfSentenceEnvelope,
       username,
       token,
     )
-    return new ReviewAndSubmitAdaViewModel(prisonerDetail, adjustmentsToCreate, allAdaAdjustments)
+
+    const quashedAdjustments = quashed.map(it => {
+      return allAdaAdjustments.find(adjustment => this.adjustmentMatchesAdjudication(it, adjustment))
+    })
+    return new ReviewAndSubmitAdaViewModel(prisonerDetail, adjustmentsToCreate, allAdaAdjustments, quashedAdjustments)
   }
 
   public async submitAdjustments(
