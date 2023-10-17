@@ -32,9 +32,17 @@
             </p>
       </div>
 
-      {{ govukTable(
-              model.table()
+      {% if model.createTable() %}
+        {{ govukTable(
+              model.createTable()
           ) }}
+      {% endif %}
+
+      {% if model.quashedTable() %}
+        {{ govukTable(
+              model.quashedTable()
+          ) }}
+      {% endif %}
       <div class="govuk-!-margin-top-8">
         <h2 class="govuk-heading-m">Submit adjustment details</h2>
         <p class="govuk-body">Once submitted, the ADA adjustment details will be saved in NOMIS. You will then need to recalculate the release dates.</p>
