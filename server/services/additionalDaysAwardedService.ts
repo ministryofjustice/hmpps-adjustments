@@ -458,9 +458,8 @@ export default class AdditionalDaysAwardedService {
     quashed: AdasByDateCharged[],
   ): AdaIntercept {
     const anyUnlinkedAda = allAdaAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
-    const anyLinkedAda = allAdaAdjustments.some(it => !!it.additionalDaysAwarded?.adjudicationId?.length)
 
-    if (allAdaAdjustments.length && anyUnlinkedAda) {
+    if (anyUnlinkedAda) {
       return {
         type: 'FIRST_TIME',
         number: prospective.length + awaitingApproval.length,
@@ -469,10 +468,7 @@ export default class AdditionalDaysAwardedService {
     }
 
     if (awaitingApproval.length) {
-      if (anyLinkedAda) {
-        return { type: 'UPDATE', number: awaitingApproval.length, anyProspective: !!prospective.length }
-      }
-      return { type: 'FIRST_TIME', number: awaitingApproval.length, anyProspective: !!prospective.length }
+      return { type: 'UPDATE', number: awaitingApproval.length, anyProspective: !!prospective.length }
     }
 
     if (quashed.length) {
