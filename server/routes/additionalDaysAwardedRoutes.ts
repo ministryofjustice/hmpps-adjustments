@@ -181,6 +181,18 @@ export default class AdditionalDaysAwardedRoutes {
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
 
+  public addWarning: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token, username } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+
+    return res.render('pages/adjustments/additional-days/add-warning', {
+      model: {
+        prisonerDetail,
+      },
+    })
+  }
+
   public view: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
