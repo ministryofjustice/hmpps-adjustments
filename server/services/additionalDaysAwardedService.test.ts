@@ -628,7 +628,7 @@ describe('Additional Days Added Service', () => {
         totalSuspended: 0,
         intercept: {
           number: 1,
-          type: 'FIRST_TIME',
+          type: 'UPDATE',
           anyProspective: true,
         },
       } as AdasToReview)
@@ -828,7 +828,7 @@ describe('Additional Days Added Service', () => {
       )
 
       expect(intercept).toEqual({
-        type: 'FIRST_TIME',
+        type: 'UPDATE',
         number: 1,
         anyProspective: false,
       } as AdaIntercept)
