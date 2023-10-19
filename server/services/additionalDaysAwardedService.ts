@@ -108,7 +108,6 @@ export default class AdditionalDaysAwardedService {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
     const adjudicationClient = new AdjudicationClient(systemToken)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
@@ -120,19 +119,19 @@ export default class AdditionalDaysAwardedService {
     const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
-    let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
+    let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
 
     const suspended: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'SUSPENDED')
     const totalSuspended: number = this.getTotalDays(suspended)
 
     const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
-    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, allAdaAdjustments)
     const totalQuashed: number = this.getTotalDays(quashed)
 
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
     const { awarded: prospectiveAwarded, awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
       allProspective,
-      existingAdasWithChargeIds,
+      allAdaAdjustments,
     )
 
     awarded = awarded.concat(prospectiveAwarded)
@@ -167,7 +166,6 @@ export default class AdditionalDaysAwardedService {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
     const adjudicationClient = new AdjudicationClient(systemToken)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
@@ -179,10 +177,7 @@ export default class AdditionalDaysAwardedService {
     const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
 
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
-    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
-      allProspective,
-      existingAdasWithChargeIds,
-    )
+    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(allProspective, allAdaAdjustments)
     const totalProspective: number = this.getTotalDays(prospective)
 
     return {
@@ -199,7 +194,9 @@ export default class AdditionalDaysAwardedService {
     adas: AdasByDateCharged[],
     adjustments: Adjustment[],
   ): AdasByDateCharged[] {
-    const chargeIds = adjustments.flatMap(it => it.additionalDaysAwarded.adjudicationId)
+    const chargeIds = adjustments
+      .filter(it => it.additionalDaysAwarded)
+      .flatMap(it => it.additionalDaysAwarded.adjudicationId)
     return adas
       .filter(adaByDate => {
         return adaByDate.charges.some(it => chargeIds.includes(it.chargeNumber))
@@ -216,6 +213,14 @@ export default class AdditionalDaysAwardedService {
     const result = { awarded: [], awaitingApproval: [] } as {
       awarded: AdasByDateCharged[]
       awaitingApproval: AdasByDateCharged[]
+    }
+
+    if (adjustments.some(it => !it.additionalDaysAwarded)) {
+      // An ADA has been created in NOMIS, Revert everything to pending approval
+      result.awaitingApproval = adas.map(it => {
+        return { ...it, status: 'PENDING APPROVAL' }
+      })
+      return result
     }
 
     adas.forEach(it => {
@@ -426,18 +431,14 @@ export default class AdditionalDaysAwardedService {
         return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
       }),
     )
-    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
     const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
-    const { awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
+    const { awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
-    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
-      allProspective,
-      existingAdasWithChargeIds,
-    )
+    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(allProspective, allAdaAdjustments)
     const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
-    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, allAdaAdjustments)
 
     return this.shouldInterceptLogic(
       req,
@@ -516,17 +517,16 @@ export default class AdditionalDaysAwardedService {
         return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
       }),
     )
-    const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
     const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
 
-    let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
+    let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
 
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
     const { awarded: prospectiveAwarded, awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(
       allProspective,
-      existingAdasWithChargeIds,
+      allAdaAdjustments,
     )
 
     awarded = awarded.concat(prospectiveAwarded)
@@ -541,7 +541,7 @@ export default class AdditionalDaysAwardedService {
     awaitingApproval = awaitingApproval.concat(selectedProspectiveAdas)
 
     const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
-    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, existingAdasWithChargeIds)
+    const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, allAdaAdjustments)
 
     return {
       awarded,
