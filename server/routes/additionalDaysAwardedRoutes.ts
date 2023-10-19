@@ -182,7 +182,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public addWarning: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
