@@ -1,4 +1,3 @@
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import FullPageErrorType from './FullPageErrorType'
 
 class FullPageError extends Error {
