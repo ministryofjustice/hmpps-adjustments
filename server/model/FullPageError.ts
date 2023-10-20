@@ -18,6 +18,13 @@ class FullPageError extends Error {
     error.status = 404
     return error
   }
+
+  static noSentences(): FullPageError {
+    const error = new FullPageError('Prisoner has no sentences')
+    error.errorKey = FullPageErrorType.NO_SENTENCES
+    error.status = 400
+    return error
+  }
 }
 
 export default FullPageError

@@ -38,7 +38,11 @@ export default class PrisonerService {
   }
 
   async getSentencesAndOffences(bookingId: number, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
-    return new PrisonApiClient(token).getSentencesAndOffences(bookingId)
+    const sentencesAndOffences = await new PrisonApiClient(token).getSentencesAndOffences(bookingId)
+    if (sentencesAndOffences.length === 0) {
+      throw FullPageError.noSentences()
+    }
+    return sentencesAndOffences
   }
 
   private async getPrisonerDetailImpl(

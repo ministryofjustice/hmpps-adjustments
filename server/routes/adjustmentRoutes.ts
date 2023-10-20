@@ -53,13 +53,13 @@ export default class AdjustmentRoutes {
     const { caseloads, token, username, roles } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      prisonerDetail.bookingId,
+      token,
+    )
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const message = req.flash('message')
     if (!(message && message[0])) {
-      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
-        prisonerDetail.bookingId,
-        token,
-      )
       const intercept = await this.additionalDaysAwardedService.shouldIntercept(
         req,
         prisonerDetail,
