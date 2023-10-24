@@ -147,6 +147,7 @@ export interface components {
     AdditionalDaysAwardedDto: {
       /** @description The id of the adjudication that resulted in the ADA */
       adjudicationId: number[]
+      prospective: boolean
     }
     /** @description The adjustment and its identifier */
     AdjustmentDto: {

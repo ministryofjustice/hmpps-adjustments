@@ -554,7 +554,10 @@ export default class AdditionalDaysAwardedService {
           fromDate: it.dateChargeProved.toISOString().substring(0, 10),
           days: it.total,
           prisonId: prisonerDetail.agencyId,
-          additionalDaysAwarded: { adjudicationId: it.charges.map(charge => charge.chargeNumber) },
+          additionalDaysAwarded: {
+            adjudicationId: it.charges.map(charge => charge.chargeNumber),
+            prospective: it.charges.some(charge => charge.status === 'PROSPECTIVE'),
+          },
         } as Adjustment
       }),
       quashed,
@@ -575,7 +578,6 @@ export default class AdditionalDaysAwardedService {
       username,
       token,
     )
-
     const quashedAdjustments = quashed.map(it => {
       return allAdaAdjustments.find(adjustment => this.adjustmentMatchesAdjudication(it, adjustment))
     })
