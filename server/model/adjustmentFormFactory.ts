@@ -14,7 +14,7 @@ export default class AdjustmentsFormFactory {
         'from-day': dayjs(adjustment.fromDate).get('date').toString(),
         'from-month': (dayjs(adjustment.fromDate).get('month') + 1).toString(),
         'from-year': dayjs(adjustment.fromDate).get('year').toString(),
-        days: adjustment.days.toString(),
+        days: (adjustment.days || adjustment.daysBetween || adjustment.effectiveDays).toString(),
       })
     }
     if (adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {

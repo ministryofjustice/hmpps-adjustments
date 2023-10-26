@@ -225,11 +225,11 @@ export default class AdjustmentRoutes {
       }
       const message = {
         type: adjustment.adjustmentType,
-        days: adjustment.days,
+        days: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
         action: adjustment.id ? 'UPDATE' : 'CREATE',
       } as Message
       adjustment = await this.adjustmentsService.get(adjustmentId, token)
-      message.days = adjustment.days
+      message.days = adjustment.days || adjustment.daysBetween || adjustment.effectiveDays
       return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
     }
     return res.redirect(`/${nomsId}`)
@@ -320,7 +320,7 @@ export default class AdjustmentRoutes {
     await this.adjustmentsService.delete(id, token)
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
-      days: adjustment.days,
+      days: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
       action: 'REMOVE',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)

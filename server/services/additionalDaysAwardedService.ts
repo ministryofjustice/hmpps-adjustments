@@ -236,7 +236,7 @@ export default class AdditionalDaysAwardedService {
 
   private adjustmentMatchesAdjudication(adjudication: AdasByDateCharged, adjustment: Adjustment): boolean {
     return (
-      adjudication.total === adjustment.days &&
+      adjudication.total === (adjustment.days || adjustment.daysBetween || adjustment.effectiveDays) &&
       adjudication.dateChargeProved.toISOString().substring(0, 10) === adjustment.fromDate &&
       JSON.stringify(adjudication.charges.map(charge => charge.chargeNumber).sort()) ===
         JSON.stringify(adjustment.additionalDaysAwarded.adjudicationId.sort())

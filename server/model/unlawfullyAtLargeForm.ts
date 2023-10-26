@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateItems, daysBetween, isDateInFuture } from '../utils/utils'
+import { dateItems, isDateInFuture } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
@@ -32,7 +32,6 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       toDate,
       person: nomsId,
       unlawfullyAtLarge: { type: this.type },
-      days: daysBetween(new Date(fromDate), new Date(toDate)),
       prisonId: prisonerDetails.agencyId,
     }
   }

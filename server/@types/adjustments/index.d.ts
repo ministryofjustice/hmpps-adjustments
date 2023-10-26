@@ -73,6 +73,13 @@ export interface paths {
      */
     post: operations['create_1']
   }
+  '/adjustments/{adjustmentId}/effective-days': {
+    /**
+     * Update the effective calculable days for and adjustment
+     * @description Update an adjustment's effective days.
+     */
+    post: operations['updateEffectiveDays']
+  }
   '/adjustments/validate': {
     /**
      * Validate an adjustments
@@ -180,6 +187,7 @@ export interface components {
         | 'ADDITIONAL_DAYS_AWARDED'
         | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
         | 'SPECIAL_REMISSION'
+        | 'UNUSED_DEDUCTIONS'
       /**
        * Format: date
        * @description The end date of the adjustment
@@ -219,6 +227,16 @@ export interface components {
        * @description The date and time this adjustment was last updated
        */
       lastUpdatedDate?: string
+      /**
+       * Format: int32
+       * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
+       */
+      effectiveDays?: number
+      /**
+       * Format: int32
+       * @description The days between the from and two date
+       */
+      daysBetween?: number
     }
     /** @description The details of a UAL adjustment */
     UnlawfullyAtLargeDto: {
@@ -235,6 +253,21 @@ export interface components {
     CreateResponseDto: {
       /** Format: uuid */
       adjustmentId: string
+    }
+    /** @description Details of the adjustment and the number of effective days within a calculation. */
+    AdjustmentEffectiveDaysDto: {
+      /**
+       * Format: uuid
+       * @description The ID of the adjustment
+       */
+      id: string
+      /**
+       * Format: int32
+       * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
+       */
+      effectiveDays: number
+      /** @description The NOMIS ID of the person this adjustment applies to */
+      person: string
     }
     /** @description Validation message details */
     ValidationMessage: {
@@ -578,6 +611,31 @@ export interface operations {
           'application/json': components['schemas']['CreateResponseDto']
         }
       }
+    }
+  }
+  /**
+   * Update the effective calculable days for and adjustment
+   * @description Update an adjustment's effective days.
+   */
+  updateEffectiveDays: {
+    parameters: {
+      path: {
+        /** @description The adjustment UUID */
+        adjustmentId: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdjustmentEffectiveDaysDto']
+      }
+    }
+    responses: {
+      /** @description Adjustment update */
+      200: never
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: never
+      /** @description Adjustment not found */
+      404: never
     }
   }
   /**
