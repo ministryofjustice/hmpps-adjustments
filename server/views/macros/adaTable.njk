@@ -62,7 +62,6 @@ totalText: optional,  defaults to 'Total' , the text displayed next to the total
                 {% endif %}
                 <th class="govuk-table__header govuk-!-text-align-right" scope="col">Days</th>
               </tr>
-              {% set totalDaysInCharge = 0 %}
               {% for charge in ada.charges %}
                 <tr>
                   <td class="govuk-table__cell">
@@ -87,12 +86,11 @@ totalText: optional,  defaults to 'Total' , the text displayed next to the total
                   <!-- Days -->
                   <td class="govuk-table__cell govuk-!-text-align-right">{{ charge.days }}</td>
                 </tr>
-                {% set totalDaysInCharge = totalDaysInCharge + charge.days %}
               {% endfor %}
               <tfoot>
               <tr class="govuk-table__row">
                 <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="3">Total</th>
-                <td class="govuk-table__cell govuk-!-text-align-right">{{ totalDaysInCharge }}</td>
+                <td class="govuk-table__cell govuk-!-text-align-right">{{ ada.total }}</td>
               </tr>
               </tfoot>
             </table>
