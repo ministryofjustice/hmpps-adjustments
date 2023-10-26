@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateItems, daysBetween, isDateInFuture } from '../utils/utils'
+import { dateItems, isDateInFuture } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
