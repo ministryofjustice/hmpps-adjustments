@@ -66,7 +66,7 @@ export default class AdjustmentsHubViewModel {
   public getTotalDays(adjustmentType: AdjustmentType) {
     return this.adjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
-      .map(a => a.days)
+      .map(a => a.days || a.daysBetween || a.effectiveDays)
       .reduce((sum, current) => sum + current, 0)
   }
 

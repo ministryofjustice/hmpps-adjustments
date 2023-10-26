@@ -13,7 +13,9 @@ export default class ReviewAndSubmitAdaViewModel {
   public displayBanner(): boolean {
     const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
     if (anyUnlinkedAdas) {
-      const existingDays = this.existingAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
+      const existingDays = this.existingAdjustments
+        .map(a => a.days || a.effectiveDays)
+        .reduce((sum, current) => sum + current, 0)
       const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       return existingDays !== newDays
     }

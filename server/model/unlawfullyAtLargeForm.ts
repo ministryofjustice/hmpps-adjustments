@@ -32,7 +32,6 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       toDate,
       person: nomsId,
       unlawfullyAtLarge: { type: this.type },
-      days: daysBetween(new Date(fromDate), new Date(toDate)),
       prisonId: prisonerDetails.agencyId,
     }
   }
