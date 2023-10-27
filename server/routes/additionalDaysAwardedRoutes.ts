@@ -69,6 +69,12 @@ export default class AdditionalDaysAwardedRoutes {
       )
       return res.redirect(`/${nomsId}`)
     }
+
+    // If all awaiting approval are PADA's then redirect to the submit screen (skip approve step)
+    if (!adasToReview.awaitingApproval.some(a => a.charges.some(c => c.status !== 'PROSPECTIVE'))) {
+      return res.redirect(`/${nomsId}/additional-days/review-and-submit`)
+    }
+
     return res.render('pages/adjustments/additional-days/review-and-approve', {
       model: {
         prisonerDetail,
