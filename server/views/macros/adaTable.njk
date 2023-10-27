@@ -9,6 +9,7 @@ emptyTitle: optional, displayed if table is empty
 checkboxes: optional, defaults to false, does table have checkboxes
 hideStatuses: optional,  defaults to false , should the status of the ada be displayed
 totalText: optional,  defaults to 'Total' , the text displayed next to the total.
+showTotalPerDateCharged: optional,  defaults to false, should the be shown per charge date
 #}
 {% macro adaTable(params) %}
   {% if params.adas | length %}
@@ -87,12 +88,14 @@ totalText: optional,  defaults to 'Total' , the text displayed next to the total
                   <td class="govuk-table__cell govuk-!-text-align-right">{{ charge.days }}</td>
                 </tr>
               {% endfor %}
-              <tfoot>
-              <tr class="govuk-table__row">
-                <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="3">Total</th>
-                <td class="govuk-table__cell govuk-!-text-align-right">{{ ada.total }}</td>
-              </tr>
-              </tfoot>
+              {% if params.showTotalPerDateCharged %}
+                <tfoot>
+                <tr class="govuk-table__row">
+                  <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="3">Total</th>
+                  <td class="govuk-table__cell govuk-!-text-align-right">{{ ada.total }}</td>
+                </tr>
+                </tfoot>
+              {% endif %}
             </table>
           </td>
         </tr>
