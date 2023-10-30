@@ -458,7 +458,9 @@ export default class AdditionalDaysAwardedService {
     awaitingApproval: AdasByDateCharged[],
     quashed: AdasByDateCharged[],
   ): AdaIntercept {
-    const anyUnlinkedAda = allAdaAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
+    const anyUnlinkedAda = allAdaAdjustments.some(
+      it => !it.additionalDaysAwarded?.adjudicationId?.length && it.effectiveDays > 0,
+    )
 
     if (anyUnlinkedAda) {
       return {
