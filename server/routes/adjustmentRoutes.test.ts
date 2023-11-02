@@ -9,6 +9,7 @@ import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsServi
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
+import './testutils/toContainInOrder'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -57,6 +58,31 @@ const radaAdjustment = {
   prisonId: 'LDS',
 } as Adjustment
 
+const remandAdjustment = {
+  id: '1',
+  adjustmentType: 'REMAND',
+  fromDate: '2023-04-05',
+  toDate: '2023-06-05',
+  person: 'ABC123',
+  daysBetween: 24,
+  effectiveDays: 14,
+  bookingId: 12345,
+  sentenceSequence: 1,
+  prisonId: 'LDS',
+} as Adjustment
+
+const unusedDeductions = {
+  id: '1',
+  adjustmentType: 'UNUSED_DEDUCTIONS',
+  toDate: null,
+  fromDate: '2023-04-05',
+  person: 'ABC123',
+  days: 10,
+  bookingId: 12345,
+  sentenceSequence: null,
+  prisonId: 'LDS',
+} as Adjustment
+
 const adaAdjustment = {
   id: '1',
   adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
@@ -95,10 +121,12 @@ afterEach(() => {
 })
 
 describe('Adjustment routes tests', () => {
-  it('GET /{nomsId}', () => {
+  it('GET /{nomsId} hub', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+      remandAdjustment,
+      unusedDeductions,
     ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0, anyProspective: false })
@@ -114,6 +142,15 @@ describe('Adjustment routes tests', () => {
           'Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded)',
         )
         expect(res.text).toContain('Last update\n          on 05 April 2023\n          by Leeds')
+        expect(res.text).toContainInOrder([
+          'Unused deductions',
+          'Total deductions',
+          '24',
+          'Unused deductions',
+          '10',
+          'Effective deductions',
+          '14',
+        ])
       })
   })
   it('GET /{nomsId} with remand role', () => {
