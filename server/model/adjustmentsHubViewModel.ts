@@ -90,4 +90,38 @@ export default class AdjustmentsHubViewModel {
   public calculateReleaseDatesUrl() {
     return `${config.services.calculateReleaseDatesUI.url}/calculation/${this.prisonerDetail.offenderNo}/check-information`
   }
+
+  private allDeductionsOnDps() {
+    return !this.allDeductions().some(it => it.days == null && it.daysBetween == null)
+  }
+
+  private allDeductions() {
+    return this.adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+  }
+
+  private unusedDeductions() {
+    return this.adjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+  }
+
+  public showUnusedDeductions() {
+    return this.allDeductionsOnDps() && this.unusedDeductions().length
+  }
+
+  public totalDeductions(): number {
+    return this.allDeductions()
+      .map(a => a.days || a.daysBetween)
+      .reduce((sum, current) => sum + current, 0)
+  }
+
+  public totalUnusedDeductions(): number {
+    return this.unusedDeductions()
+      .map(a => a.days || a.daysBetween)
+      .reduce((sum, current) => sum + current, 0)
+  }
+
+  public totalEffectiveDeductions(): number {
+    return this.allDeductions()
+      .map(a => a.effectiveDays)
+      .reduce((sum, current) => sum + current, 0)
+  }
 }
