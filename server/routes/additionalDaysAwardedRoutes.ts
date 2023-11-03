@@ -71,8 +71,8 @@ export default class AdditionalDaysAwardedRoutes {
     }
 
     // If all awaiting approval are PADA's then redirect to the submit screen (skip approve step)
-    if (!adasToReview.awaitingApproval.some(a => a.charges.some(c => c.status !== 'PROSPECTIVE'))) {
-      return res.redirect(`/${nomsId}/additional-days/review-and-submit`)
+    if (this.onlyPadasExist(adasToReview)) {
+      return res.redirect(`/${nomsId}/additional-days/review-and-submit?referrer=REVIEW_PROSPECTIVE`)
     }
 
     return res.render('pages/adjustments/additional-days/review-and-approve', {
@@ -81,6 +81,16 @@ export default class AdditionalDaysAwardedRoutes {
       },
       adasToReview,
     })
+  }
+
+  private onlyPadasExist(adasToReview: AdasToReview) {
+    return (
+      adasToReview.quashed.length === 0 &&
+      adasToReview.suspended.length === 0 &&
+      adasToReview.awarded.length === 0 &&
+      adasToReview.awaitingApproval.length &&
+      !adasToReview.awaitingApproval.some(a => a.charges.some(c => c.status !== 'PROSPECTIVE'))
+    )
   }
 
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
@@ -142,12 +152,14 @@ export default class AdditionalDaysAwardedRoutes {
 
   public approve: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    return res.redirect(`/${nomsId}/additional-days/review-and-submit`)
+    const { referrer } = req.query as Record<string, string>
+    return res.redirect(`/${nomsId}/additional-days/review-and-submit?referrer=${referrer}`)
   }
 
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
+    const { referrer } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
@@ -162,6 +174,7 @@ export default class AdditionalDaysAwardedRoutes {
         username,
         token,
       ),
+      referrer,
     })
   }
 
