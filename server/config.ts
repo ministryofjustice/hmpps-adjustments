@@ -95,10 +95,10 @@ export default {
     adjudications: {
       url: get('ADJUDICATIONS_API_URL', 'http://localhost:8080', requiredInProduction),
       timeout: {
-        response: get('ADJUSTMENTS_API_TIMEOUT_RESPONSE', 10000),
-        deadline: get('ADJUSTMENTS_API_TIMEOUT_DEADLINE', 10000),
+        response: get('ADJUDICATIONS_API_TIMEOUT_RESPONSE', 10000),
+        deadline: get('ADJUDICATIONS_API_TIMEOUT_DEADLINE', 10000),
       },
-      agent: new AgentConfig(),
+      agent: new AgentConfig(Number(get('ADJUDICATIONS_API_AGENT_TIMEOUT', 20000))),
     },
   },
   services: {
