@@ -8,7 +8,9 @@
 
 {% block content %}
 
-  <a href="/{{model.prisonerDetail.offenderNo}}/additional-days/review-and-approve" class="govuk-back-link">Back</a>
+  {% set backUrl = '/' + model.prisonerDetail.offenderNo + '/additional-days/review-prospective' if referrer==='REVIEW_PROSPECTIVE' else '/' + model.prisonerDetail.offenderNo + '/additional-days/review-and-approve' %}
+
+  <a href="{{ backUrl }}" class="govuk-back-link">Back</a>
 
   {% if model.displayBanner() %}
     {% set html %}

@@ -77,6 +77,81 @@ const allPadas = {
   },
 } as AdasToReview
 
+const noAwaitingApproval = {
+  awaitingApproval: [],
+  suspended: [],
+  awarded: [],
+  quashed: [],
+  totalAwarded: 0,
+  totalQuashed: 0,
+  totalAwaitingApproval: 104,
+  totalSuspended: 0,
+  intercept: {
+    number: 2,
+    type: 'UPDATE',
+    anyProspective: false,
+  },
+} as AdasToReview
+
+const padasAwaitingApprovalAndQuashed = {
+  awaitingApproval: [
+    {
+      dateChargeProved: new Date('2023-08-03'),
+      charges: [
+        {
+          chargeNumber: 1525916,
+          dateChargeProved: new Date('2023-08-03'),
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'PROSPECTIVE',
+          toBeServed: 'Concurrent',
+          sequence: 15,
+        },
+        {
+          chargeNumber: 1525917,
+          dateChargeProved: new Date('2023-08-03'),
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+          sequence: 16,
+        },
+      ],
+      total: 5,
+      status: 'PENDING APPROVAL',
+    },
+  ],
+  suspended: [],
+  awarded: [],
+  quashed: [
+    {
+      dateChargeProved: new Date('2023-08-03'),
+      charges: [
+        {
+          dateChargeProved: new Date('2023-08-03'),
+          chargeNumber: 1526230,
+          heardAt: 'Kirkham (HMP)',
+          status: 'QUASHED',
+          days: 25,
+          sequence: 2,
+          toBeServed: 'Forthwith',
+        },
+      ],
+      total: 25,
+      status: 'PENDING APPROVAL',
+    },
+  ],
+  totalAwarded: 0,
+  totalQuashed: 0,
+  totalAwaitingApproval: 104,
+  totalSuspended: 0,
+  intercept: {
+    number: 2,
+    type: 'UPDATE',
+    anyProspective: false,
+  },
+} as AdasToReview
+
 const mixPadasAndPending = {
   awaitingApproval: [
     {
@@ -153,7 +228,23 @@ describe('Additional Days Awarded routes tests', () => {
       return request(app)
         .get(`/${NOMS_ID}/additional-days/review-and-approve`)
         .expect(302)
-        .expect('Location', `/${NOMS_ID}/additional-days/review-and-submit`)
+        .expect('Location', `/${NOMS_ID}/additional-days/review-and-submit?referrer=REVIEW_PROSPECTIVE`)
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve when no awaiting approval records exist does not redirect', () => {
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(new Date())
+      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
+
+      return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve when quashed records exist does not redirect', () => {
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(new Date())
+      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
+
+      return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when mix of PADAs and others exist does not redirect', () => {
