@@ -64,13 +64,13 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
     if (isDateInFuture(this['from-year'], this['from-month'], this['from-day']))
       errors.push({
         text: 'The first day of unlawfully at large date must not be in the future',
-        fields: ['from'],
+        fields: ['from-day', 'from-month', 'from-year'],
       })
 
     if (isDateInFuture(this['to-year'], this['to-month'], this['to-day']))
       errors.push({
         text: 'The last day of unlawfully at large date must not be in the future',
-        fields: ['to'],
+        fields: ['to-day', 'to-month', 'to-year'],
       })
 
     if (!this.type)

@@ -16,6 +16,7 @@ import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
+import { delay } from '../utils/utils'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -57,9 +58,15 @@ export default class AdjustmentRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+
     const message = req.flash('message')
-    if (!(message && message[0])) {
+    const messageExists = message && message[0]
+    if (messageExists) {
+      // Adjustment updated/deleted/created. Wait for unused deductions calc.
+      await delay(1000)
+    }
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    if (!messageExists) {
       const intercept = await this.additionalDaysAwardedService.shouldIntercept(
         req,
         prisonerDetail,
