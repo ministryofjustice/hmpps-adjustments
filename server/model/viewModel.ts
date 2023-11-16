@@ -17,7 +17,15 @@ export default class ViewModel {
   ) {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
-      .sort((a, b) => a.fromDate.localeCompare(b.fromDate))
+      .sort((a, b) => {
+        if (a.fromDate == null) {
+          return 1
+        }
+        if (b.fromDate == null) {
+          return -1
+        }
+        return a.fromDate.localeCompare(b.fromDate)
+      })
   }
 
   public table() {

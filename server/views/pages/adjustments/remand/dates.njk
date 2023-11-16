@@ -1,0 +1,104 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - " + model.addOrEdit + " remand dates"%}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {% if model.addOrEdit == 'edit' and model.id %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/view" %}
+    {% else %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
+    {% endif %}
+    {{ govukBackLink({
+      text: "Back",
+      href: backlink
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  {% if model.form.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: model.form.errorList()
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        {{ 'Edit' if model.addOrEdit == 'edit' else 'Enter' }} remand dates
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <p class="govuk-body">Enter the first and last day the prisoner was on remand for these offences.</p>
+      <p class="govuk-body">If the length of time on remand leads to the prisoner being an immediate release, this service will calculate the unused remand time later.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-three-quarters">
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+        {{ govukDateInput({
+            id: "from",
+            namePrefix: "from",
+            items: model.form.fromItems(),
+            fieldset: {
+                legend: {
+                    text: "Remand start date",
+                    classes: "govuk-fieldset__legend--s"
+                }
+            },
+            hint: {
+                text: "For example, 27 3 2022"
+            },
+            errorMessage: model.form.messageForField('from-day', 'from-month', 'from-year')
+            })
+        }}
+        {{ govukDateInput({
+            id: "to",
+            namePrefix: "to",
+            items: model.form.toItems(),
+            fieldset: {
+                legend: {
+                    text: "Remand end date",
+                    classes: "govuk-fieldset__legend--s"
+                }
+            },
+            hint: {
+                text: "For example, 27 3 2022"
+            },
+            errorMessage: model.form.messageForField('to-day', 'to-month', 'to-year')
+            })
+        }}
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: "/" + model.prisonerDetail.offenderNo
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
