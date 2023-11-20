@@ -13,8 +13,13 @@
     <div class="govuk-grid-column-two-thirds">
       <div class="govuk-form-group">
         <h1 class="govuk-heading-l">There is a problem</h1>
-        <p class="govuk-body">ADAs cannot be added manually.</p>
-        <p class="govuk-body">To add an ADAs, contact the team who manage adjudications.</p>
+        {% if startOfSentenceEnvelope %}
+          <p class="govuk-body">ADAs cannot be added manually.</p>
+          <p class="govuk-body">To add an ADAs, contact the team who manage adjudications.</p>
+        {% else %}
+          <p class="govuk-body">This person is being recalled on license. ADAs cannot be added for a person during licence recall with this service.</p>
+          <p class="govuk-body">Email <a href="mailto:calculatereleasedates@digital.justice.gov.uk?subject=Adjustments service - ADA within recall period">calculatereleasedates@digital.justice.gov.uk</a> and ask the team to add the ADA information.</p>
+        {% endif %}
       </div>
     </div>
   </div>

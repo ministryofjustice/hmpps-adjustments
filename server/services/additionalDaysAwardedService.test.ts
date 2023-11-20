@@ -901,6 +901,30 @@ describe('Additional Days Added Service', () => {
     })
   })
 
+  it('Shouldnt intercept when there are no non recall sentences', async () => {
+    const nomsId = 'AA1234A'
+    const bookingId = 1234
+    const startOfSentenceEnvelope: Date = null
+    const request = {} as jest.Mocked<Request>
+    storeService.getLastApprovedDate.mockReturnValue(new Date())
+    const intercept = await adaService.shouldIntercept(
+      request,
+      {
+        offenderNo: nomsId,
+        bookingId,
+      } as PrisonApiPrisoner,
+      [],
+      startOfSentenceEnvelope,
+      'username',
+    )
+
+    expect(intercept).toEqual({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    } as AdaIntercept)
+  })
+
   it('Should intercept if all adas quashed', async () => {
     const nomsId = 'AA1234A'
     const bookingId = 1234

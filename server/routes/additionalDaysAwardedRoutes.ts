@@ -16,7 +16,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
@@ -46,7 +46,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
@@ -97,7 +97,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
@@ -126,7 +126,7 @@ export default class AdditionalDaysAwardedRoutes {
 
     if (padaForm.errors.length) {
       const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
         prisonerDetail.bookingId,
         token,
       )
@@ -161,7 +161,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { nomsId } = req.params
     const { referrer } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
@@ -182,7 +182,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
@@ -204,10 +204,15 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+      prisonerDetail.bookingId,
+      token,
+    )
 
     return res.render('pages/adjustments/additional-days/add-warning', {
       model: {
         prisonerDetail,
+        startOfSentenceEnvelope,
       },
     })
   }
@@ -216,7 +221,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token, username } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
