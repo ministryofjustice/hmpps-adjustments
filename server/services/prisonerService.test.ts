@@ -70,7 +70,7 @@ describe('Prisoner service related tests', () => {
             { sentenceDate: '2023-02-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
           ])
 
-        const minDate = await prisonerService.getStartOfSentenceEnvelope(9991, token)
+        const minDate = await prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(9991, token)
         expect(minDate.getTime()).toEqual(new Date('2023-01-01').getTime())
       })
     })

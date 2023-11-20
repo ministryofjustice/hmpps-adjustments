@@ -419,6 +419,9 @@ export default class AdditionalDaysAwardedService {
     startOfSentenceEnvelope: Date,
     username: string,
   ): Promise<AdaIntercept> {
+    if (!startOfSentenceEnvelope) {
+      return { type: 'NONE', anyProspective: false, number: 0 }
+    }
     const allAdaAdjustments = adjustments.filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
 
     const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)

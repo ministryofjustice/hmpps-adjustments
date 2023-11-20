@@ -222,7 +222,7 @@ describe('Additional Days Awarded routes tests', () => {
   describe('Review and approve tests', () => {
     it('GET /{nomsId}/additional-days/review-and-approve when only PADAs exist redirects to review and submit', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(allPadas)
 
       return request(app)
@@ -233,7 +233,7 @@ describe('Additional Days Awarded routes tests', () => {
 
     it('GET /{nomsId}/additional-days/review-and-approve when no awaiting approval records exist does not redirect', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
@@ -241,7 +241,7 @@ describe('Additional Days Awarded routes tests', () => {
 
     it('GET /{nomsId}/additional-days/review-and-approve when quashed records exist does not redirect', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
@@ -249,7 +249,7 @@ describe('Additional Days Awarded routes tests', () => {
 
     it('GET /{nomsId}/additional-days/review-and-approve when mix of PADAs and others exist does not redirect', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)

@@ -54,7 +54,7 @@ export default class AdjustmentRoutes {
     const { caseloads, token, username, roles } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
