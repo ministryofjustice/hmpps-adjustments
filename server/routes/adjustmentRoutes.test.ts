@@ -223,8 +223,8 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect('Location', `/${NOMS_ID}/review`)
       .expect(res => {
-        expect(adjustmentsStoreService.store.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.store.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
       })
   })
   it('POST /{nomsId}/restored-additional-days/add empty form validation', () => {
@@ -350,15 +350,15 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect('Location', `/${NOMS_ID}/warning`)
       .expect(res => {
-        expect(adjustmentsStoreService.store.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.store.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
       })
   })
 
   it('GET /{nomsId}/restored-additional-days/edit should load adjustment from session', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
-    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
+    adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/edit`)
       .expect('Content-Type', /html/)
@@ -399,8 +399,8 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect('Location', `/${NOMS_ID}/review`)
       .expect(res => {
-        expect(adjustmentsStoreService.store.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.store.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
       })
   })
   it('POST /{nomsId}/restored-additional-days/edit/{id} valid', () => {
@@ -413,13 +413,16 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect('Location', `/${NOMS_ID}/review`)
       .expect(res => {
-        expect(adjustmentsStoreService.store.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.store.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: 'this-is-an-id' })
+        expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({
+          ...radaAdjustment,
+          id: 'this-is-an-id',
+        })
       })
   })
   it('GET /{nomsId}/warning display server side warning', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
+    adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
     adjustmentsService.validate.mockResolvedValue([
       {
         code: 'RADA_REDUCES_BY_MORE_THAN_HALF',
@@ -439,7 +442,7 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/warning submit warning agreement', () => {
-    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
     return request(app)
       .post(`/${NOMS_ID}/warning`)
       .send({ confirm: 'yes' })
@@ -449,7 +452,7 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/warning submit warning disagreement', () => {
-    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
     return request(app)
       .post(`/${NOMS_ID}/warning`)
       .send({ confirm: 'no' })
@@ -458,9 +461,9 @@ describe('Adjustment routes tests', () => {
       .expect('Location', `/${NOMS_ID}/restored-additional-days/edit`)
   })
   it('POST /{nomsId}/warning submit warning without an answer', () => {
-    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
+    adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
     adjustmentsService.validate.mockResolvedValue([
       {
         code: 'RADA_REDUCES_BY_MORE_THAN_HALF',
@@ -481,7 +484,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue(radaAdjustment)
+    adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
 
     return request(app)
       .get(`/${NOMS_ID}/review`)
@@ -499,7 +502,7 @@ describe('Adjustment routes tests', () => {
 
   it('POST /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: undefined })
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
     adjustmentsService.create.mockResolvedValue({ adjustmentId: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
@@ -518,7 +521,7 @@ describe('Adjustment routes tests', () => {
   })
   it('POST /{nomsId}/review with a adjustment with an id', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.get.mockReturnValue({ ...radaAdjustment, id: 'this-is-an-id' })
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
       .post(`/${NOMS_ID}/review`)

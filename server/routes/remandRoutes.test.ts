@@ -4,11 +4,12 @@ import request from 'supertest'
 import { appWithAllRoutes } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import './testutils/toContainInOrder'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -27,6 +28,8 @@ const additionalDaysAwardedService = new AdditionalDaysAwardedService(
 
 const NOMS_ID = 'ABC123'
 
+const SESSION_ID = '123-abc'
+
 const stubbedPrisonerData = {
   offenderNo: NOMS_ID,
   firstName: 'Anon',
@@ -35,6 +38,38 @@ const stubbedPrisonerData = {
   bookingId: 12345,
   agencyId: 'LDS',
 } as PrisonApiPrisoner
+
+const stubbedSentencesAndOffences = [
+  {
+    terms: [
+      {
+        years: 3,
+      },
+    ],
+    sentenceTypeDescription: 'SDS Standard Sentence',
+    caseSequence: 1,
+    lineSequence: 1,
+    caseReference: 'CASE001',
+    courtDescription: 'Court 1',
+    sentenceSequence: 1,
+    sentenceStatus: 'A',
+    offences: [
+      { offenceDescription: 'Doing a crime', offenceStartDate: '2021-01-04', offenceEndDate: '2021-01-05' },
+      { offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
+    ],
+  } as PrisonApiOffenderSentenceAndOffences,
+]
+
+const blankAdjustment = {
+  person: NOMS_ID,
+  bookingId: stubbedPrisonerData.bookingId,
+} as Adjustment
+
+const adjustmentWithDates = {
+  ...blankAdjustment,
+  fromDate: '2023-01-01',
+  toDate: '2023-01-10',
+} as Adjustment
 
 let app: Express
 
@@ -55,10 +90,20 @@ afterEach(() => {
 })
 
 describe('Adjustment routes tests', () => {
+  it('GET /{nomsId}/remand/add', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/add`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
+  })
+
   it('GET /{nomsId}/remand/dates/add', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
-      .get(`/${NOMS_ID}/remand/dates/add`)
+      .get(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Anon')
@@ -71,9 +116,10 @@ describe('Adjustment routes tests', () => {
 
   it('POST /{nomsId}/remand/dates/add valid', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     adjustmentsService.validate.mockResolvedValue([])
     return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add`)
+      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
       .send({
         'from-day': '5',
         'from-month': '4',
@@ -84,13 +130,14 @@ describe('Adjustment routes tests', () => {
       })
       .type('form')
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/remand/offences/add`)
+      .expect('Location', `/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
   })
 
   it('POST /{nomsId}/remand/dates/add empty form validation', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add`)
+      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('This date must include a valid day, month and year')
@@ -99,8 +146,9 @@ describe('Adjustment routes tests', () => {
 
   it('POST /{nomsId}/remand/dates/add to date after from', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add`)
+      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
       .send({
         'from-day': '5',
         'from-month': '4',
@@ -118,8 +166,9 @@ describe('Adjustment routes tests', () => {
 
   it('POST /{nomsId}/remand/dates/add dates in future', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add`)
+      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
       .send({
         'from-day': '5',
         'from-month': '4',
@@ -133,6 +182,54 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('The first day of remand must not be in the future.')
         expect(res.text).toContain('The last day of remand must not be in the future.')
+      })
+  })
+
+  it('GET /{nomsId}/remand/offences/add', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContainInOrder(['10', 'day(s)'])
+        expect(res.text).toContainInOrder([
+          'Court 1',
+          'CASE001',
+          'Doing a crime',
+          'Committed from 04 January 2021 to 05 January 2021',
+          'Doing a different crime',
+          'Committed on 06 March 2021',
+        ])
+      })
+  })
+
+  it('POST /{nomsId}/remand/offence/add valid', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+    return request(app)
+      .post(`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
+      .send({
+        chargeId: ['5', '6', '7'],
+      })
+      .type('form')
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/remand/review`)
+  })
+
+  it('POST /{nomsId}/remand/offence/add no offences selected', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+    return request(app)
+      .post(`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Select an offence')
       })
   })
 })
