@@ -53,10 +53,11 @@ export default function routes(service: Services): Router {
   get('/:nomsId/additional-days/view', additionalDaysAwardedRoutes.view)
   get('/:nomsId/additional-days/add', additionalDaysAwardedRoutes.addWarning)
 
-  get('/:nomsId/:adjustmentTypeUrl/dates/:addOrEdit', remandRoutes.dates)
-  post('/:nomsId/:adjustmentTypeUrl/dates/:addOrEdit', remandRoutes.submitDates)
-  get('/:nomsId/:adjustmentTypeUrl/dates/:addOrEdit/:id', remandRoutes.dates)
-  post('/:nomsId/:adjustmentTypeUrl/dates/:addOrEdit/:id', remandRoutes.submitDates)
+  get('/:nomsId/remand/add', remandRoutes.add)
+  get('/:nomsId/remand/dates/:addOrEdit/:id', remandRoutes.dates)
+  post('/:nomsId/remand/dates/:addOrEdit/:id', remandRoutes.submitDates)
+  get('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.offences)
+  post('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.submitOffences)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

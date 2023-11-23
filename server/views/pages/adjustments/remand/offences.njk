@@ -1,0 +1,112 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set pageTitle = applicationName + " - Select offences" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {% if model.addOrEdit == 'edit' and model.id %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/view" %}
+    {% else %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
+    {% endif %}
+    {{ govukBackLink({
+      text: "Back",
+      href: backlink
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  {% if model.form.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: model.form.errorList()
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Select the offences
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <p class="govuk-body">You have entered <strong>{{model.days()}}</strong> day(s) of remand. Select all the offences that apply to this remand time.</p>
+      <p class="govuk-body">The rules for applying remand can be found in the policy framework.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h2 class="govuk-heading-m">Court cases</h2>
+
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+
+        {% for sentences in model
+          .cases
+          .values() %}
+
+          <h3 class="govuk-heading-s">Case {{sentences[0].caseSequence}}</h2>
+          {{ govukSummaryList({
+              classes: 'govuk-summary-list--no-border',
+              rows: model.caseSummary(sentences[0])
+          })
+          }}
+
+          {% for sentence in sentences %}
+            {% for offence in sentence.offences %}
+              <div class="shadow-card govuk-!-margin-bottom-6">
+                <h4 class="govuk-heading-s">{{offence.offenceDescription}}</h4>
+                <p class="govuk-body">
+                  {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
+                        Committed from {{ offence.offenceStartDate | date('DD MMMM YYYY') }} to {{ offence.offenceEndDate | date('DD MMMM YYYY') }}
+                  {% elif(offence.offenceEndDate or offence.offenceStartDate) %}
+                        Committed on {{ (offence.offenceEndDate or offence.offenceStartDate) | date('DD MMMM YYYY') }}
+                  {% else %}
+                        Offence date not entered
+                  {% endif %}
+                </p>
+                <div class="govuk-checkboxes__item govuk-checkboxes--small">
+                  <input type="checkbox" class="govuk-checkboxes__input" id="charge-{{ offence.offenderChargeId }}"
+                       name="chargeId" value="{{ offence.offenderChargeId }}">
+                  <label class="govuk-label govuk-checkboxes__label" for="charge-{{ offence.offenderChargeId }}">Select this offence</label>
+                </div>
+              </div>
+            {% endfor %}
+
+          {% endfor %}
+
+        {% endfor %}
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: "/" + model.prisonerDetail.offenderNo
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

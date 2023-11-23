@@ -168,11 +168,6 @@ export interface components {
        * @description The NOMIS booking ID of the adjustment
        */
       bookingId: number
-      /**
-       * Format: int32
-       * @description The NOMIS sentence sequence of the adjustment
-       */
-      sentenceSequence?: number
       /** @description The NOMIS ID of the person this adjustment applies to */
       person: string
       /**
@@ -203,6 +198,7 @@ export interface components {
        * @description The number of adjustment days
        */
       days?: number
+      remand?: components['schemas']['RemandDto']
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
       /**
@@ -234,9 +230,19 @@ export interface components {
       effectiveDays?: number
       /**
        * Format: int32
+       * @description The NOMIS sentence sequence of the adjustment
+       */
+      sentenceSequence?: number
+      /**
+       * Format: int32
        * @description The days between the from and two date
        */
       daysBetween?: number
+    }
+    /** @description The details of remand adjustment */
+    RemandDto: {
+      /** @description The id of the charges this remand applies to */
+      chargeId: number[]
     }
     /** @description The details of a UAL adjustment */
     UnlawfullyAtLargeDto: {

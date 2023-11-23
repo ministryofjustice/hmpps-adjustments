@@ -2,9 +2,10 @@ import { RequestHandler } from 'express'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import adjustmentTypes from '../model/adjustmentTypes'
 import FullPageError from '../model/FullPageError'
 import RemandDatesForm from '../model/remandDatesForm'
+import RemandOffencesForm from '../model/remandOffencesForm'
+import RemandSelectOffencesModel from '../model/remandSelectOffencesModel'
 
 export default class RemandRoutes {
   constructor(
@@ -13,31 +14,31 @@ export default class RemandRoutes {
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
   ) {}
 
+  public add: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetails = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
+      adjustmentType: 'REMAND',
+      bookingId: prisonerDetails.bookingId,
+      person: nomsId,
+      prisonId: prisonerDetails.agencyId,
+    })
+    return res.redirect(`/${nomsId}/remand/dates/add/${sessionId}`)
+  }
+
   public dates: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
+    const { nomsId, addOrEdit, id } = req.params
 
     if (!['edit', 'add'].includes(addOrEdit)) {
       throw FullPageError.notFoundError()
     }
-
-    const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
-    if (!adjustmentType) {
-      return res.redirect(`/${nomsId}`)
-    }
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
-    let adjustment = null
-    if (addOrEdit === 'edit') {
-      const sessionAdjustment = this.adjustmentsStoreService.get(req, nomsId)
-      if (id && sessionAdjustment?.id !== id) {
-        adjustment = await this.adjustmentsService.get(id, token)
-      } else {
-        adjustment = sessionAdjustment
-      }
-    }
-    const form = adjustment ? RemandDatesForm.fromAdjustment(adjustment) : new RemandDatesForm({})
+    const form = RemandDatesForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/remand/dates', {
       model: { prisonerDetail, form, addOrEdit, id },
@@ -46,12 +47,7 @@ export default class RemandRoutes {
 
   public submitDates: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
-
-    const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
-    if (!adjustmentType) {
-      return res.redirect(`/${nomsId}`)
-    }
+    const { nomsId, addOrEdit, id } = req.params
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = new RemandDatesForm(req.body)
@@ -64,16 +60,53 @@ export default class RemandRoutes {
       })
     }
 
-    // const messages = await this.adjustmentsService.validate(adjustment, token)
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
 
-    // const validationMessages = messages.filter(it => it.type === 'VALIDATION')
+    return res.redirect(`/${nomsId}/remand/offences/${addOrEdit}/${id}`)
+  }
 
-    // if (validationMessages.length) {
-    //   adjustmentForm.addErrors(validationMessages)
-    //   return res.render('pages/adjustments/form', {
-    //     model: { prisonerDetail, form: adjustmentForm, addOrEdit, id },
-    //   })
-    // }
-    return res.redirect(`/${nomsId}/remand/offences/${addOrEdit}`)
+  public offences: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, addOrEdit, id } = req.params
+
+    if (!['edit', 'add'].includes(addOrEdit)) {
+      throw FullPageError.notFoundError()
+    }
+
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const form = RemandOffencesForm.fromAdjustment(adjustment)
+
+    return res.render('pages/adjustments/remand/offences', {
+      model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, form, sentencesAndOffences),
+    })
+  }
+
+  public submitOffences: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, addOrEdit, id } = req.params
+
+    if (!['edit', 'add'].includes(addOrEdit)) {
+      throw FullPageError.notFoundError()
+    }
+
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustmentForm = new RemandOffencesForm(req.body)
+
+    await adjustmentForm.validate()
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+
+    if (adjustmentForm.errors.length) {
+      return res.render('pages/adjustments/remand/offences', {
+        model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, adjustmentForm, sentencesAndOffences),
+      })
+    }
+
+    this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+
+    return res.redirect(`/${nomsId}/remand/review`)
   }
 }

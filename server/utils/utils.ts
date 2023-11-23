@@ -71,6 +71,16 @@ export const isFromAfterTo = (
   return fromDate > toDate
 }
 
+export const groupBy = <T, K>(items: T[], groupingFunction: (item: T) => K): Map<K, T[]> => {
+  return items.reduce((result, item) => {
+    const key = groupingFunction(item)
+    const currentValues = result.get(key) || []
+    currentValues.push(item)
+    result.set(key, currentValues)
+    return result
+  }, new Map<K, T[]>())
+}
+
 export function delay(ms: number): Promise<void> {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
