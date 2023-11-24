@@ -16,15 +16,17 @@ expect.extend({
     let match: jest.CustomMatcherResult = null
     let text = received
     all.forEach(expected => {
-      const result = text.indexOf(expected)
-      if (result === -1) {
-        match = {
-          message: () => `Remaining text didn't contain: '${expected}' within: \n ${text}`,
-          pass: false,
+      if (!match) {
+        const result = text.indexOf(expected)
+        if (result === -1) {
+          match = {
+            message: () => `Remaining text didn't contain: '${expected}' within: \n ${text}`,
+            pass: false,
+          }
+          return
         }
-        return
+        text = text.substring(result)
       }
-      text = text.substring(result)
     })
     if (match) {
       return match

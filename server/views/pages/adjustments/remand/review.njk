@@ -1,0 +1,103 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% set pageTitle = applicationName + " - Review remand details" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {% if model.addOrEdit == 'edit' and model.id %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/view" %}
+    {% else %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
+    {% endif %}
+    {{ govukBackLink({
+      text: "Back",
+      href: backlink
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  {% if model.form.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: model.form.errorList()
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Review remand details
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <p class="govuk-body">Check that the remand and offence information is correct. Once you've reviewed it, you can add more remand time if needed.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h2 class="govuk-heading-m">Remand details</h2>
+
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+
+        {% for adjustmentId in model.adjustmentIds %}
+          {{ govukSummaryList(model.adjustmentSummary(adjustmentId))}}
+        {% endfor %}
+        {{ govukSummaryList(model.totalDaysSummary())}}
+
+        {{ govukRadios({
+            classes: "govuk-radios--inline",
+            name: "another",
+            fieldset: {
+              legend: {
+                text: "Do you need to add another period of remand?",
+                classes: "govuk-fieldset__legend--m"
+              }
+            },
+            errorMessage: model.form.messageForField('another'),
+            items: [
+              {
+                value: "yes",
+                text: "Yes"
+              },
+              {
+                value: "no",
+                text: "No"
+              }
+            ]
+          }) }}
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: "/" + model.prisonerDetail.offenderNo
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -6,6 +6,8 @@ import FullPageError from '../model/FullPageError'
 import RemandDatesForm from '../model/remandDatesForm'
 import RemandOffencesForm from '../model/remandOffencesForm'
 import RemandSelectOffencesModel from '../model/remandSelectOffencesModel'
+import RemandReviewModel from '../model/remandReviewModel'
+import ReviewRemandForm from '../model/reviewRemandForm'
 
 export default class RemandRoutes {
   constructor(
@@ -97,9 +99,9 @@ export default class RemandRoutes {
 
     await adjustmentForm.validate()
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
 
     if (adjustmentForm.errors.length) {
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
       return res.render('pages/adjustments/remand/offences', {
         model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, adjustmentForm, sentencesAndOffences),
       })
@@ -108,5 +110,38 @@ export default class RemandRoutes {
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
 
     return res.redirect(`/${nomsId}/remand/review`)
+  }
+
+  public review: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+
+    const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+
+    return res.render('pages/adjustments/remand/review', {
+      model: new RemandReviewModel(prisonerDetail, adjustments, sentencesAndOffences, new ReviewRemandForm({})),
+    })
+  }
+
+  public submitReview: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+
+    const form = new ReviewRemandForm(req.body)
+    await form.validate()
+    if (form.errors.length) {
+      const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+      return res.render('pages/adjustments/remand/review', {
+        model: new RemandReviewModel(prisonerDetail, adjustments, sentencesAndOffences, form),
+      })
+    }
+    if (form.another === 'yes') {
+      return res.redirect(`/${nomsId}/remand/add`)
+    }
+    return res.redirect(`/${nomsId}/remand/save`)
   }
 }
