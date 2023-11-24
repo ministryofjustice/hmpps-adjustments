@@ -54,8 +54,13 @@ const stubbedSentencesAndOffences = [
     sentenceSequence: 1,
     sentenceStatus: 'A',
     offences: [
-      { offenceDescription: 'Doing a crime', offenceStartDate: '2021-01-04', offenceEndDate: '2021-01-05' },
-      { offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
+      {
+        offenderChargeId: 1,
+        offenceDescription: 'Doing a crime',
+        offenceStartDate: '2021-01-04',
+        offenceEndDate: '2021-01-05',
+      },
+      { offenderChargeId: 2, offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
     ],
   } as PrisonApiOffenderSentenceAndOffences,
 ]
@@ -69,6 +74,13 @@ const adjustmentWithDates = {
   ...blankAdjustment,
   fromDate: '2023-01-01',
   toDate: '2023-01-10',
+} as Adjustment
+
+const adjustmentWithDatesAndCharges = {
+  ...adjustmentWithDates,
+  remand: {
+    chargeId: [1, 2],
+  },
 } as Adjustment
 
 let app: Express
@@ -230,6 +242,69 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Select an offence')
+      })
+  })
+  it('GET /{nomsId}/remand/review', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/review`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain('Review remand details')
+        expect(res.text).toContainInOrder([
+          'Remand period',
+          '01 January 2023 to 10 January 2023',
+          'Offences',
+          'Doing a crime',
+          'Doing a different crime',
+          'Days spend on remand',
+          '10',
+          'Total days',
+          '10',
+        ])
+      })
+  })
+
+  it('POST /{nomsId}/remand/review yes more to add', () => {
+    return request(app)
+      .post(`/${NOMS_ID}/remand/review`)
+      .type('form')
+      .send({
+        another: 'yes',
+      })
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/remand/add`)
+  })
+
+  it('POST /{nomsId}/remand/review no more to add', () => {
+    return request(app)
+      .post(`/${NOMS_ID}/remand/review`)
+      .type('form')
+      .send({
+        another: 'no',
+      })
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/remand/save`)
+  })
+
+  it('POST /{nomsId}/remand/review nothing selected', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    return request(app)
+      .post(`/${NOMS_ID}/remand/review`)
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Select an answer')
       })
   })
 })
