@@ -44,6 +44,14 @@
                 release dates.</a>
           </p>
           {% endset %}
+        {% elif model.message.action === 'REMAND_UPDATED' %}
+          {% set html %}
+          <h3 class="govuk-notification-banner__heading">Remand updates have been saved</h3>
+          <p class="govuk-body">Once all changes have been made, you must
+              <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
+                release dates.</a>
+          </p>
+          {% endset %}
         {% endif %}
 
         {% if model.message.action === 'VALIDATION' %}

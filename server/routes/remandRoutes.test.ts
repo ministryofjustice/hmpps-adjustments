@@ -5,26 +5,20 @@ import { appWithAllRoutes } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import './testutils/toContainInOrder'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
-jest.mock('../services/identifyRemandPeriodsService')
+jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
-jest.mock('../services/additionalDaysAwardedService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
-const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
+const calculateReleaseDatesService = new CalculateReleaseDatesService() as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
-const additionalDaysAwardedService = new AdditionalDaysAwardedService(
-  null,
-  null,
-) as jest.Mocked<AdditionalDaysAwardedService>
 
 const NOMS_ID = 'ABC123'
 
@@ -90,9 +84,8 @@ beforeEach(() => {
     services: {
       prisonerService,
       adjustmentsService,
-      identifyRemandPeriodsService,
       adjustmentsStoreService,
-      additionalDaysAwardedService,
+      calculateReleaseDatesService,
     },
   })
 })
@@ -306,5 +299,53 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Select an answer')
       })
+  })
+  it('GET /{nomsId}/remand/save calculated deductions', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({ unusedDeductions: 50 })
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/save`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain('Save remand details')
+        expect(res.text).toContainInOrder([
+          'Period of remand',
+          'Days spent on remand',
+          '10',
+          'There are 50 days of unused deductions',
+        ])
+      })
+  })
+  it('GET /{nomsId}/remand/save error from deductions', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue({ error: 'an error' })
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/save`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain('unused deductions')
+      })
+  })
+  it('POST /{nomsId}/remand/save', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/remand/save`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
   })
 })

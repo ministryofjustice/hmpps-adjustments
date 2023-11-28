@@ -8,7 +8,7 @@ export type Message = {
   type: string
   days: number
   text: string
-  action: 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED' | 'VALIDATION' | 'ADDITIONAL_DAYS_UPDATED'
+  action: 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED' | 'VALIDATION' | 'ADDITIONAL_DAYS_UPDATED' | 'REMAND_UPDATED'
 }
 export default class AdjustmentsHubViewModel {
   public adjustmentTypes = adjustmentTypes

@@ -8,12 +8,18 @@ import RemandOffencesForm from '../model/remandOffencesForm'
 import RemandSelectOffencesModel from '../model/remandSelectOffencesModel'
 import RemandReviewModel from '../model/remandReviewModel'
 import ReviewRemandForm from '../model/reviewRemandForm'
+import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
+import RemandSaveModel from '../model/remandSaveModel'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { daysBetween } from '../utils/utils'
+import { Message } from '../model/adjustmentsHubViewModel'
 
 export default class RemandRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
+    private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -143,5 +149,54 @@ export default class RemandRoutes {
       return res.redirect(`/${nomsId}/remand/add`)
     }
     return res.redirect(`/${nomsId}/remand/save`)
+  }
+
+  public save: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const sessionadjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+
+    let unusedDeductions = 0
+    try {
+      unusedDeductions = (
+        await this.calculateReleaseDatesService.calculateUnusedDeductions(
+          nomsId,
+          [...this.makeSessionAdjustmentsReadyForCalculation(sessionadjustments), ...adjustments],
+          token,
+        )
+      ).unusedDeductions
+    } catch {
+      // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
+    }
+
+    return res.render('pages/adjustments/remand/save', {
+      model: new RemandSaveModel(prisonerDetail, Object.values(sessionadjustments), unusedDeductions),
+    })
+  }
+
+  public submitSave: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId } = req.params
+
+    const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
+
+    await Promise.all(adjustments.map(it => this.adjustmentsService.create(it, token)))
+
+    const message = {
+      action: 'REMAND_UPDATED',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  private makeSessionAdjustmentsReadyForCalculation(sessionadjustments: { string?: Adjustment }): Adjustment[] {
+    return Object.values(sessionadjustments).map(it => {
+      return {
+        ...it,
+        daysBetween: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
+      }
+    })
   }
 }
