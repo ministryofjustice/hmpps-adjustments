@@ -1,0 +1,71 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% set pageTitle = applicationName + " - Save remand details" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {% if model.addOrEdit == 'edit' and model.id %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/view" %}
+    {% else %}
+      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
+    {% endif %}
+    {{ govukBackLink({
+      text: "Back",
+      href: backlink
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Save remand details
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h2 class="govuk-heading-m">Remand details</h2>
+
+      {{ govukTable(
+        model.table()
+      ) }}
+
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+
+        {% if model.unusedDeductions %}
+          <h2 class="govuk-heading-m">There are {{model.unusedDeductions}} days of unused deductions</h2>
+          <p class="govuk-body">Unused deductions can include remand and tagged bail. They will not be taken into the calculation. but can be carried over to future licence recall cases.</p>
+          <p class="govuk-body">For deductions, you will need to add the unused remand alert on NOMIS.</p>
+        {% endif %}
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: "/" + model.prisonerDetail.offenderNo
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

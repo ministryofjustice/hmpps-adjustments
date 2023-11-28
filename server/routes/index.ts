@@ -23,6 +23,7 @@ export default function routes(service: Services): Router {
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
+    service.calculateReleaseDatesService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -60,6 +61,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.submitOffences)
   get('/:nomsId/remand/review', remandRoutes.review)
   post('/:nomsId/remand/review', remandRoutes.submitReview)
+  get('/:nomsId/remand/save', remandRoutes.save)
+  post('/:nomsId/remand/save', remandRoutes.submitSave)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
