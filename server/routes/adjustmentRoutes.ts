@@ -16,6 +16,7 @@ import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
+import { delay } from '../utils/utils'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -53,13 +54,20 @@ export default class AdjustmentRoutes {
     const { caseloads, token, username, roles } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+
     const message = req.flash('message')
-    if (!(message && message[0])) {
+    const messageExists = message && message[0]
+    if (messageExists) {
+      this.adjustmentsStoreService.clear(req, nomsId)
+      // Adjustment updated/deleted/created. Wait for unused deductions calc.
+      await delay(1000)
+    }
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    if (!messageExists) {
       const intercept = await this.additionalDaysAwardedService.shouldIntercept(
         req,
         prisonerDetail,
@@ -138,7 +146,7 @@ export default class AdjustmentRoutes {
 
     let adjustment = null
     if (addOrEdit === 'edit') {
-      const sessionAdjustment = this.adjustmentsStoreService.get(req, nomsId)
+      const sessionAdjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
       if (id && sessionAdjustment?.id !== id) {
         adjustment = await this.adjustmentsService.get(id, token)
       } else {
@@ -187,7 +195,7 @@ export default class AdjustmentRoutes {
       })
     }
 
-    this.adjustmentsStoreService.store(req, nomsId, adjustment)
+    this.adjustmentsStoreService.storeOnly(req, nomsId, adjustment)
 
     const warnings = messages.filter(it => it.type === 'WARNING')
     if (warnings.length) {
@@ -202,9 +210,9 @@ export default class AdjustmentRoutes {
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
-    if (this.adjustmentsStoreService.get(req, nomsId)) {
+    if (this.adjustmentsStoreService.getOnly(req, nomsId)) {
       return res.render('pages/adjustments/review', {
-        model: new ReviewModel(prisonerDetail, this.adjustmentsStoreService.get(req, nomsId)),
+        model: new ReviewModel(prisonerDetail, this.adjustmentsStoreService.getOnly(req, nomsId)),
       })
     }
     return res.redirect(`/${nomsId}`)
@@ -214,7 +222,7 @@ export default class AdjustmentRoutes {
     const { token } = res.locals.user
     const { nomsId } = req.params
 
-    let adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    let adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (adjustment) {
       let adjustmentId
       if (adjustment.id) {
@@ -240,7 +248,7 @@ export default class AdjustmentRoutes {
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
-    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    const adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (adjustment) {
       const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
       if (warning) {
@@ -260,7 +268,7 @@ export default class AdjustmentRoutes {
 
     await warningForm.validate()
 
-    const adjustment = this.adjustmentsStoreService.get(req, nomsId)
+    const adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (adjustment) {
       if (warningForm.errors.length) {
         const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)

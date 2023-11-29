@@ -4,6 +4,7 @@ import asyncMiddleware from '../middleware/asyncMiddleware'
 import type { Services } from '../services'
 import AdjustmentRoutes from './adjustmentRoutes'
 import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
+import RemandRoutes from './remandRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -17,6 +18,12 @@ export default function routes(service: Services): Router {
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
     service.additionalDaysAwardedService,
+  )
+  const remandRoutes = new RemandRoutes(
+    service.prisonerService,
+    service.adjustmentsService,
+    service.adjustmentsStoreService,
+    service.calculateReleaseDatesService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -46,6 +53,16 @@ export default function routes(service: Services): Router {
   post('/:nomsId/additional-days/review-and-submit', additionalDaysAwardedRoutes.submit)
   get('/:nomsId/additional-days/view', additionalDaysAwardedRoutes.view)
   get('/:nomsId/additional-days/add', additionalDaysAwardedRoutes.addWarning)
+
+  get('/:nomsId/remand/add', remandRoutes.add)
+  get('/:nomsId/remand/dates/:addOrEdit/:id', remandRoutes.dates)
+  post('/:nomsId/remand/dates/:addOrEdit/:id', remandRoutes.submitDates)
+  get('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.offences)
+  post('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.submitOffences)
+  get('/:nomsId/remand/review', remandRoutes.review)
+  post('/:nomsId/remand/review', remandRoutes.submitReview)
+  get('/:nomsId/remand/save', remandRoutes.save)
+  post('/:nomsId/remand/save', remandRoutes.submitSave)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

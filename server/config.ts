@@ -100,6 +100,14 @@ export default {
       },
       agent: new AgentConfig(Number(get('ADJUDICATIONS_API_AGENT_TIMEOUT', 20000))),
     },
+    calculateReleaseDates: {
+      url: get('CALCULATE_RELEASE_DATES_API_URL', 'http://localhost:8089', requiredInProduction),
+      timeout: {
+        response: Number(get('CALCULATE_RELEASE_DATES_API_TIMEOUT_RESPONSE', 10000)),
+        deadline: Number(get('CALCULATE_RELEASE_DATES_API_TIMEOUT_DEADLINE', 10000)),
+      },
+      agent: new AgentConfig(Number(get('CALCULATE_RELEASE_DATES_API_TIMEOUT_RESPONSE', 10000))),
+    },
   },
   services: {
     calculateReleaseDatesUI: {

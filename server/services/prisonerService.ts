@@ -95,13 +95,41 @@ export default class PrisonerService {
     return new PrisonApiClient(token).getBookingAndSentenceAdjustments(bookingId)
   }
 
-  async getStartOfSentenceEnvelope(bookingId: number, token: string): Promise<Date> {
-    const sentences = await this.getSentencesAndOffences(bookingId, token)
-    return new Date(
-      Math.min.apply(
-        null,
-        sentences.filter(it => it.sentenceStatus === 'A').map(it => new Date(it.sentenceDate)),
+  async getStartOfSentenceEnvelopeExcludingRecalls(bookingId: number, token: string): Promise<Date> {
+    return this.findStartOfSentenceEvelope(
+      (await this.getSentencesAndOffences(bookingId, token)).filter(
+        it => !this.recallTypes.includes(it.sentenceCalculationType),
       ),
     )
   }
+
+  private findStartOfSentenceEvelope(sentences: PrisonApiOffenderSentenceAndOffences[]): Date {
+    if (sentences.length) {
+      return new Date(
+        Math.min.apply(
+          null,
+          sentences.filter(it => it.sentenceStatus === 'A').map(it => new Date(it.sentenceDate)),
+        ),
+      )
+    }
+    return null
+  }
+
+  private recallTypes = [
+    'LR_EDS18',
+    'LR_EDS21',
+    'LR_EDSU18',
+    'LR_LASPO_AR',
+    'LR_LASPO_DR',
+    'LR_SEC236A',
+    'LR_SOPC18',
+    'LR_SOPC21',
+    '14FTR_ORA',
+    'FTR',
+    'FTR_ORA',
+    'FTR_SCH15',
+    'FTRSCH15_ORA',
+    'FTRSCH18',
+    'FTRSCH18_ORA',
+  ]
 }

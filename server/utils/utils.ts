@@ -57,3 +57,32 @@ export const isDateInFuture = (year: string, month: string, day: string) => {
   const date = new Date(dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD'))
   return date > today
 }
+
+export const isFromAfterTo = (
+  fromYear: string,
+  fromMonth: string,
+  fromDay: string,
+  toYear: string,
+  toMonth: string,
+  toDay: string,
+) => {
+  const fromDate = new Date(dayjs(`${fromYear}-${fromMonth}-${fromDay}`).format('YYYY-MM-DD'))
+  const toDate = new Date(dayjs(`${toYear}-${toMonth}-${toDay}`).format('YYYY-MM-DD'))
+  return fromDate > toDate
+}
+
+export const groupBy = <T, K>(items: T[], groupingFunction: (item: T) => K): Map<K, T[]> => {
+  return items.reduce((result, item) => {
+    const key = groupingFunction(item)
+    const currentValues = result.get(key) || []
+    currentValues.push(item)
+    result.set(key, currentValues)
+    return result
+  }, new Map<K, T[]>())
+}
+
+export function delay(ms: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}
