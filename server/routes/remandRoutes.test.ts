@@ -7,7 +7,6 @@ import AdjustmentsService from '../services/adjustmentsService'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 
