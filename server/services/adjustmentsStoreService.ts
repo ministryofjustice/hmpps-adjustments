@@ -1,6 +1,6 @@
 import { Request } from 'express'
 import { randomUUID } from 'crypto'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import SessionAdjustment from '../@types/AdjustmentTypes'
 
 export default class AdjustmentsStoreService {
   private initSessionForNomsId(req: Request, nomsId: string) {
@@ -18,13 +18,13 @@ export default class AdjustmentsStoreService {
   }
 
   /* Functions for forms that create adjustments one at a time */
-  public getOnly(req: Request, nomsId: string): Adjustment {
+  public getOnly(req: Request, nomsId: string): SessionAdjustment {
     this.initSessionForNomsId(req, nomsId)
     const key = Object.keys(req.session.adjustments[nomsId])[0]
     return req.session.adjustments[nomsId][key]
   }
 
-  public storeOnly(req: Request, nomsId: string, adjustment: Adjustment) {
+  public storeOnly(req: Request, nomsId: string, adjustment: SessionAdjustment) {
     this.initSessionForNomsId(req, nomsId)
     const keys = Object.keys(req.session.adjustments[nomsId])
     if (keys.length) {
@@ -37,20 +37,24 @@ export default class AdjustmentsStoreService {
   }
 
   /* Functions for forms that create multiple */
-  public store(req: Request, nomsId: string, reqId: string, adjustment: Adjustment): string {
+  public store(req: Request, nomsId: string, reqId: string, adjustment: SessionAdjustment): string {
     this.initSessionForNomsId(req, nomsId)
     const id = reqId || randomUUID()
     req.session.adjustments[nomsId][id] = adjustment
     return id
   }
 
-  public getById(req: Request, nomsId: string, id: string): Adjustment {
+  public getById(req: Request, nomsId: string, id: string): SessionAdjustment {
     this.initSessionForNomsId(req, nomsId)
     return req.session.adjustments[nomsId][id]
   }
 
-  public getAll(req: Request, nomsId: string): { string?: Adjustment } {
+  public getAll(req: Request, nomsId: string): { string?: SessionAdjustment } {
     this.initSessionForNomsId(req, nomsId)
     return req.session.adjustments[nomsId]
+  }
+
+  public remove(req: Request, nomsId: string, id: string) {
+    delete req.session.adjustments[nomsId][id]
   }
 }

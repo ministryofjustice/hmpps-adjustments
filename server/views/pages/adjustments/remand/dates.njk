@@ -5,20 +5,15 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{% set pageTitle = applicationName + " - " + model.addOrEdit + " remand dates"%}
+{% set pageTitle = applicationName + " - Enter remand dates"%}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
   {{ super() }}
   <nav>
-    {% if model.addOrEdit == 'edit' and model.id %}
-      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/view" %}
-    {% else %}
-      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
-    {% endif %}
     {{ govukBackLink({
       text: "Back",
-      href: backlink
+      href: model.backlink()
     }) }}
   </nav>
 {% endblock %}
@@ -39,7 +34,7 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-        {{ 'Edit' if model.addOrEdit == 'edit' else 'Enter' }} remand dates
+        Enter remand dates
       </h1>
     </div>
   </div>

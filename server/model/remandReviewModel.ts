@@ -22,6 +22,10 @@ export default class RemandReviewModel {
       .reduce((sum, current) => sum + current, 0)
   }
 
+  public backlink(): string {
+    return `/${this.prisonerDetail.offenderNo}/remand/offences/add/${this.adjustmentIds[0]}`
+  }
+
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
     const offences = this.sentencesAndOffences.flatMap(it =>
@@ -38,6 +42,15 @@ export default class RemandReviewModel {
               'DD MMMM YYYY',
             )}`,
           },
+          actions: {
+            items: [
+              {
+                href: `/${this.prisonerDetail.offenderNo}/remand/dates/add/${id}`,
+                text: 'Edit',
+                visuallyHiddenText: 'remand',
+              },
+            ],
+          },
         },
         {
           key: {
@@ -48,6 +61,15 @@ export default class RemandReviewModel {
                     ${offences.map(it => `<li>${it.offenceDescription}</li>`).join('')}
                   </ul>`,
           },
+          actions: {
+            items: [
+              {
+                href: `/${this.prisonerDetail.offenderNo}/remand/offences/add/${id}`,
+                text: 'Edit',
+                visuallyHiddenText: 'remand',
+              },
+            ],
+          },
         },
         {
           key: {
@@ -55,6 +77,15 @@ export default class RemandReviewModel {
           },
           value: {
             text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
+          },
+          actions: {
+            items: [
+              {
+                href: `/${this.prisonerDetail.offenderNo}/remand/session/remove/${id}`,
+                text: 'Remove',
+                visuallyHiddenText: 'remand',
+              },
+            ],
           },
         },
       ],
