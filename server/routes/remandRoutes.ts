@@ -13,6 +13,7 @@ import RemandSaveModel from '../model/remandSaveModel'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { daysBetween } from '../utils/utils'
 import { Message } from '../model/adjustmentsHubViewModel'
+import RemandDatesModel from '../model/remandDatesModel'
 
 export default class RemandRoutes {
   constructor(
@@ -43,13 +44,14 @@ export default class RemandRoutes {
       throw FullPageError.notFoundError()
     }
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
     const form = RemandDatesForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/remand/dates', {
-      model: { prisonerDetail, form, addOrEdit, id },
+      model: new RemandDatesModel(id, prisonerDetail, adjustments, form),
     })
   }
 
@@ -63,14 +65,18 @@ export default class RemandRoutes {
     await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token))
 
     if (adjustmentForm.errors.length) {
+      const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
       return res.render('pages/adjustments/remand/dates', {
-        model: { prisonerDetail, form: adjustmentForm, addOrEdit, id },
+        model: new RemandDatesModel(id, prisonerDetail, adjustments, adjustmentForm),
       })
     }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
 
+    if (adjustment.complete) {
+      return res.redirect(`/${nomsId}/remand/review`)
+    }
     return res.redirect(`/${nomsId}/remand/offences/${addOrEdit}/${id}`)
   }
 
@@ -123,6 +129,15 @@ export default class RemandRoutes {
     const { nomsId } = req.params
 
     const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    Object.keys(adjustments).forEach(it => {
+      if (!adjustments[it].complete) {
+        this.adjustmentsStoreService.remove(req, nomsId, it)
+        delete adjustments[it]
+      }
+    })
+    if (!Object.keys(adjustments).length) {
+      return res.redirect(`/${nomsId}`)
+    }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
 
@@ -189,6 +204,12 @@ export default class RemandRoutes {
       action: 'REMAND_UPDATED',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  public removeFromSession: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId, id } = req.params
+    this.adjustmentsStoreService.remove(req, nomsId, id)
+    return res.redirect(`/${nomsId}/remand/review`)
   }
 
   private makeSessionAdjustmentsReadyForCalculation(sessionadjustments: { string?: Adjustment }): Adjustment[] {

@@ -1,4 +1,4 @@
-import { Adjustment } from '../adjustments/adjustmentsTypes'
+import SessionAdjustment from '../AdjustmentTypes'
 
 export default {}
 
@@ -7,7 +7,7 @@ declare module 'express-session' {
   interface SessionData {
     returnTo: string
     nowInMinutes: number
-    adjustments: { string?: { string?: Adjustment } }
+    adjustments: { string?: { string?: SessionAdjustment } }
     additionalDayApprovals: { string?: Date }
     additionalDayPadas: { string?: string[] }
   }

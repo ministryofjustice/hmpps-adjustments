@@ -59,6 +59,7 @@ export default function routes(service: Services): Router {
   post('/:nomsId/remand/dates/:addOrEdit/:id', remandRoutes.submitDates)
   get('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.offences)
   post('/:nomsId/remand/offences/:addOrEdit/:id', remandRoutes.submitOffences)
+  get('/:nomsId/remand/session/remove/:id', remandRoutes.removeFromSession)
   get('/:nomsId/remand/review', remandRoutes.review)
   post('/:nomsId/remand/review', remandRoutes.submitReview)
   get('/:nomsId/remand/save', remandRoutes.save)

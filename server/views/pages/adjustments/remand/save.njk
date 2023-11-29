@@ -14,11 +14,7 @@
 {% block beforeContent %}
   {{ super() }}
   <nav>
-    {% if model.addOrEdit == 'edit' and model.id %}
-      {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/view" %}
-    {% else %}
-      {% set backlink = "/" + model.prisonerDetail.offenderNo %}
-    {% endif %}
+    {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/review" %}
     {{ govukBackLink({
       text: "Back",
       href: backlink

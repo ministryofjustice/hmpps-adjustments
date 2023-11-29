@@ -1,3 +1,4 @@
+import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
@@ -5,8 +6,8 @@ import ValidationError from './validationError'
 export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm> {
   chargeId: string | string[]
 
-  toAdjustment(adjustment: Adjustment): Adjustment {
-    return { ...adjustment, remand: { chargeId: [].concat(this.chargeId).map(it => Number(it)) } }
+  toAdjustment(adjustment: Adjustment): SessionAdjustment {
+    return { ...adjustment, remand: { chargeId: [].concat(this.chargeId).map(it => Number(it)) }, complete: true }
   }
 
   async validation(): Promise<ValidationError[]> {

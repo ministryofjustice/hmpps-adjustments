@@ -9,6 +9,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
+import SessionAdjustment from '../@types/AdjustmentTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -62,20 +63,21 @@ const stubbedSentencesAndOffences = [
 const blankAdjustment = {
   person: NOMS_ID,
   bookingId: stubbedPrisonerData.bookingId,
-} as Adjustment
+} as SessionAdjustment
 
 const adjustmentWithDates = {
   ...blankAdjustment,
   fromDate: '2023-01-01',
   toDate: '2023-01-10',
-} as Adjustment
+} as SessionAdjustment
 
 const adjustmentWithDatesAndCharges = {
   ...adjustmentWithDates,
   remand: {
     chargeId: [1, 2],
   },
-} as Adjustment
+  complete: true,
+} as SessionAdjustment
 
 let app: Express
 
@@ -105,7 +107,10 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/dates/add', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
@@ -113,6 +118,7 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(`<a href="/${NOMS_ID}" class="govuk-back-link">Back</a>`)
         expect(res.text).toContain('Remand start date')
         expect(res.text).toContain('Remand end date')
         expect(res.text).toContain('Continue')
@@ -139,7 +145,10 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/remand/dates/add empty form validation', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
       .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
@@ -150,7 +159,10 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/remand/dates/add to date after from', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
       .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
@@ -170,7 +182,10 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/remand/dates/add dates in future', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
       .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
@@ -200,6 +215,9 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/remand/dates/add/${SESSION_ID}" class="govuk-back-link">Back</a>`,
+        )
         expect(res.text).toContainInOrder(['10', 'day(s)'])
         expect(res.text).toContainInOrder([
           'Court 1',
@@ -249,6 +267,9 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/remand/offences/add/${SESSION_ID}" class="govuk-back-link">Back</a>`,
+        )
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
           'Remand period',
