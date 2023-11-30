@@ -131,5 +131,6 @@ export default class PrisonerService {
     'FTRSCH15_ORA',
     'FTRSCH18',
     'FTRSCH18_ORA',
+    '14FTRHDC_ORA',
   ]
 }
