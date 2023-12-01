@@ -78,7 +78,7 @@
                 </p>
                 <div class="govuk-checkboxes__item govuk-checkboxes--small">
                   <input type="checkbox" class="govuk-checkboxes__input" id="charge-{{ offence.offenderChargeId }}"
-                       name="chargeId" value="{{ offence.offenderChargeId }}">
+                       name="chargeId" value="{{ offence.offenderChargeId }}"  {{ "checked" if model.form.isChecked(offence.offenderChargeId) }}>
                   <label class="govuk-label govuk-checkboxes__label" for="charge-{{ offence.offenderChargeId }}">Select this offence</label>
                 </div>
               </div>

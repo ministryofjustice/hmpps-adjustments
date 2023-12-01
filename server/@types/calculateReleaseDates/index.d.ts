@@ -268,6 +268,16 @@ export interface paths {
      */
     get: operations['get']
   }
+  '/calculation-reasons/': {
+    get: operations['getActiveCalculationReasons']
+  }
+  '/booking-and-sentence-adjustments/{bookingId}': {
+    /**
+     * Get booking and sentence adjusments
+     * @description This endpoint will return a response model which shows booking and sentence adjustments. It will notify if there are new adjustments since last calculation
+     */
+    get: operations['getBookingAndSentenceAdjustments']
+  }
 }
 
 export type webhooks = Record<string, never>
@@ -402,6 +412,7 @@ export interface components {
     UnusedDeductionCalculationResponse: {
       /** Format: int32 */
       unusedDeductions?: number
+      validationMessages: components['schemas']['ValidationMessage'][]
     }
     GenuineOverrideRequest: {
       reason: string
@@ -756,6 +767,7 @@ export interface components {
       personId: string
       isValid: boolean
       isMatch: boolean
+      isActiveSexOffender?: boolean
       validationMessages: components['schemas']['JsonNode']
       shortReference: string
       /** Format: int64 */
@@ -980,6 +992,49 @@ export interface components {
       numberOfDays: number
       /** @enum {string} */
       type: 'RECALL_SENTENCE_REMAND' | 'RECALL_SENTENCE_TAGGED_BAIL' | 'REMAND' | 'TAGGED_BAIL' | 'UNUSED_REMAND'
+    }
+    CalculationReason: {
+      /** Format: int64 */
+      id: number
+      isOther: boolean
+      displayName: string
+    }
+    AnalyzedBookingAdjustment: {
+      active: boolean
+      /** Format: date */
+      fromDate: string
+      /** Format: date */
+      toDate?: string
+      /** Format: int32 */
+      numberOfDays: number
+      /** @enum {string} */
+      type:
+        | 'ADDITIONAL_DAYS_AWARDED'
+        | 'LAWFULLY_AT_LARGE'
+        | 'RESTORED_ADDITIONAL_DAYS_AWARDED'
+        | 'SPECIAL_REMISSION'
+        | 'UNLAWFULLY_AT_LARGE'
+      /** @enum {string} */
+      analysisResult: 'NEW' | 'SAME'
+    }
+    AnalyzedBookingAndSentenceAdjustments: {
+      bookingAdjustments: components['schemas']['AnalyzedBookingAdjustment'][]
+      sentenceAdjustments: components['schemas']['AnalyzedSentenceAdjustment'][]
+    }
+    AnalyzedSentenceAdjustment: {
+      /** Format: int32 */
+      sentenceSequence: number
+      active: boolean
+      /** Format: date */
+      fromDate?: string
+      /** Format: date */
+      toDate?: string
+      /** Format: int32 */
+      numberOfDays: number
+      /** @enum {string} */
+      type: 'RECALL_SENTENCE_REMAND' | 'RECALL_SENTENCE_TAGGED_BAIL' | 'REMAND' | 'TAGGED_BAIL' | 'UNUSED_REMAND'
+      /** @enum {string} */
+      analysisResult: 'NEW' | 'SAME'
     }
   }
   responses: never
@@ -2419,6 +2474,65 @@ export interface operations {
       404: {
         content: {
           'application/json': components['schemas']['BookingAndSentenceAdjustments']
+        }
+      }
+    }
+  }
+  getActiveCalculationReasons: {
+    responses: {
+      /** @description Returns list of active reasons */
+      200: {
+        content: {
+          'application/json': components['schemas']['CalculationReason'][]
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['CalculationReason'][]
+        }
+      }
+      /** @description Forbidden, requires an appropriate role */
+      403: {
+        content: {
+          'application/json': components['schemas']['CalculationReason'][]
+        }
+      }
+      /** @description No active calculation reasons were found */
+      404: {
+        content: {
+          'application/json': components['schemas']['CalculationReason'][]
+        }
+      }
+    }
+  }
+  /**
+   * Get booking and sentence adjusments
+   * @description This endpoint will return a response model which shows booking and sentence adjustments. It will notify if there are new adjustments since last calculation
+   */
+  getBookingAndSentenceAdjustments: {
+    parameters: {
+      path: {
+        bookingId: number
+      }
+    }
+    responses: {
+      /** @description Returns a List<AnalyzedSentenceAndOffences */
+      200: {
+        content: {
+          'application/json': components['schemas']['AnalyzedBookingAndSentenceAdjustments']
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['AnalyzedBookingAndSentenceAdjustments']
+        }
+      }
+      /** @description Forbidden, requires an appropriate role */
+      403: {
+        content: {
+          'application/json': components['schemas']['AnalyzedBookingAndSentenceAdjustments']
         }
       }
     }

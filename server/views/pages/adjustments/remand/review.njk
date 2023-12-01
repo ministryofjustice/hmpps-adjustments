@@ -31,6 +31,17 @@
         }) }}
       </div>
     </div>
+  {% elif model
+      .remandRelatedValidationSummary()
+      .errorList
+      .length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary(
+          model.remandRelatedValidationSummary()
+        ) }}
+      </div>
+    </div>
   {% endif %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
@@ -57,7 +68,11 @@
         {% endfor %}
         {{ govukSummaryList(model.totalDaysSummary())}}
 
-        {{ govukRadios({
+        {% if not model
+          .remandRelatedValidationSummary()
+          .errorList
+          .length %}
+          {{ govukRadios({
             classes: "govuk-radios--inline",
             name: "another",
             fieldset: {
@@ -79,19 +94,20 @@
             ]
           }) }}
 
-        <div class="govuk-button-group">
-          {{ govukButton({
+          <div class="govuk-button-group">
+            {{ govukButton({
             text: "Continue",
             type: submit,
             preventDoubleClick: true,
             attributes: { 'data-qa': 'submit-form' }
           }) }}
-          {{ govukButton({
+            {{ govukButton({
             text: "Cancel",
             classes: "govuk-button--secondary",
             href: "/" + model.prisonerDetail.offenderNo
           }) }}
-        </div>
+          </div>
+        {% endif %}
       </form>
     </div>
   </div>

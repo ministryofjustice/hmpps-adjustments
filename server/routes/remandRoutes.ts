@@ -14,6 +14,8 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { daysBetween } from '../utils/utils'
 import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
+import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 export default class RemandRoutes {
   constructor(
@@ -140,9 +142,21 @@ export default class RemandRoutes {
     }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      token,
+    )
 
     return res.render('pages/adjustments/remand/review', {
-      model: new RemandReviewModel(prisonerDetail, adjustments, sentencesAndOffences, new ReviewRemandForm({})),
+      model: new RemandReviewModel(
+        prisonerDetail,
+        adjustments,
+        sentencesAndOffences,
+        unusedDeductions?.validationMessages || [],
+        new ReviewRemandForm({}),
+      ),
     })
   }
 
@@ -156,8 +170,20 @@ export default class RemandRoutes {
       const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
       const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
       const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+      const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+        adjustments,
+        sentencesAndOffences,
+        nomsId,
+        token,
+      )
       return res.render('pages/adjustments/remand/review', {
-        model: new RemandReviewModel(prisonerDetail, adjustments, sentencesAndOffences, form),
+        model: new RemandReviewModel(
+          prisonerDetail,
+          adjustments,
+          sentencesAndOffences,
+          unusedDeductions?.validationMessages || [],
+          form,
+        ),
       })
     }
     if (form.another === 'yes') {
@@ -171,24 +197,17 @@ export default class RemandRoutes {
     const { nomsId } = req.params
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sessionadjustments = this.adjustmentsStoreService.getAll(req, nomsId)
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
-
-    let unusedDeductions = 0
-    try {
-      unusedDeductions = (
-        await this.calculateReleaseDatesService.calculateUnusedDeductions(
-          nomsId,
-          [...this.makeSessionAdjustmentsReadyForCalculation(sessionadjustments), ...adjustments],
-          token,
-        )
-      ).unusedDeductions
-    } catch {
-      // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
-    }
+    const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      token,
+    )
 
     return res.render('pages/adjustments/remand/save', {
-      model: new RemandSaveModel(prisonerDetail, Object.values(sessionadjustments), unusedDeductions),
+      model: new RemandSaveModel(prisonerDetail, Object.values(adjustments), unusedDeductions?.unusedDeductions),
     })
   }
 
@@ -212,12 +231,40 @@ export default class RemandRoutes {
     return res.redirect(`/${nomsId}/remand/review`)
   }
 
-  private makeSessionAdjustmentsReadyForCalculation(sessionadjustments: { string?: Adjustment }): Adjustment[] {
+  private makeSessionAdjustmentsReadyForCalculation(
+    sessionadjustments: { string?: Adjustment },
+    sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
+  ): Adjustment[] {
     return Object.values(sessionadjustments).map(it => {
+      const sentence = sentencesAndOffence.find(sent =>
+        sent.offences.some(off => it.remand.chargeId.includes(off.offenderChargeId)),
+      )
       return {
         ...it,
         daysBetween: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
+        effectiveDays: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
+        sentenceSequence: sentence.sentenceSequence,
       }
     })
+  }
+
+  private async unusedDeductionsHandlingCRDError(
+    sessionadjustments: { string?: Adjustment },
+    sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
+    nomsId: string,
+    token: string,
+  ): Promise<UnusedDeductionCalculationResponse> {
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+
+    try {
+      return await this.calculateReleaseDatesService.calculateUnusedDeductions(
+        nomsId,
+        [...this.makeSessionAdjustmentsReadyForCalculation(sessionadjustments, sentencesAndOffence), ...adjustments],
+        token,
+      )
+    } catch {
+      // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
+      return null
+    }
   }
 }

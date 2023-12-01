@@ -9,6 +9,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -77,6 +78,11 @@ const adjustmentWithDatesAndCharges = {
   },
   complete: true,
 } as SessionAdjustment
+
+const remandOverlapWithSentenceMessage = {
+  code: 'REMAND_OVERLAPS_WITH_SENTENCE',
+  arguments: ['2021-01-01', '2021-02-01', '2021-01-02', '2021-02-02'],
+} as CalculateReleaseDatesValidationMessage
 
 let app: Express
 
@@ -259,6 +265,11 @@ describe('Adjustment routes tests', () => {
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [remandOverlapWithSentenceMessage],
+    })
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
       .get(`/${NOMS_ID}/remand/review`)
@@ -268,6 +279,9 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain(
           `<a href="/${NOMS_ID}/remand/offences/add/${SESSION_ID}" class="govuk-back-link">Back</a>`,
+        )
+        expect(res.text).toContain(
+          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with a sentence from 01 Jan 2021 to 01 Feb 2021',
         )
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
@@ -326,7 +340,10 @@ describe('Adjustment routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
-    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({ unusedDeductions: 50 })
+    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
       .get(`/${NOMS_ID}/remand/save`)
