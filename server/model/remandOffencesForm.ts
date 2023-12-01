@@ -22,6 +22,10 @@ export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm>
     return errors
   }
 
+  isChecked(charge: number): boolean {
+    return [].concat(this.chargeId).includes(charge.toString())
+  }
+
   static fromAdjustment(adjustment: Adjustment): RemandOffencesForm {
     return new RemandOffencesForm({
       chargeId: adjustment?.remand?.chargeId?.map(it => it.toString()) || [],
