@@ -1,0 +1,97 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - View remand details" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: "/" + model.prisonerDetail.offenderNo
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
+    Remand details for {{ model.prisonerDetail.firstName | title }} {{ model.prisonerDetail.lastName | title }}
+  </h1>
+  {{ remandTable(model.adjustmentsWithOffences(), model.totalDays()) }}
+  <div class="govuk-!-margin-bottom-6">
+    <a href="/{{ model.prisonerDetail.offenderNo }}/remand/add" class="govuk-button" data-module="govuk-button">
+      Add new
+    </a>
+  </div>
+
+{% endblock %}
+
+{% macro remandTable(adjustments, totalDays) %}
+  <table id="remand-table" class="govuk-table govuk-!-margin-bottom-8">
+    <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th class="govuk-table__header" scope="col">Remand period</th>
+      <th class="govuk-table__header" scope="col">Case details</th>
+      <th class="govuk-table__header" scope="col">Days</th>
+      <th class="govuk-table__header" scope="col">Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for adjustment in adjustments %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">
+          {{ adjustment.fromDate | date("DD MMM YYYY") }} to {{ adjustment.toDate | date("DD MMM YYYY") }}
+        </td>
+        <td class="govuk-table__cell">
+          {{ offenceSubTable(adjustment.offences) }}
+        </td>
+        <td class="govuk-table__cell">
+          {{ adjustment.daysToDisplay }}
+        </td>
+        <td class="govuk-table__cell">
+          <a class="govuk-link edit-link" href="#">Edit</a>
+          <br>
+          <a class="govuk-link delete-link" href="#">Delete</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+
+    <tfoot>
+    <tr class="govuk-table__row">
+      <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="2">Total</th>
+      <td id="TotalRemandDays" class="govuk-table__cell govuk-!-text-align-left">{{ totalDays }}</td>
+      <td class="govuk-table__cell govuk-!-text-align-right" colspan="2"></td>
+    </tr>
+    </tfoot>
+
+  </table>
+{% endmacro %}
+
+{% macro offenceSubTable(offences) %}
+  <table id="offence-sub-table" class="govuk-table">
+    <thead>
+    <tr>
+      <th class="govuk-table__header govuk-!-width-two-thirds" scope="col">Offence</th>
+      <th class="govuk-table__header" scope="col">Offence dates</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for offence in offences %}
+      <tr>
+        <td class="govuk-table__cell">
+          {{ offence.offenceDescription }}<br>
+          <span class="govuk-hint"> Case reference: {{ offence.offenderChargeId }}</span>
+        </td>
+        <td class="govuk-table__cell ">
+          {{ offence.startDate | date("DD MMM YYYY") }}
+        </td>
+      </tr>
+    {% endfor %}
+
+    </tbody>
+  </table>
+{% endmacro %}
