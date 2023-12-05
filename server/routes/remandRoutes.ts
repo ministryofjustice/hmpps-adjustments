@@ -16,6 +16,7 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
 import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import RemandViewModel from '../model/remandViewModel'
 
 export default class RemandRoutes {
   constructor(
@@ -266,5 +267,25 @@ export default class RemandRoutes {
       // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
       return null
     }
+  }
+
+  public view: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    const { caseloads, token } = res.locals.user
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustments = (await this.adjustmentsService.findByPerson(nomsId, token)).filter(
+      it => it.adjustmentType === 'REMAND',
+    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+
+    // TODO copied this code in from the generic View route - need to double check what it's used for WIP
+    // Can be removed from the generic route once done
+    // const remandDecision =
+    //     adjustmentType.value === 'REMAND' && roles.includes('REMAND_IDENTIFIER')
+    //         ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
+    //         : null
+    return res.render('pages/adjustments/remand/view', {
+      model: new RemandViewModel(prisonerDetail, adjustments, sentencesAndOffences),
+    })
   }
 }
