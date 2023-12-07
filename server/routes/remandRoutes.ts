@@ -17,6 +17,7 @@ import RemandDatesModel from '../model/remandDatesModel'
 import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import RemandViewModel from '../model/remandViewModel'
+import RemandRemoveModel from '../model/remandRemoveModel'
 
 export default class RemandRoutes {
   constructor(
@@ -287,5 +288,34 @@ export default class RemandRoutes {
     return res.render('pages/adjustments/remand/view', {
       model: new RemandViewModel(prisonerDetail, adjustments, sentencesAndOffences),
     })
+  }
+
+  public remove: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, id } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustment = await this.adjustmentsService.get(id, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    return res.render('pages/adjustments/remand/remove', {
+      model: new RemandRemoveModel(prisonerDetail, adjustment, sentencesAndOffences),
+    })
+  }
+
+  public submitRemove: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = await this.adjustmentsService.get(id, token)
+    await this.adjustmentsService.delete(id, token)
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    await this.unusedDeductionsHandlingCRDError({}, sentencesAndOffences, nomsId, token)
+
+    const message = JSON.stringify({
+      type: adjustment.adjustmentType,
+      days: adjustment.daysBetween || adjustment.effectiveDays,
+      action: 'REMOVE',
+    } as Message)
+    return res.redirect(`/${nomsId}/success?message=${message}`)
   }
 }
