@@ -18,6 +18,7 @@ export default class FormPage extends AdjustmentsPage {
   }
 
   public enterDays = (days: string): void => {
+    cy.get('[name=days]').clear()
     cy.get('[name=days]').type(days)
   }
 

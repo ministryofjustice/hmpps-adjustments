@@ -73,7 +73,7 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('25 days of RADA have been update')
+    hub.successMessage().contains('26 days of RADA have been update')
   })
 
   it('View and remove a RADA', () => {
