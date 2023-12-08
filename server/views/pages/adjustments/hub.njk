@@ -12,45 +12,44 @@
       {% if model.message %}
         {% if model.message.action === 'CREATE' %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
               of {{ model.messageType.shortText }} have been added</h3>
-          <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on
+            <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on
               this page.</p>
-          <p class="govuk-body">Once all adjustments have been applied, you must
+            <p class="govuk-body">Once all adjustments have been applied, you must
               <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
                 release dates.</a>
-          </p>
+            </p>
           {% endset %}
-        {% elif model.message.action === 'REMOVE' %}
+          {% elif model.message.action === 'REMOVE' %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
               of {{ model.messageType.shortText }} have been removed</h3>
           {% endset %}
-        {% elif model.message.action === 'UPDATE' %}
+          {% elif model.message.action === 'UPDATE' %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
               of {{ model.messageType.shortText }} have been updated</h3>
           {% endset %}
-        {% elif model.message.action === 'REJECTED' %}
+          {% elif model.message.action === 'REJECTED' %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of suggested remand have been
+            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of suggested remand have been
               rejected</h3>
           {% endset %}
-        {% elif model.message.action === 'ADDITIONAL_DAYS_UPDATED' %}
+          {% elif model.message.action === 'ADDITIONAL_DAYS_UPDATED' %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
-          <p class="govuk-body">Once all changes have been made, you must
-              <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
-                release dates.</a>
-          </p>
+            <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
           {% endset %}
-        {% elif model.message.action === 'REMAND_UPDATED' %}
+          {% elif model.message.action === 'REMAND_UPDATED' %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">Remand updates have been saved</h3>
-          <p class="govuk-body">Once all changes have been made, you must
-              <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
-                release dates.</a>
-          </p>
+            <h3 class="govuk-notification-banner__heading">Remand updates have been saved</h3>
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
+          {% endset %}
+          {% elif model.message.action === 'REMAND_REMOVED' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">Remand details have been deleted</h3>
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
           {% endset %}
         {% endif %}
 
@@ -104,22 +103,22 @@
       {% if model.showUnusedDeductions() %}
 
         <h2 class="govuk-heading-m">
-        Unused deductions
-      </h2>
+          Unused deductions
+        </h2>
         <table class="govuk-table">
           <tbody>
-            <tr class="govuk-table__row">
-              <td class="govuk-table__cell">Total deductions</td>
-              <td class="govuk-table__cell">{{model.totalDeductions()}}</td>
-            </tr>
-            <tr class="govuk-table__row">
-              <td class="govuk-table__cell">Unused deductions</td>
-              <td class="govuk-table__cell">{{model.totalUnusedDeductions()}}</td>
-            </tr>
-            <tr class="govuk-table__row">
-              <td class="govuk-table__cell">Effective deductions</td>
-              <td class="govuk-table__cell">{{model.totalEffectiveDeductions()}}</td>
-            </tr>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Total deductions</td>
+            <td class="govuk-table__cell">{{ model.totalDeductions() }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Unused deductions</td>
+            <td class="govuk-table__cell">{{ model.totalUnusedDeductions() }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Effective deductions</td>
+            <td class="govuk-table__cell">{{ model.totalEffectiveDeductions() }}</td>
+          </tr>
           </tbody>
         </table>
 
@@ -154,3 +153,10 @@
     </a>
   </div>
 {% endblock %}
+
+{% macro calcReleaseDatesMessage(calculateReleaseDatesdUrl, prisonerDetail) %}
+  <p class="govuk-body">Once all adjustments have been made, you will need to
+    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates
+      for {{ prisonerDetail.firstName | title }} {{ prisonerDetail.lastName | title }}.</a>
+  </p>
+{% endmacro %}
