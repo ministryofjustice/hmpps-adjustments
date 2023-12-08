@@ -614,11 +614,7 @@ export default class AdditionalDaysAwardedService {
         }),
     )
     // Create adjustments
-    await Promise.all(
-      adjustmentsToCreate.map(it => {
-        return new AdjustmentsClient(token).create(it)
-      }),
-    )
+    await new AdjustmentsClient(token).create(adjustmentsToCreate)
 
     this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.offenderNo)
     this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.offenderNo)

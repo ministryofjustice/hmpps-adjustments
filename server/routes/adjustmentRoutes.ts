@@ -16,7 +16,7 @@ import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
-import { delay } from '../utils/utils'
+import { daysBetween, delay } from '../utils/utils'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -222,22 +222,18 @@ export default class AdjustmentRoutes {
     const { token } = res.locals.user
     const { nomsId } = req.params
 
-    let adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
+    const adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (adjustment) {
-      let adjustmentId
       if (adjustment.id) {
         await this.adjustmentsService.update(adjustment.id, adjustment, token)
-        adjustmentId = adjustment.id
       } else {
-        adjustmentId = (await this.adjustmentsService.create(adjustment, token)).adjustmentId
+        await this.adjustmentsService.create([adjustment], token)
       }
       const message = {
         type: adjustment.adjustmentType,
-        days: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
+        days: adjustment.days || daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         action: adjustment.id ? 'UPDATE' : 'CREATE',
       } as Message
-      adjustment = await this.adjustmentsService.get(adjustmentId, token)
-      message.days = adjustment.days || adjustment.daysBetween || adjustment.effectiveDays
       return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
     }
     return res.redirect(`/${nomsId}`)
