@@ -257,7 +257,7 @@ describe('Adjustment routes tests', () => {
       .type('form')
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Select an offence')
+        expect(res.text).toContain('You must select the offence(s) which relate to the remand period.')
       })
   })
   it('GET /{nomsId}/remand/review', () => {

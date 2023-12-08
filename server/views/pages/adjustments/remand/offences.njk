@@ -42,7 +42,7 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
       <p class="govuk-body">You have entered <strong>{{model.days()}}</strong> day(s) of remand. Select all the offences that apply to this remand time.</p>
-      <p class="govuk-body">The rules for applying remand can be found in the policy framework.</p>
+      <p class="govuk-body">The rules for applying remand can be found in the <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf">policy framework</a>.</p>
     </div>
   </div>
   <div class="govuk-grid-row">
@@ -87,6 +87,10 @@
           {% endfor %}
 
         {% endfor %}
+
+        <div class="govuk-inset-text">
+            If you think some information is wrong, you can edit it in NOMIS and <a href="">reload this page</a>.
+        </div>
 
         <div class="govuk-button-group">
           {{ govukButton({
