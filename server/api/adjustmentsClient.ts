@@ -17,8 +17,8 @@ export default class AdjustmentsClient {
     return this.restClient.get({ path: `/adjustments?person=${person}` }) as Promise<Adjustment[]>
   }
 
-  async create(adjustment: Adjustment): Promise<CreateResponse> {
-    return this.restClient.post({ path: `/adjustments`, data: adjustment }) as Promise<CreateResponse>
+  async create(adjustments: Adjustment[]): Promise<CreateResponse> {
+    return this.restClient.post({ path: `/adjustments`, data: adjustments }) as Promise<CreateResponse>
   }
 
   async update(adjustmentsId: string, adjustment: Adjustment): Promise<void> {

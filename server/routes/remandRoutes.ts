@@ -219,7 +219,7 @@ export default class RemandRoutes {
 
     const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
 
-    await Promise.all(adjustments.map(it => this.adjustmentsService.create(it, token)))
+    await this.adjustmentsService.create(adjustments, token)
 
     const message = {
       action: 'REMAND_UPDATED',

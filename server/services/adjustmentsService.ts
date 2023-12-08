@@ -2,8 +2,8 @@ import AdjustmentsClient from '../api/adjustmentsClient'
 import { Adjustment, CreateResponse, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentsService {
-  public async create(adjustment: Adjustment, token: string): Promise<CreateResponse> {
-    return new AdjustmentsClient(token).create(adjustment)
+  public async create(adjustments: Adjustment[], token: string): Promise<CreateResponse> {
+    return new AdjustmentsClient(token).create(adjustments)
   }
 
   public async get(adjustmentId: string, token: string): Promise<Adjustment> {

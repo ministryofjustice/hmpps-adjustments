@@ -516,7 +516,7 @@ describe('Adjustment routes tests', () => {
       )
       .expect(res => {
         expect(adjustmentsService.create.mock.calls).toHaveLength(1)
-        expect(adjustmentsService.create.mock.calls[0][0]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsService.create.mock.calls[0][0]).toStrictEqual([{ ...radaAdjustment, id: undefined }])
       })
   })
   it('POST /{nomsId}/review with a adjustment with an id', () => {
