@@ -356,6 +356,8 @@ describe('Adjustment routes tests', () => {
           'Period of remand',
           'Days spent on remand',
           '10',
+          'Total days',
+          '10',
           'There are 50 days of unused deductions',
         ])
       })
