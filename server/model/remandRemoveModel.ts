@@ -15,7 +15,7 @@ export default class RemandRemoveModel {
 
   public listOffences() {
     const offences = this.sentencesAndOffences.flatMap(so => {
-      return so.offences.filter(off => this.adjustment.remand.chargeId.includes(off.offenderChargeId))
+      return so.offences.filter(off => this.adjustment.remand?.chargeId.includes(off.offenderChargeId))
     })
 
     const offenceListHtml = offences.reduce(
