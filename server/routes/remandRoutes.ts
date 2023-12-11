@@ -314,7 +314,7 @@ export default class RemandRoutes {
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.daysBetween || adjustment.effectiveDays,
-      action: 'REMOVE',
+      action: 'REMAND_REMOVED',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }
