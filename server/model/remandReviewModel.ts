@@ -4,7 +4,6 @@ import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@typ
 import { calculateReleaseDatesCheckInformationUrl, daysBetween } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
-import config from '../config'
 
 export default class RemandReviewModel {
   remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']

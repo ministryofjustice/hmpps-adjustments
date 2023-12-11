@@ -1,7 +1,6 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import config from '../config'
 import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
