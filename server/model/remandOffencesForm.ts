@@ -15,7 +15,7 @@ export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm>
 
     if (!this.chargeId || !this.chargeId.length)
       errors.push({
-        text: 'Select an offence',
+        text: 'You must select the offence(s) which relate to the remand period.',
         fields: [],
       })
 
