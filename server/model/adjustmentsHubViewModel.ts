@@ -2,6 +2,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import config from '../config'
+import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
 export type Message = {
@@ -96,7 +97,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public calculateReleaseDatesUrl() {
-    return `${config.services.calculateReleaseDatesUI.url}/calculation/${this.prisonerDetail.offenderNo}/check-information`
+    return calculateReleaseDatesCheckInformationUrl(this.prisonerDetail)
   }
 
   private allDeductionsOnDps() {

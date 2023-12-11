@@ -1,9 +1,10 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { daysBetween } from '../utils/utils'
+import { calculateReleaseDatesCheckInformationUrl, daysBetween } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import config from '../config'
 
 export default class RemandReviewModel {
   remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
@@ -49,6 +50,13 @@ export default class RemandReviewModel {
           )}`,
         },
       ],
+      subText: {
+        html: overlapsWithRemand
+          ? '<p>To continue, edit or remove the remand days that overlap.</p>'
+          : `<p>Update the remand dates to continue.</p><p>You can view the court case & sentence information in the <a href="${calculateReleaseDatesCheckInformationUrl(
+              this.prisonerDetail,
+            )}">Calculate release dates service</a>.</p>`,
+      },
     }
   }
 

@@ -1,5 +1,7 @@
 import dayjs from 'dayjs'
 import ValidationError from '../model/validationError'
+import config from '../config'
+import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 
 const properCase = (word: string): string =>
   word.length >= 1 ? word[0].toUpperCase() + word.toLowerCase().slice(1) : word
@@ -85,4 +87,8 @@ export function delay(ms: number): Promise<void> {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
   })
+}
+
+export function calculateReleaseDatesCheckInformationUrl(prisonerDetail: PrisonApiPrisoner) {
+  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerDetail.offenderNo}/check-information`
 }

@@ -280,9 +280,12 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain(
           `<a href="/${NOMS_ID}/remand/offences/add/${SESSION_ID}" class="govuk-back-link">Back</a>`,
         )
-        expect(res.text).toContain(
+        expect(res.text).toContainInOrder([
+          ' Remand cannot be applied when a sentence is being served.',
           'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with a sentence from 01 Jan 2021 to 01 Feb 2021',
-        )
+          'Update the remand dates to continue.',
+          'You can view the court case & sentence information in the <a href="http://localhost:8080/calculation/ABC123/check-information">Calculate release dates service</a>.',
+        ])
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
           'Remand period',

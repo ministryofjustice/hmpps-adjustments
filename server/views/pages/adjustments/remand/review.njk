@@ -37,9 +37,26 @@
       .length %}
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-full">
-        {{ govukErrorSummary(
-          model.remandRelatedValidationSummary()
-        ) }}
+        {% set errorBody %}
+        <div class="govuk-error-summary__body">
+          <ul class="govuk-list govuk-error-summary__list">
+            {% for error in model
+              .remandRelatedValidationSummary()
+              .errorList %}
+              <li>
+                <p class="govuk-body">{{error.text}}</p>
+              </li>
+            {% endfor %}
+          </ul>
+          {{model.remandRelatedValidationSummary().subText.html | safe}}
+        </div>
+        {% endset -%}
+
+        {{ govukErrorSummary({
+          titleText: model.remandRelatedValidationSummary().titleText,
+          errorList: [],
+          descriptionHtml: errorBody
+        }) }}
       </div>
     </div>
   {% endif %}
