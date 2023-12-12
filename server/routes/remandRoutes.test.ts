@@ -393,7 +393,6 @@ describe('Adjustment routes tests', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
 
-    adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     return request(app)
       .get(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -402,7 +401,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Delete remand details')
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
-        expect(res.text).toContain('Committed from 04 January 2021 to 05 January 2021')
+        expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
         expect(res.text).toContain('Doing a crime')
       })
   })
@@ -416,5 +415,23 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(302)
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_REMOVED%22%7D`)
+  })
+
+  it('GET /{nomsId}/remand/edit', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain('Edit remand details')
+        expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
+        expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
+        expect(res.text).toContain('Doing a crime')
+      })
   })
 })
