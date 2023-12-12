@@ -1,7 +1,7 @@
 {% extends "../../../partials/layout.njk" %}
+{% from "./partials/remandSummary.njk" import remandSummary %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "./partials/remandSummary.njk" import remandSummary %}
 
 {% set pageTitle = applicationName + " - View remand details" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -18,7 +18,7 @@
 
 {% block content %}
   <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
-    Delete remand details
+    Edit remand details
   </h1>
 
   <div class="govuk-grid-row">
@@ -26,20 +26,15 @@
       {{ remandSummary({
         adjustment: model.adjustment,
         offences: model.listOffences(),
-        offenderNo: model.prisonerDetail.offenderNo
+        offenderNo: model.prisonerDetail.offenderNo,
+        isEdit: true
       }) }}
-
-      <div class="govuk-!-margin-bottom-6">
-        <h2 class="govuk-heading-m">Are you sure you want to delete this period of remand?</h2>
-        <p>The remand time will be removed from the records. You will need to recalculate a prisoner’s release
-          dates.</p>
-      </div>
 
       <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
         <div class="govuk-button-group">
           {{ govukButton({
-            text: "Delete record",
+            text: "Save",
             type: submit,
             preventDoubleClick: true
           }) }}

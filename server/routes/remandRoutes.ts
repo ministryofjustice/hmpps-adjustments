@@ -17,7 +17,7 @@ import RemandDatesModel from '../model/remandDatesModel'
 import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import RemandViewModel from '../model/remandViewModel'
-import RemandRemoveModel from '../model/remandRemoveModel'
+import RemandChangeModel from '../model/remandChangeModel'
 
 export default class RemandRoutes {
   constructor(
@@ -297,7 +297,7 @@ export default class RemandRoutes {
     const adjustment = await this.adjustmentsService.get(id, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandRemoveModel(prisonerDetail, adjustment, sentencesAndOffences),
+      model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences),
     })
   }
 
@@ -317,5 +317,16 @@ export default class RemandRoutes {
       action: 'REMAND_REMOVED',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
+  }
+
+  public edit: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, id } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustment = await this.adjustmentsService.get(id, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    return res.render('pages/adjustments/remand/edit', {
+      model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences),
+    })
   }
 }
