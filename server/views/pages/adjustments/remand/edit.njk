@@ -23,7 +23,12 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
-      {{ remandSummary(model.adjustment, model.listOffences(), model.prisonerDetail.offenderNo, true) }}
+      {{ remandSummary({
+        adjustment: model.adjustment,
+        offences: model.listOffences(),
+        offenderNo: model.prisonerDetail.offenderNo,
+        isEdit: true
+      }) }}
 
       <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>

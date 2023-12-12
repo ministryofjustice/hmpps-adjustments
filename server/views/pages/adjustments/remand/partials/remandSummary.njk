@@ -4,13 +4,18 @@
 
 {#
 This macro returns a remand summary.
-The params are as follows:
+The params are wrapped inside the attributes object and are as follows:
   adjustment (mandatory)
   offences (mandatory)
   prisonerDetail (mandatory)
   isEdit (optional) true/false
 #}
-{% macro remandSummary(adjustment, offences, offenderNo, isEdit) %}
+{% macro remandSummary(attributes) %}
+  {% set adjustment = attributes.adjustment %}
+  {% set offences = attributes.offences %}
+  {% set offenderNo = attributes.offenderNo %}
+  {% set isEdit = attributes.isEdit %}
+
   {{ govukSummaryList({
     rows: [
       {
