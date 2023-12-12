@@ -63,6 +63,7 @@ const stubbedSentencesAndOffences = [
 const blankAdjustment = {
   person: NOMS_ID,
   bookingId: stubbedPrisonerData.bookingId,
+  adjustmentType: 'REMAND',
 } as SessionAdjustment
 
 const adjustmentWithDates = {
@@ -417,7 +418,7 @@ describe('Adjustment routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_REMOVED%22%7D`)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMAND_REMOVED%22%7D`)
   })
 
   it('GET /{nomsId}/remand/edit', () => {
