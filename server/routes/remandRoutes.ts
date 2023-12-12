@@ -301,24 +301,6 @@ export default class RemandRoutes {
     })
   }
 
-  public submitRemove: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
-    const { nomsId, id } = req.params
-
-    const adjustment = await this.adjustmentsService.get(id, token)
-    await this.adjustmentsService.delete(id, token)
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
-    await this.unusedDeductionsHandlingCRDError({}, sentencesAndOffences, nomsId, token)
-
-    const message = JSON.stringify({
-      type: adjustment.adjustmentType,
-      days: adjustment.daysBetween || adjustment.effectiveDays,
-      action: 'REMAND_REMOVED',
-    } as Message)
-    return res.redirect(`/${nomsId}/success?message=${message}`)
-  }
-
   public edit: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
     const { nomsId, id } = req.params

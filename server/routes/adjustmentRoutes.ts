@@ -325,7 +325,7 @@ export default class AdjustmentRoutes {
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
-      action: 'REMOVE',
+      action: adjustment.adjustmentType === 'REMAND' ? 'REMAND_REMOVED' : 'REMOVE',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }
