@@ -55,7 +55,7 @@ export default class RemandRoutes {
     const form = RemandDatesForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/remand/dates', {
-      model: new RemandDatesModel(id, prisonerDetail, adjustments, form),
+      model: new RemandDatesModel(id, prisonerDetail, adjustments, form, addOrEdit),
     })
   }
 
@@ -71,12 +71,15 @@ export default class RemandRoutes {
     if (adjustmentForm.errors.length) {
       const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
       return res.render('pages/adjustments/remand/dates', {
-        model: new RemandDatesModel(id, prisonerDetail, adjustments, adjustmentForm),
+        model: new RemandDatesModel(id, prisonerDetail, adjustments, adjustmentForm, addOrEdit),
       })
     }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+    if (addOrEdit === 'edit') {
+      return res.redirect(`/${nomsId}/remand/edit/${id}`)
+    }
 
     if (adjustment.complete) {
       return res.redirect(`/${nomsId}/remand/review`)
@@ -278,6 +281,7 @@ export default class RemandRoutes {
       it => it.adjustmentType === 'REMAND',
     )
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    this.adjustmentsStoreService.clear(req, nomsId)
 
     // TODO copied this code in from the generic View route - need to double check what it's used for WIP
     // Can be removed from the generic route once done
@@ -305,10 +309,18 @@ export default class RemandRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId, id } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustment = await this.adjustmentsService.get(id, token)
+    const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    const adjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
+    this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+
     return res.render('pages/adjustments/remand/edit', {
-      model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences),
+      model: new RemandChangeModel(
+        prisonerDetail,
+        { ...adjustment, daysBetween: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)) },
+        sentencesAndOffences,
+      ),
     })
   }
 }

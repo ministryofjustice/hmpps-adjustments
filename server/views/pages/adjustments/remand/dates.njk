@@ -34,7 +34,7 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-        Enter remand dates
+        {% if model.addOrEdit === 'edit' %} Edit {% else %} Enter {% endif %} remand dates
       </h1>
     </div>
   </div>
@@ -90,7 +90,7 @@
           {{ govukButton({
             text: "Cancel",
             classes: "govuk-button--secondary",
-            href: "/" + model.prisonerDetail.offenderNo
+            href: model.backlink() if model.addOrEdit === 'edit' else "/" + model.prisonerDetail.offenderNo
           }) }}
         </div>
       </form>
