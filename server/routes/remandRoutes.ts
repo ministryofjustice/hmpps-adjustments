@@ -334,4 +334,18 @@ export default class RemandRoutes {
       ),
     })
   }
+
+  public submitEdit: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    await this.adjustmentsService.update(id, adjustment, token)
+
+    const message = {
+      action: 'REMAND_UPDATED',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
 }

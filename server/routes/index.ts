@@ -67,6 +67,7 @@ export default function routes(service: Services): Router {
   get('/:nomsId/remand/view', remandRoutes.view)
   get('/:nomsId/remand/remove/:id', remandRoutes.remove)
   get('/:nomsId/remand/edit/:id', remandRoutes.edit)
+  post('/:nomsId/remand/edit/:id', remandRoutes.submitEdit)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

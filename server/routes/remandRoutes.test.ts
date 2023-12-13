@@ -472,4 +472,13 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Continue')
       })
   })
+
+  it('POST /{nomsId}/remand/edit/:id', () => {
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+
+    return request(app)
+      .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
+  })
 })
