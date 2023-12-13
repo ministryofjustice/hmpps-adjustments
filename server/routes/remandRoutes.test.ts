@@ -112,33 +112,11 @@ describe('Adjustment routes tests', () => {
       .expect('Location', `/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
   })
 
-  it('GET /{nomsId}/remand/dates/add', () => {
-    const adjustments = {}
-    adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-    return request(app)
-      .get(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Nobody')
-        expect(res.text).toContain(`<a href="/${NOMS_ID}" class="govuk-back-link">Back</a>`)
-        expect(res.text).toContain('Remand start date')
-        expect(res.text).toContain('Remand end date')
-        expect(res.text).toContain('Continue')
-      })
-  })
-
   describe('POST /{nomsId}/remand/dates/:addOrEdit validation tests', () => {
-    const addLink = `/${NOMS_ID}/remand/offences/add/${SESSION_ID}`
-    const editLink = `/${NOMS_ID}/remand/edit/${SESSION_ID}`
-
     test.each`
       addOrEdit | redirectLocation
-      ${'add'}  | ${addLink}
-      ${'edit'} | ${editLink}
+      ${'add'}  | ${`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`}
+      ${'edit'} | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
     `('POST of dates when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
@@ -232,56 +210,72 @@ describe('Adjustment routes tests', () => {
     })
   })
 
-  it('GET /{nomsId}/remand/offences/add', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
-    return request(app)
-      .get(`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Nobody')
-        expect(res.text).toContain(
-          `<a href="/${NOMS_ID}/remand/dates/add/${SESSION_ID}" class="govuk-back-link">Back</a>`,
-        )
-        expect(res.text).toContainInOrder(['10', 'day(s)'])
-        expect(res.text).toContainInOrder([
-          'Court 1',
-          'CASE001',
-          'Doing a crime',
-          'Committed from 04 January 2021 to 05 January 2021',
-          'Doing a different crime',
-          'Committed on 06 March 2021',
-        ])
-      })
+  describe('GET and POST tests for /{nomsId}/remand/dates/:addOrEdit', () => {
+    test.each`
+      addOrEdit | title                    | backLink
+      ${'add'}  | ${'Select the offences'} | ${`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`}
+      ${'edit'} | ${'Edit offences'}       | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
+    `('GET /{nomsId}/remand/offences/:addOrEdit', async ({ addOrEdit, title, backLink }) => {
+      const adjustments = {}
+      adjustments[SESSION_ID] = blankAdjustment
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+      return request(app)
+        .get(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain(title)
+          expect(res.text).toContain('Anon')
+          expect(res.text).toContain('Nobody')
+          expect(res.text).toContain(`<a href="${backLink}" class="govuk-back-link">Back</a>`)
+          expect(res.text).toContainInOrder(['10', 'day(s)'])
+          expect(res.text).toContainInOrder([
+            'Court 1',
+            'CASE001',
+            'Doing a crime',
+            'Committed from 04 January 2021 to 05 January 2021',
+            'Doing a different crime',
+            'Committed on 06 March 2021',
+          ])
+        })
+    })
+
+    test.each`
+      addOrEdit | redirectLocation
+      ${'add'}  | ${`/${NOMS_ID}/remand/review`}
+      ${'edit'} | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
+    `('POST /{nomsId}/remand/offence/:addOrEdit valid', async ({ addOrEdit, redirectLocation }) => {
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+      return request(app)
+        .post(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
+        .send({
+          chargeId: ['5', '6', '7'],
+        })
+        .type('form')
+        .expect(302)
+        .expect('Location', redirectLocation)
+    })
+
+    test.each`
+      addOrEdit
+      ${'add'}
+      ${'edit'}
+    `('POST /{nomsId}/remand/offence/:addOrEdit no offences selected', async ({ addOrEdit }) => {
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+      return request(app)
+        .post(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('You must select the offence(s) which relate to the remand period.')
+        })
+    })
   })
 
-  it('POST /{nomsId}/remand/offence/add valid', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
-    return request(app)
-      .post(`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
-      .send({
-        chargeId: ['5', '6', '7'],
-      })
-      .type('form')
-      .expect(302)
-      .expect('Location', `/${NOMS_ID}/remand/review`)
-  })
-
-  it('POST /{nomsId}/remand/offence/add no offences selected', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
-    return request(app)
-      .post(`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
-      .type('form')
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('You must select the offence(s) which relate to the remand period.')
-      })
-  })
   it('GET /{nomsId}/remand/review', () => {
     const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
