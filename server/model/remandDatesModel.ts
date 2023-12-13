@@ -8,9 +8,11 @@ export default class RemandDatesModel {
     public prisonerDetail: PrisonApiPrisoner,
     public adjustments: SessionAdjustment[],
     public form: RemandDatesForm,
+    public addOrEdit: string = null,
   ) {}
 
   public backlink(): string {
+    if (this.addOrEdit === 'edit') return `/${this.prisonerDetail.offenderNo}/remand/edit/${this.id}`
     if (this.adjustments.length > 1 || this.adjustments[0].complete) {
       return `/${this.prisonerDetail.offenderNo}/remand/review`
     }

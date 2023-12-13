@@ -131,84 +131,105 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('POST /{nomsId}/remand/dates/add valid', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-    adjustmentsService.validate.mockResolvedValue([])
-    return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
-      .send({
-        'from-day': '5',
-        'from-month': '4',
-        'from-year': '2023',
-        'to-day': '20',
-        'to-month': '4',
-        'to-year': '2023',
-      })
-      .type('form')
-      .expect(302)
-      .expect('Location', `/${NOMS_ID}/remand/offences/add/${SESSION_ID}`)
-  })
+  describe('POST /{nomsId}/remand/dates/:addOrEdit validation tests', () => {
+    const addLink = `/${NOMS_ID}/remand/offences/add/${SESSION_ID}`
+    const editLink = `/${NOMS_ID}/remand/edit/${SESSION_ID}`
 
-  it('POST /{nomsId}/remand/dates/add empty form validation', () => {
-    const adjustments = {}
-    adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-    return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('This date must include a valid day, month and year')
-      })
-  })
+    test.each`
+      addOrEdit | redirectLocation
+      ${'add'}  | ${addLink}
+      ${'edit'} | ${editLink}
+    `('POST of dates when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      adjustmentsService.validate.mockResolvedValue([])
+      return request(app)
+        .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+        .send({
+          'from-day': '5',
+          'from-month': '4',
+          'from-year': '2023',
+          'to-day': '20',
+          'to-month': '4',
+          'to-year': '2023',
+        })
+        .type('form')
+        .expect(302)
+        .expect('Location', redirectLocation)
+    })
 
-  it('POST /{nomsId}/remand/dates/add to date after from', () => {
-    const adjustments = {}
-    adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-    return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
-      .send({
-        'from-day': '5',
-        'from-month': '4',
-        'from-year': '2023',
-        'to-day': '20',
-        'to-month': '3',
-        'to-year': '2023',
-      })
-      .type('form')
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('The first day of remand must be before the last day of remand.')
-      })
-  })
+    test.each`
+      addOrEdit
+      ${'add'}
+      ${'edit'}
+    `('POST /{nomsId}/remand/dates/add empty form validation', async ({ addOrEdit }) => {
+      const adjustments = {}
+      adjustments[SESSION_ID] = blankAdjustment
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      return request(app)
+        .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('This date must include a valid day, month and year')
+        })
+    })
 
-  it('POST /{nomsId}/remand/dates/add dates in future', () => {
-    const adjustments = {}
-    adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-    return request(app)
-      .post(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
-      .send({
-        'from-day': '5',
-        'from-month': '4',
-        'from-year': (dayjs().year() + 1).toString(),
-        'to-day': '20',
-        'to-month': '4',
-        'to-year': (dayjs().year() + 1).toString(),
-      })
-      .type('form')
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('The first day of remand must not be in the future.')
-        expect(res.text).toContain('The last day of remand must not be in the future.')
-      })
+    test.each`
+      addOrEdit
+      ${'add'}
+      ${'edit'}
+    `('POST /{nomsId}/remand/dates/add to date after from', async ({ addOrEdit }) => {
+      const adjustments = {}
+      adjustments[SESSION_ID] = blankAdjustment
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      return request(app)
+        .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+        .send({
+          'from-day': '5',
+          'from-month': '4',
+          'from-year': '2023',
+          'to-day': '20',
+          'to-month': '3',
+          'to-year': '2023',
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('The first day of remand must be before the last day of remand.')
+        })
+    })
+
+    test.each`
+      addOrEdit
+      ${'add'}
+      ${'edit'}
+    `('POST /{nomsId}/remand/dates/:addOrEdit dates in future', async ({ addOrEdit }) => {
+      const adjustments = {}
+      adjustments[SESSION_ID] = blankAdjustment
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      return request(app)
+        .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+        .send({
+          'from-day': '5',
+          'from-month': '4',
+          'from-year': (dayjs().year() + 1).toString(),
+          'to-day': '20',
+          'to-month': '4',
+          'to-year': (dayjs().year() + 1).toString(),
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('The first day of remand must not be in the future.')
+          expect(res.text).toContain('The last day of remand must not be in the future.')
+        })
+    })
   })
 
   it('GET /{nomsId}/remand/offences/add', () => {
@@ -436,6 +457,25 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
         expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
         expect(res.text).toContain('Doing a crime')
+      })
+  })
+
+  it('GET /{nomsId}/remand/dates/edit', () => {
+    const adjustments = {}
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/dates/edit/${ADJUSTMENT_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(`<a href="/${NOMS_ID}/remand/edit/9991" class="govuk-back-link">Back</a>`)
+        expect(res.text).toContain('Remand start date')
+        expect(res.text).toContain('Remand end date')
+        expect(res.text).toContain('Continue')
       })
   })
 })
