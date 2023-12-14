@@ -39,17 +39,17 @@
           {% elif model.message.action === 'ADDITIONAL_DAYS_UPDATED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
           {% endset %}
           {% elif model.message.action === 'REMAND_UPDATED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
           {% endset %}
           {% elif model.message.action === 'REMAND_REMOVED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Remand details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
           {% endset %}
         {% endif %}
 

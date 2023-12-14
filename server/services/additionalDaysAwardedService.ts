@@ -583,6 +583,7 @@ export default class AdditionalDaysAwardedService {
       username,
       token,
     )
+
     const quashedAdjustments = quashed.map(it => {
       return allAdaAdjustments.find(adjustment => this.adjustmentMatchesAdjudication(it, adjustment))
     })
@@ -613,8 +614,10 @@ export default class AdditionalDaysAwardedService {
           return new AdjustmentsClient(token).delete(it.id)
         }),
     )
-    // Create adjustments
-    await new AdjustmentsClient(token).create(adjustmentsToCreate)
+    if (adjustmentsToCreate.length) {
+      // Create adjustments
+      await new AdjustmentsClient(token).create(adjustmentsToCreate)
+    }
 
     this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.offenderNo)
     this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.offenderNo)
