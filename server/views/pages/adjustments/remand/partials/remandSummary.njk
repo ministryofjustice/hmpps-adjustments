@@ -44,7 +44,7 @@ The params are wrapped inside the attributes object and are as follows:
         actions: {
         items: [
           {
-            href: '#',
+            href: '/' + offenderNo + '/remand/offences/edit/' + adjustment.id,
             text: "Edit"
           }
         ]
@@ -56,15 +56,7 @@ The params are wrapped inside the attributes object and are as follows:
       },
         value: {
         text: adjustment.daysBetween or adjustment.effectiveDays
-      },
-        actions: {
-        items: [
-          {
-            href: '#',
-            text: "Edit"
-          }
-        ]
-      } if (isEdit)
+      }
       }
     ]
   }) }}

@@ -12,11 +12,13 @@ export default class RemandSelectOffencesModel {
     public adjustment: SessionAdjustment,
     public form: RemandOffencesForm,
     sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+    public addOrEdit: string = null,
   ) {
     this.cases = groupBy(sentencesAndOffences, (sent: PrisonApiOffenderSentenceAndOffences) => sent.caseSequence)
   }
 
   public backlink(): string {
+    if (this.addOrEdit === 'edit') return `/${this.prisonerDetail.offenderNo}/remand/edit/${this.id}`
     if (this.adjustment.complete) {
       return `/${this.prisonerDetail.offenderNo}/remand/review`
     }

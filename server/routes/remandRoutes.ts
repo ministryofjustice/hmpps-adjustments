@@ -101,7 +101,7 @@ export default class RemandRoutes {
     const form = RemandOffencesForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/remand/offences', {
-      model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, form, sentencesAndOffences),
+      model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, form, sentencesAndOffences, addOrEdit),
     })
   }
 
@@ -122,11 +122,22 @@ export default class RemandRoutes {
     if (adjustmentForm.errors.length) {
       const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
       return res.render('pages/adjustments/remand/offences', {
-        model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, adjustmentForm, sentencesAndOffences),
+        model: new RemandSelectOffencesModel(
+          id,
+          prisonerDetail,
+          adjustment,
+          adjustmentForm,
+          sentencesAndOffences,
+          addOrEdit,
+        ),
       })
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+
+    if (addOrEdit === 'edit') {
+      return res.redirect(`/${nomsId}/remand/edit/${id}`)
+    }
 
     return res.redirect(`/${nomsId}/remand/review`)
   }
@@ -322,5 +333,19 @@ export default class RemandRoutes {
         sentencesAndOffences,
       ),
     })
+  }
+
+  public submitEdit: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    await this.adjustmentsService.update(id, adjustment, token)
+
+    const message = {
+      action: 'REMAND_UPDATED',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
 }

@@ -43,7 +43,7 @@
           {% endset %}
           {% elif model.message.action === 'REMAND_UPDATED' %}
           {% set html %}
-            <h3 class="govuk-notification-banner__heading">Remand time added</h3>
+            <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
             {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl, model.prisonerDetail) }}
           {% endset %}
           {% elif model.message.action === 'REMAND_REMOVED' %}
