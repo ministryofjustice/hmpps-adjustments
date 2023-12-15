@@ -103,13 +103,55 @@ afterEach(() => {
 })
 
 describe('Adjustment routes tests', () => {
-  it('GET /{nomsId}/remand/add', () => {
+  it('GET /{nomsId}/remand/add okay', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/remand/add`)
       .expect(302)
       .expect('Location', `/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
+  })
+
+  it('GET /{nomsId}/remand/add no applicable', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([])
+    return request(app)
+      .get(`/${NOMS_ID}/remand/add`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/remand/no-applicable-sentences`)
+  })
+
+  it('GET /{nomsId}/remand/no-applicable-sentences', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/no-applicable-sentences`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(`<a href="/${NOMS_ID}" class="govuk-back-link">Back</a>`)
+        expect(res.text).toContain('Remand cannot be applied as none of the sentence offences are eligible for remand.')
+      })
+  })
+
+  it('GET /{nomsId}/remand/dates/add', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = blankAdjustment
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(`<a href="/${NOMS_ID}" class="govuk-back-link">Back</a>`)
+        expect(res.text).toContain('Remand start date')
+        expect(res.text).toContain('Remand end date')
+        expect(res.text).toContain('Continue')
+      })
   })
 
   describe('POST /{nomsId}/remand/dates/:addOrEdit validation tests', () => {
@@ -219,7 +261,7 @@ describe('Adjustment routes tests', () => {
       const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
       return request(app)
         .get(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
@@ -264,7 +306,7 @@ describe('Adjustment routes tests', () => {
       ${'edit'}
     `('POST /{nomsId}/remand/offence/:addOrEdit no offences selected', async ({ addOrEdit }) => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
       return request(app)
         .post(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
@@ -280,7 +322,7 @@ describe('Adjustment routes tests', () => {
     const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
@@ -343,7 +385,7 @@ describe('Adjustment routes tests', () => {
     const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
       .post(`/${NOMS_ID}/remand/review`)
@@ -357,7 +399,7 @@ describe('Adjustment routes tests', () => {
     const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
@@ -385,7 +427,7 @@ describe('Adjustment routes tests', () => {
     const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue({ error: 'an error' })
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -409,7 +451,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/remand/remove', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
 
     return request(app)
@@ -427,7 +469,7 @@ describe('Adjustment routes tests', () => {
 
   it('POST /{nomsId}/remand/remove', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
 
     return request(app)
@@ -438,7 +480,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/remand/edit', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
 
     return request(app)

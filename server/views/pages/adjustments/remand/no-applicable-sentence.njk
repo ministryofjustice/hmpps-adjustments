@@ -1,0 +1,20 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "../../../macros/adaTable.njk" import adaTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = applicationName %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+
+  <a href="/{{model.prisonerDetail.offenderNo}}" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-form-group">
+        <h1 class="govuk-heading-l">There is a problem</h1>
+        <p class="govuk-body"> Remand cannot be applied as none of the sentence offences are eligible for remand.</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}
