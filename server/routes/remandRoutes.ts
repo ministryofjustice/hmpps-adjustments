@@ -31,6 +31,15 @@ export default class RemandRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetails = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetails.bookingId,
+      token,
+    )
+
+    if (!sentencesAndOffences.length) {
+      return res.redirect(`/${nomsId}/remand/no-applicable-sentences`)
+    }
+
     const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
       adjustmentType: 'REMAND',
       bookingId: prisonerDetails.bookingId,
@@ -66,7 +75,7 @@ export default class RemandRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = new RemandDatesForm(req.body)
 
-    await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token))
+    await adjustmentForm.validate()
 
     if (adjustmentForm.errors.length) {
       const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
@@ -97,7 +106,10 @@ export default class RemandRoutes {
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
     const form = RemandOffencesForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/remand/offences', {
@@ -120,7 +132,10 @@ export default class RemandRoutes {
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
     if (adjustmentForm.errors.length) {
-      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+        prisonerDetail.bookingId,
+        token,
+      )
       return res.render('pages/adjustments/remand/offences', {
         model: new RemandSelectOffencesModel(
           id,
@@ -157,7 +172,10 @@ export default class RemandRoutes {
       return res.redirect(`/${nomsId}`)
     }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
     const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
       adjustments,
       sentencesAndOffences,
@@ -185,7 +203,10 @@ export default class RemandRoutes {
     if (form.errors.length) {
       const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
       const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+        prisonerDetail.bookingId,
+        token,
+      )
       const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
         adjustments,
         sentencesAndOffences,
@@ -214,7 +235,10 @@ export default class RemandRoutes {
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
     const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
       adjustments,
       sentencesAndOffences,
@@ -291,7 +315,10 @@ export default class RemandRoutes {
     const adjustments = (await this.adjustmentsService.findByPerson(nomsId, token)).filter(
       it => it.adjustmentType === 'REMAND',
     )
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
     this.adjustmentsStoreService.clear(req, nomsId)
 
     // TODO copied this code in from the generic View route - need to double check what it's used for WIP
@@ -310,7 +337,10 @@ export default class RemandRoutes {
     const { nomsId, id } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustment = await this.adjustmentsService.get(id, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
     return res.render('pages/adjustments/remand/remove', {
       model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences),
     })
@@ -324,7 +354,10 @@ export default class RemandRoutes {
 
     const adjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
     this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
 
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
@@ -347,5 +380,17 @@ export default class RemandRoutes {
       action: 'REMAND_UPDATED',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  public noApplicableSentences: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+
+    return res.render('pages/adjustments/remand/no-applicable-sentence', {
+      model: {
+        prisonerDetail,
+      },
+    })
   }
 }

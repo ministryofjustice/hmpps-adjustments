@@ -68,6 +68,7 @@ export default function routes(service: Services): Router {
   get('/:nomsId/remand/remove/:id', remandRoutes.remove)
   get('/:nomsId/remand/edit/:id', remandRoutes.edit)
   post('/:nomsId/remand/edit/:id', remandRoutes.submitEdit)
+  get('/:nomsId/remand/no-applicable-sentences', remandRoutes.noApplicableSentences)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
@@ -78,7 +79,5 @@ export default function routes(service: Services): Router {
   post('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.submitForm)
 
   get('/:nomsId/remand', adjustmentRoutes.remand)
-  get('/:nomsId/additional-days/add', adjustmentRoutes.additionalDays)
-
   return router
 }
