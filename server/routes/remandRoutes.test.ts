@@ -4,7 +4,11 @@ import request from 'supertest'
 import { appWithAllRoutes } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import {
+  PrisonApiOffence,
+  PrisonApiOffenderSentenceAndOffences,
+  PrisonApiPrisoner,
+} from '../@types/prisonApi/prisonClientTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
@@ -34,30 +38,48 @@ const stubbedPrisonerData = {
   agencyId: 'LDS',
 } as PrisonApiPrisoner
 
-const stubbedSentencesAndOffences = [
+const sentenceAndOffenceBaseRecord = {
+  terms: [
+    {
+      years: 3,
+    },
+  ],
+  sentenceTypeDescription: 'SDS Standard Sentence',
+  caseSequence: 1,
+  lineSequence: 1,
+  caseReference: 'CASE001',
+  courtDescription: 'Court 1',
+  sentenceSequence: 1,
+  sentenceStatus: 'A',
+  offences: [
+    {
+      offenderChargeId: 1,
+      offenceDescription: 'Doing a crime',
+      offenceStartDate: '2021-01-04',
+      offenceEndDate: '2021-01-05',
+    },
+    { offenderChargeId: 2, offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
+  ],
+} as PrisonApiOffenderSentenceAndOffences
+
+const stubbedSentencesAndOffences = [sentenceAndOffenceBaseRecord]
+
+const offencesWithAndWithoutStartDates: PrisonApiOffence[] = [
   {
-    terms: [
-      {
-        years: 3,
-      },
-    ],
-    sentenceTypeDescription: 'SDS Standard Sentence',
-    caseSequence: 1,
-    lineSequence: 1,
-    caseReference: 'CASE001',
-    courtDescription: 'Court 1',
-    sentenceSequence: 1,
-    sentenceStatus: 'A',
-    offences: [
-      {
-        offenderChargeId: 1,
-        offenceDescription: 'Doing a crime',
-        offenceStartDate: '2021-01-04',
-        offenceEndDate: '2021-01-05',
-      },
-      { offenderChargeId: 2, offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
-    ],
-  } as PrisonApiOffenderSentenceAndOffences,
+    offenderChargeId: 1,
+    offenceDescription: 'Doing a crime',
+    offenceStartDate: '2021-01-04',
+    offenceEndDate: '2021-01-05',
+  },
+  { offenderChargeId: 2, offenceDescription: 'Doing a different crime' },
+]
+
+const offencesWithoutStartDates: PrisonApiOffence[] = [
+  {
+    offenderChargeId: 1,
+    offenceDescription: 'Doing a crime',
+  },
+  { offenderChargeId: 2, offenceDescription: 'Doing a different crime' },
 ]
 
 const blankAdjustment = {
@@ -162,6 +184,7 @@ describe('Adjustment routes tests', () => {
     `('POST of dates when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsService.validate.mockResolvedValue([])
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -188,6 +211,7 @@ describe('Adjustment routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
         .expect('Content-Type', /html/)
@@ -200,12 +224,13 @@ describe('Adjustment routes tests', () => {
       addOrEdit
       ${'add'}
       ${'edit'}
-    `('POST /{nomsId}/remand/dates/add to date after from', async ({ addOrEdit }) => {
+    `('POST /{nomsId}/remand/dates/addOrEdit to date after from', async ({ addOrEdit }) => {
       const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
         .send({
@@ -233,6 +258,7 @@ describe('Adjustment routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
         .send({
@@ -250,6 +276,100 @@ describe('Adjustment routes tests', () => {
           expect(res.text).toContain('The last day of remand must not be in the future.')
         })
     })
+
+    test.each`
+      addOrEdit
+      ${'add'}
+      ${'edit'}
+    `('POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date', async ({ addOrEdit }) => {
+      const adjustments = {}
+      adjustments[SESSION_ID] = blankAdjustment
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+      return request(app)
+        .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+        .send({
+          'from-day': '5',
+          'from-month': '3',
+          'from-year': '2000',
+          'to-day': '20',
+          'to-month': '3',
+          'to-year': '2023',
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('The remand period cannot start before the earliest offence date, on 04 Jan 2021')
+        })
+    })
+
+    test.each`
+      addOrEdit
+      ${'add'}
+      ${'edit'}
+    `(
+      'POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date when some offence dates are not set',
+      async ({ addOrEdit }) => {
+        const adjustments = {}
+        adjustments[SESSION_ID] = blankAdjustment
+        prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+        adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+        adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+        prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
+          { ...sentenceAndOffenceBaseRecord, offences: offencesWithAndWithoutStartDates },
+        ])
+        return request(app)
+          .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+          .send({
+            'from-day': '5',
+            'from-month': '3',
+            'from-year': '2000',
+            'to-day': '20',
+            'to-month': '3',
+            'to-year': '2023',
+          })
+          .type('form')
+          .expect('Content-Type', /html/)
+          .expect(res => {
+            expect(res.text).toContain(
+              'The remand period cannot start before the earliest offence date, on 04 Jan 2021',
+            )
+          })
+      },
+    )
+
+    test.each`
+      addOrEdit | redirectLocation
+      ${'add'}  | ${`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`}
+      ${'edit'} | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
+    `(
+      'POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date when all offence dates are not set (success)',
+      async ({ addOrEdit, redirectLocation }) => {
+        const adjustments = {}
+        adjustments[SESSION_ID] = blankAdjustment
+        prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+        adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+        adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+        prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
+          { ...sentenceAndOffenceBaseRecord, offences: offencesWithoutStartDates },
+        ])
+        return request(app)
+          .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
+          .send({
+            'from-day': '5',
+            'from-month': '3',
+            'from-year': '2000',
+            'to-day': '20',
+            'to-month': '3',
+            'to-year': '2023',
+          })
+          .type('form')
+          .expect(302)
+          .expect('Location', redirectLocation)
+      },
+    )
   })
 
   describe('GET and POST tests for /{nomsId}/remand/dates/:addOrEdit', () => {

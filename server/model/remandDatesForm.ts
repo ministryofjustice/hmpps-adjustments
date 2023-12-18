@@ -2,7 +2,8 @@ import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
-import { dateItems, isDateInFuture, isFromAfterTo } from '../utils/utils'
+import { dateItems, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
   'from-day': string
@@ -31,7 +32,7 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
     return dateItems(this['to-year'], this['to-month'], this['to-day'], 'to', this.errors)
   }
 
-  async validation(): Promise<ValidationError[]> {
+  async validation(getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>): Promise<ValidationError[]> {
     const errors = []
     const fromDateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
     if (fromDateError) {
@@ -69,7 +70,37 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
         fields: ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year'],
       })
     }
+
+    const activeSentences = await getSentences()
+    const sentencesWithOffenceDates = activeSentences.filter(it => it.offences.filter(o => o.offenceStartDate).length)
+
+    if (sentencesWithOffenceDates.length) {
+      const minOffenceDate = this.getMinOffenceDate(sentencesWithOffenceDates)
+      const fromDate = fieldsToDate(this['from-year'], this['from-month'], this['from-day'])
+      if (fromDate < minOffenceDate) {
+        errors.push({
+          text: `The remand period cannot start before the earliest offence date, on ${dayjs(minOffenceDate).format(
+            'DD MMM YYYY',
+          )}`,
+          fields: ['from-day', 'from-month', 'from-year'],
+        })
+      }
+    }
+
     return errors
+  }
+
+  private getMinOffenceDate(sentencesWithOffenceDates: PrisonApiOffenderSentenceAndOffences[]) {
+    return sentencesWithOffenceDates
+      .map(
+        it =>
+          new Date(
+            it.offences
+              .filter(o => o.offenceStartDate)
+              .reduce((a, b) => (new Date(a.offenceStartDate) < new Date(b.offenceStartDate) ? a : b)).offenceStartDate,
+          ),
+      )
+      .reduce((a, b) => (a < b ? a : b))
   }
 
   static fromAdjustment(adjustment: Adjustment): RemandDatesForm {

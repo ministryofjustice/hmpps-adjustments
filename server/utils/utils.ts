@@ -92,3 +92,6 @@ export function delay(ms: number): Promise<void> {
 export function calculateReleaseDatesCheckInformationUrl(prisonerDetail: PrisonApiPrisoner) {
   return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerDetail.offenderNo}/check-information`
 }
+
+export const fieldsToDate = (day: string, month: string, year: string): Date =>
+  new Date(dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD'))

@@ -75,7 +75,9 @@ export default class RemandRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = new RemandDatesForm(req.body)
 
-    await adjustmentForm.validate()
+    await adjustmentForm.validate(() =>
+      this.prisonerService.getSentencesAndOffencesFilteredForRemand(prisonerDetail.bookingId, token),
+    )
 
     if (adjustmentForm.errors.length) {
       const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
