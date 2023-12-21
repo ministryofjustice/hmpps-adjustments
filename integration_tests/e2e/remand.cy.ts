@@ -46,7 +46,7 @@ context('Enter Remand', () => {
     cy.signIn()
     const hub = HubPage.goTo('A1234AB')
     hub.viewRemandLink().click()
-    const viewRemandPage = ViewRemandPage.verifyOnPage(ViewRemandPage)
+    ViewRemandPage.verifyOnPage(ViewRemandPage)
     // TODO enhance this view test + edit/delete (awaiting redesign tickets)
   })
 })
