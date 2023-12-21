@@ -147,6 +147,7 @@ export default class RemandReviewModel {
           },
         },
       ],
+      attributes: { 'data-qa': 'total-days-summary' },
     }
   }
 }
