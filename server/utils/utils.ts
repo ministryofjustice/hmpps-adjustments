@@ -95,3 +95,5 @@ export function calculateReleaseDatesCheckInformationUrl(prisonerDetail: PrisonA
 
 export const fieldsToDate = (day: string, month: string, year: string): Date =>
   new Date(dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD'))
+
+export const dateToString = (date: Date): string => dayjs(date).format('DD MMM YYYY')

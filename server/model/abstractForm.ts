@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
 import { fieldHasErrors } from '../utils/utils'
 import ValidationError from './validationError'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
@@ -14,11 +14,17 @@ export default abstract class AbstractForm<T> {
 
   errors: ValidationError[] = []
 
-  async validate(getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>): Promise<void> {
-    this.errors = await this.validation(getSentences)
+  async validate(
+    getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>,
+    getAdjustments?: () => Promise<Adjustment[]>,
+  ): Promise<void> {
+    this.errors = await this.validation(getSentences, getAdjustments)
   }
 
-  abstract validation(getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>): Promise<ValidationError[]>
+  abstract validation(
+    getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>,
+    getAdjustments?: () => Promise<Adjustment[]>,
+  ): Promise<ValidationError[]>
 
   protected validateDate(day: string, month: string, year: string, fieldPrefix: string): ValidationError {
     if (!day && !month && !year) {

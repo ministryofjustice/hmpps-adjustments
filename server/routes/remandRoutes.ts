@@ -73,10 +73,11 @@ export default class RemandRoutes {
     const { nomsId, addOrEdit, id } = req.params
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustmentForm = new RemandDatesForm(req.body)
+    const adjustmentForm = new RemandDatesForm({ ...req.body, isEdit: addOrEdit === 'edit', adjustmentId: id })
 
-    await adjustmentForm.validate(() =>
-      this.prisonerService.getSentencesAndOffencesFilteredForRemand(prisonerDetail.bookingId, token),
+    await adjustmentForm.validate(
+      () => this.prisonerService.getSentencesAndOffencesFilteredForRemand(prisonerDetail.bookingId, token),
+      () => this.adjustmentsService.findByPerson(nomsId, token),
     )
 
     if (adjustmentForm.errors.length) {
@@ -323,12 +324,6 @@ export default class RemandRoutes {
     )
     this.adjustmentsStoreService.clear(req, nomsId)
 
-    // TODO copied this code in from the generic View route - need to double check what it's used for WIP
-    // Can be removed from the generic route once done
-    // const remandDecision =
-    //     adjustmentType.value === 'REMAND' && roles.includes('REMAND_IDENTIFIER')
-    //         ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
-    //         : null
     return res.render('pages/adjustments/remand/view', {
       model: new RemandViewModel(prisonerDetail, adjustments, sentencesAndOffences),
     })
