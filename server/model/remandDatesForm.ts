@@ -1,8 +1,9 @@
 import dayjs from 'dayjs'
+import { areIntervalsOverlapping } from 'date-fns'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
-import { dateItems, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
+import { dateItems, dateToString, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
@@ -18,6 +19,10 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
 
   'to-year': string
 
+  isEdit: boolean
+
+  adjustmentId?: string
+
   toAdjustment(adjustment: Adjustment): Adjustment {
     const fromDate = dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD')
     const toDate = dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD')
@@ -32,7 +37,10 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
     return dateItems(this['to-year'], this['to-month'], this['to-day'], 'to', this.errors)
   }
 
-  async validation(getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>): Promise<ValidationError[]> {
+  async validation(
+    getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>,
+    getAdjustments?: () => Promise<Adjustment[]>,
+  ): Promise<ValidationError[]> {
     const errors = []
     const fromDateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
     if (fromDateError) {
@@ -75,8 +83,8 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
     const sentencesWithOffenceDates = activeSentences.filter(it => it.offences.filter(o => o.offenceStartDate).length)
 
     if (sentencesWithOffenceDates.length) {
+      const fromDate = fieldsToDate(this['from-day'], this['from-month'], this['from-year'])
       const minOffenceDate = this.getMinOffenceDate(sentencesWithOffenceDates)
-      const fromDate = fieldsToDate(this['from-year'], this['from-month'], this['from-day'])
       if (fromDate < minOffenceDate) {
         errors.push({
           text: `The remand period cannot start before the earliest offence date, on ${dayjs(minOffenceDate).format(
@@ -87,6 +95,37 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
       }
     }
 
+    // Edit specific validation
+    if (this.isEdit) {
+      errors.push(...(await this.validationForEdit(getAdjustments)))
+    }
+
+    return errors
+  }
+
+  private async validationForEdit(getAdjustments?: () => Promise<Adjustment[]>): Promise<ValidationError[]> {
+    const errors = []
+    const fromDate = fieldsToDate(this['from-day'], this['from-month'], this['from-year'])
+    const toDate = fieldsToDate(this['to-day'], this['to-month'], this['to-year'])
+    const adjustments = (await getAdjustments()).filter(
+      it => it.adjustmentType === 'REMAND' && it.id !== this.adjustmentId,
+    )
+    const overlappingAdjustment = adjustments.find(a =>
+      areIntervalsOverlapping(
+        { start: new Date(a.fromDate), end: new Date(a.toDate) },
+        { start: fromDate, end: toDate },
+        { inclusive: true },
+      ),
+    )
+
+    if (overlappingAdjustment) {
+      errors.push({
+        text: `The remand dates overlap with another remand period ${dateToString(
+          new Date(overlappingAdjustment.fromDate),
+        )} to ${dateToString(new Date(overlappingAdjustment.toDate))}`,
+        fields: ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year'],
+      })
+    }
     return errors
   }
 

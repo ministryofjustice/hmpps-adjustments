@@ -186,6 +186,7 @@ describe('Adjustment routes tests', () => {
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsService.validate.mockResolvedValue([])
+      adjustmentsService.findByPerson.mockResolvedValue([])
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
         .send({
@@ -211,6 +212,7 @@ describe('Adjustment routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      adjustmentsService.findByPerson.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -230,6 +232,7 @@ describe('Adjustment routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      adjustmentsService.findByPerson.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -258,6 +261,7 @@ describe('Adjustment routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      adjustmentsService.findByPerson.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -287,6 +291,7 @@ describe('Adjustment routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      adjustmentsService.findByPerson.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -317,6 +322,7 @@ describe('Adjustment routes tests', () => {
         prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
         adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+        adjustmentsService.findByPerson.mockResolvedValue([])
         prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
           { ...sentenceAndOffenceBaseRecord, offences: offencesWithAndWithoutStartDates },
         ])
@@ -352,6 +358,7 @@ describe('Adjustment routes tests', () => {
         prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
         adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+        adjustmentsService.findByPerson.mockResolvedValue([])
         prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
           { ...sentenceAndOffenceBaseRecord, offences: offencesWithoutStartDates },
         ])
@@ -370,6 +377,75 @@ describe('Adjustment routes tests', () => {
           .expect('Location', redirectLocation)
       },
     )
+
+    test.each([
+      {
+        adjustment: {
+          ...blankAdjustment,
+          fromDate: '2023-01-06',
+          toDate: '2023-01-10',
+          id: '123-abb',
+          from: '06 Jan 2023',
+          to: '10 Jan 2023',
+        },
+        from: { year: '2023', month: '01', day: '01' },
+        to: { year: '2023', month: '03', day: '20' },
+        id: '9991',
+      },
+      {
+        adjustment: {
+          ...blankAdjustment,
+          fromDate: '2023-01-07',
+          toDate: '2023-01-10',
+          id: '123-abb',
+          from: '07 Jan 2023',
+          to: '10 Jan 2023',
+        },
+        from: { year: '2023', month: '01', day: '01' },
+        to: { year: '2023', month: '01', day: '07' },
+        id: '9992',
+      },
+      {
+        adjustment: {
+          ...blankAdjustment,
+          fromDate: '2023-01-06',
+          toDate: '2023-01-10',
+          id: '123-abb',
+          from: '06 Jan 2023',
+          to: '10 Jan 2023',
+        },
+        from: { year: '2023', month: '01', day: '10' },
+        to: { year: '2023', month: '01', day: '1' },
+        id: '9993',
+      },
+    ])('POST /{nomsId}/remand/dates/addOrEdit overlapping remand periods', ({ adjustment, from, to, id }) => {
+      const adjustments = {}
+      adjustments[SESSION_ID] = blankAdjustment
+      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+      adjustmentsService.findByPerson.mockResolvedValue([adjustment, { ...adjustment, id }])
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
+        { ...sentenceAndOffenceBaseRecord, offences: offencesWithAndWithoutStartDates },
+      ])
+      return request(app)
+        .post(`/${NOMS_ID}/remand/dates/edit/${id}`)
+        .send({
+          'from-day': from.day,
+          'from-month': from.month,
+          'from-year': from.year,
+          'to-day': to.day,
+          'to-month': to.month,
+          'to-year': to.year,
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain(
+            `The remand dates overlap with another remand period ${adjustment.from} to ${adjustment.to}`,
+          )
+        })
+    })
   })
 
   describe('GET and POST tests for /{nomsId}/remand/dates/:addOrEdit', () => {

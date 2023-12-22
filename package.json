@@ -119,7 +119,8 @@
     "redis": "^4.6.10",
     "superagent": "^8.1.2",
     "url-value-parser": "^2.2.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "date-fns": "^3.0.6"
   },
   "devDependencies": {
     "@types/bunyan": "^1.8.9",
