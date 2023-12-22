@@ -17,6 +17,16 @@ export default class FormPage extends AdjustmentsPage {
     cy.get('[name=from-year]').type(years)
   }
 
+  public enterToDate = (date: string): void => {
+    const days = dayjs(date).get('date').toString()
+    const months = (dayjs(date).get('month') + 1).toString()
+    const years = dayjs(date).get('year').toString()
+
+    cy.get('[name=to-day]').type(days)
+    cy.get('[name=to-month]').type(months)
+    cy.get('[name=to-year]').type(years)
+  }
+
   public enterDays = (days: string): void => {
     cy.get('[name=days]').clear()
     cy.get('[name=days]').type(days)

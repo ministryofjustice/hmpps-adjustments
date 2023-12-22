@@ -15,7 +15,9 @@ export default class HubPage extends AdjustmentsPage {
 
   public viewRadaLink = (): PageElement => cy.get('[data-qa=view-restored-additional-days]')
 
-  public relevantRemandLink = (): PageElement => cy.get('[data-qa=relevant-remand]')
+  public addRemandLink = (): PageElement => cy.get('[data-qa=add-remand]')
+
+  public viewRemandLink = (): PageElement => cy.get('[data-qa=view-remand]')
 
   public relevantRemandMessage = (): PageElement => cy.get('[data-qa=relevant-remand-message]')
 
