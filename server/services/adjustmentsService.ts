@@ -1,5 +1,11 @@
 import AdjustmentsClient from '../api/adjustmentsClient'
-import { Adjustment, CreateResponse, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
+import {
+  Adjustment,
+  AdjustmentStatus,
+  CreateResponse,
+  RestoreAdjustments,
+  ValidationMessage,
+} from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentsService {
   public async create(adjustments: Adjustment[], token: string): Promise<CreateResponse> {
@@ -14,6 +20,10 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).findByPerson(person)
   }
 
+  public async findByPersonAndStatus(person: string, status: AdjustmentStatus, token: string): Promise<Adjustment[]> {
+    return new AdjustmentsClient(token).findByPersonAndStatus(person, status)
+  }
+
   public async update(adjustmentId: string, adjustment: Adjustment, token: string): Promise<void> {
     return new AdjustmentsClient(token).update(adjustmentId, adjustment)
   }
@@ -24,5 +34,9 @@ export default class AdjustmentsService {
 
   public async validate(adjustment: Adjustment, token: string): Promise<ValidationMessage[]> {
     return new AdjustmentsClient(token).validate(adjustment)
+  }
+
+  public async restore(restore: RestoreAdjustments, token: string): Promise<void> {
+    return new AdjustmentsClient(token).restore(restore)
   }
 }

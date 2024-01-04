@@ -4,3 +4,5 @@ export type AdjustmentTypes = components['schemas']['AdjustmentDto']['adjustment
 export type Adjustment = components['schemas']['AdjustmentDto']
 export type CreateResponse = components['schemas']['CreateResponseDto']
 export type ValidationMessage = components['schemas']['ValidationMessage']
+export type AdjustmentStatus = components['schemas']['AdjustmentDto']['status']
+export type RestoreAdjustments = components['schemas']['RestoreAdjustmentsDto']

@@ -68,8 +68,8 @@ export interface paths {
      */
     get: operations['findByPerson']
     /**
-     * Create an adjustments
-     * @description Create an adjustment.
+     * Create adjustments
+     * @description Create adjustment.
      */
     post: operations['create_1']
   }
@@ -86,6 +86,13 @@ export interface paths {
      * @description Validate an adjustment.
      */
     post: operations['validate']
+  }
+  '/adjustments/restore': {
+    /**
+     * Restore a deleted adjustment
+     * @description Restore a deleted adjustment
+     */
+    post: operations['restore']
   }
   '/queue-admin/get-dlq-messages/{dlqName}': {
     get: operations['getDlqMessages']
@@ -217,7 +224,7 @@ export interface components {
        * @description The status of this adjustment
        * @enum {string}
        */
-      status?: 'ACTIVE' | 'INACTIVE' | 'DELETED'
+      status?: 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'INACTIVE_WHEN_DELETED'
       /**
        * Format: date-time
        * @description The date and time this adjustment was last updated
@@ -257,8 +264,7 @@ export interface components {
       adjustmentId: string
     }
     CreateResponseDto: {
-      /** Format: uuid */
-      adjustmentId: string
+      adjustmentIds: string[]
     }
     /** @description Details of the adjustment and the number of effective days within a calculation. */
     AdjustmentEffectiveDaysDto: {
@@ -299,6 +305,11 @@ export interface components {
       message: string
       /** @enum {string} */
       type: 'VALIDATION' | 'WARNING'
+    }
+    /** @description The adjustment UUID */
+    RestoreAdjustmentsDto: {
+      /** @description The IDs of the adjustments to restore */
+      ids: string[]
     }
     GetDlqResult: {
       /** Format: int32 */
@@ -571,6 +582,10 @@ export interface operations {
       query: {
         /** @description The noms ID of the person */
         person: string
+        /** @description The status of adjustments. Defaults to ACTIVE */
+        status?: 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'INACTIVE_WHEN_DELETED'
+        /** @description The earliest sentence date to filter adjustments by. Defaults to earliest active sentence date */
+        sentenceEnvelopeDate?: string
       }
     }
     responses: {
@@ -595,17 +610,17 @@ export interface operations {
     }
   }
   /**
-   * Create an adjustments
-   * @description Create an adjustment.
+   * Create adjustments
+   * @description Create adjustment.
    */
   create_1: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['AdjustmentDto']
+        'application/json': components['schemas']['AdjustmentDto'][]
       }
     }
     responses: {
-      /** @description Adjustment created */
+      /** @description Adjustments created */
       201: {
         content: {
           'application/json': components['schemas']['CreateResponseDto']
@@ -667,6 +682,25 @@ export interface operations {
           'application/json': components['schemas']['ValidationMessage'][]
         }
       }
+    }
+  }
+  /**
+   * Restore a deleted adjustment
+   * @description Restore a deleted adjustment
+   */
+  restore: {
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RestoreAdjustmentsDto']
+      }
+    }
+    responses: {
+      /** @description Adjustment restored */
+      200: never
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: never
+      /** @description Adjustment not found */
+      404: never
     }
   }
   getDlqMessages: {

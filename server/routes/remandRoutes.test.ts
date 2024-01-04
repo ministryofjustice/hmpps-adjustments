@@ -414,8 +414,8 @@ describe('Adjustment routes tests', () => {
           from: '06 Jan 2023',
           to: '10 Jan 2023',
         },
-        from: { year: '2023', month: '01', day: '10' },
-        to: { year: '2023', month: '01', day: '1' },
+        from: { year: '2023', month: '01', day: '1' },
+        to: { year: '2023', month: '01', day: '10' },
         id: '9993',
       },
     ])('POST /{nomsId}/remand/dates/addOrEdit overlapping remand periods', ({ adjustment, from, to, id }) => {
