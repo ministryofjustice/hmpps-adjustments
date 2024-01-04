@@ -16,6 +16,8 @@ import hubValidationMessages from '../model/hubValidationMessages'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
 import { daysBetween, delay } from '../utils/utils'
+import RecallModel from '../model/recallModel'
+import RecallForm from '../model/recallForm'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -311,5 +313,39 @@ export default class AdjustmentRoutes {
       action: adjustment.adjustmentType === 'REMAND' ? 'REMAND_REMOVED' : 'REMOVE',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
+  }
+
+  public recall: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustments = await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', token)
+
+    return res.render('pages/adjustments/recall', {
+      model: new RecallModel(prisonerDetail, adjustments, new RecallForm({})),
+    })
+  }
+
+  public recallSubmit: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
+
+    const recallForm = new RecallForm(req.body)
+
+    await recallForm.validate()
+    if (recallForm.errors.length) {
+      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+      const adjustments = await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', token)
+
+      return res.render('pages/adjustments/recall', {
+        model: new RecallModel(prisonerDetail, adjustments, recallForm),
+      })
+    }
+    await this.adjustmentsService.restore({ ids: recallForm.getSelectedAdjustments() }, token)
+    const message = {
+      action: 'REMAND_UPDATED',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
 }

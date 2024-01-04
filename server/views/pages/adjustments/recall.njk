@@ -1,0 +1,42 @@
+{% extends "../../partials/layout.njk" %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = applicationName + " - Home" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="moj-page-header-actions">
+
+        <div class="moj-page-header-actions__title">
+          <h1 class="govuk-heading-xl">
+            <span class="govuk-caption-xl">Adjustments</span>Recall adjustments</h1>
+        </div>
+      </div>
+
+      <p class="govuk-body">
+        This page lists adjustments that have been recorded previously for {{ model.prisonerDetail.firstName | title }}
+        {{ model.prisonerDetail.lastName | title }}.
+        Some of these adjustments may be applicable to recall sentences
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <form class="form" method="post">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+          {{ govukCheckboxes(model.checkboxes()) }}
+          {{ govukButton({
+                text: "Approve",
+                type: submit,
+                preventDoubleClick: true,
+                attributes: {'data-qa': 'approve-button'}
+              }) }}
+        </form>
+    </div>
+  </div>
+
+{% endblock %}

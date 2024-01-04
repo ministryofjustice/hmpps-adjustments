@@ -503,7 +503,7 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
-    adjustmentsService.create.mockResolvedValue({ adjustmentId: 'this-is-an-id' })
+    adjustmentsService.create.mockResolvedValue({ adjustmentIds: ['this-is-an-id'] })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
       .post(`/${NOMS_ID}/review`)

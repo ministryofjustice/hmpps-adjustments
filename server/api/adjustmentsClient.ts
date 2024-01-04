@@ -1,6 +1,12 @@
 import config, { ApiConfig } from '../config'
 import RestClient from '../data/restClient'
-import { Adjustment, CreateResponse, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
+import {
+  Adjustment,
+  AdjustmentStatus,
+  CreateResponse,
+  RestoreAdjustments,
+  ValidationMessage,
+} from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentsClient {
   restClient: RestClient
@@ -17,6 +23,10 @@ export default class AdjustmentsClient {
     return this.restClient.get({ path: `/adjustments?person=${person}` }) as Promise<Adjustment[]>
   }
 
+  async findByPersonAndStatus(person: string, status: AdjustmentStatus): Promise<Adjustment[]> {
+    return this.restClient.get({ path: `/adjustments?person=${person}&status=${status}` }) as Promise<Adjustment[]>
+  }
+
   async create(adjustments: Adjustment[]): Promise<CreateResponse> {
     return this.restClient.post({ path: `/adjustments`, data: adjustments }) as Promise<CreateResponse>
   }
@@ -31,5 +41,9 @@ export default class AdjustmentsClient {
 
   async validate(adjustment: Adjustment): Promise<ValidationMessage[]> {
     return this.restClient.post({ path: `/adjustments/validate`, data: adjustment }) as Promise<ValidationMessage[]>
+  }
+
+  async restore(adjustment: RestoreAdjustments): Promise<void> {
+    return this.restClient.post({ path: `/adjustments/restore`, data: adjustment }) as Promise<void>
   }
 }

@@ -78,6 +78,9 @@ export default function routes(service: Services): Router {
   get('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.form)
   post('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.submitForm)
 
+  get('/:nomsId/recall', adjustmentRoutes.recall)
+  post('/:nomsId/recall', adjustmentRoutes.recallSubmit)
+
   get('/:nomsId/remand', adjustmentRoutes.remand)
   return router
 }
