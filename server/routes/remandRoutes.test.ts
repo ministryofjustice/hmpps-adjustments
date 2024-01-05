@@ -538,7 +538,7 @@ describe('Adjustment routes tests', () => {
           ' Remand cannot be applied when a sentence is being served.',
           'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with a sentence from 01 Jan 2021 to 01 Feb 2021',
           'Update the remand dates to continue.',
-          'You can view the court case & sentence information in the <a href="http://localhost:8080/calculation/ABC123/check-information">Calculate release dates service</a>.',
+          'You can view the court case & sentence information in the <a href="http://localhost:8080/calculation/ABC123/reason">Calculate release dates service</a>.',
         ])
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([

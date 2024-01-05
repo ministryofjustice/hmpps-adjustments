@@ -1,4 +1,10 @@
-import { convertToTitleCase, daysBetween, initialiseName, isDateInFuture } from './utils'
+import {
+  convertToTitleCase,
+  daysBetween,
+  initialiseName,
+  isDateInFuture,
+  calculateReleaseDatesCheckInformationUrl,
+} from './utils'
 
 describe('convert to title case', () => {
   it.each([
@@ -88,5 +94,16 @@ describe('Future date tests', () => {
     ],
   ])('%s', (_: string, year: string, month: string, day: string, expected: boolean) => {
     expect(isDateInFuture(year, month, day)).toEqual(expected)
+  })
+})
+
+describe('Calculate Release Dates Location', () => {
+  it('Check redirection to reason is configured', () => {
+    const stubbedPrisonerData = {
+      offenderNo: 'A1234AA',
+    }
+    return expect(calculateReleaseDatesCheckInformationUrl(stubbedPrisonerData)).toContain(
+      'http://localhost:8080/calculation/A1234AA/reason',
+    )
   })
 })
