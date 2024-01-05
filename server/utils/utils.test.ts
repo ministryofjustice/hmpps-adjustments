@@ -5,7 +5,6 @@ import {
   isDateInFuture,
   calculateReleaseDatesCheckInformationUrl,
 } from './utils'
-import config from '../config'
 
 describe('convert to title case', () => {
   it.each([
