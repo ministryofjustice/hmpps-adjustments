@@ -90,7 +90,7 @@ export function delay(ms: number): Promise<void> {
 }
 
 export function calculateReleaseDatesCheckInformationUrl(prisonerDetail: PrisonApiPrisoner) {
-  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerDetail.offenderNo}/check-information`
+  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerDetail.offenderNo}/reason`
 }
 
 export const fieldsToDate = (day: string, month: string, year: string): Date =>
