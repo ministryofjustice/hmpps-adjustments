@@ -15,9 +15,10 @@ import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
-import { daysBetween, delay } from '../utils/utils'
+import { daysBetween } from '../utils/utils'
 import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
+import UnusedDeductionsService from '../services/unusedDeductionsService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -26,6 +27,7 @@ export default class AdjustmentRoutes {
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly additionalDaysAwardedService: AdditionalDaysAwardedService,
+    private readonly unusedDeductionsService: UnusedDeductionsService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -64,8 +66,11 @@ export default class AdjustmentRoutes {
     const messageExists = message && message[0]
     if (messageExists) {
       this.adjustmentsStoreService.clear(req, nomsId)
-      // Adjustment updated/deleted/created. Wait for unused deductions calc.
-      await delay(1000)
+      try {
+        await this.unusedDeductionsService.waitUntilUnusedRemandCreated(nomsId, token)
+      } catch {
+        // Continue if we can't wait for unused deductions.
+      }
     }
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     if (!messageExists) {

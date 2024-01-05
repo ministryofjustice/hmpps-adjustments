@@ -7,6 +7,7 @@ import UserService from './userService'
 import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
+import UnusedDeductionsService from './unusedDeductionsService'
 
 export const services = () => {
   const { hmppsAuthClient, applicationInfo } = dataAccess()
@@ -22,6 +23,7 @@ export const services = () => {
     additionalDaysAwardedStoreService,
   )
   const calculateReleaseDatesService = new CalculateReleaseDatesService()
+  const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, calculateReleaseDatesService)
 
   return {
     applicationInfo,
@@ -33,6 +35,7 @@ export const services = () => {
     additionalDaysAwardedService,
     additionalDaysAwardedStoreService,
     calculateReleaseDatesService,
+    unusedDeductionsService,
   }
 }
 
