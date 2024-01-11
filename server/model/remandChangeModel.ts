@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
-import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
+import { calculateReleaseDatesCheckInformationUrl, offencesForAdjustment } from '../utils/utils'
 
 export default class RemandChangeModel {
   remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
@@ -15,9 +15,7 @@ export default class RemandChangeModel {
   ) {}
 
   public listOffences() {
-    return this.sentencesAndOffences.flatMap(so => {
-      return so.offences.filter(off => this.adjustment.remand?.chargeId.includes(off.offenderChargeId))
-    })
+    return offencesForAdjustment(this.adjustment, this.sentencesAndOffences)
   }
 
   private remandRelatedValidation() {

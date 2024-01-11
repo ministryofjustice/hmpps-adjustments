@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { offencesForAdjustment } from '../utils/utils'
 
 export default class RemandViewModel {
   constructor(
@@ -26,9 +27,7 @@ export default class RemandViewModel {
       return {
         ...it,
         daysToDisplay: it.daysBetween || it.effectiveDays,
-        offences: this.sentencesAndOffences.flatMap(so =>
-          so.offences.filter(off => it.remand?.chargeId.includes(off.offenderChargeId)),
-        ),
+        offences: offencesForAdjustment(it, this.sentencesAndOffences),
       }
     })
   }
