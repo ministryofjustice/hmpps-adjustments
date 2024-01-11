@@ -2,6 +2,7 @@
 {% from "./partials/remandSummary.njk" import remandSummary %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 
 {% set pageTitle = applicationName + " - View remand details" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -17,6 +18,32 @@
 {% endblock %}
 
 {% block content %}
+  {% if model.remandRelatedValidationSummary().errorList.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {% set errorBody %}
+          <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+              {% for error in model
+                .remandRelatedValidationSummary()
+              .errorList %}
+                <li>
+                  <p class="govuk-body">{{ error.text }}</p>
+                </li>
+              {% endfor %}
+            </ul>
+            {{ model.remandRelatedValidationSummary().subText.html | safe }}
+          </div>
+        {% endset -%}
+
+        {{ govukErrorSummary({
+          titleText: model.remandRelatedValidationSummary().titleText,
+          errorList: [],
+          descriptionHtml: errorBody
+        }) }}
+      </div>
+    </div>
+  {% endif %}
   <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
     Edit remand details
   </h1>
@@ -33,11 +60,13 @@
       <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
         <div class="govuk-button-group">
-          {{ govukButton({
-            text: "Save",
-            type: submit,
-            preventDoubleClick: true
-          }) }}
+          {% if not model.remandRelatedValidationSummary().errorList.length %}
+            {{ govukButton({
+              text: "Save",
+              type: submit,
+              preventDoubleClick: true
+            }) }}
+          {% endif %}
 
           {{ govukButton({
             text: "Cancel",

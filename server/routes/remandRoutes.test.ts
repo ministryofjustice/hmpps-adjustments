@@ -678,6 +678,11 @@ describe('Adjustment routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
 
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
@@ -718,5 +723,30 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(302)
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
+  })
+
+  it('GET /{nomsId}/remand/edit with CRD error', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [remandOverlapWithSentenceMessage],
+    })
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContainInOrder([
+          ' Remand cannot be applied when a sentence is being served.',
+          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with a sentence from 01 Jan 2021 to 01 Feb 2021',
+          'Update the remand dates to continue.',
+          'You can view the court case & sentence information in the <a href="http://localhost:8080/calculation/ABC123/reason">Calculate release dates service</a>.',
+        ])
+      })
   })
 })
