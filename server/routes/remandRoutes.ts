@@ -113,7 +113,7 @@ export default class RemandRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const form = RemandOffencesForm.fromAdjustment(adjustment)
+    const form = RemandOffencesForm.fromAdjustment(adjustment, sentencesAndOffences)
 
     return res.render('pages/adjustments/remand/offences', {
       model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, form, sentencesAndOffences, addOrEdit),

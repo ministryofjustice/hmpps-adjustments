@@ -1,7 +1,12 @@
 import dayjs from 'dayjs'
 import ValidationError from '../model/validationError'
 import config from '../config'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import {
+  PrisonApiOffence,
+  PrisonApiOffenderSentenceAndOffences,
+  PrisonApiPrisoner,
+} from '../@types/prisonApi/prisonClientTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 const properCase = (word: string): string =>
   word.length >= 1 ? word[0].toUpperCase() + word.toLowerCase().slice(1) : word
@@ -97,3 +102,17 @@ export const fieldsToDate = (day: string, month: string, year: string): Date =>
   new Date(dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD'))
 
 export const dateToString = (date: Date): string => dayjs(date).format('DD MMM YYYY')
+
+export function offencesForAdjustment(
+  adjustment: Adjustment,
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): PrisonApiOffence[] {
+  return sentencesAndOffences.flatMap(so => {
+    return so.offences.filter(off => {
+      if (adjustment.remand?.chargeId?.length) {
+        return adjustment.remand?.chargeId.includes(off.offenderChargeId)
+      }
+      return adjustment.sentenceSequence === so.sentenceSequence
+    })
+  })
+}
