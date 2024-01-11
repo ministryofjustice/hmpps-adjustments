@@ -80,10 +80,10 @@ export default class RemandRoutes {
       () => this.adjustmentsService.findByPerson(nomsId, token),
     )
 
+    const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     if (adjustmentForm.errors.length) {
-      const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
       return res.render('pages/adjustments/remand/dates', {
-        model: new RemandDatesModel(id, prisonerDetail, adjustments, adjustmentForm, addOrEdit),
+        model: new RemandDatesModel(id, prisonerDetail, [sessionAdjustment], adjustmentForm, addOrEdit),
       })
     }
 
@@ -296,8 +296,11 @@ export default class RemandRoutes {
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
     nomsId: string,
     token: string,
+    isEdit: boolean = false,
   ): Promise<UnusedDeductionCalculationResponse> {
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const adjustments = isEdit
+      ? await this.getAdjustmentsExceptOneBeingEdited(sessionadjustments, nomsId, token)
+      : await this.adjustmentsService.findByPerson(nomsId, token)
 
     try {
       return await this.calculateReleaseDatesService.calculateUnusedDeductions(
@@ -309,6 +312,16 @@ export default class RemandRoutes {
       // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
       return null
     }
+  }
+
+  private async getAdjustmentsExceptOneBeingEdited(
+    sessionAdjustment: { string?: Adjustment },
+    nomsId: string,
+    token: string,
+  ) {
+    // When editing there is only one session adjustment
+    const id = Object.keys(sessionAdjustment)[0]
+    return (await this.adjustmentsService.findByPerson(nomsId, token)).filter(it => it.id !== id)
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
@@ -356,11 +369,20 @@ export default class RemandRoutes {
       token,
     )
 
+    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      { [id]: adjustment },
+      sentencesAndOffences,
+      nomsId,
+      token,
+      true,
+    )
+
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
         prisonerDetail,
         { ...adjustment, daysBetween: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)) },
         sentencesAndOffences,
+        unusedDeductions?.validationMessages || [],
       ),
     })
   }
