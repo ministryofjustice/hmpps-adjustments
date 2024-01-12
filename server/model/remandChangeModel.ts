@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { calculateReleaseDatesCheckInformationUrl, offencesForAdjustment } from '../utils/utils'
 
 export default class RemandChangeModel {
@@ -11,7 +11,8 @@ export default class RemandChangeModel {
     public prisonerDetail: PrisonApiPrisoner,
     public adjustment: Adjustment,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-    private calculateReleaseDatesValidationMessages: CalculateReleaseDatesValidationMessage[] = [],
+    private currentAdjustments: Adjustment[],
+    private calculatedUnusedDeductions: UnusedDeductionCalculationResponse,
   ) {}
 
   public listOffences() {
@@ -19,9 +20,23 @@ export default class RemandChangeModel {
   }
 
   private remandRelatedValidation() {
-    return this.calculateReleaseDatesValidationMessages.filter(it =>
+    return this.calculatedUnusedDeductions.validationMessages.filter(it =>
       this.remandRelatedValidationCodes.includes(it.code),
     )
+  }
+
+  public showUnusedMessage() {
+    if (this.calculatedUnusedDeductions?.unusedDeductions != null) {
+      const currentUnusedDeductions = this.currentAdjustments
+        .filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+        .map(it => it.effectiveDays)
+        .reduce((sum, current) => sum + current, 0)
+
+      const toBeUnusedDeductions = this.calculatedUnusedDeductions.unusedDeductions
+
+      return toBeUnusedDeductions !== currentUnusedDeductions
+    }
+    return false
   }
 
   public remandRelatedValidationSummary() {
