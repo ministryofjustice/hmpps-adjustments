@@ -124,7 +124,7 @@ afterEach(() => {
   jest.resetAllMocks()
 })
 
-describe('Adjustment routes tests', () => {
+describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/add okay', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
@@ -649,6 +649,11 @@ describe('Adjustment routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.findByPerson.mockResolvedValue([adjustmentWithDatesAndCharges])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
 
     return request(app)
       .get(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
@@ -656,7 +661,7 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Delete remand details')
+        expect(res.text).toContain('Delete remand')
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
         expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
         expect(res.text).toContain('Doing a crime')
@@ -690,7 +695,7 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Edit remand details')
+        expect(res.text).toContain('Edit remand')
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
         expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
         expect(res.text).toContain('Doing a crime')

@@ -164,14 +164,14 @@ export default class RemandRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
 
-    const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
-    Object.keys(adjustments).forEach(it => {
-      if (!adjustments[it].complete) {
+    const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    Object.keys(sessionAdjustments).forEach(it => {
+      if (!sessionAdjustments[it].complete) {
         this.adjustmentsStoreService.remove(req, nomsId, it)
-        delete adjustments[it]
+        delete sessionAdjustments[it]
       }
     })
-    if (!Object.keys(adjustments).length) {
+    if (!Object.keys(sessionAdjustments).length) {
       return res.redirect(`/${nomsId}`)
     }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
@@ -179,7 +179,9 @@ export default class RemandRoutes {
       prisonerDetail.bookingId,
       token,
     )
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      sessionAdjustments,
       adjustments,
       sentencesAndOffences,
       nomsId,
@@ -189,7 +191,7 @@ export default class RemandRoutes {
     return res.render('pages/adjustments/remand/review', {
       model: new RemandReviewModel(
         prisonerDetail,
-        adjustments,
+        sessionAdjustments,
         sentencesAndOffences,
         unusedDeductions?.validationMessages || [],
         new ReviewRemandForm({}),
@@ -204,13 +206,15 @@ export default class RemandRoutes {
     const form = new ReviewRemandForm(req.body)
     await form.validate()
     if (form.errors.length) {
-      const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+      const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+      const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
       const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
       const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
         prisonerDetail.bookingId,
         token,
       )
       const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+        sessionAdjustments,
         adjustments,
         sentencesAndOffences,
         nomsId,
@@ -219,7 +223,7 @@ export default class RemandRoutes {
       return res.render('pages/adjustments/remand/review', {
         model: new RemandReviewModel(
           prisonerDetail,
-          adjustments,
+          sessionAdjustments,
           sentencesAndOffences,
           unusedDeductions?.validationMessages || [],
           form,
@@ -237,12 +241,15 @@ export default class RemandRoutes {
     const { nomsId } = req.params
 
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
       prisonerDetail.bookingId,
       token,
     )
+
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      sessionAdjustments,
       adjustments,
       sentencesAndOffences,
       nomsId,
@@ -250,7 +257,7 @@ export default class RemandRoutes {
     )
 
     return res.render('pages/adjustments/remand/save', {
-      model: new RemandSaveModel(prisonerDetail, Object.values(adjustments), unusedDeductions?.unusedDeductions),
+      model: new RemandSaveModel(prisonerDetail, Object.values(sessionAdjustments), unusedDeductions?.unusedDeductions),
     })
   }
 
@@ -293,15 +300,11 @@ export default class RemandRoutes {
 
   private async unusedDeductionsHandlingCRDError(
     sessionadjustments: { string?: Adjustment },
+    adjustments: Adjustment[],
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
     nomsId: string,
     token: string,
-    isEdit: boolean = false,
   ): Promise<UnusedDeductionCalculationResponse> {
-    const adjustments = isEdit
-      ? await this.getAdjustmentsExceptOneBeingEdited(sessionadjustments, nomsId, token)
-      : await this.adjustmentsService.findByPerson(nomsId, token)
-
     try {
       return await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
@@ -351,8 +354,19 @@ export default class RemandRoutes {
       prisonerDetail.bookingId,
       token,
     )
+
+    const adjustments = await this.getAdjustmentsExceptOneBeingEdited({ [id]: adjustment }, nomsId, token)
+
+    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      {},
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      token,
+    )
+
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences),
+      model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences, adjustments, unusedDeductions),
     })
   }
 
@@ -360,29 +374,33 @@ export default class RemandRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId, id } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-
-    const adjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
-    this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
+    let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
+    this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
       prisonerDetail.bookingId,
       token,
     )
+    const adjustments = await this.getAdjustmentsExceptOneBeingEdited({ [id]: sessionAdjustment }, nomsId, token)
 
     const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
-      { [id]: adjustment },
+      { [id]: sessionAdjustment },
+      adjustments,
       sentencesAndOffences,
       nomsId,
       token,
-      true,
     )
 
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
         prisonerDetail,
-        { ...adjustment, daysBetween: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)) },
+        {
+          ...sessionAdjustment,
+          daysBetween: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
+        },
         sentencesAndOffences,
-        unusedDeductions?.validationMessages || [],
+        adjustments,
+        unusedDeductions,
       ),
     })
   }
