@@ -1,0 +1,64 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - Enter remand dates"%}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Select the case that applies to the tagged bail.
+      </h1>
+    </div>
+  </div>
+  <p class="govuk-body">You can add other periods of tagged bail later.</p>
+
+  <div class="govuk-summary-card">
+    <div class="govuk-summary-card__title-wrapper">
+      <h2 class="govuk-summary-card__title">Bristol magistrates court</h2>
+      <ul class="govuk-summary-card__actions">
+        <li class="govuk-summary-card__action">
+          <a class="govuk-link select-case-link" href="#">
+            Select this case
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="govuk-summary-card__content">
+      <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Case reference
+          </dt>
+          <dd class="govuk-summary-list__value">
+            T900000000
+          </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Date
+          </dt>
+          <dd class="govuk-summary-list__value">
+            23 Jan 2023
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+{% endblock %}
