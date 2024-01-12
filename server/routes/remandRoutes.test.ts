@@ -609,14 +609,10 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Save remand details')
-        expect(res.text).toContainInOrder([
-          'Period of remand',
-          'Days spent on remand',
-          '10',
-          'Total days',
-          '10',
-          'There are 50 days of unused deductions',
-        ])
+        expect(res.text).toContain(
+          'Once the remand time has been saved, this service will record unused deductions. You may need to add the unused remand alert on NOMIS.',
+        )
+        expect(res.text).toContainInOrder(['Period of remand', 'Days spent on remand', '10', 'Total days', '10'])
       })
   })
   it('GET /{nomsId}/remand/save error from deductions', () => {
