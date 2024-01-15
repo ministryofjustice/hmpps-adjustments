@@ -549,8 +549,6 @@ describe('Remand routes tests', () => {
           'Doing a different crime',
           'Days spend on remand',
           '10',
-          'Total days',
-          '10',
         ])
       })
   })

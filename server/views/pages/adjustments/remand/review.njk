@@ -80,10 +80,23 @@
       <form class="form" method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
 
-        {% for adjustmentId in model.adjustmentIds %}
-          {{ govukSummaryList(model.adjustmentSummary(adjustmentId))}}
-        {% endfor %}
-        {{ govukSummaryList(model.totalDaysSummary())}}
+        <div class="adjustment-card-container govuk-body">
+          {% for adjustmentId in model.adjustmentIds %}
+            <div class="adjustment-card wider clear">
+              <div class="govuk-summary-card__title-wrapper adjustment-card-heading clear">
+                  <h2 class="govuk-summary-card__title"><span class="govuk-visually-hidden">Remand adjustment</span></h2>
+                  <ul class="govuk-summary-card__actions">
+                      <li class="govuk-summary-card__action">
+                          <a class="govuk-link" href="/{{model.prisonerDetail.offenderNo}}/remand/session/remove/{{adjustmentId}}">Remove this period of remand</a>
+                      </li>
+                  </ul>
+              </div>
+              <div class="adjustment-card_content">
+                {{ govukSummaryList(model.adjustmentSummary(adjustmentId))}}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
 
         {% if not model
           .remandRelatedValidationSummary()

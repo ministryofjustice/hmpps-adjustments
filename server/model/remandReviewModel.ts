@@ -121,15 +121,6 @@ export default class RemandReviewModel {
           value: {
             text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
           },
-          actions: {
-            items: [
-              {
-                href: `/${this.prisonerDetail.offenderNo}/remand/session/remove/${id}`,
-                text: 'Remove',
-                visuallyHiddenText: 'remand',
-              },
-            ],
-          },
         },
       ],
     }
