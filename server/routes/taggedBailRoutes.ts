@@ -17,9 +17,13 @@ export default class TaggedBailRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
-      model: new TaggedBailSelectCaseModel(prisonerDetail),
+      model: new TaggedBailSelectCaseModel(prisonerDetail, sentencesAndOffences),
     })
   }
 }
