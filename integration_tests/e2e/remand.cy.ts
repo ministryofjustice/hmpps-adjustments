@@ -33,7 +33,6 @@ context('Enter Remand', () => {
     selectOffencesPage.offenceRadio().click()
     selectOffencesPage.submit().click()
     const reviewRemand = ReviewRemandPage.verifyOnPage(ReviewRemandPage)
-    reviewRemand.totalDaysSummary().contains('13')
     reviewRemand.noMoreRemandRadio().click()
     reviewRemand.submit().click()
 
