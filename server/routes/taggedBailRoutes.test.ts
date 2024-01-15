@@ -74,7 +74,7 @@ afterEach(() => {
 })
 
 describe('Tagged bail routes tests', () => {
-  it('GET /{nomsId}/tagged-bail/add okay', () => {
+  it('GET /{nomsId}/tagged-bail/add shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -82,7 +82,7 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/add`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Bristol magistrates court')
+        expect(res.text).toContain('Court 1')
       })
   })
 })
