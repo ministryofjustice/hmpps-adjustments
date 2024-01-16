@@ -5,6 +5,7 @@ import type { Services } from '../services'
 import AdjustmentRoutes from './adjustmentRoutes'
 import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
 import RemandRoutes from './remandRoutes'
+import TaggedBailRoutes from './taggedBailRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -30,6 +31,13 @@ export default function routes(service: Services): Router {
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
     service.prisonerService,
     service.additionalDaysAwardedService,
+  )
+
+  const taggedBailRoutes = new TaggedBailRoutes(
+    service.prisonerService,
+    service.adjustmentsService,
+    service.adjustmentsStoreService,
+    service.calculateReleaseDatesService,
   )
 
   get('/', (req, res, next) => {
@@ -70,6 +78,8 @@ export default function routes(service: Services): Router {
   get('/:nomsId/remand/edit/:id', remandRoutes.edit)
   post('/:nomsId/remand/edit/:id', remandRoutes.submitEdit)
   get('/:nomsId/remand/no-applicable-sentences', remandRoutes.noApplicableSentences)
+
+  get('/:nomsId/tagged-bail/add', taggedBailRoutes.add)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
