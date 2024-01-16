@@ -74,12 +74,21 @@ afterEach(() => {
 })
 
 describe('Tagged bail routes tests', () => {
-  it('GET /{nomsId}/tagged-bail/add shows correct information', () => {
+  it('GET /{nomsId}/tagged-bail/add redirects correctly', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/add`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}`)
+  })
+
+  it('GET /{nomsId}/tagged-bail/select-case/add shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}`)
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Court 1')
