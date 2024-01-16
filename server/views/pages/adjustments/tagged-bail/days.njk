@@ -24,17 +24,28 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-        Select the case for this tagged bail
+        Enter the amount of tagged bail
       </h1>
     </div>
   </div>
-  <p class="govuk-body">You can add other periods of tagged bail later.</p>
+  <p class="govuk-body">Enter the number of days as it’s written on the warrant.</p>
+  <div class="govuk-form-group govuk-body govuk-!-margin-top-6">
 
-  <div class="govuk-grid-column-two-thirds-from-desktop govuk-!-padding-left-0">
-
-
-    <div class="govuk-inset-text">
-      If you think some information is wrong, you can edit it in NOMIS and <a href="">reload this page</a>.
+    <label class="govuk-label" for="taggedBailDays">
+      Amount of days
+    </label>
+    <div class="govuk-input__wrapper"><input id="taggedBailDays" class="govuk-input govuk-input--width-5"  name="weight" type="text" spellcheck="false">
+      <div class="govuk-input__suffix" aria-hidden="true">days</div>
     </div>
+  </div>
+
+
+  <div class="govuk-button-group">
+    <a href="review-tagged-bail.html" id="add-tagged-bail-days-button" class="govuk-button" data-name="ADA" data-desc="ADA (Additional days awarded)">
+      Continue
+    </a>
+    <a href="index.html" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+      Cancel
+    </a>
   </div>
 {% endblock %}

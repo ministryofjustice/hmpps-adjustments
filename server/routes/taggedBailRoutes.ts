@@ -4,7 +4,7 @@ import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailSelectCaseModel from '../model/taggedBailSelectCaseModel'
-import TaggedBailDaysModel from "../model/taggedBailDaysModel";
+import TaggedBailDaysModel from '../model/taggedBailDaysModel'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -46,7 +46,10 @@ export default class TaggedBailRoutes {
     const { caseSequence } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    this.adjustmentsStoreService.store(req, nomsId, id, {...adjustment, taggedBail: {caseSequence: caseSequence as unknown as number}})
+    this.adjustmentsStoreService.store(req, nomsId, id, {
+      ...adjustment,
+      taggedBail: { caseSequence: caseSequence as unknown as number },
+    })
 
     return res.render('pages/adjustments/tagged-bail/days', {
       model: new TaggedBailDaysModel(prisonerDetail, addOrEdit, id),
