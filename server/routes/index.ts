@@ -81,6 +81,7 @@ export default function routes(service: Services): Router {
 
   get('/:nomsId/tagged-bail/add', taggedBailRoutes.add)
   get('/:nomsId/tagged-bail/select-case/:addOrEdit/:id', taggedBailRoutes.selectCase)
+  get('/:nomsId/tagged-bail/days/:addOrEdit/:id', taggedBailRoutes.days)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

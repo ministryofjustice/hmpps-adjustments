@@ -7,9 +7,9 @@ type SentencesByCaseSequence = {
 
 export default class TaggedBailSelectCaseModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
-    private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-  ) {}
+      public prisonerDetail: PrisonApiPrisoner,
+      private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+      private addOrEdit: string, private id: string) {}
 
   public backlink(): string {
     return `/${this.prisonerDetail.offenderNo}`

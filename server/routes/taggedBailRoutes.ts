@@ -4,6 +4,7 @@ import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailSelectCaseModel from '../model/taggedBailSelectCaseModel'
+import TaggedBailDaysModel from "../model/taggedBailDaysModell";
 
 export default class TaggedBailRoutes {
   constructor(
@@ -30,26 +31,23 @@ export default class TaggedBailRoutes {
 
   public selectCase: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId } = req.params
+    const { nomsId, addOrEdit, id } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
-      model: new TaggedBailSelectCaseModel(prisonerDetail, sentencesAndOffences),
+      model: new TaggedBailSelectCaseModel(prisonerDetail, sentencesAndOffences, addOrEdit, id),
     })
   }
 
   public days: RequestHandler = async (req, res): Promise<void> => {
     const { caseloads, token } = res.locals.user
-    const { nomsId } = req.params
+    const { nomsId, addOrEdit, id } = req.params
+    const { caseSequence } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
 
     return res.render('pages/adjustments/tagged-bail/days', {
-      model: new TaggedBailSelectCaseModel(prisonerDetail, sentencesAndOffences),
+      model: new TaggedBailDaysModel(prisonerDetail, addOrEdit, id),
     })
   }
 }
