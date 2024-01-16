@@ -3,6 +3,7 @@ import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
+import { daysBetween } from '../utils/utils'
 
 export default class ReviewModel {
   constructor(
@@ -114,7 +115,7 @@ export default class ReviewModel {
           text: 'Number of days',
         },
         value: {
-          text: adjustment.daysBetween || adjustment.effectiveDays,
+          text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         },
       },
       {
