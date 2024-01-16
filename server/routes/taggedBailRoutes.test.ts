@@ -77,7 +77,7 @@ describe('Tagged bail routes tests', () => {
   it('GET /{nomsId}/tagged-bail/add redirects correctly', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
-    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/add`)
       .expect(302)
@@ -86,7 +86,7 @@ describe('Tagged bail routes tests', () => {
 
   it('GET /{nomsId}/tagged-bail/select-case/add shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}`)
       .expect(200)
