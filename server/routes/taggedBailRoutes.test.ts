@@ -107,4 +107,15 @@ describe('Tagged bail routes tests', () => {
         expect(res.text).not.toContain('Court 1')
       })
   })
+
+  it('GET /{nomsId}/tagged-bail/days/add shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/days/add/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Enter the amount of tagged bail')
+      })
+  })
 })
