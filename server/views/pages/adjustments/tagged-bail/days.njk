@@ -4,6 +4,7 @@
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
 
 {% set pageTitle = applicationName + " - Enter remand dates" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -29,23 +30,31 @@
     </div>
   </div>
   <p class="govuk-body">Enter the number of days as it’s written on the warrant.</p>
-  <div class="govuk-form-group govuk-body govuk-!-margin-top-6">
-
-    <label class="govuk-label" for="taggedBailDays">
-      Amount of days
-    </label>
-    <div class="govuk-input__wrapper"><input id="taggedBailDays" class="govuk-input govuk-input--width-5"  name="weight" type="text" spellcheck="false">
-      <div class="govuk-input__suffix" aria-hidden="true">days</div>
-    </div>
-  </div>
-
+  {{ govukInput({
+    label: {
+      text: "Amount of days"
+    },
+    classes: "govuk-input--width-5",
+    id: "days",
+    name: "days",
+    type: "number",
+    suffix: {
+      text: "days"
+    },
+    spellcheck: false
+  }) }}
 
   <div class="govuk-button-group">
-    <a href="review-tagged-bail.html" id="add-tagged-bail-days-button" class="govuk-button" data-name="ADA" data-desc="ADA (Additional days awarded)">
-      Continue
-    </a>
-    <a href="index.html" class="govuk-button govuk-button--secondary" data-module="govuk-button">
-      Cancel
-    </a>
+    {{ govukButton({
+      text: "Continue",
+      type: submit,
+      preventDoubleClick: true,
+      attributes: { 'data-qa': 'submit-form' }
+    }) }}
+    {{ govukButton({
+      text: "Cancel",
+      classes: "govuk-button--secondary",
+      href: model.backlink()
+    }) }}
   </div>
 {% endblock %}
