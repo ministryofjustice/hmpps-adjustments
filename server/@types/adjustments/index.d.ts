@@ -105,7 +105,7 @@ export interface components {
   schemas: {
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never> | undefined
+        [key: string]: Record<string, never>
       }
       messageId: string
     }
@@ -208,6 +208,7 @@ export interface components {
       remand?: components['schemas']['RemandDto']
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
+      taggedBail?: components['schemas']['TaggedBailDto']
       /**
        * @description The prison where the prisoner was located at the time the adjustment was created (a 3 character code identifying the prison)
        * @example LDS
@@ -250,6 +251,14 @@ export interface components {
     RemandDto: {
       /** @description The id of the charges this remand applies to */
       chargeId: number[]
+    }
+    /** @description The details of the tagged bail adjustment */
+    TaggedBailDto: {
+      /**
+       * Format: int32
+       * @description The case sequence number this tagged-bail was associated with
+       */
+      caseSequence: number
     }
     /** @description The details of a UAL adjustment */
     UnlawfullyAtLargeDto: {
@@ -325,6 +334,8 @@ export interface components {
   headers: never
   pathItems: never
 }
+
+export type $defs = Record<string, never>
 
 export type external = Record<string, never>
 
@@ -419,11 +430,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -439,11 +456,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -496,11 +519,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -516,11 +545,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -652,11 +687,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -696,11 +737,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment restored */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   getDlqMessages: {

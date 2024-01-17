@@ -1,0 +1,58 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - Enter remand dates" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Enter the amount of tagged bail
+      </h1>
+    </div>
+  </div>
+  <p class="govuk-body">Enter the number of days as it’s written on the warrant.</p>
+  {{ govukInput({
+    label: {
+      text: "Amount of days"
+    },
+    classes: "govuk-input--width-5",
+    id: "days",
+    name: "days",
+    type: "number",
+    suffix: {
+      text: "days"
+    },
+    spellcheck: false
+  }) }}
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Continue",
+      type: submit,
+      preventDoubleClick: true,
+      attributes: { 'data-qa': 'submit-form' }
+    }) }}
+    {{ govukButton({
+      text: "Cancel",
+      classes: "govuk-button--secondary",
+      href: model.backlink()
+    }) }}
+  </div>
+{% endblock %}

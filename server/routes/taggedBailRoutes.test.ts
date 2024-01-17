@@ -37,6 +37,7 @@ const sentenceAndOffenceBaseRecord = {
     },
   ],
   sentenceTypeDescription: 'SDS Standard Sentence',
+  sentenceDate: '2021-08-20',
   caseSequence: 1,
   lineSequence: 1,
   caseReference: 'CASE001',
@@ -54,7 +55,17 @@ const sentenceAndOffenceBaseRecord = {
   ],
 } as PrisonApiOffenderSentenceAndOffences
 
-const stubbedSentencesAndOffences = [sentenceAndOffenceBaseRecord]
+const stubbedSentencesAndOffences = [
+  sentenceAndOffenceBaseRecord,
+  { ...sentenceAndOffenceBaseRecord, sentenceDate: '2021-08-19', courtDescription: 'Court 2' },
+  {
+    ...sentenceAndOffenceBaseRecord,
+    caseSequence: 2,
+    caseReference: 'CASE002',
+    sentenceDate: '2021-08-30',
+    courtDescription: 'Court 3',
+  },
+]
 
 let app: Express
 
@@ -74,15 +85,37 @@ afterEach(() => {
 })
 
 describe('Tagged bail routes tests', () => {
-  it('GET /{nomsId}/tagged-bail/add shows correct information', () => {
+  it('GET /{nomsId}/tagged-bail/add redirects correctly', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
-    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/add`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}`)
+  })
+
+  it('GET /{nomsId}/tagged-bail/select-case/add shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Court 1')
+        expect(res.text).toContain('Court 2')
+        expect(res.text).toContain('Court 3')
+        expect(res.text).not.toContain('Court 1')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/days/add shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/days/add/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Enter the amount of tagged bail')
       })
   })
 })
