@@ -30,55 +30,57 @@
   </div>
 
   <h2 class="govuk-heading-m">Tagged bail details</h2>
+  <div class="govuk-grid-column-two-thirds-from-desktop govuk-!-padding-left-0">
 
-  {{ govukSummaryList({
-    rows: [
-      {
-        key: {
-        text: "Case details"
-      },
-        value: {
-        html: model.getCaseDetails()
-      },
-        actions: {
-        items: [
-          {
-            href: "#",
-            text: "Edit"
-          }
-        ]
-      }
-      },
-      {
-        key: {
-        text: "Days"
-      },
-        value: {
-        text: model.adjustment.days
-      },
-        actions: {
-        items: [
-          {
-            href: "#",
-            text: "Edit"
-          }
-        ]
-      }
-      }
-    ]
-  }) }}
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: {
+          text: "Case details"
+        },
+          value: {
+          html: model.getCaseDetails()
+        },
+          actions: {
+          items: [
+            {
+              href: "#",
+              text: "Edit"
+            }
+          ]
+        }
+        },
+        {
+          key: {
+          text: "Days"
+        },
+          value: {
+          text: model.adjustment.days
+        },
+          actions: {
+          items: [
+            {
+              href: "#",
+              text: "Edit"
+            }
+          ]
+        }
+        }
+      ]
+    }) }}
 
-  <div class="govuk-button-group">
-    {{ govukButton({
-      text: "Confirm and save",
-      type: submit,
-      preventDoubleClick: true,
-      attributes: { 'data-qa': 'submit-form' }
-    }) }}
-    {{ govukButton({
-      text: "Cancel",
-      classes: "govuk-button--secondary",
-      href: model.backlink()
-    }) }}
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Confirm and save",
+        type: submit,
+        preventDoubleClick: true,
+        attributes: { 'data-qa': 'submit-form' }
+      }) }}
+      {{ govukButton({
+        text: "Cancel",
+        classes: "govuk-button--secondary",
+        href: model.backlink()
+      }) }}
+    </div>
   </div>
 {% endblock %}
