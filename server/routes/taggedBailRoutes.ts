@@ -5,8 +5,6 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailSelectCaseModel from '../model/taggedBailSelectCaseModel'
 import TaggedBailDaysModel from '../model/taggedBailDaysModel'
-import RemandDatesForm from '../model/remandDatesForm'
-import RemandDatesModel from '../model/remandDatesModel'
 import TaggedBailDaysForm from '../model/taggedBailDaysForm'
 import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 
