@@ -50,7 +50,7 @@ export default class TaggedBailRoutes {
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     this.adjustmentsStoreService.store(req, nomsId, id, {
       ...adjustment,
-      taggedBail: { caseSequence: caseSequence as unknown as number },
+      taggedBail: { caseSequence: Number(caseSequence) },
     })
     const form = TaggedBailDaysForm.fromAdjustment(adjustment)
 

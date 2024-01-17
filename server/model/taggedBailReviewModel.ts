@@ -17,7 +17,7 @@ export default class TaggedBailReviewModel {
 
   public getCaseDetails() {
     const selectedCase = this.sentencesAndOffences
-      .filter(it => it.sentenceStatus === 'A' && it.caseSequence == this.adjustment.taggedBail.caseSequence)
+      .filter(it => it.sentenceStatus === 'A' && it.caseSequence === this.adjustment.taggedBail.caseSequence)
       .sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0]
 
     return `${selectedCase.courtDescription}<br>${selectedCase.caseReference || ''} ${dateToString(
