@@ -1,0 +1,84 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set pageTitle = applicationName + " - Enter remand dates" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjust release dates</span>
+        Confirm and save
+      </h1>
+    </div>
+  </div>
+
+  <h2 class="govuk-heading-m">Tagged bail details</h2>
+
+  {{ govukSummaryList({
+    rows: [
+      {
+        key: {
+        text: "Case details"
+      },
+        value: {
+        html: model.getCaseDetails()
+      },
+        actions: {
+        items: [
+          {
+            href: "#",
+            text: "Edit"
+          }
+        ]
+      }
+      },
+      {
+        key: {
+        text: "Days"
+      },
+        value: {
+        text: model.adjustment.days
+      },
+        actions: {
+        items: [
+          {
+            href: "#",
+            text: "Edit"
+          }
+        ]
+      }
+      }
+    ]
+  }) }}
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Confirm and save",
+      type: submit,
+      preventDoubleClick: true,
+      attributes: { 'data-qa': 'submit-form' }
+    }) }}
+    {{ govukButton({
+      text: "Cancel",
+      classes: "govuk-button--secondary",
+      href: model.backlink()
+    }) }}
+  </div>
+{% endblock %}

@@ -19,6 +19,17 @@
 
 {% block content %}
 
+  {% if model.form.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: model.form.errorList()
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
@@ -28,31 +39,34 @@
     </div>
   </div>
   <p class="govuk-body">Enter the number of days as it’s written on the warrant.</p>
-  {{ govukInput({
-    label: {
-      text: "Amount of days"
-    },
-    classes: "govuk-input--width-5",
-    id: "days",
-    name: "days",
-    type: "number",
-    suffix: {
-      text: "days"
-    },
-    spellcheck: false
-  }) }}
+  <form class="form" method="post">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+    {{ govukInput({
+      label: {
+        text: "Amount of days"
+      },
+      classes: "govuk-input--width-5",
+      id: "days",
+      name: "days",
+      type: "number",
+      suffix: {
+        text: "days"
+      },
+      spellcheck: false
+    }) }}
 
-  <div class="govuk-button-group">
-    {{ govukButton({
-      text: "Continue",
-      type: submit,
-      preventDoubleClick: true,
-      attributes: { 'data-qa': 'submit-form' }
-    }) }}
-    {{ govukButton({
-      text: "Cancel",
-      classes: "govuk-button--secondary",
-      href: model.backlink()
-    }) }}
-  </div>
+    <div class="govuk-button-group">
+      {{ govukButton({
+        text: "Continue",
+        type: submit,
+        preventDoubleClick: true,
+        attributes: { 'data-qa': 'submit-form' }
+      }) }}
+      {{ govukButton({
+        text: "Cancel",
+        classes: "govuk-button--secondary",
+        href: model.backlink()
+      }) }}
+    </div>
+  </form>
 {% endblock %}
