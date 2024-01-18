@@ -70,12 +70,15 @@
     }) }}
 
     <div class="govuk-button-group">
-      {{ govukButton({
-        text: "Confirm and save",
-        type: submit,
-        preventDoubleClick: true,
-        attributes: { 'data-qa': 'submit-form' }
-      }) }}
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+        {{ govukButton({
+          text: "Confirm and save",
+          type: submit,
+          preventDoubleClick: true,
+          attributes: { 'data-qa': 'submit-form' }
+        }) }}
+      </form>
       {{ govukButton({
         text: "Cancel",
         classes: "govuk-button--secondary",
