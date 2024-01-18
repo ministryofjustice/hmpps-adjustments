@@ -146,6 +146,17 @@ describe('Tagged bail routes tests', () => {
         expect(res.text).toContain('9955')
       })
   })
+
+  it('POST /{nomsId}/tagged-bail/review/add', () => {
+    const adjustments = {}
+    adjustments[SESSION_ID] = populatedAdjustment
+    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    return request(app)
+      .post(`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22TAGGED_BAIL_UPDATED%22%7D`)
+  })
 })
 
 describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
@@ -190,8 +201,10 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
     addOrEdit | days
     ${'add'}  | ${`0`}
     ${'add'}  | ${`-1`}
+    ${'add'}  | ${`1.5`}
     ${'edit'} | ${`0`}
     ${'edit'} | ${`-1`}
+    ${'edit'} | ${`1.5`}
   `('POST /{nomsId}/tagged-bail/dates/add invalid number entered for days', async ({ addOrEdit, days }) => {
     const adjustments = {}
     adjustments[SESSION_ID] = blankAdjustment
@@ -205,7 +218,7 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
       .send({ days })
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Enter a whole number for the number of days on tagged bail')
+        expect(res.text).toContain('Enter a positive whole number for the number of days on tagged bail')
       })
   })
 })
