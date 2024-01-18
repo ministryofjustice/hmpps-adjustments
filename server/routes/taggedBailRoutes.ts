@@ -5,6 +5,8 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailSelectCaseModel from '../model/taggedBailSelectCaseModel'
 import TaggedBailDaysModel from '../model/taggedBailDaysModel'
+import TaggedBailDaysForm from '../model/taggedBailDaysForm'
+import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -48,11 +50,43 @@ export default class TaggedBailRoutes {
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     this.adjustmentsStoreService.store(req, nomsId, id, {
       ...adjustment,
-      taggedBail: { caseSequence: caseSequence as unknown as number },
+      taggedBail: { caseSequence: Number(caseSequence) },
     })
+    const form = TaggedBailDaysForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/tagged-bail/days', {
-      model: new TaggedBailDaysModel(prisonerDetail, addOrEdit, id),
+      model: new TaggedBailDaysModel(prisonerDetail, addOrEdit, id, form),
+    })
+  }
+
+  public submitDays: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, addOrEdit, id } = req.params
+
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustmentForm = new TaggedBailDaysForm({ ...req.body, isEdit: addOrEdit === 'edit', adjustmentId: id })
+    await adjustmentForm.validate()
+    if (adjustmentForm.errors.length) {
+      return res.render('pages/adjustments/tagged-bail/days', {
+        model: new TaggedBailDaysModel(prisonerDetail, addOrEdit, id, adjustmentForm),
+      })
+    }
+
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+
+    return res.redirect(`/${nomsId}/tagged-bail/review/${addOrEdit}/${id}`)
+  }
+
+  public review: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, addOrEdit, id } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+
+    return res.render('pages/adjustments/tagged-bail/review', {
+      model: new TaggedBailReviewModel(prisonerDetail, addOrEdit, id, sentencesAndOffences, adjustment),
     })
   }
 }

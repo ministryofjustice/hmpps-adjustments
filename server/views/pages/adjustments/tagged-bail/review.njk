@@ -3,6 +3,7 @@
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
 {% set pageTitle = applicationName + " - Enter remand dates" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -19,45 +20,58 @@
 
 {% block content %}
 
-  {% if model.form.errors.length %}
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full">
-        {{ govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: model.form.errorList()
-        }) }}
-      </div>
-    </div>
-  {% endif %}
-
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-        Enter the amount of tagged bail
+        Confirm and save
       </h1>
     </div>
   </div>
-  <p class="govuk-body">Enter the number of days as it’s written on the warrant.</p>
-  <form class="form" method="post">
-    <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
-    {{ govukInput({
-      label: {
-        text: "Amount of days"
-      },
-      classes: "govuk-input--width-5",
-      id: "days",
-      name: "days",
-      type: "number",
-      suffix: {
-        text: "days"
-      },
-      spellcheck: false
+
+  <h2 class="govuk-heading-m">Tagged bail details</h2>
+  <div class="govuk-grid-column-two-thirds-from-desktop govuk-!-padding-left-0">
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: {
+          text: "Case details"
+        },
+          value: {
+          html: model.getCaseDetails()
+        },
+          actions: {
+          items: [
+            {
+              href: "#",
+              text: "Edit"
+            }
+          ]
+        }
+        },
+        {
+          key: {
+          text: "Days"
+        },
+          value: {
+          text: model.adjustment.days
+        },
+          actions: {
+          items: [
+            {
+              href: "#",
+              text: "Edit"
+            }
+          ]
+        }
+        }
+      ]
     }) }}
 
     <div class="govuk-button-group">
       {{ govukButton({
-        text: "Continue",
+        text: "Confirm and save",
         type: submit,
         preventDoubleClick: true,
         attributes: { 'data-qa': 'submit-form' }
@@ -68,5 +82,5 @@
         href: model.backlink()
       }) }}
     </div>
-  </form>
+  </div>
 {% endblock %}
