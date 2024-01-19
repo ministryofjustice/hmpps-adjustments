@@ -20,7 +20,7 @@ export default class RemandChangeModel {
   }
 
   private remandRelatedValidation() {
-    return this.calculatedUnusedDeductions.validationMessages.filter(it =>
+    return (this.calculatedUnusedDeductions?.validationMessages || []).filter(it =>
       this.remandRelatedValidationCodes.includes(it.code),
     )
   }
