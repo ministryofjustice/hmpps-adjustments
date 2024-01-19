@@ -36,8 +36,6 @@ export default class TaggedBailRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    console.log('@@@@@@@@@@@@@ sbmit')
-    console.log(JSON.stringify(this.adjustmentsStoreService.getById(req, nomsId, id)))
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
       model: new TaggedBailSelectCaseModel(prisonerDetail, sentencesAndOffences, addOrEdit, id, adjustment),
@@ -45,21 +43,18 @@ export default class TaggedBailRoutes {
   }
 
   public days: RequestHandler = async (req, res): Promise<void> => {
-    const {caseloads, token} = res.locals.user
-    const {nomsId, addOrEdit, id} = req.params
-    const {caseSequence} = req.query as Record<string, string>
+    const { caseloads, token } = res.locals.user
+    const { nomsId, addOrEdit, id } = req.params
+    const { caseSequence } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     if (caseSequence) {
-
-    this.adjustmentsStoreService.store(req, nomsId, id, {
-      ...adjustment,
-      taggedBail: {caseSequence: Number(caseSequence)},
-    })
-  }
+      this.adjustmentsStoreService.store(req, nomsId, id, {
+        ...adjustment,
+        taggedBail: { caseSequence: Number(caseSequence) },
+      })
+    }
     const form = TaggedBailDaysForm.fromAdjustment(adjustment)
-    console.log('@@@@@@@@@@@@@ sbmit')
-    console.log(JSON.stringify(this.adjustmentsStoreService.getById(req, nomsId, id)))
 
     return res.render('pages/adjustments/tagged-bail/days', {
       model: new TaggedBailDaysModel(prisonerDetail, addOrEdit, id, form, adjustment),
@@ -81,9 +76,6 @@ export default class TaggedBailRoutes {
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
-    console.log('@@@@@@@@@@@@@ sbmit')
-    console.log(JSON.stringify(this.adjustmentsStoreService.getById(req, nomsId, id)))
-
     return res.redirect(`/${nomsId}/tagged-bail/review/${addOrEdit}/${id}`)
   }
 
@@ -93,8 +85,6 @@ export default class TaggedBailRoutes {
     const { caseSequence } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    console.log('@@@@@@@@@@@@@')
-    console.log(JSON.stringify(adjustment))
     if (caseSequence) {
       this.adjustmentsStoreService.store(req, nomsId, id, {
         ...adjustment,

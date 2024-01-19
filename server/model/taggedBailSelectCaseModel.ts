@@ -32,7 +32,7 @@ export default class TaggedBailSelectCaseModel {
         ...it.sentences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0],
         selected: this.adjustment.taggedBail?.caseSequence === it.caseSequence,
         selectCaseHref: this.adjustment.complete
-          ? `/${this.prisonerDetail.offenderNo}/tagged-bail/review/${this.addOrEdit}/${this.id}`
+          ? `/${this.prisonerDetail.offenderNo}/tagged-bail/review/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`
           : `/${this.prisonerDetail.offenderNo}/tagged-bail/days/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`,
       }
     })
