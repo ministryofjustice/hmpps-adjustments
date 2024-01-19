@@ -17,6 +17,8 @@ export type Message = {
     | 'ADDITIONAL_DAYS_UPDATED'
     | 'REMAND_UPDATED'
     | 'REMAND_REMOVED'
+    | 'TAGGED_BAIL_UPDATED'
+    | 'TAGGED_BAIL_REMOVED'
 }
 export default class AdjustmentsHubViewModel {
   public adjustmentTypes = adjustmentTypes

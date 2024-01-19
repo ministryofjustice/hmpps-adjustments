@@ -22,10 +22,10 @@ export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm>
         },
       ]
     }
-    if (this.days <= 0) {
+    if (Number(this.days) <= 0 || !Number.isInteger(Number(this.days))) {
       return [
         {
-          text: 'Enter a whole number for the number of days on tagged bail',
+          text: 'Enter a positive whole number for the number of days on tagged bail',
           fields: ['days'],
         },
       ]

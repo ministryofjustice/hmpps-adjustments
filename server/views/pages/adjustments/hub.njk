@@ -51,6 +51,16 @@
             <h3 class="govuk-notification-banner__heading">Remand details have been deleted</h3>
             {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
           {% endset %}
+        {% elif model.message.action === 'TAGGED_BAIL_UPDATED' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">Tagged bail details have been saved</h3>
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+          {% endset %}
+          {% elif model.message.action === 'TAGGED_BAIL_REMOVED' %}
+          {% set html %}
+            <h3 class="govuk-notification-banner__heading">Tagged bail details have been deleted</h3>
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+          {% endset %}
         {% endif %}
 
         {% if model.message.action === 'VALIDATION' %}
