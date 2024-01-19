@@ -7,8 +7,6 @@ import TaggedBailSelectCaseModel from '../model/taggedBailSelectCaseModel'
 import TaggedBailDaysModel from '../model/taggedBailDaysModel'
 import TaggedBailDaysForm from '../model/taggedBailDaysForm'
 import TaggedBailReviewModel from '../model/taggedBailReviewModel'
-import ReviewRemandForm from '../model/reviewRemandForm'
-import RemandReviewModel from '../model/remandReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
 
 export default class TaggedBailRoutes {
