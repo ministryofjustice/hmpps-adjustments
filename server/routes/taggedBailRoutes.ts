@@ -84,13 +84,13 @@ export default class TaggedBailRoutes {
     const { nomsId, addOrEdit, id } = req.params
     const { caseSequence } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     if (caseSequence) {
       this.adjustmentsStoreService.store(req, nomsId, id, {
-        ...adjustment,
+        ...this.adjustmentsStoreService.getById(req, nomsId, id),
         taggedBail: { caseSequence: Number(caseSequence) },
       })
     }
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
 
     return res.render('pages/adjustments/tagged-bail/review', {
