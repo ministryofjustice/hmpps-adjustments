@@ -7,6 +7,7 @@ import {
   PrisonApiPrisoner,
 } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
 const properCase = (word: string): string =>
   word.length >= 1 ? word[0].toUpperCase() + word.toLowerCase().slice(1) : word
@@ -115,4 +116,39 @@ export function offencesForAdjustment(
       return adjustment.sentenceSequence === so.sentenceSequence
     })
   })
+}
+
+export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {
+  const remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
+
+  const remandRelatedMessages = (messages || []).filter(it => remandRelatedValidationCodes.includes(it.code))
+
+  const message = remandRelatedMessages.length ? remandRelatedMessages[0] : null
+  if (!message) {
+    return {
+      errorList: [] as string[],
+    }
+  }
+  const overlapsWithRemand = message.code === 'REMAND_OVERLAPS_WITH_REMAND'
+  return {
+    titleText: overlapsWithRemand
+      ? 'Remand time cannot overlap'
+      : 'Remand cannot be applied when a sentence is being served.',
+    errorList: [
+      {
+        text: `The remand dates from ${dayjs(message.arguments[2]).format('DD MMM YYYY')} to ${dayjs(
+          message.arguments[3],
+        ).format('DD MMM YYYY')} overlaps with ${
+          overlapsWithRemand ? 'another remand period from' : 'the sentence starting on'
+        } ${dayjs(message.arguments[0]).format('DD MMM YYYY')} ${
+          overlapsWithRemand ? 'to' : 'with a release date of the'
+        } ${dayjs(message.arguments[1]).format('DD MMM YYYY')}`,
+      },
+    ],
+    subText: {
+      html: overlapsWithRemand
+        ? '<p>To continue, edit the remand days that overlap or Cancel.</p>'
+        : `<p>Update the remand dates to continue.</p>`,
+    },
+  }
 }
