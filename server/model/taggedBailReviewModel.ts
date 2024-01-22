@@ -6,7 +6,7 @@ export default class TaggedBailReviewModel {
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
     private addOrEdit: string,
-    private id: string,
+    public id: string,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     public adjustment: SessionAdjustment,
   ) {}
