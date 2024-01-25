@@ -671,7 +671,7 @@ describe('Remand routes tests', () => {
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMAND_REMOVED%22%7D`)
   })
 
-  it('GET /{nomsId}/remand/edit', () => {
+  it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
@@ -691,6 +691,23 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
         expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
         expect(res.text).toContain('Doing a crime')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit unused deductions calculation errors', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain('Edit remand')
       })
   })
 
