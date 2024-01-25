@@ -31,6 +31,6 @@ export default class RemandChangeModel {
   }
 
   public remandRelatedValidationSummary() {
-    return remandRelatedValidationSummary(this.calculatedUnusedDeductions.validationMessages)
+    return remandRelatedValidationSummary(this.calculatedUnusedDeductions?.validationMessages)
   }
 }
