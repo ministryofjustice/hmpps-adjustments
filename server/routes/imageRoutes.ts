@@ -7,10 +7,10 @@ export default class ImageRoutes {
   constructor(private readonly prisonerService: PrisonerService) {}
 
   public get: RequestHandler = async (req, res): Promise<void> => {
-    const { prisonerNumber } = req.params
+    const { nomsId } = req.params
 
     return this.prisonerService
-      .getPrisonerImage(res.locals.user.token, prisonerNumber)
+      .getPrisonerImage(res.locals.user.token, nomsId)
       .then(data => {
         res.set('Cache-control', 'private, max-age=86400')
         res.removeHeader('pragma')
