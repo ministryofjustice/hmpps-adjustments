@@ -535,10 +535,8 @@ describe('Remand routes tests', () => {
           `<a href="/${NOMS_ID}/remand/offences/add/${SESSION_ID}" class="govuk-back-link">Back</a>`,
         )
         expect(res.text).toContainInOrder([
-          ' Remand cannot be applied when a sentence is being served.',
-          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with a sentence from 01 Jan 2021 to 01 Feb 2021',
-          'Update the remand dates to continue.',
-          'You can view the court case & sentence information in the <a href="http://localhost:8080/calculation/ABC123/reason">Calculate release dates service</a>.',
+          'Remand cannot be applied when a sentence is being served.',
+          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with the sentence starting on 01 Jan 2021 with a release date of the 01 Feb 2021',
         ])
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
@@ -673,7 +671,7 @@ describe('Remand routes tests', () => {
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMAND_REMOVED%22%7D`)
   })
 
-  it('GET /{nomsId}/remand/edit', () => {
+  it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
@@ -693,6 +691,23 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
         expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
         expect(res.text).toContain('Doing a crime')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit unused deductions calculation errors', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain('Edit remand')
       })
   })
 
@@ -741,10 +756,9 @@ describe('Remand routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContainInOrder([
-          ' Remand cannot be applied when a sentence is being served.',
-          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with a sentence from 01 Jan 2021 to 01 Feb 2021',
+          'Remand cannot be applied when a sentence is being served.',
+          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with the sentence starting on 01 Jan 2021 with a release date of the 01 Feb 2021',
           'Update the remand dates to continue.',
-          'You can view the court case & sentence information in the <a href="http://localhost:8080/calculation/ABC123/reason">Calculate release dates service</a>.',
         ])
       })
   })

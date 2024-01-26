@@ -1,6 +1,7 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
+import SessionAdjustment from '../@types/AdjustmentTypes'
 
 export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm> {
   days: number
@@ -9,8 +10,8 @@ export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm>
 
   adjustmentId?: string
 
-  toAdjustment(adjustment: Adjustment): Adjustment {
-    return { ...adjustment, days: this.days }
+  toAdjustment(adjustment: Adjustment): SessionAdjustment {
+    return { ...adjustment, days: this.days, complete: true }
   }
 
   async validation(): Promise<ValidationError[]> {

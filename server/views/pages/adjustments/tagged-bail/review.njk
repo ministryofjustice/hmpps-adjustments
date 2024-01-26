@@ -44,7 +44,7 @@
           actions: {
           items: [
             {
-              href: "#",
+              href: "/" + model.prisonerDetail.offenderNo + "/tagged-bail/select-case/add/" + model.id,
               text: "Edit"
             }
           ]
@@ -60,7 +60,7 @@
           actions: {
           items: [
             {
-              href: "#",
+              href: "/" + model.prisonerDetail.offenderNo + "/tagged-bail/days/add/" + model.id,
               text: "Edit"
             }
           ]
@@ -78,12 +78,12 @@
           preventDoubleClick: true,
           attributes: { 'data-qa': 'submit-form' }
         }) }}
+        {{ govukButton({
+          text: "Cancel",
+          classes: "govuk-button--secondary",
+          href: "/" + model.prisonerDetail.offenderNo
+        }) }}
       </form>
-      {{ govukButton({
-        text: "Cancel",
-        classes: "govuk-button--secondary",
-        href: model.backlink()
-      }) }}
     </div>
   </div>
 {% endblock %}
