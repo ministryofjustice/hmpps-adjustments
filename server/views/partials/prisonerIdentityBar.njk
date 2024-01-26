@@ -1,5 +1,5 @@
 {% from "hmpps/components/mini-profile/macro.njk" import miniProfile %}
 
 {% if model.prisonerDetail %}
-  {{ miniProfile(model.prisonerDetail, '/plugin-assets/hmpps-design-system-frontend/hmpps/assets/images/prisoner-profile-image.png', '#') }}
+  {{ miniProfile(model.prisonerDetail, '/image/' + model.prisonerDetail.offenderNo, '#') }}
 {% endif %}

@@ -1,3 +1,4 @@
+import { Readable } from 'stream'
 import type HmppsAuthClient from '../data/hmppsAuthClient'
 import PrisonApiClient from '../api/prisonApiClient'
 import {
@@ -18,6 +19,10 @@ export default class PrisonerService {
     token: string,
   ): Promise<PrisonApiPrisoner> {
     return this.getPrisonerDetailImpl(nomsId, userCaseloads, token, true)
+  }
+
+  async getPrisonerImage(token: string, prisonerNumber: string): Promise<Readable> {
+    return new PrisonApiClient(token).getPrisonerImage(prisonerNumber)
   }
 
   async getPrisonerDetail(nomsId: string, userCaseloads: string[], token: string): Promise<PrisonApiPrisoner> {
