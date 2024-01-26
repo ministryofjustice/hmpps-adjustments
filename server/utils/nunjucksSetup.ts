@@ -3,6 +3,7 @@ import path from 'path'
 import express from 'express'
 import nunjucks from 'nunjucks'
 import dayjs from 'dayjs'
+import { personProfileName, personDateOfBirth, personStatus } from 'hmpps-design-system-frontend/hmpps/utils/utils'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
@@ -34,6 +35,8 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
       'node_modules/govuk-frontend/components/',
       'node_modules/@ministryofjustice/frontend/',
       'node_modules/@ministryofjustice/frontend/moj/components/',
+      'node_modules/hmpps-design-system-frontend/',
+      'node_modules/hmpps-design-system-frontend/hmpps/components/',
     ],
     {
       autoescape: true,
@@ -57,4 +60,7 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   })
 
   njkEnv.addFilter('date', (date, format) => dayjs(date).format(format))
+  njkEnv.addFilter('personProfileName', personProfileName)
+  njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
+  njkEnv.addFilter('personStatus', personStatus)
 }
