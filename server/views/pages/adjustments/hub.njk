@@ -18,7 +18,8 @@
         {% endset %}
 
         {{ govukNotificationBanner({
-          html: html
+          html: html,
+          titleId: 'unused-deductions-notification'
         }) }}
       {% endif %}
       {% if model.message %}
