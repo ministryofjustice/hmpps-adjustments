@@ -64,15 +64,25 @@ export default class AdjustmentRoutes {
 
     const message = req.flash('message')
     const messageExists = message && message[0]
+    let serviceHasCalculatedUnusedDeductions = true
     if (messageExists) {
       this.adjustmentsStoreService.clear(req, nomsId)
-      try {
-        await this.unusedDeductionsService.waitUntilUnusedRemandCreated(nomsId, token)
-      } catch {
-        // Continue if we can't wait for unused deductions.
-      }
+
+      serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.waitUntilUnusedRemandCreated(
+        nomsId,
+        token,
+      )
     }
+
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+
+    if (!messageExists) {
+      serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.serviceHasCalculatedUnusedDeductions(
+        nomsId,
+        adjustments,
+        token,
+      )
+    }
     if (!messageExists) {
       const intercept = await this.additionalDaysAwardedService.shouldIntercept(
         req,
@@ -103,6 +113,7 @@ export default class AdjustmentRoutes {
         remandDecision,
         roles,
         message && message[0] && (JSON.parse(message[0]) as Message),
+        serviceHasCalculatedUnusedDeductions,
       ),
     })
   }
