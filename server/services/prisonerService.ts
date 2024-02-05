@@ -86,7 +86,7 @@ export default class PrisonerService {
   async getStartOfSentenceEnvelopeExcludingRecalls(bookingId: number, token: string): Promise<Date> {
     return this.findStartOfSentenceEvelope(
       (await this.getSentencesAndOffences(bookingId, token)).filter(
-        it => !this.recallTypes.includes(it.sentenceCalculationType),
+        it => !PrisonerService.recallTypes.includes(it.sentenceCalculationType),
       ),
     )
   }
@@ -118,7 +118,7 @@ export default class PrisonerService {
     return sentence.sentenceCalculationType === 'A/FINE' && offence.offenceStatute === 'ZZ01'
   }
 
-  private recallTypes = [
+  public static recallTypes = [
     'LR',
     'LR_ORA',
     'LR_YOI_ORA',

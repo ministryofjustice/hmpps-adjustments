@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { daysBetween, remandRelatedValidationSummary } from '../utils/utils'
+import { daysBetween, offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
@@ -34,9 +34,7 @@ export default class RemandReviewModel {
 
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
-    const offences = this.sentencesAndOffences.flatMap(it =>
-      it.offences.filter(off => adjustment.remand.chargeId.includes(off.offenderChargeId)),
-    )
+    const offences = offencesForAdjustment(adjustment, this.sentencesAndOffences)
     return {
       rows: [
         {
@@ -64,7 +62,14 @@ export default class RemandReviewModel {
           },
           value: {
             html: `<ul class="govuk-list govuk-list--bullet">
-                    ${offences.map(it => `<li>${it.offenceDescription}</li>`).join('')}
+                    ${offences
+                      .map(
+                        it =>
+                          `<li>${it.offenceDescription}${
+                            it.recall ? '<strong class="govuk-tag">Recall</strong>' : ''
+                          }</li>`,
+                      )
+                      .join('')}
                   </ul>`,
           },
           actions: {
