@@ -1,0 +1,26 @@
+{% macro offenceList(offences) %}
+  <ul class='govuk-list'>
+    {% for o in offences %}
+      <li>
+        {{ o.offenceDescription }} {% if o.recall %}<strong class="govuk-tag">Recall</strong>{% endif %}
+        <br>
+        <span class="govuk-hint">
+                    {{ offenceCommittedText(o) }}
+                </span>
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+
+{% macro offenceCommittedText(offence) %}
+  {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
+    Committed from {{ offence.offenceStartDate | date("DD MMM YYYY") }} to {{ offence.offenceEndDate | date("DD MMM YYYY") }}
+    {% elif offence.offenceStartDate %}
+    Committed on {{ offence.offenceStartDate | date("DD MMM YYYY") }}
+    {% elif offence.offenceEndDate %}
+    Committed on {{ offence.offenceEndDate | date("DD MMM YYYY") }}
+  {% else %}
+    Offence date not entered
+  {% endif %}
+{% endmacro %}

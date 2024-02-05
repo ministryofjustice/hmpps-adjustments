@@ -8,6 +8,7 @@ import {
 } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import PrisonerService from '../services/prisonerService'
 
 const properCase = (word: string): string =>
   word.length >= 1 ? word[0].toUpperCase() + word.toLowerCase().slice(1) : word
@@ -107,14 +108,18 @@ export const dateToString = (date: Date): string => dayjs(date).format('DD MMM Y
 export function offencesForAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-): PrisonApiOffence[] {
+): (PrisonApiOffence & { recall: boolean })[] {
   return sentencesAndOffences.flatMap(so => {
-    return so.offences.filter(off => {
-      if (adjustment.remand?.chargeId?.length) {
-        return adjustment.remand?.chargeId.includes(off.offenderChargeId)
-      }
-      return adjustment.sentenceSequence === so.sentenceSequence
-    })
+    return so.offences
+      .filter(off => {
+        if (adjustment.remand?.chargeId?.length) {
+          return adjustment.remand?.chargeId.includes(off.offenderChargeId)
+        }
+        return adjustment.sentenceSequence === so.sentenceSequence
+      })
+      .map(off => {
+        return { ...off, recall: PrisonerService.recallTypes.includes(so.sentenceCalculationType) }
+      })
   })
 }
 

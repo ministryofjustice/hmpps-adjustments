@@ -1,5 +1,10 @@
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import {
+  PrisonApiOffence,
+  PrisonApiOffenderSentenceAndOffences,
+  PrisonApiPrisoner,
+} from '../@types/prisonApi/prisonClientTypes'
+import PrisonerService from '../services/prisonerService'
 import { daysBetween, groupBy } from '../utils/utils'
 import RemandOffencesForm from './remandOffencesForm'
 
@@ -27,6 +32,12 @@ export default class RemandSelectOffencesModel {
 
   public days(): number {
     return daysBetween(new Date(this.adjustment.fromDate), new Date(this.adjustment.toDate))
+  }
+
+  public getOffences(sentence: PrisonApiOffenderSentenceAndOffences): PrisonApiOffence & { recall: boolean }[] {
+    return sentence.offences.map(off => {
+      return { ...off, recall: PrisonerService.recallTypes.includes(sentence.sentenceCalculationType) }
+    })
   }
 
   public caseSummary(sentence: PrisonApiOffenderSentenceAndOffences) {
