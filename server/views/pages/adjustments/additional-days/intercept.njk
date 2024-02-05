@@ -18,7 +18,8 @@
         {% if model.intercept.type == 'FIRST_TIME' %} 
             The first time you use the adjustments service, you need to check if the existing adjustment information from NOMIS is correct.
             {% elif model.intercept.type == 'PADA' %}
-            There is a prospective ADA recorded for Joe Bloggs.
+            There is a prospective ADA recorded for {{ model.prisonerDetail.firstName | title }}
+          {{ model.prisonerDetail.lastName | title }}.
             {% elif model.intercept.type == 'UPDATE' %}
             Updates have been made to {{ model.prisonerDetail.firstName | title }}
           {{ model.prisonerDetail.lastName | title }}'s adjustment information, which need to be approved.
