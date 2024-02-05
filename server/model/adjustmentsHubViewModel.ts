@@ -32,6 +32,7 @@ export default class AdjustmentsHubViewModel {
     public remandDecision: IdentifyRemandDecision,
     public roles: string[],
     public message: Message,
+    public serviceHasCalculatedUnusedDeductions: boolean,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
   }
