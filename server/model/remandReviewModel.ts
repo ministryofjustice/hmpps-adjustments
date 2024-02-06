@@ -10,7 +10,7 @@ export default class RemandReviewModel {
 
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
-    public adjustments: { string?: Adjustment },
+    public adjustments: Record<string, Adjustment>,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculateReleaseDatesValidationMessages: CalculateReleaseDatesValidationMessage[],
     public form: ReviewRemandForm,

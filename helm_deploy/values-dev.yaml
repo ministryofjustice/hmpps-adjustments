@@ -1,5 +1,5 @@
 ---
-# Per environment values which override defaults in hmpps-adjustments/values.yaml
+# Per environment values which override defaults in hmpps-template-typescript/values.yaml
 
 generic-service:
   replicaCount: 2
@@ -19,9 +19,11 @@ generic-service:
     IDENTIFY_REMAND_PERIODS_API_URL: "https://identify-remand-periods-api-dev.hmpps.service.justice.gov.uk"
     ADJUDICATIONS_API_URL: "https://manage-adjudications-api-dev.hmpps.service.justice.gov.uk"
     CALCULATE_RELEASE_DATES_API_URL: "https://calculate-release-dates-api-dev.hmpps.service.justice.gov.uk"
+    MANAGE_USERS_API_URL: "https://manage-users-api-dev.hmpps.service.justice.gov.uk"
+    ENVIRONMENT_NAME: DEV
 
   # Switches off the allow list in the DEV env only.
   allowlist: null
   
 generic-prometheus-alerts:
-  alertSeverity: digital-prison-service-dev
+  alertSeverity: NON_PROD_ALERTS_SEVERITY_LABEL
