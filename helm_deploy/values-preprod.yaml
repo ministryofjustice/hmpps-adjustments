@@ -1,5 +1,5 @@
 ---
-# Per environment values which override defaults in hmpps-template-typescript/values.yaml
+# Per environment values which override defaults in hmpps-adjustments/values.yaml
 
 generic-service:
   replicaCount: 2
@@ -23,4 +23,4 @@ generic-service:
     ENVIRONMENT_NAME: PRE-PRODUCTION
 
 generic-prometheus-alerts:
-  alertSeverity: NON_PROD_ALERTS_SEVERITY_LABEL
+  alertSeverity: digital-prison-service-dev
