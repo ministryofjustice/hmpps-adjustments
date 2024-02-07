@@ -82,8 +82,8 @@ export default class TaggedBailRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, roles } = res.locals.user
-    const { nomsId, adjustmentTypeUrl } = req.params
+    const { caseloads, token } = res.locals.user
+    const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const taggedBailAdjustments = adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
