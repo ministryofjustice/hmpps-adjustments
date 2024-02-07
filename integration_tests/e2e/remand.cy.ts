@@ -9,7 +9,7 @@ context('Enter Remand', () => {
   beforeEach(() => {
     cy.task('reset')
     cy.task('stubSignIn')
-    cy.task('stubManageUser')
+    cy.task('stubAuthUser')
     cy.task('stubGetPrisonerDetails')
     cy.task('stubGetUserCaseloads')
     cy.task('stubGetAdjustments')
@@ -30,10 +30,10 @@ context('Enter Remand', () => {
     form.enterToDate('2023-04-17')
     form.submitButton().click()
     const selectOffencesPage = RemandSelectOffencesPage.verifyOnPage(RemandSelectOffencesPage)
-    selectOffencesPage.offenceRadio().click({ force: true })
+    selectOffencesPage.offenceRadio().click()
     selectOffencesPage.submit().click()
     const reviewRemand = ReviewRemandPage.verifyOnPage(ReviewRemandPage)
-    reviewRemand.noMoreRemandRadio().click({ force: true })
+    reviewRemand.noMoreRemandRadio().click()
     reviewRemand.submit().click()
 
     const saveRemand = SaveRemandPage.verifyOnPage(SaveRemandPage)

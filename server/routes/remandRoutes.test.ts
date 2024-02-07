@@ -158,7 +158,7 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/dates/add', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -207,7 +207,7 @@ describe('Remand routes tests', () => {
       ${'add'}
       ${'edit'}
     `('POST /{nomsId}/remand/dates/add empty form validation', async ({ addOrEdit }) => {
-      const adjustments: Record<string, SessionAdjustment> = {}
+      const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -227,7 +227,7 @@ describe('Remand routes tests', () => {
       ${'add'}
       ${'edit'}
     `('POST /{nomsId}/remand/dates/addOrEdit to date after from', async ({ addOrEdit }) => {
-      const adjustments: Record<string, SessionAdjustment> = {}
+      const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -256,7 +256,7 @@ describe('Remand routes tests', () => {
       ${'add'}
       ${'edit'}
     `('POST /{nomsId}/remand/dates/:addOrEdit dates in future', async ({ addOrEdit }) => {
-      const adjustments: Record<string, SessionAdjustment> = {}
+      const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -286,7 +286,7 @@ describe('Remand routes tests', () => {
       ${'add'}
       ${'edit'}
     `('POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date', async ({ addOrEdit }) => {
-      const adjustments: Record<string, SessionAdjustment> = {}
+      const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -317,7 +317,7 @@ describe('Remand routes tests', () => {
     `(
       'POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date when some offence dates are not set',
       async ({ addOrEdit }) => {
-        const adjustments: Record<string, SessionAdjustment> = {}
+        const adjustments = {}
         adjustments[SESSION_ID] = blankAdjustment
         prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -353,7 +353,7 @@ describe('Remand routes tests', () => {
     `(
       'POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date when all offence dates are not set (success)',
       async ({ addOrEdit, redirectLocation }) => {
-        const adjustments: Record<string, SessionAdjustment> = {}
+        const adjustments = {}
         adjustments[SESSION_ID] = blankAdjustment
         prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -419,7 +419,7 @@ describe('Remand routes tests', () => {
         id: '9993',
       },
     ])('POST /{nomsId}/remand/dates/addOrEdit overlapping remand periods', ({ adjustment, from, to, id }) => {
-      const adjustments: Record<string, SessionAdjustment> = {}
+      const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
@@ -454,7 +454,7 @@ describe('Remand routes tests', () => {
       ${'add'}  | ${'Select the offences'} | ${`/${NOMS_ID}/remand/dates/add/${SESSION_ID}`}
       ${'edit'} | ${'Edit offences'}       | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
     `('GET /{nomsId}/remand/offences/:addOrEdit', async ({ addOrEdit, title, backLink }) => {
-      const adjustments: Record<string, SessionAdjustment> = {}
+      const adjustments = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -515,7 +515,7 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/review', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -574,7 +574,7 @@ describe('Remand routes tests', () => {
   })
 
   it('POST /{nomsId}/remand/review nothing selected', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -588,7 +588,7 @@ describe('Remand routes tests', () => {
       })
   })
   it('GET /{nomsId}/remand/save calculated deductions', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -612,7 +612,7 @@ describe('Remand routes tests', () => {
       })
   })
   it('GET /{nomsId}/remand/save error from deductions', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -627,7 +627,7 @@ describe('Remand routes tests', () => {
       })
   })
   it('POST /{nomsId}/remand/save', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
@@ -740,7 +740,7 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/edit with CRD error', () => {
-    const adjustments: Record<string, SessionAdjustment> = {}
+    const adjustments = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)

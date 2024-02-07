@@ -6,6 +6,11 @@ import config from '../config'
 export default function setUpWebSecurity(): Router {
   const router = express.Router()
 
+  router.use((req, res, next) => {
+    res.locals.cspNonce = crypto.randomBytes(16).toString('base64')
+    next()
+  })
+
   // Secure code best practice - see:
   // 1. https://expressjs.com/en/advanced/best-practice-security.html,
   // 2. https://www.npmjs.com/package/helmet
@@ -24,7 +29,13 @@ export default function setUpWebSecurity(): Router {
           // <link href="http://example.com/" rel="stylesheet" nonce="{{ cspNonce }}">
           // This ensures only scripts we trust are loaded, and not anything injected into the
           // page by an attacker.
-          scriptSrc: ["'self'", (_req: Request, res: Response) => `'nonce-${res.locals.cspNonce}'`],
+          scriptSrc: [
+            "'self'",
+            '*.googletagmanager.com',
+            '*.google-analytics.com',
+            (_req: Request, res: Response) => `'nonce-${res.locals.cspNonce}'`,
+          ],
+          connectSrc: ["'self'", '*.googletagmanager.com', '*.google-analytics.com', '*.analytics.google.com'],
           styleSrc: ["'self'", (_req: Request, res: Response) => `'nonce-${res.locals.cspNonce}'`],
           fontSrc: ["'self'"],
           formAction: [`'self' ${config.apis.hmppsAuth.externalUrl}`],

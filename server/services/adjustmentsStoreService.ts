@@ -49,7 +49,7 @@ export default class AdjustmentsStoreService {
     return req.session.adjustments[nomsId][id]
   }
 
-  public getAll(req: Request, nomsId: string): Record<string, SessionAdjustment> {
+  public getAll(req: Request, nomsId: string): { string?: SessionAdjustment } {
     this.initSessionForNomsId(req, nomsId)
     return req.session.adjustments[nomsId]
   }

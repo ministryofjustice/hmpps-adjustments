@@ -1,52 +1,43 @@
+import nock from 'nock'
 import UserService from './userService'
-import ManageUsersApiClient, { type User } from '../data/manageUsersApiClient'
-import createUserToken from '../testutils/createUserToken'
-import PrisonerService from './prisonerService'
+import HmppsAuthClient, { User } from '../data/hmppsAuthClient'
+import config from '../config'
 import { PrisonApiUserCaseloads } from '../@types/prisonApi/prisonClientTypes'
 
-jest.mock('../data/manageUsersApiClient')
-jest.mock('./prisonerService')
+jest.mock('../data/hmppsAuthClient')
+
+// Token generated from https://jwt.io/
+const token =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJhdXRob3JpdGllcyI6WyJST0xFX1JFTUFORF9JREVOVElGSUVSIl19.NGFqJz3OSXNPh3qsofGdUgDn-IxcEtgq65kn1u41WMM'
 
 describe('User service', () => {
-  let manageUsersApiClient: jest.Mocked<ManageUsersApiClient>
-  let prisonerService: jest.Mocked<PrisonerService>
+  let hmppsAuthClient: jest.Mocked<HmppsAuthClient>
   let userService: UserService
 
+  let fakeApi: nock.Scope
   describe('getUser', () => {
     const caseload = {
       caseLoadId: 'MDI',
     } as PrisonApiUserCaseloads
+
     beforeEach(() => {
-      manageUsersApiClient = new ManageUsersApiClient() as jest.Mocked<ManageUsersApiClient>
-      prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
-      userService = new UserService(manageUsersApiClient, prisonerService)
+      hmppsAuthClient = new HmppsAuthClient(null) as jest.Mocked<HmppsAuthClient>
+      userService = new UserService(hmppsAuthClient)
+      config.apis.prisonApi.url = 'http://localhost:8100'
+      fakeApi = nock(config.apis.prisonApi.url)
     })
-
     it('Retrieves and formats user name', async () => {
-      const token = createUserToken(['ROLE_REMAND_IDENTIFIER'])
-      manageUsersApiClient.getUser.mockResolvedValue({ name: 'john smith' } as User)
-      prisonerService.getUsersCaseloads.mockResolvedValue([caseload])
+      hmppsAuthClient.getUser.mockResolvedValue({ name: 'anon nobody' } as User)
+      fakeApi.get(`/api/users/me/caseLoads`).reply(200, [caseload])
 
       const result = await userService.getUser(token)
 
-      expect(result.roles).toEqual(['REMAND_IDENTIFIER'])
-      expect(result.displayName).toEqual('John Smith')
+      expect(result.displayName).toEqual('Anon Nobody')
       expect(result.caseloads).toEqual(['MDI'])
+      expect(result.roles).toEqual(['REMAND_IDENTIFIER'])
     })
-
-    it('Retrieves and formats roles', async () => {
-      const token = createUserToken(['ROLE_ONE', 'ROLE_TWO'])
-      manageUsersApiClient.getUser.mockResolvedValue({ name: 'john smith' } as User)
-      prisonerService.getUsersCaseloads.mockResolvedValue([caseload] as PrisonApiUserCaseloads[])
-
-      const result = await userService.getUser(token)
-
-      expect(result.roles).toEqual(['ONE', 'TWO'])
-    })
-
     it('Propagates error', async () => {
-      const token = createUserToken([])
-      manageUsersApiClient.getUser.mockRejectedValue(new Error('some error'))
+      hmppsAuthClient.getUser.mockRejectedValue(new Error('some error'))
 
       await expect(userService.getUser(token)).rejects.toEqual(new Error('some error'))
     })

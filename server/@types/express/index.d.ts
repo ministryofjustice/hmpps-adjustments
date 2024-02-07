@@ -1,5 +1,4 @@
 import SessionAdjustment from '../AdjustmentTypes'
-import type { UserDetails } from '../../services/userService'
 
 export default {}
 
@@ -8,15 +7,16 @@ declare module 'express-session' {
   interface SessionData {
     returnTo: string
     nowInMinutes: number
-    adjustments?: Record<string, Record<string, SessionAdjustment>>
-    additionalDayApprovals?: Record<string, Date>
-    additionalDayPadas?: Record<string, string[]>
+    adjustments: { string?: { string?: SessionAdjustment } }
+    additionalDayApprovals: { string?: Date }
+    additionalDayPadas: { string?: string[] }
   }
 }
 
 export declare global {
   namespace Express {
-    interface User extends Partial<UserDetails> {
+    interface User {
+      username: string
       token: string
       authSource: string
     }
@@ -25,10 +25,6 @@ export declare global {
       verified?: boolean
       id: string
       logout(done: (err: unknown) => void): void
-    }
-
-    interface Locals {
-      user: Express.User
     }
   }
 }

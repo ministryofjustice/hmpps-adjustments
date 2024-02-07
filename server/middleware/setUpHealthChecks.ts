@@ -8,7 +8,7 @@ export default function setUpHealthChecks(applicationInfo: ApplicationInfo): Rou
 
   router.get('/health', (req, res, next) => {
     healthcheck(applicationInfo, result => {
-      if (result.status !== 'UP') {
+      if (!result.healthy) {
         res.status(503)
       }
       res.json(result)
@@ -20,20 +20,6 @@ export default function setUpHealthChecks(applicationInfo: ApplicationInfo): Rou
       status: 'UP',
     }),
   )
-
-  router.get('/info', (req, res) => {
-    res.json({
-      git: {
-        branch: applicationInfo.branchName,
-      },
-      build: {
-        artifact: applicationInfo.applicationName,
-        version: applicationInfo.buildNumber,
-        name: applicationInfo.applicationName,
-      },
-      productId: applicationInfo.productId,
-    })
-  })
 
   return router
 }
