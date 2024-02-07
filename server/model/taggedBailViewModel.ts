@@ -15,12 +15,7 @@ export default class TaggedBailViewModel {
   }
 
   public columnHeadings() {
-    return [
-      { text: 'Court name' },
-      { text: 'Case reference' },
-      { text: 'Days'},
-      { text: 'Actions' },
-    ]
+    return [{ text: 'Court name' }, { text: 'Case reference' }, { text: 'Days' }, { text: 'Actions' }]
   }
 
   public rows() {
