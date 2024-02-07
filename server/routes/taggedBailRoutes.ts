@@ -7,6 +7,9 @@ import TaggedBailDaysModel from '../model/taggedBailDaysModel'
 import TaggedBailDaysForm from '../model/taggedBailDaysForm'
 import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
+import adjustmentTypes from "../model/adjustmentTypes";
+import ViewModel from "../model/viewModel";
+import TaggedBailViewModel from "../model/taggedBailViewModel";
 
 export default class TaggedBailRoutes {
   constructor(
@@ -77,6 +80,31 @@ export default class TaggedBailRoutes {
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
     return res.redirect(`/${nomsId}/tagged-bail/review/${addOrEdit}/${id}`)
+  }
+
+  public view: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token, roles } = res.locals.user
+    const { nomsId, adjustmentTypeUrl } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const taggedBailAdjustments = adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
+    if (!taggedBailAdjustments) {
+      return res.redirect(`/${nomsId}`)
+    }
+
+    const adjustmentType = adjustmentTypes.find(it => it.url === 'tagged-bail')
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
+
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      prisonerDetail.bookingId,
+      token,
+    )
+
+    return res.render('pages/adjustments/tagged-bail/view', {
+      model: new TaggedBailViewModel(prisonerDetail, taggedBailAdjustments, adjustmentType, sentencesAndOffences),
+    })
   }
 
   public review: RequestHandler = async (req, res): Promise<void> => {
