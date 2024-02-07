@@ -19,6 +19,8 @@ generic-service:
     IDENTIFY_REMAND_PERIODS_API_URL: "https://identify-remand-periods-api-preprod.hmpps.service.justice.gov.uk"
     ADJUDICATIONS_API_URL: "https://manage-adjudications-api-preprod.hmpps.service.justice.gov.uk"
     CALCULATE_RELEASE_DATES_API_URL: "https://calculate-release-dates-api-preprod.hmpps.service.justice.gov.uk"
+    MANAGE_USERS_API_URL: "https://manage-users-api-preprod.hmpps.service.justice.gov.uk"
+    ENVIRONMENT_NAME: PRE-PRODUCTION
 
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
