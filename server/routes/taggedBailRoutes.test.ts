@@ -177,7 +177,7 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('POST /{nomsId}/tagged-bail/review/add', () => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = populatedAdjustment
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
@@ -194,7 +194,7 @@ describe('Tagged bail routes tests', () => {
   `(
     'GET /{nomsId}/tagged-bail/select-case/:addOrEdit back link and select href tests',
     async ({ addOrEdit, complete, backLink, selectHref }) => {
-      const adjustments = {}
+      const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getById.mockReturnValue({ ...populatedAdjustment, complete })
@@ -215,7 +215,7 @@ describe('Tagged bail routes tests', () => {
     ${'add'}  | ${true}  | ${`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}" class="govuk-back-link"`}
     ${'add'}  | ${false} | ${`/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}" class="govuk-back-link"`}
   `('GET /{nomsId}/tagged-bail/days/:addOrEdit back link tests', async ({ addOrEdit, complete, backLink }) => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue({ ...populatedAdjustment, complete })
@@ -230,7 +230,7 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('GET /{nomsId}/tagged-bail/review/select-case/add/:id shows selected if a record has already been chosen', () => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue({ ...populatedAdjustment, complete: true })
@@ -266,7 +266,7 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
     ${'add'}
     ${'edit'}
   `('POST /{nomsId}/tagged-bail/dates/add empty form validation', async ({ addOrEdit }) => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
@@ -287,7 +287,7 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
     ${'edit'} | ${`-1`}
     ${'edit'} | ${`1.5`}
   `('POST /{nomsId}/tagged-bail/dates/:addOrEdit invalid number entered for days', async ({ addOrEdit, days }) => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)

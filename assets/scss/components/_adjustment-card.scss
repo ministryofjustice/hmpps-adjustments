@@ -10,7 +10,11 @@
     margin: 1%;
     border: 1px solid #b1b4b6;
     &.wider {
-      flex-basis: 68%;
+      flex-basis: 68%
+    }
+    &.full {
+      flex-basis: 100%;
+      margin: 0;
     }
 
     &_heading{

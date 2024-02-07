@@ -6,6 +6,7 @@ import {
   PrisonApiOffence,
   PrisonApiOffenderSentenceAndOffences,
   PrisonApiPrisoner,
+  PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
 import FullPageError from '../model/FullPageError'
 
@@ -76,6 +77,10 @@ export default class PrisonerService {
     return new PrisonApiClient(token).getCourtDateResults(nomsId)
   }
 
+  async getUsersCaseloads(token: string): Promise<PrisonApiUserCaseloads[]> {
+    return new PrisonApiClient(token).getUsersCaseloads()
+  }
+
   async getBookingAndSentenceAdjustments(
     bookingId: number,
     token: string,
@@ -86,7 +91,7 @@ export default class PrisonerService {
   async getStartOfSentenceEnvelopeExcludingRecalls(bookingId: number, token: string): Promise<Date> {
     return this.findStartOfSentenceEvelope(
       (await this.getSentencesAndOffences(bookingId, token)).filter(
-        it => !this.recallTypes.includes(it.sentenceCalculationType),
+        it => !PrisonerService.recallTypes.includes(it.sentenceCalculationType),
       ),
     )
   }
@@ -118,7 +123,7 @@ export default class PrisonerService {
     return sentence.sentenceCalculationType === 'A/FINE' && offence.offenceStatute === 'ZZ01'
   }
 
-  private recallTypes = [
+  public static recallTypes = [
     'LR',
     'LR_ORA',
     'LR_YOI_ORA',
