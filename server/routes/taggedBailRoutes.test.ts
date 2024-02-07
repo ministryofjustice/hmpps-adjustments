@@ -156,6 +156,8 @@ describe('Tagged bail routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Tagged bail overview')
+        expect(res.text).toContain('Court 1')
+        expect(res.text).toContain('CASE001')
       })
   })
 
