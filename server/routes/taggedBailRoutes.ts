@@ -7,9 +7,8 @@ import TaggedBailDaysModel from '../model/taggedBailDaysModel'
 import TaggedBailDaysForm from '../model/taggedBailDaysForm'
 import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
-import adjustmentTypes from "../model/adjustmentTypes";
-import ViewModel from "../model/viewModel";
-import TaggedBailViewModel from "../model/taggedBailViewModel";
+import adjustmentTypes from '../model/adjustmentTypes'
+import TaggedBailViewModel from '../model/taggedBailViewModel'
 
 export default class TaggedBailRoutes {
   constructor(
