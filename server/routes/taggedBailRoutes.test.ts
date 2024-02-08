@@ -148,7 +148,7 @@ describe('Tagged bail routes tests', () => {
 
   it('GET /{nomsId}/tagged-bail/view shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
     return request(app)
@@ -156,7 +156,7 @@ describe('Tagged bail routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Tagged bail overview')
-        expect(res.text).toContain('Court 1')
+        expect(res.text).toContain('Court 2')
         expect(res.text).toContain('CASE001')
       })
   })

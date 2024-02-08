@@ -87,7 +87,7 @@ export default class TaggedBailRoutes {
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
     const taggedBailAdjustments = adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
-    if (!taggedBailAdjustments) {
+    if (!taggedBailAdjustments.length) {
       return res.redirect(`/${nomsId}`)
     }
 
@@ -96,10 +96,7 @@ export default class TaggedBailRoutes {
       return res.redirect(`/${nomsId}`)
     }
 
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
 
     return res.render('pages/adjustments/tagged-bail/view', {
       model: new TaggedBailViewModel(prisonerDetail, taggedBailAdjustments, adjustmentType, sentencesAndOffences),

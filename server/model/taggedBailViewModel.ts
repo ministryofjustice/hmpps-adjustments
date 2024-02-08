@@ -1,14 +1,19 @@
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
+import { getActiveSentencesByCaseSequence, SentencesByCaseSequence } from '../utils/utils'
 
 export default class TaggedBailViewModel {
+  private sentencesByCaseSequence: SentencesByCaseSequence[]
+
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-  ) {}
+  ) {
+    this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
+  }
 
   public backlink(): string {
     return `/${this.prisonerDetail.offenderNo}`
@@ -43,18 +48,22 @@ export default class TaggedBailViewModel {
   }
 
   private getCourtName(caseSequence: number): string {
-    const sentenceAndOffence = this.sentencesAndOffences.find(it => it.caseSequence === caseSequence)
-    if (sentenceAndOffence) {
-      return sentenceAndOffence.courtDescription
+    const sentencesForCaseSequence = this.sentencesByCaseSequence.find(it => it.caseSequence === caseSequence)
+    if (sentencesForCaseSequence) {
+      return sentencesForCaseSequence.sentences.sort(
+        (a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime(),
+      )[0].courtDescription
     }
 
     return null
   }
 
   private getCaseReference(caseSequence: number): string {
-    const sentenceAndOffence = this.sentencesAndOffences.find(it => it.caseSequence === caseSequence)
-    if (sentenceAndOffence) {
-      return sentenceAndOffence.caseReference
+    const sentencesForCaseSequence = this.sentencesByCaseSequence.find(it => it.caseSequence === caseSequence)
+    if (sentencesForCaseSequence) {
+      return sentencesForCaseSequence.sentences.sort(
+        (a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime(),
+      )[0].caseReference
     }
 
     return null
