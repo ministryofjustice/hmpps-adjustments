@@ -146,9 +146,25 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/tagged-bail/view shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Tagged bail overview')
+        expect(res.text).toContain('Court 2')
+        expect(res.text).toContain('CASE001')
+      })
+  })
+
   it('GET /{nomsId}/tagged-bail/review/add shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`)

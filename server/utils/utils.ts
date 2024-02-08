@@ -123,6 +123,35 @@ export function offencesForAdjustment(
   })
 }
 
+/**
+ * Type used to organise sentences and offences by caseSequence.
+ */
+export type SentencesByCaseSequence = {
+  caseSequence: number
+  sentences: PrisonApiOffenderSentenceAndOffences[]
+}
+
+/**
+ * Takes a list of sentences and offences and converts them to a collection of active sentences for each case sequence.
+ * @param sentencesAndOffences sentences and offences to be converted.
+ * @returns a collection of active sentences for each case sequence.
+ */
+export function getActiveSentencesByCaseSequence(
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): SentencesByCaseSequence[] {
+  return sentencesAndOffences
+    .filter(it => it.sentenceStatus === 'A')
+    .reduce((acc: SentencesByCaseSequence[], cur) => {
+      if (acc.some(it => it.caseSequence === cur.caseSequence)) {
+        const record = acc.find(it => it.caseSequence === cur.caseSequence)
+        record.sentences.push(cur)
+      } else {
+        acc.push({ caseSequence: cur.caseSequence, sentences: [cur] } as SentencesByCaseSequence)
+      }
+      return acc
+    }, [])
+}
+
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {
   const remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
 
