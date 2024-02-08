@@ -215,7 +215,7 @@ export interface components {
        */
       prisonId?: string
       /**
-       * @description The name of the prison where the prisoner was located at the time the adjustment was created
+       * @description The name name of the prison where the prisoner was located at the time the adjustment was created
        * @example Leeds
        */
       prisonName?: string
