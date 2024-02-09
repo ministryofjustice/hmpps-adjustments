@@ -1,13 +1,14 @@
 import config, { ApiConfig } from '../config'
 import RestClient from '../data/restClient'
 import type {
+  PrisonApiAdjudicationSearchResponse,
   PrisonApiBookingAndSentenceAdjustments,
   PrisonApiCourtDateResult,
+  PrisonApiIndividualAdjudication,
   PrisonApiOffenderSentenceAndOffences,
   PrisonApiPrisoner,
   PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
-import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
 
 export default class PrisonApiClient {
   restClient: RestClient
@@ -42,15 +43,16 @@ export default class PrisonApiClient {
     })) as Promise<unknown> as Promise<PrisonApiOffenderSentenceAndOffences[]>
   }
 
-  async getAdjudications(nomsId: string): Promise<AdjudicationSearchResponse> {
+  async getAdjudications(nomsId: string): Promise<PrisonApiAdjudicationSearchResponse> {
     return this.restClient.get({
-      path: `/api/offenders/${nomsId}/adjudications?size=1000`,
-    }) as Promise<AdjudicationSearchResponse>
+      headers: { 'Page-Limit': '1000' },
+      path: `/api/offenders/${nomsId}/adjudications`,
+    }) as Promise<PrisonApiAdjudicationSearchResponse>
   }
 
-  async getAdjudication(nomsId: string, adjudationNumber: number): Promise<IndividualAdjudication> {
+  async getAdjudication(nomsId: string, adjudationNumber: number): Promise<PrisonApiIndividualAdjudication> {
     return this.restClient.get({
       path: `/api/offenders/${nomsId}/adjudications/${adjudationNumber}`,
-    }) as Promise<IndividualAdjudication>
+    }) as Promise<PrisonApiIndividualAdjudication>
   }
 }

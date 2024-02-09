@@ -1,7 +1,5 @@
 import { Request } from 'express'
 import dayjs from 'dayjs'
-import AdjudicationClient from '../api/adjudicationsClient'
-import { AdjudicationSearchResponse, IndividualAdjudication, Sanction } from '../@types/adjudications/adjudicationTypes'
 import { HmppsAuthClient } from '../data'
 import {
   Ada,
@@ -13,7 +11,12 @@ import {
   PadasToReview,
 } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import {
+  PrisonApiAdjudicationSearchResponse,
+  PrisonApiIndividualAdjudication,
+  PrisonApiPrisoner,
+  PrisonApiSanction,
+} from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import PadaForm from '../model/padaForm'
@@ -32,19 +35,20 @@ import PrisonApiClient from '../api/prisonApiClient'
  * 'SUSPEN_RED' = 'Period of Suspension Shortened
  * 'SUSP_PROSP' = 'Suspended and Prospective'
  */
-const sanctionIsProspective = (s: Sanction) => s.status === 'Prospective' || s.status === 'Suspended and Prospective'
+const sanctionIsProspective = (s: PrisonApiSanction) =>
+  s.status === 'Prospective' || s.status === 'Suspended and Prospective'
 
-const sanctionIsAda = (s: Sanction) => s.sanctionType === 'Additional Days Added'
-const isSanctionedAda = (s: Sanction, hearingDate: Date, startOfSentenceEnvelope: Date) =>
+const sanctionIsAda = (s: PrisonApiSanction) => s.sanctionType === 'Additional Days Added'
+const isSanctionedAda = (s: PrisonApiSanction, hearingDate: Date, startOfSentenceEnvelope: Date) =>
   sanctionIsAda(s) &&
   !sanctionIsProspective(s) &&
   s.sanctionDays > 0 &&
   hearingDate.getTime() >= startOfSentenceEnvelope.getTime()
-const isProspectiveAda = (s: Sanction) => sanctionIsAda(s) && sanctionIsProspective(s)
+const isProspectiveAda = (s: PrisonApiSanction) => sanctionIsAda(s) && sanctionIsProspective(s)
 
 const adaHasSequence = (sequence: number, ada: Ada) => sequence === ada.sequence
 
-function isSuspended(sanction: Sanction) {
+function isSuspended(sanction: PrisonApiSanction) {
   return (
     sanction.status === 'Suspended' ||
     sanction.status === 'Suspended and Prospective' ||
@@ -53,7 +57,7 @@ function isSuspended(sanction: Sanction) {
   )
 }
 
-function deriveChargeStatus(chargeId: number, sanction: Sanction): ChargeStatus {
+function deriveChargeStatus(chargeId: number, sanction: PrisonApiSanction): ChargeStatus {
   if (isSuspended(sanction)) return 'SUSPENDED'
   if (sanction.status === 'Quashed') return 'QUASHED'
   if (isProspectiveAda(sanction)) return 'PROSPECTIVE'
@@ -71,14 +75,7 @@ export default class AdditionalDaysAwardedService {
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
     const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
-    const adjudicationClient = new PrisonApiClient(token)
-    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
-    const individualAdjudications = await Promise.all(
-      adjudications.results.content.map(async it => {
-        return adjudicationClient.getAdjudication(nomsId, it.adjudicationNumber)
-      }),
-    )
-    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+    const adas: Ada[] = await this.lookupAdas(token, nomsId, startOfSentenceEnvelope)
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
     let { awarded } = this.filterAdasByMatchingAdjustment(awardedOrPending, existingAdasWithChargeIds)
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
@@ -102,14 +99,7 @@ export default class AdditionalDaysAwardedService {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const adjudicationClient = new PrisonApiClient(token)
-    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
-    const individualAdjudications = await Promise.all(
-      adjudications.results.content.map(async it => {
-        return adjudicationClient.getAdjudication(nomsId, it.adjudicationNumber)
-      }),
-    )
-    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+    const adas: Ada[] = await this.lookupAdas(token, nomsId, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
     let { awarded, awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
@@ -154,14 +144,7 @@ export default class AdditionalDaysAwardedService {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const adjudicationClient = new PrisonApiClient(token)
-    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
-    const individualAdjudications = await Promise.all(
-      adjudications.results.content.map(async it => {
-        return adjudicationClient.getAdjudication(nomsId, it.adjudicationNumber)
-      }),
-    )
-    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+    const adas: Ada[] = await this.lookupAdas(token, nomsId, startOfSentenceEnvelope)
 
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
     const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(allProspective, allAdaAdjustments)
@@ -348,7 +331,10 @@ export default class AdditionalDaysAwardedService {
     )
   }
 
-  private getAdas(individualAdjudications: Awaited<IndividualAdjudication>[], startOfSentenceEnvelope: Date): Ada[] {
+  private getAdas(
+    individualAdjudications: Awaited<PrisonApiIndividualAdjudication>[],
+    startOfSentenceEnvelope: Date,
+  ): Ada[] {
     const adasToTransform = individualAdjudications.filter(ad =>
       ad.hearings.some(h => {
         const hearingDate = new Date(h.hearingTime.substring(0, 10))
@@ -411,17 +397,7 @@ export default class AdditionalDaysAwardedService {
     }
     const allAdaAdjustments = adjustments.filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
 
-    const adjudicationClient = new PrisonApiClient(token)
-    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(
-      prisonerDetail.offenderNo,
-    )
-    console.log(JSON.stringify(adjudications))
-    const individualAdjudications = await Promise.all(
-      adjudications.results.content.map(async it => {
-        return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
-      }),
-    )
-    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+    const adas: Ada[] = await this.lookupAdas(token, prisonerDetail.offenderNo, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
     const { awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
@@ -498,16 +474,7 @@ export default class AdditionalDaysAwardedService {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const adjudicationClient = new PrisonApiClient(token)
-    const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(
-      prisonerDetail.offenderNo,
-    )
-    const individualAdjudications = await Promise.all(
-      adjudications.results.content.map(async it => {
-        return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
-      }),
-    )
-    const adas: Ada[] = this.getAdas(individualAdjudications, startOfSentenceEnvelope)
+    const adas: Ada[] = await this.lookupAdas(token, prisonerDetail.offenderNo, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
 
@@ -602,5 +569,16 @@ export default class AdditionalDaysAwardedService {
 
     this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.offenderNo)
     this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.offenderNo)
+  }
+
+  private async lookupAdas(token: string, nomsId: string, startOfSentenceEnvelope: Date) {
+    const adjudicationClient = new PrisonApiClient(token)
+    const adjudications: PrisonApiAdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
+    const individualAdjudications = await Promise.all(
+      adjudications.results.map(async it => {
+        return adjudicationClient.getAdjudication(nomsId, it.adjudicationNumber)
+      }),
+    )
+    return this.getAdas(individualAdjudications, startOfSentenceEnvelope)
   }
 }
