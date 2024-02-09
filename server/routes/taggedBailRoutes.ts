@@ -9,6 +9,8 @@ import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
 import adjustmentTypes from '../model/adjustmentTypes'
 import TaggedBailViewModel from '../model/taggedBailViewModel'
+import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
+import { getActiveSentencesByCaseSequence, getMostRecentSentenceAndOffence } from '../utils/utils'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -100,6 +102,32 @@ export default class TaggedBailRoutes {
 
     return res.render('pages/adjustments/tagged-bail/view', {
       model: new TaggedBailViewModel(prisonerDetail, taggedBailAdjustments, adjustmentType, sentencesAndOffences),
+    })
+  }
+
+  public remove: RequestHandler = async (req, res): Promise<void> => {
+    const { caseloads, token } = res.locals.user
+    const { nomsId, id } = req.params
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const adjustment = await this.adjustmentsService.get(id, token)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
+
+    const adjustmentType = adjustmentTypes.find(it => it.url === 'tagged-bail')
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
+
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
+    const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
+    const sentencesForCaseSequence = sentencesByCaseSequence.find(
+      it => it.caseSequence === adjustment.taggedBail.caseSequence,
+    )
+    const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
+
+    return res.render('pages/adjustments/tagged-bail/remove', {
+      model: new TaggedBailRemoveModel(prisonerDetail, adjustment, adjustmentType, sentenceAndOffence),
     })
   }
 

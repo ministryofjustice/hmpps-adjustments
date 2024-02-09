@@ -152,6 +152,17 @@ export function getActiveSentencesByCaseSequence(
     }, [])
 }
 
+/**
+ * Takes a list of sentences and offences and returns the most recent one based on sentence date.
+ * @param sentencesAndOffences sentences and offences to filter.
+ * @returns The most recent sentence and offence.
+ */
+export function getMostRecentSentenceAndOffence(
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): PrisonApiOffenderSentenceAndOffences {
+  return sentencesAndOffences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0]
+}
+
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {
   const remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
 
