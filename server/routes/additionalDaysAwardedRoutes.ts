@@ -13,7 +13,7 @@ export default class AdditionalDaysAwardedRoutes {
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
@@ -27,7 +27,7 @@ export default class AdditionalDaysAwardedRoutes {
       prisonerDetail,
       adjustments,
       startOfSentenceEnvelope,
-      username,
+      token,
     )
 
     if (intercept.type === 'NONE') {
@@ -43,7 +43,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
@@ -54,19 +54,12 @@ export default class AdditionalDaysAwardedRoutes {
       req,
       nomsId,
       startOfSentenceEnvelope,
-      username,
       token,
     )
 
     if (adasToReview.intercept.type === 'PADA' && !adasToReview.awaitingApproval.length) {
       // Intercepted for PADAs, none have been selected.
-      await this.additionalDaysAwardedService.submitAdjustments(
-        req,
-        prisonerDetail,
-        startOfSentenceEnvelope,
-        username,
-        token,
-      )
+      await this.additionalDaysAwardedService.submitAdjustments(req, prisonerDetail, startOfSentenceEnvelope, token)
       return res.redirect(`/${nomsId}`)
     }
 
@@ -94,7 +87,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
@@ -104,7 +97,6 @@ export default class AdditionalDaysAwardedRoutes {
     const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
       nomsId,
       startOfSentenceEnvelope,
-      username,
       token,
     )
 
@@ -117,7 +109,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
 
     const padaForm = new PadaForm(req.body)
@@ -133,7 +125,6 @@ export default class AdditionalDaysAwardedRoutes {
       const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
         nomsId,
         startOfSentenceEnvelope,
-        username,
         token,
       )
       return res.render('pages/adjustments/additional-days/review-prospective', {
@@ -157,7 +148,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const { referrer } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
@@ -171,7 +162,6 @@ export default class AdditionalDaysAwardedRoutes {
         req,
         prisonerDetail,
         startOfSentenceEnvelope,
-        username,
         token,
       ),
       referrer,
@@ -179,20 +169,14 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
-    await this.additionalDaysAwardedService.submitAdjustments(
-      req,
-      prisonerDetail,
-      startOfSentenceEnvelope,
-      username,
-      token,
-    )
+    await this.additionalDaysAwardedService.submitAdjustments(req, prisonerDetail, startOfSentenceEnvelope, token)
 
     const message = {
       action: 'ADDITIONAL_DAYS_UPDATED',
@@ -218,19 +202,14 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
       prisonerDetail.bookingId,
       token,
     )
-    const adas = await this.additionalDaysAwardedService.viewAdjustments(
-      nomsId,
-      startOfSentenceEnvelope,
-      username,
-      token,
-    )
+    const adas = await this.additionalDaysAwardedService.viewAdjustments(nomsId, startOfSentenceEnvelope, token)
 
     return res.render('pages/adjustments/additional-days/view', {
       model: {

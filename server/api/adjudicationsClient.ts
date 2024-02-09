@@ -9,15 +9,15 @@ export default class AdjudicationClient {
     this.restClient = new RestClient('Adjudication API', config.apis.adjudications as ApiConfig, token)
   }
 
-  async getAdjudications(nomsId: string): Promise<AdjudicationSearchResponse> {
-    return (await this.restClient.get({
-      path: `/adjudications/${nomsId}/adjudications?size=1000`,
-    })) as Promise<unknown> as Promise<AdjudicationSearchResponse>
-  }
+  // async getAdjudications(nomsId: string): Promise<AdjudicationSearchResponse> {
+  //   return (await this.restClient.get({
+  //     path: `/adjudications/${nomsId}/adjudications?size=1000`,
+  //   })) as Promise<unknown> as Promise<AdjudicationSearchResponse>
+  // }
 
-  async getAdjudication(nomsId: string, chargeId: number): Promise<IndividualAdjudication> {
-    return (await this.restClient.get({
-      path: `/adjudications/${nomsId}/charge/${chargeId}`,
-    })) as Promise<unknown> as Promise<IndividualAdjudication>
-  }
+  // async getAdjudication(nomsId: string, chargeId: number): Promise<IndividualAdjudication> {
+  //   return (await this.restClient.get({
+  //     path: `/adjudications/${nomsId}/charge/${chargeId}`,
+  //   })) as Promise<unknown> as Promise<IndividualAdjudication>
+  // }
 }

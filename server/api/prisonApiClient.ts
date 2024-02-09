@@ -7,6 +7,7 @@ import type {
   PrisonApiPrisoner,
   PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
+import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
 
 export default class PrisonApiClient {
   restClient: RestClient
@@ -39,5 +40,17 @@ export default class PrisonApiClient {
     return (await this.restClient.get({
       path: `/api/offender-sentences/booking/${bookingId}/sentences-and-offences`,
     })) as Promise<unknown> as Promise<PrisonApiOffenderSentenceAndOffences[]>
+  }
+
+  async getAdjudications(nomsId: string): Promise<AdjudicationSearchResponse> {
+    return this.restClient.get({
+      path: `/api/offenders/${nomsId}/adjudications?size=1000`,
+    }) as Promise<AdjudicationSearchResponse>
+  }
+
+  async getAdjudication(nomsId: string, adjudationNumber: number): Promise<IndividualAdjudication> {
+    return this.restClient.get({
+      path: `/api/offenders/${nomsId}/adjudications/${adjudationNumber}`,
+    }) as Promise<IndividualAdjudication>
   }
 }

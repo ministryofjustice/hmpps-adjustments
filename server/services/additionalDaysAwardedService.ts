@@ -18,6 +18,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import PadaForm from '../model/padaForm'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
+import PrisonApiClient from '../api/prisonApiClient'
 
 /* The adjudications status from NOMIS DB mapped to the adjudications API status are listed here temporarily to make it easier to implement the stories which use the NOMIS status
  * 'AS_AWARDED' = 'Activated as Awarded'
@@ -65,18 +66,12 @@ export default class AdditionalDaysAwardedService {
     private readonly additionalDaysAwardedStoreService: AdditionalDaysAwardedStoreService,
   ) {}
 
-  public async viewAdjustments(
-    nomsId: string,
-    startOfSentenceEnvelope: Date,
-    username: string,
-    token: string,
-  ): Promise<AdasToView> {
+  public async viewAdjustments(nomsId: string, startOfSentenceEnvelope: Date, token: string): Promise<AdasToView> {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
     const existingAdasWithChargeIds = allAdaAdjustments.filter(it => it.additionalDaysAwarded)
-    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
-    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudicationClient = new PrisonApiClient(token)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
     const individualAdjudications = await Promise.all(
       adjudications.results.content.map(async it => {
@@ -102,14 +97,12 @@ export default class AdditionalDaysAwardedService {
     req: Request,
     nomsId: string,
     startOfSentenceEnvelope: Date,
-    username: string,
     token: string,
   ): Promise<AdasToReview> {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
-    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudicationClient = new PrisonApiClient(token)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
     const individualAdjudications = await Promise.all(
       adjudications.results.content.map(async it => {
@@ -157,17 +150,11 @@ export default class AdditionalDaysAwardedService {
     } as AdasToReview
   }
 
-  public async getPadasToApprove(
-    nomsId: string,
-    startOfSentenceEnvelope: Date,
-    username: string,
-    token: string,
-  ): Promise<PadasToReview> {
+  public async getPadasToApprove(nomsId: string, startOfSentenceEnvelope: Date, token: string): Promise<PadasToReview> {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(nomsId)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
-    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudicationClient = new PrisonApiClient(token)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(nomsId)
     const individualAdjudications = await Promise.all(
       adjudications.results.content.map(async it => {
@@ -417,18 +404,18 @@ export default class AdditionalDaysAwardedService {
     prisonerDetail: PrisonApiPrisoner,
     adjustments: Adjustment[],
     startOfSentenceEnvelope: Date,
-    username: string,
+    token: string,
   ): Promise<AdaIntercept> {
     if (!startOfSentenceEnvelope) {
       return { type: 'NONE', anyProspective: false, number: 0 }
     }
     const allAdaAdjustments = adjustments.filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
 
-    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
-    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudicationClient = new PrisonApiClient(token)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(
       prisonerDetail.offenderNo,
     )
+    console.log(JSON.stringify(adjudications))
     const individualAdjudications = await Promise.all(
       adjudications.results.content.map(async it => {
         return adjudicationClient.getAdjudication(prisonerDetail.offenderNo, it.adjudicationNumber)
@@ -501,7 +488,6 @@ export default class AdditionalDaysAwardedService {
     req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
-    username: string,
     token: string,
   ): Promise<{
     adjustmentsToCreate: Adjustment[]
@@ -512,8 +498,7 @@ export default class AdditionalDaysAwardedService {
     const allAdaAdjustments = (await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)).filter(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
     )
-    const systemToken = await this.hmppsAuthClient.getSystemClientToken(username)
-    const adjudicationClient = new AdjudicationClient(systemToken)
+    const adjudicationClient = new PrisonApiClient(token)
     const adjudications: AdjudicationSearchResponse = await adjudicationClient.getAdjudications(
       prisonerDetail.offenderNo,
     )
@@ -573,14 +558,12 @@ export default class AdditionalDaysAwardedService {
     req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
-    username: string,
     token: string,
   ): Promise<ReviewAndSubmitAdaViewModel> {
     const { adjustmentsToCreate, allAdaAdjustments, quashed } = await this.getAdasToSubmitAndDelete(
       req,
       prisonerDetail,
       startOfSentenceEnvelope,
-      username,
       token,
     )
 
@@ -594,14 +577,12 @@ export default class AdditionalDaysAwardedService {
     req: Request,
     prisonerDetail: PrisonApiPrisoner,
     startOfSentenceEnvelope: Date,
-    username: string,
     token: string,
   ) {
     const { awarded, adjustmentsToCreate, allAdaAdjustments } = await this.getAdasToSubmitAndDelete(
       req,
       prisonerDetail,
       startOfSentenceEnvelope,
-      username,
       token,
     )
 
