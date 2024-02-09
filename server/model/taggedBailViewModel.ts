@@ -77,7 +77,7 @@ export default class TaggedBailViewModel {
           <a class="govuk-link" href="/${adjustment.person}/tagged-bail/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
         </div>
         <div class="govuk-grid-column-one-quarter">
-          <a class="govuk-link" href="/${adjustment.person}/tagged-bail/delete/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete</a><br />
+          <a class="govuk-link" href="/${adjustment.person}/tagged-bail/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete</a><br />
         </div>
       </div>
     `,
