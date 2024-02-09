@@ -77,12 +77,11 @@ export default {
       },
     })
   },
-
   stubSearchAdjudicationsNoReview: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'GET',
-        urlPattern: '/prison-api/api/offender/A1234AB/adjudications',
+        urlPattern: '/prison-api/api/offenders/A1234AB/adjudications',
       },
       response: {
         status: 200,
@@ -95,7 +94,7 @@ export default {
     return stubFor({
       request: {
         method: 'GET',
-        urlPattern: '/prison-api/api/offender/A1234AB/adjudications',
+        urlPattern: '/prison-api/api/offenders/A1234AB/adjudications',
       },
       response: {
         status: 200,
@@ -108,15 +107,13 @@ export default {
     return stubFor({
       request: {
         method: 'GET',
-        urlPattern: '/prison-api/api/offender/A1234AB/adjudications',
+        urlPattern: '/prison-api/api/offenders/A1234AB/adjudications',
       },
       response: {
         status: 200,
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
         jsonBody: {
-          results: {
-            content: [],
-          },
+          results: [],
         },
       },
     })
@@ -127,7 +124,7 @@ export default {
         return stubFor({
           request: {
             method: 'GET',
-            urlPattern: `/prison-api/api/offender/A1234AB/adjudication/${it.adjudicationNumber}`,
+            urlPattern: `/prison-api/api/offenders/A1234AB/adjudications/${it.adjudicationNumber}`,
           },
           response: {
             status: 200,
@@ -144,7 +141,7 @@ export default {
         return stubFor({
           request: {
             method: 'GET',
-            urlPattern: `/prison-api/api/offender/A1234AB/adjudication/${it.adjudicationNumber}`,
+            urlPattern: `/prison-api/api/offenders/A1234AB/adjudications/${it.adjudicationNumber}`,
           },
           response: {
             status: 200,
