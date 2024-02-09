@@ -54,7 +54,7 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username, roles } = res.locals.user
+    const { caseloads, token, roles } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
@@ -89,7 +89,7 @@ export default class AdjustmentRoutes {
         prisonerDetail,
         adjustments,
         startOfSentenceEnvelope,
-        username,
+        token,
       )
 
       if (intercept.type !== 'NONE') {

@@ -1,8 +1,10 @@
 import config, { ApiConfig } from '../config'
 import RestClient from '../data/restClient'
 import type {
+  PrisonApiAdjudicationSearchResponse,
   PrisonApiBookingAndSentenceAdjustments,
   PrisonApiCourtDateResult,
+  PrisonApiIndividualAdjudication,
   PrisonApiOffenderSentenceAndOffences,
   PrisonApiPrisoner,
   PrisonApiUserCaseloads,
@@ -39,5 +41,18 @@ export default class PrisonApiClient {
     return (await this.restClient.get({
       path: `/api/offender-sentences/booking/${bookingId}/sentences-and-offences`,
     })) as Promise<unknown> as Promise<PrisonApiOffenderSentenceAndOffences[]>
+  }
+
+  async getAdjudications(nomsId: string): Promise<PrisonApiAdjudicationSearchResponse> {
+    return this.restClient.get({
+      headers: { 'Page-Limit': '1000' },
+      path: `/api/offenders/${nomsId}/adjudications`,
+    }) as Promise<PrisonApiAdjudicationSearchResponse>
+  }
+
+  async getAdjudication(nomsId: string, adjudationNumber: number): Promise<PrisonApiIndividualAdjudication> {
+    return this.restClient.get({
+      path: `/api/offenders/${nomsId}/adjudications/${adjudationNumber}`,
+    }) as Promise<PrisonApiIndividualAdjudication>
   }
 }
