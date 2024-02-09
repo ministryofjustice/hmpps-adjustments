@@ -81,6 +81,7 @@ const stubbedSentencesAndOffencesWithSelected = [
 ]
 
 const blankAdjustment = {
+  id: '1',
   person: NOMS_ID,
   bookingId: stubbedPrisonerData.bookingId,
   adjustmentType: 'TAGGED_BAIL',
@@ -158,6 +159,21 @@ describe('Tagged bail routes tests', () => {
         expect(res.text).toContain('Tagged bail overview')
         expect(res.text).toContain('Court 2')
         expect(res.text).toContain('CASE001')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
       })
   })
 
