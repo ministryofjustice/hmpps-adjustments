@@ -4,7 +4,7 @@ import { AdjustmentType } from './adjustmentTypes'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
-  SentencesByCaseSequence
+  SentencesByCaseSequence,
 } from '../utils/utils'
 
 export default class TaggedBailViewModel {

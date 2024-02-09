@@ -10,7 +10,7 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import adjustmentTypes from '../model/adjustmentTypes'
 import TaggedBailViewModel from '../model/taggedBailViewModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
-import {getActiveSentencesByCaseSequence, getMostRecentSentenceAndOffence} from '../utils/utils'
+import { getActiveSentencesByCaseSequence, getMostRecentSentenceAndOffence } from '../utils/utils'
 
 export default class TaggedBailRoutes {
   constructor(
