@@ -1,6 +1,6 @@
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { dateToString } from '../utils/utils'
+import { dateToString, getMostRecentSentenceAndOffence } from '../utils/utils'
 
 export default class TaggedBailReviewModel {
   constructor(
@@ -16,9 +16,11 @@ export default class TaggedBailReviewModel {
   }
 
   public getCaseDetails() {
-    const selectedCase = this.sentencesAndOffences
-      .filter(it => it.sentenceStatus === 'A' && it.caseSequence === this.adjustment.taggedBail.caseSequence)
-      .sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0]
+    const selectedCase = getMostRecentSentenceAndOffence(
+      this.sentencesAndOffences.filter(
+        it => it.sentenceStatus === 'A' && it.caseSequence === this.adjustment.taggedBail.caseSequence,
+      ),
+    )
 
     return `${selectedCase.courtDescription}<br>${selectedCase.caseReference || ''} ${dateToString(
       new Date(selectedCase.sentenceDate),

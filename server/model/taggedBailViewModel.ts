@@ -1,7 +1,11 @@
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
-import { getActiveSentencesByCaseSequence, SentencesByCaseSequence } from '../utils/utils'
+import {
+  getActiveSentencesByCaseSequence,
+  getMostRecentSentenceAndOffence,
+  SentencesByCaseSequence
+} from '../utils/utils'
 
 export default class TaggedBailViewModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]
@@ -50,9 +54,7 @@ export default class TaggedBailViewModel {
   private getCourtName(caseSequence: number): string {
     const sentencesForCaseSequence = this.sentencesByCaseSequence.find(it => it.caseSequence === caseSequence)
     if (sentencesForCaseSequence) {
-      return sentencesForCaseSequence.sentences.sort(
-        (a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime(),
-      )[0].courtDescription
+      return getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences).courtDescription
     }
 
     return null
@@ -61,9 +63,7 @@ export default class TaggedBailViewModel {
   private getCaseReference(caseSequence: number): string {
     const sentencesForCaseSequence = this.sentencesByCaseSequence.find(it => it.caseSequence === caseSequence)
     if (sentencesForCaseSequence) {
-      return sentencesForCaseSequence.sentences.sort(
-        (a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime(),
-      )[0].caseReference
+      return getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences).caseReference
     }
 
     return null

@@ -8,7 +8,7 @@ export default class TaggedBailRemoveModel {
     public prisonerDetail: PrisonApiPrisoner,
     public adjustment: Adjustment,
     public adjustmentType: AdjustmentType,
-    public sentenceAndOffense: PrisonApiOffenderSentenceAndOffences,
+    public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
   ) {}
 
   public backlink(): string {
@@ -34,8 +34,8 @@ export default class TaggedBailRemoveModel {
   }
 
   private getCourtName(): string {
-    if (this.sentenceAndOffense) {
-      return this.sentenceAndOffense.courtDescription
+    if (this.sentenceAndOffence) {
+      return this.sentenceAndOffence.courtDescription
     }
 
     return null
@@ -50,16 +50,16 @@ export default class TaggedBailRemoveModel {
   }
 
   private getSentenceDate(): string {
-    if (this.sentenceAndOffense) {
-      return dateToString(new Date(this.sentenceAndOffense.sentenceDate))
+    if (this.sentenceAndOffence) {
+      return dateToString(new Date(this.sentenceAndOffence.sentenceDate))
     }
 
     return null
   }
 
   private getCaseReference(): string {
-    if (this.sentenceAndOffense) {
-      return this.sentenceAndOffense.caseReference
+    if (this.sentenceAndOffence) {
+      return this.sentenceAndOffence.caseReference
     }
 
     return null

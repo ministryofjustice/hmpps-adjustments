@@ -10,7 +10,7 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import adjustmentTypes from '../model/adjustmentTypes'
 import TaggedBailViewModel from '../model/taggedBailViewModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
-import { getActiveSentencesByCaseSequence } from '../utils/utils'
+import {getActiveSentencesByCaseSequence, getMostRecentSentenceAndOffence} from '../utils/utils'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -124,9 +124,7 @@ export default class TaggedBailRoutes {
     const sentencesForCaseSequence = sentencesByCaseSequence.find(
       it => it.caseSequence === adjustment.taggedBail.caseSequence,
     )
-    const sentenceAndOffence = sentencesForCaseSequence.sentences.sort(
-      (a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime(),
-    )[0]
+    const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
 
     return res.render('pages/adjustments/tagged-bail/remove', {
       model: new TaggedBailRemoveModel(prisonerDetail, adjustment, adjustmentType, sentenceAndOffence),
