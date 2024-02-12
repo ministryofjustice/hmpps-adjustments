@@ -37,6 +37,7 @@ export default function routes(service: Services): Router {
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
+    service.calculateReleaseDatesService,
   )
 
   get('/', (req, res, next) => {

@@ -13,7 +13,10 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import {
+  CalculateReleaseDatesValidationMessage,
+  UnusedDeductionCalculationResponse,
+} from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -106,6 +109,11 @@ const remandOverlapWithSentenceMessage = {
   code: 'REMAND_OVERLAPS_WITH_SENTENCE',
   arguments: ['2021-01-01', '2021-02-01', '2021-01-02', '2021-02-02'],
 } as CalculateReleaseDatesValidationMessage
+
+const mockedUnusedDeductionCalculationResponse = {
+  unusedDeductions: 29,
+  validationMessages: [remandOverlapWithSentenceMessage],
+} as UnusedDeductionCalculationResponse
 
 let app: Express
 
@@ -524,6 +532,9 @@ describe('Remand routes tests', () => {
       unusedDeductions: 50,
       validationMessages: [remandOverlapWithSentenceMessage],
     })
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue(
+      mockedUnusedDeductionCalculationResponse,
+    )
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
       .get(`/${NOMS_ID}/remand/review`)
@@ -593,10 +604,9 @@ describe('Remand routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
-    calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
-      unusedDeductions: 50,
-      validationMessages: [],
-    })
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue(
+      mockedUnusedDeductionCalculationResponse,
+    )
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
       .get(`/${NOMS_ID}/remand/save`)
@@ -618,6 +628,7 @@ describe('Remand routes tests', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue({ error: 'an error' })
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue(null)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
       .get(`/${NOMS_ID}/remand/save`)
@@ -750,7 +761,11 @@ describe('Remand routes tests', () => {
       unusedDeductions: 50,
       validationMessages: [remandOverlapWithSentenceMessage],
     })
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue(
+      mockedUnusedDeductionCalculationResponse,
+    )
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect('Content-Type', /html/)

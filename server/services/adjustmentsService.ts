@@ -39,4 +39,14 @@ export default class AdjustmentsService {
   public async restore(restore: RestoreAdjustments, token: string): Promise<void> {
     return new AdjustmentsClient(token).restore(restore)
   }
+
+  public async getAdjustmentsExceptOneBeingEdited(
+    sessionAdjustment: { string?: Adjustment },
+    nomsId: string,
+    token: string,
+  ) {
+    // When editing there is only one session adjustment
+    const id = Object.keys(sessionAdjustment)[0]
+    return (await this.findByPerson(nomsId, token)).filter(it => it.id !== id)
+  }
 }

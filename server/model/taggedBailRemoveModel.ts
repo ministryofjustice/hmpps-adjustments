@@ -9,6 +9,7 @@ export default class TaggedBailRemoveModel {
     public adjustment: Adjustment,
     public adjustmentType: AdjustmentType,
     public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
+    public showUnusedMessage: boolean,
   ) {}
 
   public backlink(): string {
