@@ -177,6 +177,29 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/tagged-bail/remove shows unused deductions message', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([blankAdjustment])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain(
+          'The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS',
+        )
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
   it('GET /{nomsId}/tagged-bail/review/add shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
