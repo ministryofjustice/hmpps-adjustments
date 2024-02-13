@@ -62,16 +62,21 @@ describe('Prisoner service related tests', () => {
       })
 
       it('Test getting start of sentence envelope', async () => {
-        fakeApi
-          .get(`/api/offender-sentences/booking/9991/sentences-and-offences`)
-          .reply(200, [
-            { sentenceDate: '2023-03-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
-            { sentenceDate: '2023-01-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
-            { sentenceDate: '2023-02-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
-          ])
+        fakeApi.get(`/api/offender-sentences/booking/9991/sentences-and-offences`).reply(200, [
+          { sentenceDate: '2023-04-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
+          { sentenceDate: '2023-02-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
+          { sentenceDate: '2023-03-01', sentenceStatus: 'A' } as PrisonApiOffenderSentenceAndOffences,
+          {
+            sentenceDate: '2023-01-01',
+            sentenceStatus: 'A',
+            sentenceCalculationType: 'LR',
+          } as PrisonApiOffenderSentenceAndOffences,
+        ])
 
-        const minDate = await prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(9991, token)
-        expect(minDate.getTime()).toEqual(new Date('2023-01-01').getTime())
+        const result = await prisonerService.getStartOfSentenceEnvelope(9991, token)
+
+        expect(result.earliestExcludingRecalls.toISOString().substring(0, 10)).toBe('2023-02-01')
+        expect(result.earliestSentence.toISOString().substring(0, 10)).toBe('2023-01-01')
       })
     })
   })

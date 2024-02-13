@@ -57,7 +57,7 @@ export default class AdjustmentRoutes {
     const { caseloads, token, roles } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
@@ -74,7 +74,11 @@ export default class AdjustmentRoutes {
       )
     }
 
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const adjustments = await this.adjustmentsService.findByPerson(
+      nomsId,
+      startOfSentenceEnvelope.earliestSentence,
+      token,
+    )
 
     if (!messageExists) {
       serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.serviceHasCalculatedUnusedDeductions(
@@ -88,7 +92,7 @@ export default class AdjustmentRoutes {
         req,
         prisonerDetail,
         adjustments,
-        startOfSentenceEnvelope,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       )
 
@@ -135,15 +139,22 @@ export default class AdjustmentRoutes {
     if (!adjustmentType) {
       return res.redirect(`/${nomsId}`)
     }
+    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     if (adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
-      const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+        prisonerDetail.bookingId,
+        token,
+      )
+      const adjustments = await this.adjustmentsService.findByPerson(
+        nomsId,
+        startOfSentenceEnvelope.earliestSentence,
+        token,
+      )
       if (!adjustments.some(a => a.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')) {
         req.flash('message', JSON.stringify(hubValidationMessages.RADA_NO_ADAS_EXIST))
         return res.redirect(`/${nomsId}`)
       }
     }
-
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
 
     let adjustment = null
     if (addOrEdit === 'edit') {
@@ -293,7 +304,15 @@ export default class AdjustmentRoutes {
       return res.redirect(`/${nomsId}`)
     }
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
+      prisonerDetail.bookingId,
+      token,
+    )
+    const adjustments = await this.adjustmentsService.findByPerson(
+      nomsId,
+      startOfSentenceEnvelope.earliestSentence,
+      token,
+    )
     const remandDecision =
       adjustmentType.value === 'REMAND' && roles.includes('REMAND_IDENTIFIER')
         ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)

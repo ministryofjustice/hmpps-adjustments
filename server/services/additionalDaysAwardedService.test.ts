@@ -9,13 +9,16 @@ import { AdaIntercept, AdasToReview, AdasToView, PadasToReview } from '../@types
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
+import AdjustmentsService from './adjustmentsService'
 
 jest.mock('../data/hmppsAuthClient')
 jest.mock('./additionalDaysApprovalStoreService')
+jest.mock('./adjustmentsService')
 
 const hmppsAuthClient = new HmppsAuthClient({} as TokenStore) as jest.Mocked<HmppsAuthClient>
 const storeService = new AdditionalDaysAwardedStoreService() as jest.Mocked<AdditionalDaysAwardedStoreService>
-const adaService = new AdditionalDaysAwardedService(hmppsAuthClient, storeService)
+const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
+const adaService = new AdditionalDaysAwardedService(storeService, adjustmentsService)
 
 const token = 'token'
 
@@ -123,13 +126,10 @@ const adjustmentResponsesWithChargeNumber = [
 
 describe('Additional Days Added Service', () => {
   let prisonApi: nock.Scope
-  let adjustmentApi: nock.Scope
 
   beforeEach(() => {
     config.apis.prisonApi.url = 'http://localhost:8100'
     prisonApi = nock(config.apis.prisonApi.url)
-    config.apis.adjustments.url = 'http://localhost:8101'
-    adjustmentApi = nock(config.apis.adjustments.url)
   })
 
   afterEach(() => {
@@ -142,7 +142,7 @@ describe('Additional Days Added Service', () => {
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwo)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeWithTwoSanctions)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -225,7 +225,7 @@ describe('Additional Days Added Service', () => {
       const nomsId = 'AA1234A'
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -275,7 +275,7 @@ describe('Additional Days Added Service', () => {
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, twoAdjudicationsSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -336,7 +336,7 @@ describe('Additional Days Added Service', () => {
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [
+      adjustmentsService.findByPerson.mockResolvedValue([
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
           person: 'AA1234A',
@@ -344,7 +344,7 @@ describe('Additional Days Added Service', () => {
           adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
           fromDate: '2023-08-03',
           days: 10,
-          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -417,7 +417,7 @@ describe('Additional Days Added Service', () => {
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [
+      adjustmentsService.findByPerson.mockResolvedValue([
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
           person: 'AA1234A',
@@ -425,7 +425,7 @@ describe('Additional Days Added Service', () => {
           adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
           fromDate: '2023-08-03',
           days: 10,
-          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -485,7 +485,7 @@ describe('Additional Days Added Service', () => {
       prisonApi
         .get('/api/offenders/AA1234A/adjudications/1525918', '')
         .reply(200, adjudicationThreeConcurrentToOneQuashed)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [
+      adjustmentsService.findByPerson.mockResolvedValue([
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
           person: 'AA1234A',
@@ -493,7 +493,7 @@ describe('Additional Days Added Service', () => {
           adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
           fromDate: '2023-08-03',
           days: 10,
-          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -562,7 +562,7 @@ describe('Additional Days Added Service', () => {
       const nomsId = 'AA1234A'
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      adjustmentsService.findByPerson.mockResolvedValue([])
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
@@ -613,7 +613,7 @@ describe('Additional Days Added Service', () => {
       const nomsId = 'AA1234A'
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      adjustmentsService.findByPerson.mockResolvedValue([])
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
@@ -647,7 +647,7 @@ describe('Additional Days Added Service', () => {
       const nomsId = 'AA1234A'
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      adjustmentsService.findByPerson.mockResolvedValue([])
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
       const padaToReview: PadasToReview = await adaService.getPadasToApprove(nomsId, startOfSentenceEnvelope, token)
@@ -681,7 +681,7 @@ describe('Additional Days Added Service', () => {
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecToNonAda)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeNonAda)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -743,11 +743,7 @@ describe('Additional Days Added Service', () => {
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
-      adjustmentApi.delete(`/adjustments/8569b6d4-9c6f-48d2-83db-bb5091f1011e`).reply(200)
-      adjustmentApi.delete(`/adjustments/d8069e08-5334-4f90-b59d-1748afbcfa6f`).reply(200)
-      adjustmentApi.delete(`/adjustments/a44b3d0b-3c56-4035-86d2-5ff75a85adfa`).reply(200)
-      adjustmentApi.post(`/adjustments`).reply(201)
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue(adjustmentResponsesWithChargeNumber)
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
@@ -762,6 +758,8 @@ describe('Additional Days Added Service', () => {
         token,
       )
       expect(storeService.setLastApprovedDate.mock.calls).toHaveLength(1)
+      expect(adjustmentsService.delete).toHaveBeenCalledTimes(3)
+      expect(adjustmentsService.create).toHaveBeenCalledTimes(1)
     })
     it('Should intercept mix of concurrent consec', async () => {
       const nomsId = 'AA1234A'
