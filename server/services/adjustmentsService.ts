@@ -16,7 +16,11 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).get(adjustmentId)
   }
 
-  public async findByPerson(person: string, token: string): Promise<Adjustment[]> {
+  public async findByPerson(person: string, earliestSentenceDate: Date, token: string): Promise<Adjustment[]> {
+    return new AdjustmentsClient(token).findByPerson(person, earliestSentenceDate.toISOString().substring(0, 10))
+  }
+
+  public async findByPersonOutsideSentenceEnvelope(person: string, token: string): Promise<Adjustment[]> {
     return new AdjustmentsClient(token).findByPerson(person)
   }
 

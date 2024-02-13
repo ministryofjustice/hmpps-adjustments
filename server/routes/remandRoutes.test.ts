@@ -186,7 +186,7 @@ describe('Remand routes tests', () => {
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsService.validate.mockResolvedValue([])
-      adjustmentsService.findByPerson.mockResolvedValue([])
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
         .send({
@@ -212,7 +212,7 @@ describe('Remand routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-      adjustmentsService.findByPerson.mockResolvedValue([])
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -232,7 +232,7 @@ describe('Remand routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-      adjustmentsService.findByPerson.mockResolvedValue([])
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -261,7 +261,7 @@ describe('Remand routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-      adjustmentsService.findByPerson.mockResolvedValue([])
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -291,7 +291,7 @@ describe('Remand routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-      adjustmentsService.findByPerson.mockResolvedValue([])
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       return request(app)
         .post(`/${NOMS_ID}/remand/dates/${addOrEdit}/${SESSION_ID}`)
@@ -322,7 +322,7 @@ describe('Remand routes tests', () => {
         prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
         adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-        adjustmentsService.findByPerson.mockResolvedValue([])
+        adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
         prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
           { ...sentenceAndOffenceBaseRecord, offences: offencesWithAndWithoutStartDates },
         ])
@@ -358,7 +358,7 @@ describe('Remand routes tests', () => {
         prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
         adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-        adjustmentsService.findByPerson.mockResolvedValue([])
+        adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
         prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
           { ...sentenceAndOffenceBaseRecord, offences: offencesWithoutStartDates },
         ])
@@ -424,7 +424,7 @@ describe('Remand routes tests', () => {
       prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-      adjustmentsService.findByPerson.mockResolvedValue([adjustment, { ...adjustment, id }])
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([adjustment, { ...adjustment, id }])
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([
         { ...sentenceAndOffenceBaseRecord, offences: offencesWithAndWithoutStartDates },
       ])
@@ -519,7 +519,7 @@ describe('Remand routes tests', () => {
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.findByPerson.mockResolvedValue([])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
       validationMessages: [remandOverlapWithSentenceMessage],
@@ -592,7 +592,7 @@ describe('Remand routes tests', () => {
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.findByPerson.mockResolvedValue([])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
       validationMessages: [],
@@ -641,7 +641,7 @@ describe('Remand routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
-    adjustmentsService.findByPerson.mockResolvedValue([adjustmentWithDatesAndCharges])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([adjustmentWithDatesAndCharges])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
       validationMessages: [],
@@ -675,7 +675,7 @@ describe('Remand routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
-    adjustmentsService.findByPerson.mockResolvedValue([])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
       validationMessages: [],
@@ -698,7 +698,7 @@ describe('Remand routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
-    adjustmentsService.findByPerson.mockResolvedValue([])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
 
     return request(app)
@@ -744,7 +744,7 @@ describe('Remand routes tests', () => {
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.findByPerson.mockResolvedValue([])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,

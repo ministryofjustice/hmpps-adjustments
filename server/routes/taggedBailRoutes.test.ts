@@ -150,7 +150,7 @@ describe('Tagged bail routes tests', () => {
   it('GET /{nomsId}/tagged-bail/view shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([populatedAdjustment])
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/view`)
