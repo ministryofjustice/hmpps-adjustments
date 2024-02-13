@@ -19,8 +19,8 @@ export const services = () => {
   const adjustmentsStoreService = new AdjustmentsStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
   const additionalDaysAwardedService = new AdditionalDaysAwardedService(
-    hmppsAuthClient,
     additionalDaysAwardedStoreService,
+    adjustmentsService,
   )
   const calculateReleaseDatesService = new CalculateReleaseDatesService()
   const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, calculateReleaseDatesService)

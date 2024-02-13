@@ -16,7 +16,7 @@ export default class UnusedDeductionsService {
   /* Wait until calclulated unused deductions matches with adjustments database. */
   async waitUntilUnusedRemandCreated(nomsId: string, token: string): Promise<boolean> {
     try {
-      let adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+      let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
 
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       const dpsDeductions = deductions.filter(it => it.days || it.daysBetween)
@@ -44,7 +44,7 @@ export default class UnusedDeductionsService {
             return true
           }
           await delay(this.waitBetweenTries)
-          adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+          adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
           // Try again
         } else {
           // Unable to calculate unused deductions.

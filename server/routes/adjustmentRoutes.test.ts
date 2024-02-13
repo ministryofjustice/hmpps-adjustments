@@ -127,6 +127,10 @@ afterEach(() => {
 describe('Adjustment routes tests', () => {
   it('GET /{nomsId} hub', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
       remandAdjustment,
@@ -169,6 +173,10 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0, anyProspective: false })
     unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(true)
@@ -181,6 +189,10 @@ describe('Adjustment routes tests', () => {
   })
   it('GET /{nomsId} is intercepted if there is adas to review', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
@@ -195,6 +207,10 @@ describe('Adjustment routes tests', () => {
   it('GET /{nomsId} relevant remand throws error', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([radaAdjustment])
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     identifyRemandPeriodsService.calculateRelevantRemand.mockRejectedValue(remandResult)
     return request(app)
       .get(`/${NOMS_ID}`)
@@ -207,6 +223,10 @@ describe('Adjustment routes tests', () => {
   it('GET /{nomsId}/restored-additional-days/add', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
@@ -370,6 +390,10 @@ describe('Adjustment routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/edit`)
       .expect('Content-Type', /html/)
@@ -386,6 +410,10 @@ describe('Adjustment routes tests', () => {
   it('GET /{nomsId}/restored-additional-days/edit should load adjustment from server', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     adjustmentsService.get.mockResolvedValue(radaAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/edit/this-is-an-id`)
@@ -556,6 +584,10 @@ describe('Adjustment routes tests', () => {
       { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'ACTIVE', prisonName: 'Leeds' },
     ])
 
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/view`)
       .expect('Content-Type', /html/)

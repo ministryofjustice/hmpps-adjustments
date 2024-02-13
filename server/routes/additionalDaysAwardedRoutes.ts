@@ -13,21 +13,22 @@ export default class AdditionalDaysAwardedRoutes {
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
+
     const adjustments = await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)
 
     const intercept: AdaIntercept = await this.additionalDaysAwardedService.shouldIntercept(
       req,
       prisonerDetail,
       adjustments,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
+      token,
     )
 
     if (intercept.type === 'NONE') {
@@ -43,18 +44,18 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
+
     const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToApprove(
       req,
       nomsId,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
@@ -63,8 +64,7 @@ export default class AdditionalDaysAwardedRoutes {
       await this.additionalDaysAwardedService.submitAdjustments(
         req,
         prisonerDetail,
-        startOfSentenceEnvelope,
-        username,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       )
       return res.redirect(`/${nomsId}`)
@@ -94,17 +94,17 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
+
     const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
       nomsId,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
@@ -117,7 +117,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
 
     const padaForm = new PadaForm(req.body)
@@ -126,14 +126,14 @@ export default class AdditionalDaysAwardedRoutes {
 
     if (padaForm.errors.length) {
       const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
         prisonerDetail.bookingId,
         token,
       )
+
       const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
         nomsId,
-        startOfSentenceEnvelope,
-        username,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       )
       return res.render('pages/adjustments/additional-days/review-prospective', {
@@ -157,11 +157,11 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const { referrer } = req.query as Record<string, string>
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
@@ -170,8 +170,7 @@ export default class AdditionalDaysAwardedRoutes {
       model: await this.additionalDaysAwardedService.getReviewAndSubmitModel(
         req,
         prisonerDetail,
-        startOfSentenceEnvelope,
-        username,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       ),
       referrer,
@@ -179,18 +178,18 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
+
     await this.additionalDaysAwardedService.submitAdjustments(
       req,
       prisonerDetail,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
@@ -204,7 +203,7 @@ export default class AdditionalDaysAwardedRoutes {
     const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
@@ -218,17 +217,17 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { caseloads, token } = res.locals.user
     const { nomsId } = req.params
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(
       prisonerDetail.bookingId,
       token,
     )
+
     const adas = await this.additionalDaysAwardedService.viewAdjustments(
       nomsId,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 

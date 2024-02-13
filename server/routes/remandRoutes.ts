@@ -74,7 +74,7 @@ export default class RemandRoutes {
 
     await adjustmentForm.validate(
       () => this.prisonerService.getSentencesAndOffencesFilteredForRemand(prisonerDetail.bookingId, token),
-      () => this.adjustmentsService.findByPerson(nomsId, token),
+      () => this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token),
     )
 
     const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
@@ -176,7 +176,7 @@ export default class RemandRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustments,
       adjustments,
@@ -204,7 +204,7 @@ export default class RemandRoutes {
     await form.validate()
     if (form.errors.length) {
       const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
-      const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+      const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
       const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
       const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
         prisonerDetail.bookingId,
@@ -244,7 +244,7 @@ export default class RemandRoutes {
       token,
     )
 
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, token)
+    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustments,
       adjustments,
@@ -282,7 +282,7 @@ export default class RemandRoutes {
     const { nomsId } = req.params
     const { caseloads, token } = res.locals.user
     const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const adjustments = (await this.adjustmentsService.findByPerson(nomsId, token)).filter(
+    const adjustments = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(
       it => it.adjustmentType === 'REMAND',
     )
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
