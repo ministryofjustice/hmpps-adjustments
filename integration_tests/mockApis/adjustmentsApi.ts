@@ -6,7 +6,7 @@ export default {
     return stubFor({
       request: {
         method: 'GET',
-        urlPattern: '/adjustments-api/adjustments\\?person=A1234AB',
+        urlPattern: '/adjustments-api/adjustments\\?person=A1234AB(.*)',
       },
       response: {
         status: 200,
@@ -53,7 +53,7 @@ export default {
     return stubFor({
       request: {
         method: 'GET',
-        urlPattern: '/adjustments-api/adjustments\\?person=A1234AB',
+        urlPattern: '/adjustments-api/adjustments\\?person=A1234AB(.*)',
       },
       response: {
         status: 200,
