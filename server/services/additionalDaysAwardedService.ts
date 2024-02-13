@@ -1,6 +1,5 @@
 import { Request } from 'express'
 import dayjs from 'dayjs'
-import { HmppsAuthClient } from '../data'
 import {
   Ada,
   AdaIntercept,

@@ -1,8 +1,6 @@
 import nock from 'nock'
 import { Request } from 'express'
-import HmppsAuthClient from '../data/hmppsAuthClient'
 import AdditionalDaysAwardedService from './additionalDaysAwardedService'
-import TokenStore from '../data/tokenStore'
 import config from '../config'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
 import { AdaIntercept, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
@@ -15,7 +13,6 @@ jest.mock('../data/hmppsAuthClient')
 jest.mock('./additionalDaysApprovalStoreService')
 jest.mock('./adjustmentsService')
 
-const hmppsAuthClient = new HmppsAuthClient({} as TokenStore) as jest.Mocked<HmppsAuthClient>
 const storeService = new AdditionalDaysAwardedStoreService() as jest.Mocked<AdditionalDaysAwardedStoreService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const adaService = new AdditionalDaysAwardedService(storeService, adjustmentsService)
