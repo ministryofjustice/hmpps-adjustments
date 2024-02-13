@@ -14,7 +14,7 @@ export default class CalculateReleaseDatesService {
   }
 
   async unusedDeductionsHandlingCRDError(
-    sessionAdjustments: { string?: Adjustment },
+    sessionAdjustments: Record<string, Adjustment>,
     adjustments: Adjustment[],
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
     nomsId: string,
@@ -33,7 +33,7 @@ export default class CalculateReleaseDatesService {
   }
 
   private makeSessionAdjustmentsReadyForCalculation(
-    sessionAdjustments: { string?: Adjustment },
+    sessionAdjustments: Record<string, Adjustment>,
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
   ): Adjustment[] {
     return Object.values(sessionAdjustments).map(it => {

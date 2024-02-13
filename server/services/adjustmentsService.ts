@@ -41,7 +41,7 @@ export default class AdjustmentsService {
   }
 
   public async getAdjustmentsExceptOneBeingEdited(
-    sessionAdjustment: { string?: Adjustment },
+    sessionAdjustment: Record<string, Adjustment>,
     nomsId: string,
     token: string,
   ) {
