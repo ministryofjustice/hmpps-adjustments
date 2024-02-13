@@ -35,9 +35,14 @@
         {{ govukTable(
         model.table()
         ) }}
-        <h1 class="govuk-heading-m govuk-!-padding-bottom-7">
-            Are you sure you want to delete the tagged bail?
-        </h1>
+        <div class="govuk-!-margin-bottom-7">
+            <h1 class="govuk-heading-m">
+                Are you sure you want to delete the tagged bail?
+            </h1>
+            {% if model.showUnusedMessage %}
+                <p>The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
+            {% endif %}
+        </div>
         <form method="post">
             <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
             <div class="govuk-button-group">

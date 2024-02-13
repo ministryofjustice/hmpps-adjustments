@@ -10,13 +10,19 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import adjustmentTypes from '../model/adjustmentTypes'
 import TaggedBailViewModel from '../model/taggedBailViewModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
-import { getActiveSentencesByCaseSequence, getMostRecentSentenceAndOffence } from '../utils/utils'
+import {
+  getActiveSentencesByCaseSequence,
+  getMostRecentSentenceAndOffence,
+  hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays,
+} from '../utils/utils'
+import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 
 export default class TaggedBailRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
+    private readonly calculateReleaseDateService: CalculateReleaseDatesService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -126,8 +132,34 @@ export default class TaggedBailRoutes {
     )
     const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
 
+    const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
+      { [id]: sessionAdjustment },
+      nomsId,
+      token,
+    )
+
+    const unusedDeductions = await this.calculateReleaseDateService.unusedDeductionsHandlingCRDError(
+      { [id]: sessionAdjustment },
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      token,
+    )
+
+    const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
+      adjustments,
+      unusedDeductions,
+    )
+
     return res.render('pages/adjustments/tagged-bail/remove', {
-      model: new TaggedBailRemoveModel(prisonerDetail, adjustment, adjustmentType, sentenceAndOffence),
+      model: new TaggedBailRemoveModel(
+        prisonerDetail,
+        adjustment,
+        adjustmentType,
+        sentenceAndOffence,
+        showUnusedMessage,
+      ),
     })
   }
 

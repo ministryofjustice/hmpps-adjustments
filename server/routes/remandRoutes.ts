@@ -10,12 +10,9 @@ import RemandReviewModel from '../model/remandReviewModel'
 import ReviewRemandForm from '../model/reviewRemandForm'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import RemandSaveModel from '../model/remandSaveModel'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { daysBetween } from '../utils/utils'
+import { daysBetween, hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays } from '../utils/utils'
 import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
-import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import RemandViewModel from '../model/remandViewModel'
 import RemandChangeModel from '../model/remandChangeModel'
 
@@ -180,7 +177,7 @@ export default class RemandRoutes {
       token,
     )
     const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustments,
       adjustments,
       sentencesAndOffences,
@@ -213,7 +210,7 @@ export default class RemandRoutes {
         prisonerDetail.bookingId,
         token,
       )
-      const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+      const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
         sessionAdjustments,
         adjustments,
         sentencesAndOffences,
@@ -248,7 +245,7 @@ export default class RemandRoutes {
     )
 
     const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustments,
       adjustments,
       sentencesAndOffences,
@@ -281,52 +278,6 @@ export default class RemandRoutes {
     return res.redirect(`/${nomsId}/remand/review`)
   }
 
-  private makeSessionAdjustmentsReadyForCalculation(
-    sessionadjustments: { string?: Adjustment },
-    sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
-  ): Adjustment[] {
-    return Object.values(sessionadjustments).map(it => {
-      const sentence = sentencesAndOffence.find(sent =>
-        sent.offences.some(off => it.remand.chargeId.includes(off.offenderChargeId)),
-      )
-      return {
-        ...it,
-        daysBetween: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
-        effectiveDays: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
-        sentenceSequence: sentence.sentenceSequence,
-      }
-    })
-  }
-
-  private async unusedDeductionsHandlingCRDError(
-    sessionadjustments: { string?: Adjustment },
-    adjustments: Adjustment[],
-    sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
-    nomsId: string,
-    token: string,
-  ): Promise<UnusedDeductionCalculationResponse> {
-    try {
-      return await this.calculateReleaseDatesService.calculateUnusedDeductions(
-        nomsId,
-        [...this.makeSessionAdjustmentsReadyForCalculation(sessionadjustments, sentencesAndOffence), ...adjustments],
-        token,
-      )
-    } catch {
-      // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
-      return null
-    }
-  }
-
-  private async getAdjustmentsExceptOneBeingEdited(
-    sessionAdjustment: { string?: Adjustment },
-    nomsId: string,
-    token: string,
-  ) {
-    // When editing there is only one session adjustment
-    const id = Object.keys(sessionAdjustment)[0]
-    return (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(it => it.id !== id)
-  }
-
   public view: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
     const { caseloads, token } = res.locals.user
@@ -355,9 +306,13 @@ export default class RemandRoutes {
       token,
     )
 
-    const adjustments = await this.getAdjustmentsExceptOneBeingEdited({ [id]: adjustment }, nomsId, token)
+    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
+      { [id]: adjustment },
+      nomsId,
+      token,
+    )
 
-    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       {},
       adjustments,
       sentencesAndOffences,
@@ -365,8 +320,19 @@ export default class RemandRoutes {
       token,
     )
 
+    const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
+      adjustments,
+      unusedDeductions,
+    )
+
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandChangeModel(prisonerDetail, adjustment, sentencesAndOffences, adjustments, unusedDeductions),
+      model: new RemandChangeModel(
+        prisonerDetail,
+        adjustment,
+        sentencesAndOffences,
+        unusedDeductions,
+        showUnusedMessage,
+      ),
     })
   }
 
@@ -381,14 +347,23 @@ export default class RemandRoutes {
       prisonerDetail.bookingId,
       token,
     )
-    const adjustments = await this.getAdjustmentsExceptOneBeingEdited({ [id]: sessionAdjustment }, nomsId, token)
+    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
+      { [id]: sessionAdjustment },
+      nomsId,
+      token,
+    )
 
-    const unusedDeductions = await this.unusedDeductionsHandlingCRDError(
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       { [id]: sessionAdjustment },
       adjustments,
       sentencesAndOffences,
       nomsId,
       token,
+    )
+
+    const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
+      adjustments,
+      unusedDeductions,
     )
 
     return res.render('pages/adjustments/remand/edit', {
@@ -399,8 +374,8 @@ export default class RemandRoutes {
           daysBetween: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
         },
         sentencesAndOffences,
-        adjustments,
         unusedDeductions,
+        showUnusedMessage,
       ),
     })
   }

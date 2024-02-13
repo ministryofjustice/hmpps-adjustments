@@ -7,7 +7,10 @@ import {
   PrisonApiPrisoner,
 } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import {
+  CalculateReleaseDatesValidationMessage,
+  UnusedDeductionCalculationResponse,
+} from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import PrisonerService from '../services/prisonerService'
 
 const properCase = (word: string): string =>
@@ -161,6 +164,29 @@ export function getMostRecentSentenceAndOffence(
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
 ): PrisonApiOffenderSentenceAndOffences {
   return sentencesAndOffences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0]
+}
+
+/**
+ * Takes the calculated unused deductions and checks the days against adjustments of type 'UNUSED_DEDUCTION'.
+ * @param currentAdjustments The current adjustments.
+ * @param calculatedUnusedDeductions The calculated unused deductions.
+ * @returns Whether the calculated unused deduction days differ from the adjustments of type 'UNUSED_DEDUCTION' days.
+ */
+export function hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
+  currentAdjustments: Adjustment[],
+  calculatedUnusedDeductions: UnusedDeductionCalculationResponse,
+): boolean {
+  if (calculatedUnusedDeductions?.unusedDeductions != null) {
+    const currentUnusedDeductions = currentAdjustments
+      .filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+      .map(it => it.effectiveDays)
+      .reduce((sum, current) => sum + current, 0)
+
+    const toBeUnusedDeductions = calculatedUnusedDeductions.unusedDeductions
+
+    return toBeUnusedDeductions !== currentUnusedDeductions
+  }
+  return false
 }
 
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {
