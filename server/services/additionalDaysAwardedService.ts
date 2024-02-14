@@ -135,7 +135,15 @@ export default class AdditionalDaysAwardedService {
       totalAwaitingApproval,
       quashed,
       totalQuashed,
-      intercept: this.shouldInterceptLogic(req, nomsId, allAdaAdjustments, prospective, awaitingApproval, quashed),
+      intercept: this.shouldInterceptLogic(
+        req,
+        nomsId,
+        allAdaAdjustments,
+        awarded,
+        awaitingApproval,
+        prospective,
+        quashed,
+      ),
     } as AdasToReview
   }
 
@@ -399,9 +407,12 @@ export default class AdditionalDaysAwardedService {
     const adas: Ada[] = await this.lookupAdas(token, prisonerDetail.offenderNo, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
-    const { awaitingApproval } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
+    const { awaitingApproval, awarded } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
     const allProspective: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'PROSPECTIVE')
-    const { awaitingApproval: prospective } = this.filterAdasByMatchingAdjustment(allProspective, allAdaAdjustments)
+    const { awaitingApproval: prospective, awarded: prospectiveAwarded } = this.filterAdasByMatchingAdjustment(
+      allProspective,
+      allAdaAdjustments,
+    )
     const allQuashed: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'QUASHED')
     const quashed = this.filterQuashedAdasByMatchingChargeIds(allQuashed, allAdaAdjustments)
 
@@ -409,8 +420,9 @@ export default class AdditionalDaysAwardedService {
       req,
       prisonerDetail.offenderNo,
       allAdaAdjustments,
-      prospective,
+      [...awarded, ...prospectiveAwarded],
       awaitingApproval,
+      prospective,
       quashed,
     )
   }
@@ -419,8 +431,9 @@ export default class AdditionalDaysAwardedService {
     req: Request,
     nomsId: string,
     allAdaAdjustments: Adjustment[],
-    prospective: AdasByDateCharged[],
+    awarded: AdasByDateCharged[],
     awaitingApproval: AdasByDateCharged[],
+    prospective: AdasByDateCharged[],
     quashed: AdasByDateCharged[],
   ): AdaIntercept {
     const anyUnlinkedAda = allAdaAdjustments.some(
@@ -441,6 +454,13 @@ export default class AdditionalDaysAwardedService {
 
     if (quashed.length) {
       return { type: 'UPDATE', number: quashed.length, anyProspective: !!prospective.length }
+    }
+
+    const totalAdjustments = allAdaAdjustments.map(it => it.days).reduce((sum, current) => sum + current, 0)
+    const totalAdjudications = awarded.map(it => it.total).reduce((sum, current) => sum + current, 0)
+
+    if (totalAdjustments !== totalAdjudications) {
+      return { type: 'UPDATE', number: awarded.length, anyProspective: !!prospective.length }
     }
 
     if (prospective.length) {
@@ -503,22 +523,24 @@ export default class AdditionalDaysAwardedService {
     return {
       awarded,
       allAdaAdjustments,
-      adjustmentsToCreate: awaitingApproval.map(it => {
-        return {
-          person: prisonerDetail.offenderNo,
-          bookingId: prisonerDetail.bookingId,
-          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
-          fromDate: it.dateChargeProved.toISOString().substring(0, 10),
-          days: it.total,
-          prisonId: prisonerDetail.agencyId,
-          additionalDaysAwarded: {
-            adjudicationId: it.charges.map(charge => charge.chargeNumber),
-            prospective: it.charges.some(charge => charge.status === 'PROSPECTIVE'),
-          },
-        } as Adjustment
-      }),
+      adjustmentsToCreate: awaitingApproval.map(it => this.toAdjustment(prisonerDetail, it)),
       quashed,
     }
+  }
+
+  private toAdjustment(prisonerDetail: PrisonApiPrisoner, it: AdasByDateCharged) {
+    return {
+      person: prisonerDetail.offenderNo,
+      bookingId: prisonerDetail.bookingId,
+      adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+      fromDate: it.dateChargeProved.toISOString().substring(0, 10),
+      days: it.total,
+      prisonId: prisonerDetail.agencyId,
+      additionalDaysAwarded: {
+        adjudicationId: it.charges.map(charge => charge.chargeNumber),
+        prospective: it.charges.some(charge => charge.status === 'PROSPECTIVE'),
+      },
+    } as Adjustment
   }
 
   public async getReviewAndSubmitModel(
@@ -566,6 +588,15 @@ export default class AdditionalDaysAwardedService {
       // Create adjustments
       await this.adjustmentsService.create(adjustmentsToCreate, token)
     }
+
+    awarded
+      .filter(it => it.adjustmentId)
+      .map(it => {
+        return new AdjustmentsClient(token).update(it.adjustmentId, {
+          id: it.adjustmentId,
+          ...this.toAdjustment(prisonerDetail, it),
+        })
+      })
 
     this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.offenderNo)
     this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.offenderNo)

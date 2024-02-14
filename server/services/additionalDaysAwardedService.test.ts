@@ -822,6 +822,42 @@ describe('Additional Days Added Service', () => {
       } as AdaIntercept)
     })
 
+    it('Should intercept when already persisted adjustment has different days', async () => {
+      const nomsId = 'AA1234A'
+      const bookingId = 1234
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.getLastApprovedDate.mockReturnValue(null)
+      const intercept = await adaService.shouldIntercept(
+        request,
+        {
+          offenderNo: nomsId,
+          bookingId,
+        } as PrisonApiPrisoner,
+        [
+          {
+            person: 'AA1234A',
+            bookingId: 1234,
+            adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+            fromDate: '2023-08-03',
+            days: 5,
+            additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
+          },
+        ],
+        startOfSentenceEnvelope,
+        'username',
+      )
+
+      expect(intercept).toEqual({
+        type: 'UPDATE',
+        number: 1,
+        anyProspective: false,
+      } as AdaIntercept)
+    })
     it('Shouldnt intercept when recently saved prospective', async () => {
       const nomsId = 'AA1234A'
       const bookingId = 1234
