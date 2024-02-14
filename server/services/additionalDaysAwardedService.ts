@@ -592,10 +592,14 @@ export default class AdditionalDaysAwardedService {
     awarded
       .filter(it => it.adjustmentId)
       .map(it => {
-        return new AdjustmentsClient(token).update(it.adjustmentId, {
-          id: it.adjustmentId,
-          ...this.toAdjustment(prisonerDetail, it),
-        })
+        return this.adjustmentsService.update(
+          it.adjustmentId,
+          {
+            id: it.adjustmentId,
+            ...this.toAdjustment(prisonerDetail, it),
+          },
+          token,
+        )
       })
 
     this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.offenderNo)
