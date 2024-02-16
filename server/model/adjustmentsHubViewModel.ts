@@ -39,14 +39,7 @@ export default class AdjustmentsHubViewModel {
 
   public deductions(): AdjustmentType[] {
     return this.adjustmentTypes.filter(it =>
-      [
-        'REMAND',
-        'TAGGED_BAIL',
-        'LAWFULLY_AT_LARGE',
-        'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
-        'SPECIAL_REMISSION',
-        'TIME_SPENT_IN_CUSTODY_ABROAD',
-      ].includes(it.value),
+      ['REMAND', 'TAGGED_BAIL', 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'].includes(it.value),
     )
   }
 
@@ -110,29 +103,14 @@ export default class AdjustmentsHubViewModel {
     return this.adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
   }
 
-  private unusedDeductions() {
-    return this.adjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
-  }
-
-  public showUnusedDeductions() {
-    return this.allDeductionsOnDps() && this.unusedDeductions().length
-  }
-
-  public totalDeductions(): number {
-    return this.allDeductions()
-      .map(a => a.days || a.daysBetween)
-      .reduce((sum, current) => sum + current, 0)
-  }
-
-  public totalUnusedDeductions(): number {
-    return this.unusedDeductions()
-      .map(a => a.days || a.daysBetween)
-      .reduce((sum, current) => sum + current, 0)
-  }
-
-  public totalEffectiveDeductions(): number {
-    return this.allDeductions()
-      .map(a => a.effectiveDays)
-      .reduce((sum, current) => sum + current, 0)
+  public getUnused(adjustmentType: AdjustmentType): number {
+    if (this.allDeductionsOnDps()) {
+      const adjustments = this.adjustments.filter(it => it.adjustmentType === adjustmentType.value)
+      const total = adjustments.map(a => a.days || a.daysBetween).reduce((sum, current) => sum + current, 0)
+      const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
+      return total - effective
+    } else {
+      return 0
+    }
   }
 }
