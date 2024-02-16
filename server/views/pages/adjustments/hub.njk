@@ -181,6 +181,6 @@
 
 {% macro calcReleaseDatesMessage(calculateReleaseDatesdUrl, prisonerDetail) %}
   <p class="govuk-body">Once all adjustments have been made, you will need to
-    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a>for {{ prisonerDetail.firstName | title }} {{ prisonerDetail.lastName | title }}.
+    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a> for {{ prisonerDetail.firstName | title }} {{ prisonerDetail.lastName | title }}.
   </p>
 {% endmacro %}

@@ -342,10 +342,19 @@ export default class AdjustmentRoutes {
 
     const adjustment = await this.adjustmentsService.get(id, token)
     await this.adjustmentsService.delete(id, token)
+    let action
+    if (adjustment.adjustmentType === 'REMAND') {
+      action = 'REMAND_REMOVED'
+    } else if (adjustment.adjustmentType === 'TAGGED_BAIL') {
+      action = 'TAGGED_BAIL_REMOVED'
+    } else {
+      action = 'REMOVE'
+    }
+
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.daysTotal,
-      action: adjustment.adjustmentType === 'REMAND' ? 'REMAND_REMOVED' : 'REMOVE',
+      action,
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }

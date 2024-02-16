@@ -16,104 +16,78 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
     {% if params.mainTitle %}
       <p>{{ params.mainTitle }}</p>
     {% endif %}
-    <table id="{{ params.tableId }}"
-           class="govuk-table {{ 'govuk-!-margin-bottom-8' if not params.checkboxes else 'govuk-!-margin-bottom-2' }}">
-      <thead class="govuk-table__head">
-      <tr class="govuk-table__row">
+
+    {% for ada in params.adas %}
+      <div class="govuk-!-margin-bottom-6">
         {% if params.checkboxes %}
-          <th class="govuk-table__header" scope="col">
-            <span class="govuk-visually-hidden">Select adjudication</span>
-          </th>
-        {% endif %}
-        <th class="govuk-table__header  {{ 'govuk-!-width-two-fifths' if params.hideStatuses else 'govuk-!-width-one-fifth' }}"
-            scope="col">Date charge proved
-        </th>
-        <th class="govuk-table__header" scope="col">Charge details</th>
-      </tr>
-      </thead>
-      <tbody>
-      {% for ada in params.adas %}
-        <tr class="govuk-table__row">
-          {% if params.checkboxes %}
-            <td class="govuk-table__cell">
-              <div class="govuk-checkboxes__item govuk-checkboxes--small moj-multi-select__checkbox">
-                {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
-                <input type="checkbox" class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}"
-                       name="prospective" value="{{ isoDate }}">
-                <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">
-                    <span class="govuk-visually-hidden">Select 
-              {{ ada.dateChargeProved | date("DD MMM YYYY") }}</span>
-                </label>
+          {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
+          <div class="govuk-form-group">
+            <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
+                <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</label>
               </div>
-            </td>
-          {% endif %}
-          <td class="govuk-table__cell">
-            {{ ada.dateChargeProved | date("DD MMM YYYY") }}
-          </td>
-          <td class="govuk-table__cell">
-            <table class="govuk-table">
-              <tr>
-                <th class="govuk-table__header {{ 'govuk-!-width-two-fifths' if params.hideStatuses else 'govuk-!-width-one-fifth' }}"
-                    scope="col">Charge number
-                </th>
-                <th class="govuk-table__header govuk-!-width-one-quarter" scope="col">To be served</th>
-                <th class="govuk-table__header govuk-!-width-one-quarter" scope="col">Heard at</th>
-                {% if not params.hideStatuses %}
-                  <th class="govuk-table__header" scope="col">Status</th>
-                {% endif %}
-                <th class="govuk-table__header govuk-!-text-align-right" scope="col">Days</th>
-              </tr>
-              {% for charge in ada.charges %}
-                <tr>
-                  <td class="govuk-table__cell">
-                    {{ charge.chargeNumber }}
-                  </td>
-                  <td class="govuk-table__cell">
-                    {{ charge.toBeServed }}
-                  </td>
-                  <td class="govuk-table__cell">
-                    {{ charge.heardAt }}
-                  </td>
-                  {% if not params.hideStatuses %}
-                    <td class="govuk-table__cell">
-                      {% if not params.checkboxes %}
-                        <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
-                      {% endif %}
-                      {% if charge.status === 'PROSPECTIVE' %}
-                        <span class="moj-badge moj-badge--purple">{{ charge.status }}</span>
-                      {% endif %}
-                    </td>
-                  {% endif %}
-                  <!-- Days -->
-                  <td class="govuk-table__cell govuk-!-text-align-right">{{ charge.days }}</td>
-                </tr>
-              {% endfor %}
-              {% if params.showTotalPerDateCharged %}
-                <tfoot>
-                <tr class="govuk-table__row">
-                  <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="3">Total</th>
-                  <td class="govuk-table__cell govuk-!-text-align-right">{{ ada.total }}</td>
-                </tr>
-                </tfoot>
+            </div>
+          </div>
+        {% else %}
+          <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</h3>
+        {% endif %}
+
+        <table id="{{ params.tableId }}"
+              class="govuk-table {{ 'govuk-!-margin-bottom-8' if not params.checkboxes else 'govuk-!-margin-bottom-2' }}">
+          <thead class="govuk-table__head">
+            <tr>
+              <th class="govuk-table__header {{ 'govuk-!-width-two-fifths' if params.hideStatuses else 'govuk-!-width-one-fifth' }}"
+                  scope="col">Charge number
+              </th>
+              <th class="govuk-table__header govuk-!-width-one-quarter" scope="col">To be served</th>
+              <th class="govuk-table__header govuk-!-width-one-quarter" scope="col">Heard at</th>
+              {% if not params.hideStatuses %}
+                <th class="govuk-table__header" scope="col">Status</th>
               {% endif %}
-            </table>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-
-      {% if not params.checkboxes %}
-        <tfoot>
-        <tr class="govuk-table__row">
-          <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="1">
-            {{ params.totalText if params.totalText else 'Total' }}
-          </th>
-          <td class="govuk-table__cell govuk-!-text-align-right">{{ params.total }}</td>
-        </tr>
-        </tfoot>
-      {% endif %}
-    </table>
-
+              <th class="govuk-table__header govuk-table__header--numeric" scope="col">Days</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for charge in ada.charges %}
+              <tr>
+                <td class="govuk-table__cell">
+                  {{ charge.chargeNumber }}
+                </td>
+                <td class="govuk-table__cell">
+                  {{ charge.toBeServed }}
+                </td>
+                <td class="govuk-table__cell">
+                  {{ charge.heardAt }}
+                </td>
+                {% if not params.hideStatuses %}
+                  <td class="govuk-table__cell">
+                    {% if not params.checkboxes %}
+                      <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
+                    {% endif %}
+                    {% if charge.status === 'PROSPECTIVE' %}
+                      <span class="moj-badge moj-badge--purple">{{ charge.status }}</span>
+                    {% endif %}
+                  </td>
+                {% endif %}
+                <!-- Days -->
+                <td class="govuk-table__cell govuk-table__header--numeric">{{ charge.days }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          {% if not params.checkboxes and loop.last %}
+            <tfoot>
+            <tr class="govuk-table__row">
+              <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="{{3 if params.hideStatuses else 4}}">
+                {{ params.totalText if params.totalText else 'Total' }}
+              </th>
+              <td class="govuk-table__cell govuk-!-text-align-right">{{ params.total }}</td>
+            </tr>
+            </tfoot>
+          {% endif %}
+        </table>
+      </div>
+    {% endfor %}
     {% if params.checkboxes %}
       <div class="govuk-form-group govuk-!-margin-bottom-4">
         <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
