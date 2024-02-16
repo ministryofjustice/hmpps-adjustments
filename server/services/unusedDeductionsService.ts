@@ -19,7 +19,7 @@ export default class UnusedDeductionsService {
       let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
 
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      const dpsDeductions = deductions.filter(it => it.days || it.daysBetween)
+      const dpsDeductions = deductions.filter(it => it.daysTotal)
       if (deductions.length !== dpsDeductions.length) {
         // won't calculate unused deductions if adjusments are not from DPS.
         return false

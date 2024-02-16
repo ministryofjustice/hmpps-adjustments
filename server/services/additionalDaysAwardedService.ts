@@ -213,7 +213,7 @@ export default class AdditionalDaysAwardedService {
 
   private adjustmentMatchesAdjudication(adjudication: AdasByDateCharged, adjustment: Adjustment): boolean {
     return (
-      adjudication.total === (adjustment.days || adjustment.daysBetween || adjustment.effectiveDays) &&
+      adjudication.total === adjustment.daysTotal &&
       adjudication.dateChargeProved.toISOString().substring(0, 10) === adjustment.fromDate &&
       JSON.stringify(adjudication.charges.map(charge => charge.chargeNumber).sort()) ===
         JSON.stringify(adjustment.additionalDaysAwarded.adjudicationId.sort())
@@ -456,7 +456,7 @@ export default class AdditionalDaysAwardedService {
       return { type: 'UPDATE', number: quashed.length, anyProspective: !!prospective.length }
     }
 
-    const totalAdjustments = allAdaAdjustments.map(it => it.days).reduce((sum, current) => sum + current, 0)
+    const totalAdjustments = allAdaAdjustments.map(it => it.daysTotal).reduce((sum, current) => sum + current, 0)
     const totalAdjudications = awarded.map(it => it.total).reduce((sum, current) => sum + current, 0)
 
     if (totalAdjustments !== totalAdjudications) {

@@ -15,7 +15,7 @@ export default class RemandViewModel {
       ...this.adjustments.map(it => {
         return [
           { text: `From ${dayjs(it.fromDate).format('DD MMM YYYY')} to ${dayjs(it.toDate).format('DD MMM YYYY')}` },
-          { text: it.daysBetween || it.effectiveDays },
+          { text: it.daysTotal },
         ]
       }),
       [{ text: 'Total days', classes: 'govuk-table__header' }, { text: this.totalDays() }],
@@ -26,13 +26,13 @@ export default class RemandViewModel {
     return this.adjustments.map(it => {
       return {
         ...it,
-        daysToDisplay: it.daysBetween || it.effectiveDays,
+        daysToDisplay: it.daysTotal,
         offences: offencesForAdjustment(it, this.sentencesAndOffences),
       }
     })
   }
 
   public totalDays() {
-    return this.adjustments.reduce((sum, it) => sum + (it.daysBetween || it.effectiveDays), 0)
+    return this.adjustments.reduce((sum, it) => sum + it.daysTotal, 0)
   }
 }

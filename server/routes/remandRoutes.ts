@@ -371,7 +371,7 @@ export default class RemandRoutes {
         prisonerDetail,
         {
           ...sessionAdjustment,
-          daysBetween: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
+          daysTotal: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
         },
         sentencesAndOffences,
         unusedDeductions,

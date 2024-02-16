@@ -1,4 +1,4 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
 import SessionAdjustment from '../@types/AdjustmentTypes'
@@ -34,7 +34,7 @@ export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm>
     return []
   }
 
-  static fromAdjustment(adjustment: Adjustment): TaggedBailDaysForm {
+  static fromAdjustment(adjustment: EditableAdjustment): TaggedBailDaysForm {
     return new TaggedBailDaysForm({
       days: adjustment.days,
     })

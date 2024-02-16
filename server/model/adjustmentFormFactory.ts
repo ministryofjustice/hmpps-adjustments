@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Request } from 'express'
-import { Adjustment, AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, AdjustmentTypes, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import AdjustmentsForm from './adjustmentsForm'
 import RestoredAdditionalDaysForm from './restoredAdditionalDaysForm'
@@ -8,13 +8,15 @@ import GenericAdjustmentForm, { GenericAdjustmentFormOptions } from './genericAd
 import UnlawfullyAtLargeForm from './unlawfullyAtLargeForm'
 
 export default class AdjustmentsFormFactory {
-  static fromAdjustment<T extends AdjustmentsForm<unknown>>(adjustment: Adjustment): AdjustmentsForm<T> {
+  static fromAdjustment<T extends AdjustmentsForm<unknown>>(
+    adjustment: Adjustment | EditableAdjustment,
+  ): AdjustmentsForm<T> {
     if (adjustment.adjustmentType === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return new RestoredAdditionalDaysForm({
         'from-day': dayjs(adjustment.fromDate).get('date').toString(),
         'from-month': (dayjs(adjustment.fromDate).get('month') + 1).toString(),
         'from-year': dayjs(adjustment.fromDate).get('year').toString(),
-        days: (adjustment.days || adjustment.daysBetween || adjustment.effectiveDays).toString(),
+        days: this.days(adjustment),
       })
     }
     if (adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
@@ -36,7 +38,7 @@ export default class AdjustmentsFormFactory {
       'to-day': dayjs(adjustment.toDate).get('date').toString(),
       'to-month': (dayjs(adjustment.toDate).get('month') + 1).toString(),
       'to-year': dayjs(adjustment.toDate).get('year').toString(),
-      days: adjustment.days?.toString(),
+      days: this.days(adjustment),
       sentence: adjustment.sentenceSequence?.toString(),
     })
   }
@@ -72,5 +74,15 @@ export default class AdjustmentsFormFactory {
       hasToDate: adjustmentType === 'REMAND',
       adjustmentType,
     }
+  }
+
+  private static days(adjustment: Adjustment | EditableAdjustment): string {
+    if ('daysTotal' in adjustment) {
+      return adjustment.daysTotal.toString()
+    }
+    if ('days' in adjustment) {
+      return adjustment.days.toString()
+    }
+    return ''
   }
 }

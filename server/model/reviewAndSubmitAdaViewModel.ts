@@ -13,10 +13,8 @@ export default class ReviewAndSubmitAdaViewModel {
   public displayBanner(): boolean {
     const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
     if (anyUnlinkedAdas) {
-      const existingDays = this.existingAdjustments
-        .map(a => a.days || a.effectiveDays)
-        .reduce((sum, current) => sum + current, 0)
-      const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
+      const existingDays = this.existingAdjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0)
+      const newDays = this.adjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0)
       return existingDays !== newDays
     }
     return false
@@ -32,12 +30,15 @@ export default class ReviewAndSubmitAdaViewModel {
             return [
               { text: dayjs(it.fromDate).format('D MMM YYYY') },
               { html: it.additionalDaysAwarded.adjudicationId.join('<br/>') },
-              { text: it.days, format: 'numeric' },
+              { text: it.daysTotal, format: 'numeric' },
             ]
           }),
           [
             { text: 'Total ADAs', colspan: 2 },
-            { text: this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0), format: 'numeric' },
+            {
+              text: this.adjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0),
+              format: 'numeric',
+            },
           ],
         ],
       }
@@ -55,13 +56,13 @@ export default class ReviewAndSubmitAdaViewModel {
             return [
               { text: dayjs(it.fromDate).format('D MMM YYYY') },
               { html: it.additionalDaysAwarded.adjudicationId.join('<br/>') },
-              { text: it.days, format: 'numeric' },
+              { text: it.daysTotal, format: 'numeric' },
             ]
           }),
           [
             { text: 'Total Quashed ADAs', colspan: 2 },
             {
-              text: this.quashedAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
+              text: this.quashedAdjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0),
               format: 'numeric',
             },
           ],
