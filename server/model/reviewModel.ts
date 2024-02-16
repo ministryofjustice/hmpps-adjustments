@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { daysBetween } from '../utils/utils'
@@ -8,7 +8,7 @@ import { daysBetween } from '../utils/utils'
 export default class ReviewModel {
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
-    public adjustment: Adjustment,
+    public adjustment: EditableAdjustment,
   ) {}
 
   public adjustmentType(): AdjustmentType {
@@ -31,7 +31,7 @@ export default class ReviewModel {
     return ReviewModel.summaryRowsFromAdjustment(this.adjustment)
   }
 
-  public static summaryRowsFromAdjustment(adjustment: Adjustment) {
+  public static summaryRowsFromAdjustment(adjustment: EditableAdjustment) {
     if (adjustment.adjustmentType === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
         {
@@ -47,7 +47,7 @@ export default class ReviewModel {
             text: 'Number of days restored',
           },
           value: {
-            text: adjustment.daysTotal,
+            text: adjustment.days,
           },
         },
       ]
@@ -64,14 +64,14 @@ export default class ReviewModel {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
       },
-      ...(adjustment.daysTotal
+      ...(adjustment.days
         ? [
             {
               key: {
                 text: 'Days',
               },
               value: {
-                text: adjustment.daysTotal,
+                text: adjustment.days,
               },
             },
           ]

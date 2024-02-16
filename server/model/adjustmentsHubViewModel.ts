@@ -96,7 +96,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   private allDeductionsOnDps() {
-    return !this.allDeductions().some(it => it.daysTotal == null)
+    return !this.allDeductions().some(it => it.remand || it.taggedBail)
   }
 
   private allDeductions() {
