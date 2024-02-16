@@ -96,7 +96,10 @@ export default class AdjustmentsHubViewModel {
   }
 
   private allDeductionsOnDps() {
-    return !this.allDeductions().some(it => it.remand || it.taggedBail)
+    const anyDeductionFromNomis = this.allDeductions().some(
+      it => !it.remand?.chargeId?.length && !it.taggedBail?.caseSequence,
+    )
+    return !anyDeductionFromNomis
   }
 
   private allDeductions() {

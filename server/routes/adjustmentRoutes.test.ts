@@ -74,6 +74,9 @@ const remandAdjustment = {
   sentenceSequence: 1,
   prisonId: 'LDS',
   daysTotal: 24,
+  remand: {
+    chargeId: [123],
+  },
 } as Adjustment
 
 const unusedDeductions = {
