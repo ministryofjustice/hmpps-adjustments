@@ -125,7 +125,7 @@ afterEach(() => {
 })
 
 describe('Adjustment routes tests', () => {
-  it('GET /{nomsId} hub', () => {
+  it('GET /{nomsId} hub with unused deductions', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
@@ -137,7 +137,7 @@ describe('Adjustment routes tests', () => {
       unusedDeductions,
     ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(false)
+    unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(true)
     additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
@@ -151,20 +151,29 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).not.toContain('Nobody may have 20 days remand')
         expect(res.text).toContain('24')
+        expect(res.text).toContainInOrder(['Last update', 'on 05 April 2023', 'by Leeds'])
+        expect(res.text).toContain('including 10 days unused')
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(false)
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
         expect(res.text).toContain('Unused deductions time cannot be calculated')
-        expect(res.text).toContain(
-          'Governors can restore some of the Added days awarded (ADA) time for a prisoner. These are known as RADAs (Restoration of Added Days Awarded)',
-        )
-        expect(res.text).toContain('Last update\n          on 05 April 2023\n          by Leeds')
-        expect(res.text).toContainInOrder([
-          'Unused deductions',
-          'Total deductions',
-          '24',
-          'Unused deductions',
-          '10',
-          'Effective deductions',
-          '14',
-        ])
       })
   })
   it('GET /{nomsId} with remand role', () => {
