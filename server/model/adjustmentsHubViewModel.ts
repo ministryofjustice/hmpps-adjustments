@@ -96,7 +96,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   private allDeductionsOnDps() {
-    return !this.allDeductions().some(it => it.days == null && it.daysBetween == null)
+    return !this.allDeductions().some(it => it.daysTotal == null)
   }
 
   private allDeductions() {
@@ -106,7 +106,7 @@ export default class AdjustmentsHubViewModel {
   public getUnused(adjustmentType: AdjustmentType): number {
     if (this.allDeductionsOnDps()) {
       const adjustments = this.adjustments.filter(it => it.adjustmentType === adjustmentType.value)
-      const total = adjustments.map(a => a.days || a.daysBetween).reduce((sum, current) => sum + current, 0)
+      const total = adjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0)
       const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
       return total - effective
     }

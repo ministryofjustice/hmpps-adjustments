@@ -456,7 +456,7 @@ export default class AdditionalDaysAwardedService {
       return { type: 'UPDATE', number: quashed.length, anyProspective: !!prospective.length }
     }
 
-    const totalAdjustments = allAdaAdjustments.map(it => it.days).reduce((sum, current) => sum + current, 0)
+    const totalAdjustments = allAdaAdjustments.map(it => it.daysTotal).reduce((sum, current) => sum + current, 0)
     const totalAdjudications = awarded.map(it => it.total).reduce((sum, current) => sum + current, 0)
 
     if (totalAdjustments !== totalAdjudications) {

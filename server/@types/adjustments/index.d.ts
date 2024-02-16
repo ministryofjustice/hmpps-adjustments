@@ -304,12 +304,6 @@ export interface components {
        * @description The start date of the adjustment
        */
       fromDate?: string
-      /**
-       * Format: int32
-       * @deprecated
-       * @description The number of adjustment days, Deprecated: Use daysTotal instead
-       */
-      days?: number
       remand?: components['schemas']['RemandDto']
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
@@ -356,12 +350,6 @@ export interface components {
        * @description The total number of adjustment days
        */
       daysTotal?: number
-      /**
-       * Format: int32
-       * @deprecated
-       * @description The days between the from and two date, Deprecated: Use daysTotal instead
-       */
-      daysBetween?: number
     }
     /** @description Validation message details */
     ValidationMessage: {

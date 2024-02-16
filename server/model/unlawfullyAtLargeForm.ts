@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import { dateItems, isDateInFuture } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
@@ -21,7 +21,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
 
   type: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR'
 
-  toAdjustment(prisonerDetails: PrisonApiPrisoner, nomsId: string, id: string): Adjustment {
+  toAdjustment(prisonerDetails: PrisonApiPrisoner, nomsId: string, id: string): EditableAdjustment {
     const fromDate = dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD')
     const toDate = dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD')
     return {
