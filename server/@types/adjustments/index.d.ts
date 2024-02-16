@@ -156,6 +156,8 @@ export interface components {
       comment?: string
       /** @description The NOMIS active or inactive flag */
       active: boolean
+      /** @description Has the prisoner been released from the NOMIS booking */
+      bookingReleased: boolean
     }
     /** @description The details of an additional days awarded (ADA) adjustment */
     AdditionalDaysAwardedDto: {
@@ -163,8 +165,8 @@ export interface components {
       adjudicationId: number[]
       prospective: boolean
     }
-    /** @description The adjustment and its identifier */
-    AdjustmentDto: {
+    /** @description Create/ edit an adjustment */
+    EditableAdjustmentDto: {
       /**
        * Format: uuid
        * @description The ID of the adjustment
@@ -215,37 +217,10 @@ export interface components {
        */
       prisonId?: string
       /**
-       * @description The name name of the prison where the prisoner was located at the time the adjustment was created
-       * @example Leeds
-       */
-      prisonName?: string
-      /** @description The person last updating this adjustment */
-      lastUpdatedBy?: string
-      /**
-       * @description The status of this adjustment
-       * @enum {string}
-       */
-      status?: 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'INACTIVE_WHEN_DELETED'
-      /**
-       * Format: date-time
-       * @description The date and time this adjustment was last updated
-       */
-      lastUpdatedDate?: string
-      /**
-       * Format: int32
-       * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
-       */
-      effectiveDays?: number
-      /**
        * Format: int32
        * @description The NOMIS sentence sequence of the adjustment
        */
       sentenceSequence?: number
-      /**
-       * Format: int32
-       * @description The days between the from and two date
-       */
-      daysBetween?: number
     }
     /** @description The details of remand adjustment */
     RemandDto: {
@@ -289,6 +264,104 @@ export interface components {
       effectiveDays: number
       /** @description The NOMIS ID of the person this adjustment applies to */
       person: string
+    }
+    /** @description The adjustment and its identifier */
+    AdjustmentDto: {
+      /**
+       * Format: uuid
+       * @description The ID of the adjustment
+       */
+      id?: string
+      /**
+       * Format: int64
+       * @description The NOMIS booking ID of the adjustment
+       */
+      bookingId: number
+      /** @description The NOMIS ID of the person this adjustment applies to */
+      person: string
+      /**
+       * @description The type of adjustment
+       * @enum {string}
+       */
+      adjustmentType:
+        | 'REMAND'
+        | 'TAGGED_BAIL'
+        | 'UNLAWFULLY_AT_LARGE'
+        | 'LAWFULLY_AT_LARGE'
+        | 'ADDITIONAL_DAYS_AWARDED'
+        | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
+        | 'SPECIAL_REMISSION'
+        | 'UNUSED_DEDUCTIONS'
+      /** @description Human readable text for type of adjustment */
+      adjustmentTypeText?: string
+      /**
+       * Format: date
+       * @description The end date of the adjustment
+       */
+      toDate?: string
+      /**
+       * Format: date
+       * @description The start date of the adjustment
+       */
+      fromDate?: string
+      /**
+       * Format: int32
+       * @deprecated
+       * @description The number of adjustment days, Deprecated: Use daysTotal instead
+       */
+      days?: number
+      remand?: components['schemas']['RemandDto']
+      additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
+      unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
+      taggedBail?: components['schemas']['TaggedBailDto']
+      /**
+       * @description The prison where the prisoner was located at the time the adjustment was created (a 3 character code identifying the prison)
+       * @example LDS
+       */
+      prisonId?: string
+      /**
+       * @description The name name of the prison where the prisoner was located at the time the adjustment was created
+       * @example Leeds
+       */
+      prisonName?: string
+      /** @description The person last updating this adjustment */
+      lastUpdatedBy?: string
+      /**
+       * @description The status of this adjustment
+       * @enum {string}
+       */
+      status?: 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'INACTIVE_WHEN_DELETED'
+      /**
+       * Format: date-time
+       * @description The date and time this adjustment was last updated
+       */
+      lastUpdatedDate?: string
+      /**
+       * Format: date-time
+       * @description The date and time this adjustment was last created
+       */
+      createdDate?: string
+      /**
+       * Format: int32
+       * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
+       */
+      effectiveDays?: number
+      /**
+       * Format: int32
+       * @description The NOMIS sentence sequence of the adjustment
+       */
+      sentenceSequence?: number
+      /**
+       * Format: int32
+       * @description The total number of adjustment days
+       */
+      daysTotal?: number
+      /**
+       * Format: int32
+       * @deprecated
+       * @description The days between the from and two date, Deprecated: Use daysTotal instead
+       */
+      daysBetween?: number
     }
     /** @description Validation message details */
     ValidationMessage: {
@@ -514,7 +587,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['AdjustmentDto']
+        'application/json': components['schemas']['EditableAdjustmentDto']
       }
     }
     responses: {
@@ -651,7 +724,7 @@ export interface operations {
   create_1: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['AdjustmentDto'][]
+        'application/json': components['schemas']['EditableAdjustmentDto'][]
       }
     }
     responses: {

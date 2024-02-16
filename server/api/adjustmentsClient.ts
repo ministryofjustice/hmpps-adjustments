@@ -4,6 +4,7 @@ import {
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
+  EditableAdjustment,
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
@@ -33,11 +34,11 @@ export default class AdjustmentsClient {
     return this.restClient.get({ path: `/adjustments?person=${person}&status=${status}` }) as Promise<Adjustment[]>
   }
 
-  async create(adjustments: Adjustment[]): Promise<CreateResponse> {
+  async create(adjustments: EditableAdjustment[]): Promise<CreateResponse> {
     return this.restClient.post({ path: `/adjustments`, data: adjustments }) as Promise<CreateResponse>
   }
 
-  async update(adjustmentsId: string, adjustment: Adjustment): Promise<void> {
+  async update(adjustmentsId: string, adjustment: EditableAdjustment): Promise<void> {
     return this.restClient.put({ path: `/adjustments/${adjustmentsId}`, data: adjustment }) as Promise<void>
   }
 
@@ -45,7 +46,7 @@ export default class AdjustmentsClient {
     return this.restClient.delete({ path: `/adjustments/${adjustmentsId}` }) as Promise<void>
   }
 
-  async validate(adjustment: Adjustment): Promise<ValidationMessage[]> {
+  async validate(adjustment: EditableAdjustment): Promise<ValidationMessage[]> {
     return this.restClient.post({ path: `/adjustments/validate`, data: adjustment }) as Promise<ValidationMessage[]>
   }
 

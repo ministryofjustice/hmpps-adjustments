@@ -32,7 +32,7 @@ export default class TaggedBailViewModel {
       return [
         { text: this.getCourtName(it.taggedBail.caseSequence) },
         { text: this.getCaseReference(it.taggedBail.caseSequence) },
-        { text: it.days || it.daysBetween || it.effectiveDays },
+        { text: it.daysTotal },
         this.actionCell(it),
       ]
     })
@@ -47,7 +47,7 @@ export default class TaggedBailViewModel {
   }
 
   public totalRow() {
-    const total = this.adjustments.map(it => it.days || it.daysBetween || it.effectiveDays).reduce((a, b) => a + b, 0)
+    const total = this.adjustments.map(it => it.daysTotal).reduce((a, b) => a + b, 0)
     return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }, { text: '' }]]
   }
 

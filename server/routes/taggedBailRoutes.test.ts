@@ -91,6 +91,7 @@ const populatedAdjustment = {
   ...blankAdjustment,
   days: 9955,
   taggedBail: { caseSequence: 1 },
+  daysTotal: 9955,
 }
 
 let app: Express

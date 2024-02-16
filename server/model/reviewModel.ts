@@ -64,14 +64,14 @@ export default class ReviewModel {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
       },
-      ...(adjustment.days || adjustment.daysBetween || adjustment.effectiveDays
+      ...(adjustment.daysTotal
         ? [
             {
               key: {
                 text: 'Days',
               },
               value: {
-                text: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
+                text: adjustment.daysTotal,
               },
             },
           ]

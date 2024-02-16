@@ -42,12 +42,12 @@ export default class RecallModel {
   }
 
   private remandText(adjustment: Adjustment) {
-    return `Remand ${adjustment.daysBetween || adjustment.effectiveDays} days from  ${dayjs(adjustment.fromDate).format(
+    return `Remand ${adjustment.daysTotal} days from  ${dayjs(adjustment.fromDate).format(
       'D MMM YYYY',
     )} to ${dayjs(adjustment.toDate).format('D MMM YYYY')}`
   }
 
   private taggedBailText(adjustment: Adjustment) {
-    return `Tagged bail ${adjustment.days || adjustment.effectiveDays} days`
+    return `Tagged bail ${adjustment.daysTotal} days`
   }
 }

@@ -77,7 +77,7 @@ export default class AdjustmentsHubViewModel {
   public getTotalDays(adjustmentType: AdjustmentType) {
     return this.adjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
-      .map(a => a.days || a.daysBetween || a.effectiveDays)
+      .map(a => a.daysTotal)
       .reduce((sum, current) => sum + current, 0)
   }
 
@@ -120,13 +120,13 @@ export default class AdjustmentsHubViewModel {
 
   public totalDeductions(): number {
     return this.allDeductions()
-      .map(a => a.days || a.daysBetween)
+      .map(a => a.daysTotal)
       .reduce((sum, current) => sum + current, 0)
   }
 
   public totalUnusedDeductions(): number {
     return this.unusedDeductions()
-      .map(a => a.days || a.daysBetween)
+      .map(a => a.daysTotal)
       .reduce((sum, current) => sum + current, 0)
   }
 

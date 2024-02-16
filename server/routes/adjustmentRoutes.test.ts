@@ -59,6 +59,7 @@ const radaAdjustment = {
   bookingId: 12345,
   sentenceSequence: null,
   prisonId: 'LDS',
+  daysTotal: 24,
 } as Adjustment
 
 const remandAdjustment = {
@@ -72,6 +73,7 @@ const remandAdjustment = {
   bookingId: 12345,
   sentenceSequence: 1,
   prisonId: 'LDS',
+  daysTotal: 24,
 } as Adjustment
 
 const unusedDeductions = {
@@ -84,6 +86,7 @@ const unusedDeductions = {
   bookingId: 12345,
   sentenceSequence: null,
   prisonId: 'LDS',
+  daysTotal: 10,
 } as Adjustment
 
 const adaAdjustment = {
@@ -96,6 +99,7 @@ const adaAdjustment = {
   bookingId: 12345,
   sentenceSequence: null,
   prisonId: 'LDS',
+  daysTotal: 24,
 } as Adjustment
 
 let app: Express
@@ -247,6 +251,8 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/restored-additional-days/add valid', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
+    const expectedStore = { ...radaAdjustment }
+    delete expectedStore.daysTotal
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
@@ -255,7 +261,7 @@ describe('Adjustment routes tests', () => {
       .expect('Location', `/${NOMS_ID}/review`)
       .expect(res => {
         expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...expectedStore, id: undefined })
       })
   })
   it('POST /{nomsId}/restored-additional-days/add empty form validation', () => {
@@ -374,6 +380,8 @@ describe('Adjustment routes tests', () => {
         type: 'WARNING',
       },
     ])
+    const expectedStore = { ...radaAdjustment }
+    delete expectedStore.daysTotal
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
@@ -382,7 +390,7 @@ describe('Adjustment routes tests', () => {
       .expect('Location', `/${NOMS_ID}/warning`)
       .expect(res => {
         expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...expectedStore, id: undefined })
       })
   })
 
@@ -431,6 +439,10 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/restored-additional-days/edit valid', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
+    const expectedStore = {
+      ...radaAdjustment,
+    }
+    delete expectedStore.daysTotal
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/edit`)
       .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
@@ -439,12 +451,17 @@ describe('Adjustment routes tests', () => {
       .expect('Location', `/${NOMS_ID}/review`)
       .expect(res => {
         expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({ ...radaAdjustment, id: undefined })
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({
+          ...expectedStore,
+          id: undefined,
+        })
       })
   })
   it('POST /{nomsId}/restored-additional-days/edit/{id} valid', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
+    const expectedStore = { ...radaAdjustment, id: 'this-is-an-id' }
+    delete expectedStore.daysTotal
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/edit/this-is-an-id`)
       .send({ 'from-day': '5', 'from-month': '4', 'from-year': '2023', days: 24 })
@@ -453,10 +470,7 @@ describe('Adjustment routes tests', () => {
       .expect('Location', `/${NOMS_ID}/review`)
       .expect(res => {
         expect(adjustmentsStoreService.storeOnly.mock.calls).toHaveLength(1)
-        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual({
-          ...radaAdjustment,
-          id: 'this-is-an-id',
-        })
+        expect(adjustmentsStoreService.storeOnly.mock.calls[0][2]).toStrictEqual(expectedStore)
       })
   })
   it('GET /{nomsId}/warning display server side warning', () => {

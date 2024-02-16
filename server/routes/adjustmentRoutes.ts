@@ -344,7 +344,7 @@ export default class AdjustmentRoutes {
     await this.adjustmentsService.delete(id, token)
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
-      days: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
+      days: adjustment.daysTotal,
       action: adjustment.adjustmentType === 'REMAND' ? 'REMAND_REMOVED' : 'REMOVE',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)

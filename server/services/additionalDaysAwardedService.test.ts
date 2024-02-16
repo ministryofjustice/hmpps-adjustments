@@ -342,6 +342,7 @@ describe('Additional Days Added Service', () => {
           fromDate: '2023-08-03',
           days: 10,
           additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
+          daysTotal: 10,
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -423,6 +424,7 @@ describe('Additional Days Added Service', () => {
           fromDate: '2023-08-03',
           days: 10,
           additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
+          daysTotal: 10,
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -809,6 +811,7 @@ describe('Additional Days Added Service', () => {
             fromDate: '2023-08-03',
             days: 10,
             additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
+            daysTotal: 10,
           },
         ],
         startOfSentenceEnvelope,
