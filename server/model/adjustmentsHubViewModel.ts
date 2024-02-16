@@ -109,8 +109,7 @@ export default class AdjustmentsHubViewModel {
       const total = adjustments.map(a => a.days || a.daysBetween).reduce((sum, current) => sum + current, 0)
       const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
       return total - effective
-    } else {
-      return 0
     }
+    return 0
   }
 }
