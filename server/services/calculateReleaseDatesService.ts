@@ -4,13 +4,23 @@ import CalculateReleaseDatesApiClient from '../api/calculateReleaseDatesApiClien
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween } from '../utils/utils'
 
+const expectedUnusedDeductionsValidations = [
+  'CUSTODIAL_PERIOD_EXTINGUISHED_TAGGED_BAIL',
+  'CUSTODIAL_PERIOD_EXTINGUISHED_REMAND',
+]
 export default class CalculateReleaseDatesService {
   async calculateUnusedDeductions(
     prisonerId: string,
     adjustments: Adjustment[],
     token: string,
   ): Promise<UnusedDeductionCalculationResponse> {
-    return new CalculateReleaseDatesApiClient(token).calculateUnusedDeductions(prisonerId, adjustments)
+    const result = await new CalculateReleaseDatesApiClient(token).calculateUnusedDeductions(prisonerId, adjustments)
+    return {
+      ...result,
+      validationMessages: result.validationMessages.filter(
+        it => !expectedUnusedDeductionsValidations.includes(it.code),
+      ),
+    }
   }
 
   async unusedDeductionsHandlingCRDError(
