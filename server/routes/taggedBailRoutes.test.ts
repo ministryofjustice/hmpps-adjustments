@@ -8,6 +8,7 @@ import './testutils/toContainInOrder'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -93,6 +94,12 @@ const populatedAdjustment = {
   taggedBail: { caseSequence: 1 },
   daysTotal: 9955,
 }
+const nomisAdjustment = {
+  ...blankAdjustment,
+  days: 9955,
+  daysTotal: 9955,
+  sentenceSequence: 1,
+} as Adjustment
 
 let app: Express
 
@@ -148,11 +155,24 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/tagged-bail/view shows correct information', () => {
+  it('GET /{nomsId}/tagged-bail/view DPS adjustment shows correct information', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([populatedAdjustment])
-    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Tagged bail overview')
+        expect(res.text).toContain('Court 2')
+        expect(res.text).toContain('CASE001')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/view NOMIS adjustment shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([nomisAdjustment])
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/view`)
       .expect(200)
@@ -167,6 +187,21 @@ describe('Tagged bail routes tests', () => {
     prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
+    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([nomisAdjustment])
     adjustmentsService.get.mockResolvedValue(populatedAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
