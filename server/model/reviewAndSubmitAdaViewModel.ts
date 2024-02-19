@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class ReviewAndSubmitAdaViewModel {
   constructor(
     public prisonerDetail: PrisonApiPrisoner,
-    public adjustments: Adjustment[],
+    public adjustments: EditableAdjustment[],
     public existingAdjustments: Adjustment[],
     public quashedAdjustments: Adjustment[],
   ) {}
@@ -14,7 +14,7 @@ export default class ReviewAndSubmitAdaViewModel {
     const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
     if (anyUnlinkedAdas) {
       const existingDays = this.existingAdjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0)
-      const newDays = this.adjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0)
+      const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       return existingDays !== newDays
     }
     return false
@@ -30,13 +30,13 @@ export default class ReviewAndSubmitAdaViewModel {
             return [
               { text: dayjs(it.fromDate).format('D MMM YYYY') },
               { html: it.additionalDaysAwarded.adjudicationId.join('<br/>') },
-              { text: it.daysTotal, format: 'numeric' },
+              { text: it.days, format: 'numeric' },
             ]
           }),
           [
             { text: 'Total ADAs', colspan: 2 },
             {
-              text: this.adjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0),
+              text: this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
               format: 'numeric',
             },
           ],
