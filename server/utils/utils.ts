@@ -189,6 +189,12 @@ export function hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjust
   return false
 }
 
+export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSequence, adjustment: Adjustment): boolean {
+  return adjustment.taggedBail?.caseSequence
+    ? it.caseSequence === adjustment.taggedBail?.caseSequence
+    : it.sentences.some(sent => sent.sentenceSequence === adjustment.sentenceSequence)
+}
+
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {
   const remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
 

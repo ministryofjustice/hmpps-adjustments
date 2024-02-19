@@ -14,6 +14,7 @@ import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
   hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays,
+  relevantSentenceForTaggedBailAdjustment,
 } from '../utils/utils'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 
@@ -127,20 +128,20 @@ export default class TaggedBailRoutes {
 
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(prisonerDetail.bookingId, token)
     const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
-    const sentencesForCaseSequence = sentencesByCaseSequence.find(
-      it => it.caseSequence === adjustment.taggedBail.caseSequence,
+    const sentencesForCaseSequence = sentencesByCaseSequence.find(it =>
+      relevantSentenceForTaggedBailAdjustment(it, adjustment),
     )
+
     const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
 
-    const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
-      { [id]: sessionAdjustment },
+      { [id]: adjustment },
       nomsId,
       token,
     )
 
     const unusedDeductions = await this.calculateReleaseDateService.unusedDeductionsHandlingCRDError(
-      { [id]: sessionAdjustment },
+      {},
       adjustments,
       sentencesAndOffences,
       nomsId,
