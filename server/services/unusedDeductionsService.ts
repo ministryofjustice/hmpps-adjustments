@@ -13,14 +13,17 @@ export default class UnusedDeductionsService {
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
   ) {}
 
+  private anyDeductionFromNomis(deductions: Adjustment[]) {
+    return deductions.some(it => !it.remand?.chargeId?.length && !it.taggedBail?.caseSequence)
+  }
+
   /* Wait until calclulated unused deductions matches with adjustments database. */
   async waitUntilUnusedRemandCreated(nomsId: string, token: string): Promise<boolean> {
     try {
       let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
 
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      const dpsDeductions = deductions.filter(it => it.daysTotal)
-      if (deductions.length !== dpsDeductions.length) {
+      if (this.anyDeductionFromNomis(deductions)) {
         // won't calculate unused deductions if adjusments are not from DPS.
         return false
       }
@@ -64,6 +67,10 @@ export default class UnusedDeductionsService {
     token: string,
   ): Promise<boolean> {
     try {
+      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+      if (this.anyDeductionFromNomis(deductions)) {
+        return false
+      }
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
         adjustments,

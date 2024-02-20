@@ -4,6 +4,7 @@ import { AdjustmentType } from './adjustmentTypes'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
+  relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
 } from '../utils/utils'
 
@@ -29,9 +30,14 @@ export default class TaggedBailViewModel {
 
   public rows() {
     return this.adjustments.map(it => {
+      const sentencesForCaseSequence = this.sentencesByCaseSequence.find(sentencesByCaseSequence =>
+        relevantSentenceForTaggedBailAdjustment(sentencesByCaseSequence, it),
+      )
+      const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
+
       return [
-        { text: this.getCourtName(it.taggedBail.caseSequence) },
-        { text: this.getCaseReference(it.taggedBail.caseSequence) },
+        { text: sentenceAndOffence.courtDescription },
+        { text: sentenceAndOffence.caseReference },
         { text: it.daysTotal },
         this.actionCell(it),
       ]
@@ -49,24 +55,6 @@ export default class TaggedBailViewModel {
   public totalRow() {
     const total = this.adjustments.map(it => it.daysTotal).reduce((a, b) => a + b, 0)
     return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }, { text: '' }]]
-  }
-
-  private getCourtName(caseSequence: number): string {
-    const sentencesForCaseSequence = this.sentencesByCaseSequence.find(it => it.caseSequence === caseSequence)
-    if (sentencesForCaseSequence) {
-      return getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences).courtDescription
-    }
-
-    return null
-  }
-
-  private getCaseReference(caseSequence: number): string {
-    const sentencesForCaseSequence = this.sentencesByCaseSequence.find(it => it.caseSequence === caseSequence)
-    if (sentencesForCaseSequence) {
-      return getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences).caseReference
-    }
-
-    return null
   }
 
   private actionCell(adjustment: Adjustment) {

@@ -14,7 +14,7 @@ import {
   PrisonApiIndividualAdjudication,
   PrisonApiSanction,
 } from '../@types/prisonApi/prisonClientTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import PadaForm from '../model/padaForm'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
@@ -485,7 +485,7 @@ export default class AdditionalDaysAwardedService {
     startOfSentenceEnvelope: Date,
     token: string,
   ): Promise<{
-    adjustmentsToCreate: Adjustment[]
+    adjustmentsToCreate: EditableAdjustment[]
     awarded: AdasByDateCharged[]
     allAdaAdjustments: Adjustment[]
     quashed: AdasByDateCharged[]
@@ -540,7 +540,7 @@ export default class AdditionalDaysAwardedService {
         adjudicationId: it.charges.map(charge => charge.chargeNumber),
         prospective: it.charges.some(charge => charge.status === 'PROSPECTIVE'),
       },
-    } as Adjustment
+    } as EditableAdjustment
   }
 
   public async getReviewAndSubmitModel(
