@@ -1,5 +1,6 @@
 {% extends "govuk/template.njk" %}
 {% from "hmpps/components/legal-information/service-header/macro.njk" import serviceHeader %}
+{% from "hmpps/components/legal-information/sub-navigation/macro.njk" import subNavigation %}
 
 {% block head %}
   {% if tagManagerContainerId %}
@@ -54,16 +55,27 @@
   {{ 
       serviceHeader({
       environment: environment,
-      prisonNumber: model?.prisonerDetail?.offenderNo
+      prisonNumber: model.prisonerDetail.offenderNo
     })
   }}
 {% endblock %}
 
 {% block beforeContent %}
-  <aside role="complementary">
-    {% include "./phaseBanner.njk" %}
-    {% include "./prisonerIdentityBar.njk" %}
-  </aside>
+    <aside role="complementary">
+      {% include "./phaseBanner.njk" %}
+      {% include "./prisonerIdentityBar.njk" %}
+    </aside>
+    {% block subNavigation %}
+        {% if model.prisonerDetail.offenderNo !== undefined %}
+          {{ subNavigation(
+            environment, 
+            {
+              activeSubNav: 'adjustments'
+            }, 
+            model.prisonerDetail.offenderNo) 
+          }}
+        {% endif %}
+    {% endblock %}
   <span class="govuk-visually-hidden" id="{{ pageId }}"></span>
 {% endblock %}
 
