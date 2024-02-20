@@ -1,19 +1,19 @@
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import { dateToString } from '../utils/utils'
 
 export default class TaggedBailRemoveModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustment: Adjustment,
     public adjustmentType: AdjustmentType,
     public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
     public showUnusedMessage: boolean,
+    public prisonerNumber: string,
   ) {}
 
   public backlink(): string {
-    return `/${this.prisonerDetail.offenderNo}`
+    return `/${this.prisonerNumber}`
   }
 
   public rows() {

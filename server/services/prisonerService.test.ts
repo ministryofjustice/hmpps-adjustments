@@ -73,7 +73,7 @@ describe('Prisoner service related tests', () => {
           } as PrisonApiOffenderSentenceAndOffences,
         ])
 
-        const result = await prisonerService.getStartOfSentenceEnvelope(9991, token)
+        const result = await prisonerService.getStartOfSentenceEnvelope('9991', token)
 
         expect(result.earliestExcludingRecalls.toISOString().substring(0, 10)).toBe('2023-02-01')
         expect(result.earliestSentence.toISOString().substring(0, 10)).toBe('2023-01-01')

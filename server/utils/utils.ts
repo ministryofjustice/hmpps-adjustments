@@ -1,11 +1,7 @@
 import dayjs from 'dayjs'
 import ValidationError from '../model/validationError'
 import config from '../config'
-import {
-  PrisonApiOffence,
-  PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
-} from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import {
   CalculateReleaseDatesValidationMessage,
@@ -99,8 +95,8 @@ export function delay(ms: number): Promise<void> {
   })
 }
 
-export function calculateReleaseDatesCheckInformationUrl(prisonerDetail: PrisonApiPrisoner) {
-  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerDetail.offenderNo}/reason`
+export function calculateReleaseDatesCheckInformationUrl(prisonerNumber: string) {
+  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerNumber}/reason`
 }
 
 export const fieldsToDate = (day: string, month: string, year: string): Date =>

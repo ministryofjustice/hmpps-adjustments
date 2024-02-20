@@ -26,7 +26,7 @@ export default class PrisonerService {
   }
 
   async getSentencesAndOffencesFilteredForRemand(
-    bookingId: number,
+    bookingId: string,
     token: string,
   ): Promise<PrisonApiOffenderSentenceAndOffences[]> {
     return (await this.getSentencesAndOffences(bookingId, token))
@@ -42,7 +42,7 @@ export default class PrisonerService {
       })
   }
 
-  async getSentencesAndOffences(bookingId: number, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
+  async getSentencesAndOffences(bookingId: string, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
     const sentencesAndOffences = (await new PrisonApiClient(token).getSentencesAndOffences(bookingId)).filter(
       it => it.sentenceStatus === 'A',
     )
@@ -82,14 +82,14 @@ export default class PrisonerService {
   }
 
   async getBookingAndSentenceAdjustments(
-    bookingId: number,
+    bookingId: string,
     token: string,
   ): Promise<PrisonApiBookingAndSentenceAdjustments> {
     return new PrisonApiClient(token).getBookingAndSentenceAdjustments(bookingId)
   }
 
   async getStartOfSentenceEnvelope(
-    bookingId: number,
+    bookingId: string,
     token: string,
   ): Promise<{ earliestExcludingRecalls: Date; earliestSentence: Date }> {
     const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, token)

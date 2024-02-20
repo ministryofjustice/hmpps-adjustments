@@ -5,9 +5,9 @@ import config from '../config'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
 import { AdaIntercept, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import AdjustmentsService from './adjustmentsService'
+import { Prisoner } from '../@types/prisonSearchApi/types'
 
 jest.mock('../data/hmppsAuthClient')
 jest.mock('./additionalDaysApprovalStoreService')
@@ -735,7 +735,7 @@ describe('Additional Days Added Service', () => {
 
     it('Approve ADAs where a mix of consecutive and concurrent charges exist', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
+      const bookingId = '1234'
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
@@ -748,9 +748,9 @@ describe('Additional Days Added Service', () => {
       await adaService.submitAdjustments(
         request,
         {
-          offenderNo: nomsId,
+          prisonerNumber: nomsId,
           bookingId,
-        } as PrisonApiPrisoner,
+        } as Prisoner,
         startOfSentenceEnvelope,
         token,
       )
@@ -760,7 +760,6 @@ describe('Additional Days Added Service', () => {
     })
     it('Should intercept mix of concurrent consec', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
@@ -768,16 +767,7 @@ describe('Additional Days Added Service', () => {
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
       storeService.getLastApprovedDate.mockReturnValue(null)
-      const intercept = await adaService.shouldIntercept(
-        request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
-        [],
-        startOfSentenceEnvelope,
-        token,
-      )
+      const intercept = await adaService.shouldIntercept(request, nomsId, [], startOfSentenceEnvelope, token)
 
       expect(intercept).toEqual({
         type: 'UPDATE',
@@ -787,7 +777,6 @@ describe('Additional Days Added Service', () => {
     })
     it('Shouldnt intercept when already persisted in adjustment api', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
@@ -797,10 +786,7 @@ describe('Additional Days Added Service', () => {
       storeService.getLastApprovedDate.mockReturnValue(null)
       const intercept = await adaService.shouldIntercept(
         request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
+        nomsId,
         [
           {
             person: 'AA1234A',
@@ -824,7 +810,6 @@ describe('Additional Days Added Service', () => {
 
     it('Should intercept when already persisted adjustment has different days', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
@@ -834,10 +819,7 @@ describe('Additional Days Added Service', () => {
       storeService.getLastApprovedDate.mockReturnValue(null)
       const intercept = await adaService.shouldIntercept(
         request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
+        nomsId,
         [
           {
             person: 'AA1234A',
@@ -860,22 +842,12 @@ describe('Additional Days Added Service', () => {
     })
     it('Shouldnt intercept when recently saved prospective', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
       storeService.getLastApprovedDate.mockReturnValue(new Date())
-      const intercept = await adaService.shouldIntercept(
-        request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
-        [],
-        startOfSentenceEnvelope,
-        'username',
-      )
+      const intercept = await adaService.shouldIntercept(request, nomsId, [], startOfSentenceEnvelope, 'username')
 
       expect(intercept).toEqual({
         type: 'NONE',
@@ -887,20 +859,10 @@ describe('Additional Days Added Service', () => {
 
   it('Shouldnt intercept when there are no non recall sentences', async () => {
     const nomsId = 'AA1234A'
-    const bookingId = 1234
     const startOfSentenceEnvelope: Date = null
     const request = {} as jest.Mocked<Request>
     storeService.getLastApprovedDate.mockReturnValue(new Date())
-    const intercept = await adaService.shouldIntercept(
-      request,
-      {
-        offenderNo: nomsId,
-        bookingId,
-      } as PrisonApiPrisoner,
-      [],
-      startOfSentenceEnvelope,
-      token,
-    )
+    const intercept = await adaService.shouldIntercept(request, nomsId, [], startOfSentenceEnvelope, token)
 
     expect(intercept).toEqual({
       type: 'NONE',
@@ -911,7 +873,6 @@ describe('Additional Days Added Service', () => {
 
   it('Should intercept if all adas quashed', async () => {
     const nomsId = 'AA1234A'
-    const bookingId = 1234
     prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
     prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneQuashed)
     prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOneQuashed)
@@ -923,10 +884,7 @@ describe('Additional Days Added Service', () => {
 
     const intercept = await adaService.shouldIntercept(
       request,
-      {
-        offenderNo: nomsId,
-        bookingId,
-      } as PrisonApiPrisoner,
+      nomsId,
       [
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',

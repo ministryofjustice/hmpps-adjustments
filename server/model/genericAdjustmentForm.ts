@@ -3,8 +3,9 @@ import { AdjustmentTypes, EditableAdjustment } from '../@types/adjustments/adjus
 import { dateItems } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import ValidationError from './validationError'
+import { Prisoner } from '../@types/prisonSearchApi/types'
 
 export type GenericAdjustmentFormOptions = {
   hasToDate: boolean
@@ -30,11 +31,11 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
 
   options: GenericAdjustmentFormOptions
 
-  toAdjustment(prisonerDetails: PrisonApiPrisoner, nomsId: string, id: string): EditableAdjustment {
+  toAdjustment(prisonerDetails: Prisoner, nomsId: string, id: string): EditableAdjustment {
     return {
       id,
       adjustmentType: this.options.adjustmentType,
-      bookingId: prisonerDetails.bookingId,
+      bookingId: parseInt(prisonerDetails.bookingId, 10),
       fromDate: dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD'),
       toDate: this.options.hasToDate
         ? dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD')
@@ -42,7 +43,7 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
       person: nomsId,
       days: this.options.hasToDate ? null : Number(this.days),
       sentenceSequence: this.options.hasSentence ? Number(this.sentence) : null,
-      prisonId: prisonerDetails.agencyId,
+      prisonId: prisonerDetails.prisonId,
     }
   }
 

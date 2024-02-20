@@ -1,11 +1,9 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween } from '../utils/utils'
 
 export default class RemandSaveModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public unusedDeductions: number,
   ) {}

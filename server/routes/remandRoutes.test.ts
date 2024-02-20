@@ -134,7 +134,6 @@ afterEach(() => {
 
 describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/add okay', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
@@ -144,7 +143,6 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/add no applicable', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([])
     return request(app)
       .get(`/${NOMS_ID}/remand/add`)
@@ -153,7 +151,6 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/no-applicable-sentences', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .get(`/${NOMS_ID}/remand/no-applicable-sentences`)
       .expect('Content-Type', /html/)
@@ -168,7 +165,6 @@ describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/dates/add', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
@@ -190,7 +186,6 @@ describe('Remand routes tests', () => {
       ${'add'}  | ${`/${NOMS_ID}/remand/offences/add/${SESSION_ID}`}
       ${'edit'} | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
     `('POST of dates when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsService.validate.mockResolvedValue([])
@@ -217,7 +212,6 @@ describe('Remand routes tests', () => {
     `('POST /{nomsId}/remand/dates/add empty form validation', async ({ addOrEdit }) => {
       const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -237,7 +231,6 @@ describe('Remand routes tests', () => {
     `('POST /{nomsId}/remand/dates/addOrEdit to date after from', async ({ addOrEdit }) => {
       const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -266,7 +259,6 @@ describe('Remand routes tests', () => {
     `('POST /{nomsId}/remand/dates/:addOrEdit dates in future', async ({ addOrEdit }) => {
       const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -296,7 +288,6 @@ describe('Remand routes tests', () => {
     `('POST /{nomsId}/remand/dates/addOrEdit fromDate before earliest offence date', async ({ addOrEdit }) => {
       const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -327,7 +318,6 @@ describe('Remand routes tests', () => {
       async ({ addOrEdit }) => {
         const adjustments: Record<string, SessionAdjustment> = {}
         adjustments[SESSION_ID] = blankAdjustment
-        prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
         adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
         adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -363,7 +353,6 @@ describe('Remand routes tests', () => {
       async ({ addOrEdit, redirectLocation }) => {
         const adjustments: Record<string, SessionAdjustment> = {}
         adjustments[SESSION_ID] = blankAdjustment
-        prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
         adjustmentsStoreService.getAll.mockReturnValue(adjustments)
         adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
         adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -429,7 +418,6 @@ describe('Remand routes tests', () => {
     ])('POST /{nomsId}/remand/dates/addOrEdit overlapping remand periods', ({ adjustment, from, to, id }) => {
       const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getAll.mockReturnValue(adjustments)
       adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
       adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([adjustment, { ...adjustment, id }])
@@ -464,7 +452,6 @@ describe('Remand routes tests', () => {
     `('GET /{nomsId}/remand/offences/:addOrEdit', async ({ addOrEdit, title, backLink }) => {
       const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
       return request(app)
@@ -492,7 +479,6 @@ describe('Remand routes tests', () => {
       ${'add'}  | ${`/${NOMS_ID}/remand/review`}
       ${'edit'} | ${`/${NOMS_ID}/remand/edit/${SESSION_ID}`}
     `('POST /{nomsId}/remand/offence/:addOrEdit valid', async ({ addOrEdit, redirectLocation }) => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
       return request(app)
         .post(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
@@ -509,7 +495,6 @@ describe('Remand routes tests', () => {
       ${'add'}
       ${'edit'}
     `('POST /{nomsId}/remand/offence/:addOrEdit no offences selected', async ({ addOrEdit }) => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
       return request(app)
@@ -525,7 +510,6 @@ describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/review', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
@@ -587,7 +571,6 @@ describe('Remand routes tests', () => {
   it('POST /{nomsId}/remand/review nothing selected', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     return request(app)
@@ -601,7 +584,6 @@ describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/save calculated deductions', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
     calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue(
@@ -624,7 +606,6 @@ describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/save error from deductions', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue({ error: 'an error' })
@@ -641,7 +622,6 @@ describe('Remand routes tests', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/remand/save`)
       .expect(302)
@@ -649,7 +629,6 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/remove', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([adjustmentWithDatesAndCharges])
@@ -672,7 +651,6 @@ describe('Remand routes tests', () => {
   })
 
   it('POST /{nomsId}/remand/remove', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
 
@@ -683,7 +661,6 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -706,7 +683,6 @@ describe('Remand routes tests', () => {
   })
 
   it('GET /{nomsId}/remand/edit unused deductions calculation errors', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
@@ -725,7 +701,6 @@ describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/dates/edit', () => {
     const adjustments = {}
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
@@ -753,7 +728,6 @@ describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/edit with CRD error', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)

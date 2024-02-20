@@ -12,7 +12,7 @@
   <nav>
     {{ govukBackLink({
         text: "Back",
-        href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType().url + "/edit"
+        href: "/" + prisoner.prisonerNumber + "/" + model.adjustmentType().url + "/edit"
     }) }}
   </nav>
 {% endblock %}

@@ -1,4 +1,4 @@
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import {
@@ -11,16 +11,16 @@ export default class TaggedBailViewModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+    public prisonerNumber: string,
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
   }
 
   public backlink(): string {
-    return `/${this.prisonerDetail.offenderNo}`
+    return `/${this.prisonerNumber}`
   }
 
   public columnHeadings() {

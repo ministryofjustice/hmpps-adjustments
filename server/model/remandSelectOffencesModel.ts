@@ -1,9 +1,5 @@
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import {
-  PrisonApiOffence,
-  PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
-} from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import PrisonerService from '../services/prisonerService'
 import { daysBetween, groupBy } from '../utils/utils'
 import RemandOffencesForm from './remandOffencesForm'
@@ -13,21 +9,21 @@ export default class RemandSelectOffencesModel {
 
   constructor(
     public id: string,
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustment: SessionAdjustment,
     public form: RemandOffencesForm,
     sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+    public prisonerNumber: string,
     public addOrEdit: string = null,
   ) {
     this.cases = groupBy(sentencesAndOffences, (sent: PrisonApiOffenderSentenceAndOffences) => sent.caseSequence)
   }
 
   public backlink(): string {
-    if (this.addOrEdit === 'edit') return `/${this.prisonerDetail.offenderNo}/remand/edit/${this.id}`
+    if (this.addOrEdit === 'edit') return `/${this.prisonerNumber}/remand/edit/${this.id}`
     if (this.adjustment.complete) {
-      return `/${this.prisonerDetail.offenderNo}/remand/review`
+      return `/${this.prisonerNumber}/remand/review`
     }
-    return `/${this.prisonerDetail.offenderNo}/remand/dates/add/${this.id}`
+    return `/${this.prisonerNumber}/remand/dates/add/${this.id}`
   }
 
   public days(): number {

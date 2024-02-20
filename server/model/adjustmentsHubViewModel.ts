@@ -1,6 +1,5 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
@@ -26,13 +25,13 @@ export default class AdjustmentsHubViewModel {
   public messageType: AdjustmentType
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public relevantRemand: RemandResult,
     public remandDecision: IdentifyRemandDecision,
     public roles: string[],
     public message: Message,
     public serviceHasCalculatedUnusedDeductions: boolean,
+    public prisonerNumber: string,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
   }
@@ -92,7 +91,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public calculateReleaseDatesUrl() {
-    return calculateReleaseDatesCheckInformationUrl(this.prisonerDetail)
+    return calculateReleaseDatesCheckInformationUrl(this.prisonerNumber)
   }
 
   private allDeductionsOnDps() {

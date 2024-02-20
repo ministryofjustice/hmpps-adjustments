@@ -1,11 +1,9 @@
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment, ValidationMessage } from '../@types/adjustments/adjustmentsTypes'
 import WarningForm from './warningForm'
 import adjustmentTypes from './adjustmentTypes'
 
 export default class WarningModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustment: Adjustment,
     public validationMessage: ValidationMessage,
     public form: WarningForm,

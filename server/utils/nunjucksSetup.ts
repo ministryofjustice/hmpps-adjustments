@@ -3,6 +3,12 @@ import path from 'path'
 import dayjs from 'dayjs'
 import nunjucks from 'nunjucks'
 import express from 'express'
+import {
+  personProfileName,
+  personDateOfBirth,
+  personStatus,
+  firstNameSpaceLastName,
+} from 'hmpps-design-system-frontend/hmpps/utils/utils'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
@@ -16,6 +22,16 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   app.locals.applicationName = 'Adjustments'
   app.locals.environmentName = config.environmentName
   app.locals.environmentNameColour = config.environmentName === 'PRE-PRODUCTION' ? 'govuk-tag--green' : ''
+
+  if (config.environmentName === 'LOCAL') {
+    app.locals.environment = 'local'
+  } else if (config.environmentName === 'DEV') {
+    app.locals.environment = 'dev'
+  } else if (config.environmentName === 'PRE-PRODUCTION') {
+    app.locals.environment = 'pre'
+  } else {
+    app.locals.environment = 'prod'
+  }
 
   // Cachebusting version string
   if (production) {
@@ -34,6 +50,7 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
       path.join(__dirname, '../../server/views'),
       'node_modules/govuk-frontend/dist/',
       'node_modules/@ministryofjustice/frontend/',
+      'node_modules/hmpps-design-system-frontend/',
     ],
     {
       autoescape: true,
@@ -57,4 +74,9 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   })
 
   njkEnv.addFilter('date', (date, format) => dayjs(date).format(format))
+
+  njkEnv.addFilter('personProfileName', personProfileName)
+  njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
+  njkEnv.addFilter('personStatus', personStatus)
+  njkEnv.addFilter('firstNameSpaceLastName', firstNameSpaceLastName)
 }

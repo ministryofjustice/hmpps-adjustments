@@ -52,27 +52,27 @@
           {% elif model.message.action === 'ADDITIONAL_DAYS_UPDATED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner | firstNameSpaceLastName ) }}
           {% endset %}
           {% elif model.message.action === 'REMAND_UPDATED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner | firstNameSpaceLastName ) }}
           {% endset %}
           {% elif model.message.action === 'REMAND_REMOVED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Remand details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner | firstNameSpaceLastName ) }}
           {% endset %}
         {% elif model.message.action === 'TAGGED_BAIL_UPDATED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Tagged bail details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner | firstNameSpaceLastName ) }}
           {% endset %}
           {% elif model.message.action === 'TAGGED_BAIL_REMOVED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Tagged bail details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), model.prisonerDetail) }}
+            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner | firstNameSpaceLastName ) }}
           {% endset %}
         {% endif %}
 
@@ -105,8 +105,7 @@
       </div>
 
       <p class="govuk-body">
-        This page lists all the adjustments that have been recorded for {{ model.prisonerDetail.firstName | title }}
-        {{ model.prisonerDetail.lastName | title }}.
+        This page lists all the adjustments that have been recorded for {{ prisoner | firstNameSpaceLastName }}.
         You can add new adjustments or review remand time that has been identified from court outcomes logged in NOMIS.
       </p>
     </div>
@@ -118,10 +117,9 @@
         <div class="custom-card">
           <h2 class="govuk-heading-m adj-card-heading">There is existing remand to review</h2>
           <p data-qa="relevant-remand-message">Based on the data from court outcomes in
-            NOMIS, {{ model.prisonerDetail.firstName | title }}
-            {{ model.prisonerDetail.lastName | title }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
+            NOMIS, {{ prisoner | firstNameSpaceLastName }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
             Review the remand to make sure it is relevant.</p>
-          <a href="/{{ model.prisonerDetail.offenderNo }}/remand" class="govuk-button" role="button"
+          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button"
              data-qa="relevant-remand">Review</a>
         </div>
       {% endif %}
@@ -148,8 +146,7 @@
 
   <div class="govuk-inset-text govuk-!-margin-left-2 govuk-!-margin-top-9">
     <h2 class="govuk-heading-m">Calculate release dates</h2>
-    <p>The changes may affect the release date for {{ model.prisonerDetail.firstName | title }}
-      {{ model.prisonerDetail.lastName | title }}
+    <p>The changes may affect the release date for {{ prisoner | firstNameSpaceLastName }}
     </p>
     <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-button">
       Calculate release dates
@@ -157,8 +154,8 @@
   </div>
 {% endblock %}
 
-{% macro calcReleaseDatesMessage(calculateReleaseDatesdUrl, prisonerDetail) %}
+{% macro calcReleaseDatesMessage(calculateReleaseDatesdUrl, name) %}
   <p class="govuk-body">Once all adjustments have been made, you will need to
-    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a> for {{ prisonerDetail.firstName | title }} {{ prisonerDetail.lastName | title }}.
+    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a> for {{ name }}.
   </p>
 {% endmacro %}
