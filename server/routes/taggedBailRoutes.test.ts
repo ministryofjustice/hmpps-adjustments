@@ -157,7 +157,6 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('GET /{nomsId}/tagged-bail/view NOMIS adjustment shows correct information', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([nomisAdjustment])
     return request(app)
@@ -185,7 +184,6 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([nomisAdjustment])
     adjustmentsService.get.mockResolvedValue(populatedAdjustment)
