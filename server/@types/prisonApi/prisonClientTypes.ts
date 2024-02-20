@@ -1,7 +1,6 @@
 import { components } from './index'
 import { components as adjudicationComponents } from '../adjudications/index'
 
-export type PrisonApiPrisoner = components['schemas']['InmateDetail']
 export type PrisonApiUserCaseloads = components['schemas']['CaseLoad']
 export type PrisonApiCourtDateResult = components['schemas']['CourtDateResult']
 export type PrisonApiBookingAndSentenceAdjustments = components['schemas']['BookingAndSentenceAdjustments']

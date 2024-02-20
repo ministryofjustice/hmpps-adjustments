@@ -4,11 +4,7 @@ import request from 'supertest'
 import { appWithAllRoutes } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import {
-  PrisonApiOffence,
-  PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
-} from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
@@ -23,7 +19,7 @@ jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService() as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
@@ -31,15 +27,6 @@ const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<Adj
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
 const ADJUSTMENT_ID = '9991'
-
-const stubbedPrisonerData = {
-  offenderNo: NOMS_ID,
-  firstName: 'Anon',
-  lastName: 'Nobody',
-  dateOfBirth: '24/06/2000',
-  bookingId: 12345,
-  agencyId: 'LDS',
-} as PrisonApiPrisoner
 
 const sentenceAndOffenceBaseRecord = {
   terms: [
@@ -87,7 +74,7 @@ const offencesWithoutStartDates: PrisonApiOffence[] = [
 
 const blankAdjustment = {
   person: NOMS_ID,
-  bookingId: stubbedPrisonerData.bookingId,
+  bookingId: 12345,
   adjustmentType: 'REMAND',
 } as SessionAdjustment
 

@@ -13,7 +13,7 @@ import PrisonerSearchService from './prisonerSearchService'
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient } = dataAccess()
 
-  const prisonerService = new PrisonerService(hmppsAuthClient)
+  const prisonerService = new PrisonerService()
   const userService = new UserService(manageUsersApiClient, prisonerService)
   const adjustmentsService = new AdjustmentsService()
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()

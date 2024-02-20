@@ -3,7 +3,6 @@ import request from 'supertest'
 import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
@@ -19,7 +18,7 @@ jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedService')
 jest.mock('../services/unusedDeductionsService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
@@ -30,15 +29,6 @@ const additionalDaysAwardedService = new AdditionalDaysAwardedService(
 ) as jest.Mocked<AdditionalDaysAwardedService>
 
 const NOMS_ID = 'ABC123'
-
-const stubbedPrisonerData = {
-  offenderNo: NOMS_ID,
-  firstName: 'Anon',
-  lastName: 'Nobody',
-  dateOfBirth: '24/06/2000',
-  bookingId: 12345,
-  agencyId: 'LDS',
-} as PrisonApiPrisoner
 
 const remandResult = {
   chargeRemand: [],
@@ -133,7 +123,6 @@ afterEach(() => {
 
 describe('Adjustment routes tests', () => {
   it('GET /{nomsId} hub with unused deductions', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
@@ -163,7 +152,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('GET /{nomsId} hub unused deductions cannot be calculated', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
@@ -185,7 +173,6 @@ describe('Adjustment routes tests', () => {
   })
   it('GET /{nomsId} with remand role', () => {
     userInTest = userWithRemandRole
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
@@ -204,7 +191,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('GET /{nomsId} is intercepted if there is adas to review', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
@@ -221,7 +207,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId} relevant remand throws error', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([radaAdjustment])
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
@@ -237,7 +222,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/restored-additional-days/add', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
@@ -255,13 +239,11 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/restored-additional-days/add with validation error redirect', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([])
     return request(app).get(`/${NOMS_ID}/restored-additional-days/add`).redirects(1)
   })
 
   it('POST /{nomsId}/restored-additional-days/add valid', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
     const expectedStore = { ...radaAdjustment }
     delete expectedStore.daysTotal
@@ -277,7 +259,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('POST /{nomsId}/restored-additional-days/add empty form validation', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
@@ -288,7 +269,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add missing day and month validation and not number days', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-year': '2023', days: 'xyz' })
@@ -301,7 +281,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add invalid date and negative days', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-day': '36', 'from-month': '13', 'from-year': '2023', days: -1 })
@@ -314,7 +293,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add 2 digit year', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-day': '6', 'from-month': '3', 'from-year': '23', days: -1 })
@@ -326,7 +304,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add invalid date 29 Feb', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .send({ 'from-day': '29', 'from-month': '02', 'from-year': '2023', days: 1 })
@@ -338,7 +315,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add zero days', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
@@ -351,7 +327,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add fraction days', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
     return request(app)
       .post(`/${NOMS_ID}/restored-additional-days/add`)
@@ -364,7 +339,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/add server side validation mesage', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([
       {
         code: 'MORE_RADAS_THAN_ADAS',
@@ -383,7 +357,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('POST /{nomsId}/restored-additional-days/add server side warning mesage', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([
       {
         code: 'RADA_REDUCES_BY_MORE_THAN_HALF',
@@ -407,7 +380,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/restored-additional-days/edit should load adjustment from session', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
@@ -428,7 +400,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/restored-additional-days/edit should load adjustment from server', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
@@ -449,7 +420,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/restored-additional-days/edit valid', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
     const expectedStore = {
       ...radaAdjustment,
@@ -470,7 +440,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('POST /{nomsId}/restored-additional-days/edit/{id} valid', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.validate.mockResolvedValue([])
     const expectedStore = { ...radaAdjustment, id: 'this-is-an-id' }
     delete expectedStore.daysTotal
@@ -486,7 +455,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('GET /{nomsId}/warning display server side warning', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
     adjustmentsService.validate.mockResolvedValue([
       {
@@ -527,7 +495,6 @@ describe('Adjustment routes tests', () => {
   })
   it('POST /{nomsId}/warning submit warning without an answer', () => {
     adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
     adjustmentsService.validate.mockResolvedValue([
       {
@@ -548,7 +515,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/review', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
 
     return request(app)
@@ -566,7 +532,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/review', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
     adjustmentsService.create.mockResolvedValue({ adjustmentIds: ['this-is-an-id'] })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
@@ -585,7 +550,6 @@ describe('Adjustment routes tests', () => {
       })
   })
   it('POST /{nomsId}/review with a adjustment with an id', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
@@ -605,7 +569,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/{adjustmentType}/view', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'ACTIVE', prisonName: 'Leeds' },
     ])
@@ -626,7 +589,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/{adjustmentType}/remove/{id}', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.get.mockResolvedValue(radaAdjustment)
 
     return request(app)
@@ -640,7 +602,6 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/{adjustmentType}/remove/{id}', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsService.get.mockResolvedValue(radaAdjustment)
 
     return request(app)
