@@ -9,7 +9,6 @@ import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
 import adjustmentTypes from '../model/adjustmentTypes'
 import TaggedBailViewModel from '../model/taggedBailViewModel'
-import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
@@ -17,13 +16,15 @@ import {
   relevantSentenceForTaggedBailAdjustment,
 } from '../utils/utils'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
+import TaggedBailChangeModel from '../model/taggedBailEditModel'
+import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
 
 export default class TaggedBailRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
-    private readonly calculateReleaseDateService: CalculateReleaseDatesService,
+    private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -83,6 +84,9 @@ export default class TaggedBailRoutes {
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+    if (addOrEdit === 'edit') {
+      return res.redirect(`/${nomsId}/tagged-bail/${addOrEdit}/${id}`)
+    }
     return res.redirect(`/${nomsId}/tagged-bail/review/${addOrEdit}/${id}`)
   }
 
@@ -136,7 +140,7 @@ export default class TaggedBailRoutes {
       token,
     )
 
-    const unusedDeductions = await this.calculateReleaseDateService.unusedDeductionsHandlingCRDError(
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       {},
       adjustments,
       sentencesAndOffences,
@@ -189,6 +193,72 @@ export default class TaggedBailRoutes {
 
     const message = {
       action: 'TAGGED_BAIL_UPDATED',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  public edit: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, id } = req.params
+    const { bookingId, prisonerNumber } = res.locals.prisoner
+    const { caseSequence } = req.query as Record<string, string>
+    let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.getAsEditableAdjustment(id, token))
+    if (caseSequence) {
+      sessionAdjustment = {
+        ...sessionAdjustment,
+        taggedBail: { caseSequence: Number(caseSequence) },
+      }
+    }
+    this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
+
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
+    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
+      { [id]: sessionAdjustment },
+      nomsId,
+      token,
+    )
+
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
+      { [id]: sessionAdjustment },
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      token,
+    )
+
+    const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
+      adjustments,
+      unusedDeductions,
+    )
+
+    const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
+    const sentencesForCaseSequence = sentencesByCaseSequence.find(it =>
+      relevantSentenceForTaggedBailAdjustment(it, sessionAdjustment),
+    )
+    const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
+
+    return res.render('pages/adjustments/tagged-bail/edit', {
+      model: new TaggedBailChangeModel(
+        prisonerNumber,
+        sessionAdjustment,
+        sentenceAndOffence,
+        sentencesByCaseSequence.length,
+        showUnusedMessage,
+      ),
+    })
+  }
+
+  public submitEdit: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    await this.adjustmentsService.update(id, adjustment, token)
+
+    const message = {
+      action: 'REMAND_UPDATED',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

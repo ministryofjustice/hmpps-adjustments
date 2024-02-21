@@ -649,7 +649,7 @@ describe('Remand routes tests', () => {
 
   it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.getAsEditableAdjustment.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
@@ -671,7 +671,7 @@ describe('Remand routes tests', () => {
 
   it('GET /{nomsId}/remand/edit unused deductions calculation errors', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.getAsEditableAdjustment.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
 

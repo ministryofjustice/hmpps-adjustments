@@ -246,6 +246,7 @@ describe('Tagged bail routes tests', () => {
   test.each`
     addOrEdit | complete | backLink                                                                       | selectHref
     ${'add'}  | ${true}  | ${`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}" class="govuk-back-link"`} | ${`<a class="govuk-link" href=/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`}
+    ${'edit'} | ${false} | ${`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}" class="govuk-back-link"`}       | ${`<a class="govuk-link" href=/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`}
     ${'add'}  | ${false} | ${`/${NOMS_ID}" class="govuk-back-link"`}                                      | ${`<a class="govuk-link" href=/${NOMS_ID}/tagged-bail/days/add/${SESSION_ID}`}
   `(
     'GET /{nomsId}/tagged-bail/select-case/:addOrEdit back link and select href tests',
@@ -268,6 +269,7 @@ describe('Tagged bail routes tests', () => {
   test.each`
     addOrEdit | complete | backLink
     ${'add'}  | ${true}  | ${`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}" class="govuk-back-link"`}
+    ${'edit'} | ${true}  | ${`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}" class="govuk-back-link"`}
     ${'add'}  | ${false} | ${`/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}" class="govuk-back-link"`}
   `('GET /{nomsId}/tagged-bail/days/:addOrEdit back link tests', async ({ addOrEdit, complete, backLink }) => {
     const adjustments: Record<string, SessionAdjustment> = {}
@@ -294,6 +296,18 @@ describe('Tagged bail routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Selected')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/edit/{id} shows details', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.getAsEditableAdjustment.mockResolvedValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}?caseReference=1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
       })
   })
 })

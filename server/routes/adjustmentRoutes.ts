@@ -148,7 +148,7 @@ export default class AdjustmentRoutes {
     if (addOrEdit === 'edit') {
       const sessionAdjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
       if (id && sessionAdjustment?.id !== id) {
-        adjustment = await this.adjustmentsService.get(id, token)
+        adjustment = await this.adjustmentsService.getAsEditableAdjustment(id, token)
       } else {
         adjustment = sessionAdjustment
       }

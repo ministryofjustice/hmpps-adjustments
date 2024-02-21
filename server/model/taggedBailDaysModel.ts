@@ -11,6 +11,9 @@ export default class TaggedBailDaysModel {
   ) {}
 
   public backlink(): string {
+    if (this.addOrEdit === 'edit') {
+      return `/${this.prisonerNumber}/tagged-bail/${this.addOrEdit}/${this.id}`
+    }
     if (this.adjustment.complete) {
       return `/${this.prisonerNumber}/tagged-bail/review/${this.addOrEdit}/${this.id}`
     }
