@@ -17,6 +17,15 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).get(adjustmentId)
   }
 
+  public async getAsEditableAdjustment(adjustmentId: string, token: string): Promise<EditableAdjustment> {
+    const adjustment = await new AdjustmentsClient(token).get(adjustmentId)
+    if (!(adjustment.fromDate && adjustment.toDate)) {
+      ;(adjustment as EditableAdjustment).days = adjustment.daysTotal
+    }
+    delete adjustment.daysTotal
+    return adjustment as EditableAdjustment
+  }
+
   public async findByPerson(person: string, earliestSentenceDate: Date, token: string): Promise<Adjustment[]> {
     return new AdjustmentsClient(token).findByPerson(person, earliestSentenceDate.toISOString().substring(0, 10))
   }

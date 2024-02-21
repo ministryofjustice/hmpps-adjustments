@@ -77,11 +77,11 @@ export default class AdjustmentsFormFactory {
   }
 
   public static days(adjustment: Adjustment | EditableAdjustment): string {
-    if ('daysTotal' in adjustment) {
-      return adjustment.daysTotal.toString()
-    }
     if ('days' in adjustment) {
       return adjustment.days.toString()
+    }
+    if ('daysTotal' in adjustment) {
+      return adjustment.daysTotal.toString()
     }
     return ''
   }

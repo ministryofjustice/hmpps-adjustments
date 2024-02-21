@@ -306,7 +306,7 @@ export default class RemandRoutes {
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
     let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
+    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.getAsEditableAdjustment(id, token))
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(

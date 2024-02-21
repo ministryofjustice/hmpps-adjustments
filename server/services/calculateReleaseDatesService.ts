@@ -3,6 +3,7 @@ import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDa
 import CalculateReleaseDatesApiClient from '../api/calculateReleaseDatesApiClient'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween } from '../utils/utils'
+import SessionAdjustment from '../@types/AdjustmentTypes'
 
 const expectedUnusedDeductionsValidations = [
   'CUSTODIAL_PERIOD_EXTINGUISHED_TAGGED_BAIL',
@@ -24,7 +25,7 @@ export default class CalculateReleaseDatesService {
   }
 
   async unusedDeductionsHandlingCRDError(
-    sessionAdjustments: Record<string, Adjustment>,
+    sessionAdjustments: Record<string, SessionAdjustment>,
     adjustments: Adjustment[],
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
     nomsId: string,
@@ -36,24 +37,30 @@ export default class CalculateReleaseDatesService {
         [...this.makeSessionAdjustmentsReadyForCalculation(sessionAdjustments, sentencesAndOffence), ...adjustments],
         token,
       )
-    } catch {
+    } catch (error) {
       // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
       return null
     }
   }
 
   private makeSessionAdjustmentsReadyForCalculation(
-    sessionAdjustments: Record<string, Adjustment>,
+    sessionAdjustments: Record<string, SessionAdjustment>,
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
   ): Adjustment[] {
     return Object.values(sessionAdjustments).map(it => {
-      const sentence = sentencesAndOffence.find(sent =>
-        sent.offences.some(off => it.remand.chargeId.includes(off.offenderChargeId)),
-      )
+      let sentence
+      if (it.adjustmentType === 'REMAND') {
+        sentence = sentencesAndOffence.find(sent =>
+          sent.offences.some(off => it.remand.chargeId.includes(off.offenderChargeId)),
+        )
+      } else {
+        sentence = sentencesAndOffence.find(sent => it.taggedBail.caseSequence === sent.caseSequence)
+      }
+      const days = it.fromDate && it.toDate ? daysBetween(new Date(it.fromDate), new Date(it.toDate)) : it.days
       return {
         ...it,
-        daysBetween: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
-        effectiveDays: daysBetween(new Date(it.fromDate), new Date(it.toDate)),
+        daysTotal: days,
+        effectiveDays: days,
         sentenceSequence: sentence.sentenceSequence,
       }
     })

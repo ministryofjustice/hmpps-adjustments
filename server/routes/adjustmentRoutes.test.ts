@@ -409,7 +409,7 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.get.mockResolvedValue(radaAdjustment)
+    adjustmentsService.getAsEditableAdjustment.mockResolvedValue(radaAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/edit/this-is-an-id`)
       .expect('Content-Type', /html/)

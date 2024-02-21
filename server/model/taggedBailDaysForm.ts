@@ -2,16 +2,17 @@ import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustment
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import AdjustmentsFormFactory from './adjustmentFormFactory'
 
 export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm> {
-  days: number
+  days: string
 
   isEdit: boolean
 
   adjustmentId?: string
 
   toAdjustment(adjustment: Adjustment): SessionAdjustment {
-    return { ...adjustment, days: this.days, complete: true }
+    return { ...adjustment, days: Number(this.days), complete: true }
   }
 
   async validation(): Promise<ValidationError[]> {
@@ -34,9 +35,9 @@ export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm>
     return []
   }
 
-  static fromAdjustment(adjustment: EditableAdjustment): TaggedBailDaysForm {
+  static fromAdjustment(adjustment: EditableAdjustment | Adjustment): TaggedBailDaysForm {
     return new TaggedBailDaysForm({
-      days: adjustment.days,
+      days: AdjustmentsFormFactory.days(adjustment),
     })
   }
 }

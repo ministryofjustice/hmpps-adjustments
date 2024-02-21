@@ -60,7 +60,7 @@ export default class TaggedBailRemoveModel {
 
   private getCaseReference(): string {
     if (this.sentenceAndOffence) {
-      return this.sentenceAndOffence.caseReference
+      return this.sentenceAndOffence.caseReference || ''
     }
 
     return null

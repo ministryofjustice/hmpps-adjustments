@@ -87,6 +87,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/tagged-bail/days/:addOrEdit/:id', taggedBailRoutes.submitDays)
   get('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.review)
   post('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.submitReview)
+  get('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.edit)
+  post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
