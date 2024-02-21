@@ -121,7 +121,7 @@
             NOMIS, {{ prisoner.firstName | title }}
             {{ prisoner.lastName | title }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
             Review the remand to make sure it is relevant.</p>
-          <a href="/{{ prisoner.offenderNo }}/remand" class="govuk-button" role="button"
+          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button"
              data-qa="relevant-remand">Review</a>
         </div>
       {% endif %}
@@ -131,7 +131,7 @@
       </h2>
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.deductions() %}
-          {{ adjustmentCard(adjustmentType, model, prisoner.offenderNo) }}
+          {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
         {% endfor %}
       </div>
 
@@ -140,7 +140,7 @@
       </h2>
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.additions() %}
-          {{ adjustmentCard(adjustmentType, model, prisoner.offenderNo) }}
+          {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
         {% endfor %}
       </div>
     </div>

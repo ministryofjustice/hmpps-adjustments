@@ -49,7 +49,7 @@ export default class AdjustmentRoutes {
   public hub: RequestHandler = async (req, res): Promise<void> => {
     const { token, roles } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId, offenderNo } = res.locals.prisoner
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
     const message = req.flash('message')
@@ -80,7 +80,7 @@ export default class AdjustmentRoutes {
     if (!messageExists) {
       const intercept = await this.additionalDaysAwardedService.shouldIntercept(
         req,
-        offenderNo,
+        prisonerNumber,
         adjustments,
         startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
@@ -101,7 +101,7 @@ export default class AdjustmentRoutes {
       }
     return res.render('pages/adjustments/hub', {
       model: new AdjustmentsHubViewModel(
-        offenderNo,
+        prisonerNumber,
         adjustments,
         relevantRemand,
         remandDecision,

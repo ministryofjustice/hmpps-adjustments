@@ -8,6 +8,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import AdjustmentsService from './adjustmentsService'
+import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 
 jest.mock('../data/hmppsAuthClient')
 jest.mock('./additionalDaysApprovalStoreService')
@@ -735,7 +736,7 @@ describe('Additional Days Added Service', () => {
 
     it('Approve ADAs where a mix of consecutive and concurrent charges exist', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
+      const bookingId = '1234'
       prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
       prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
@@ -748,9 +749,9 @@ describe('Additional Days Added Service', () => {
       await adaService.submitAdjustments(
         request,
         {
-          offenderNo: nomsId,
+          prisonerNumber: nomsId,
           bookingId,
-        } as PrisonApiPrisoner,
+        } as PrisonerSearchApiPrisoner,
         startOfSentenceEnvelope,
         token,
       )

@@ -1,32 +1,18 @@
-import type HmppsAuthClient from '../data/hmppsAuthClient'
 import PrisonApiClient from '../api/prisonApiClient'
 import {
   PrisonApiBookingAndSentenceAdjustments,
   PrisonApiCourtDateResult,
   PrisonApiOffence,
   PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
   PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
 import FullPageError from '../model/FullPageError'
 
 export default class PrisonerService {
-  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
-
-  async getPrisonerDetailIncludingReleased(
-    nomsId: string,
-    userCaseloads: string[],
-    token: string,
-  ): Promise<PrisonApiPrisoner> {
-    return this.getPrisonerDetailImpl(nomsId, userCaseloads, token, true)
-  }
-
-  async getPrisonerDetail(nomsId: string, userCaseloads: string[], token: string): Promise<PrisonApiPrisoner> {
-    return this.getPrisonerDetailImpl(nomsId, userCaseloads, token, false)
-  }
+  constructor() {}
 
   async getSentencesAndOffencesFilteredForRemand(
-    bookingId: number,
+    bookingId: string,
     token: string,
   ): Promise<PrisonApiOffenderSentenceAndOffences[]> {
     return (await this.getSentencesAndOffences(bookingId, token))
@@ -42,7 +28,7 @@ export default class PrisonerService {
       })
   }
 
-  async getSentencesAndOffences(bookingId: number, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
+  async getSentencesAndOffences(bookingId: string, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
     const sentencesAndOffences = (await new PrisonApiClient(token).getSentencesAndOffences(bookingId)).filter(
       it => it.sentenceStatus === 'A',
     )
@@ -50,27 +36,6 @@ export default class PrisonerService {
       throw FullPageError.noSentences()
     }
     return sentencesAndOffences
-  }
-
-  private async getPrisonerDetailImpl(
-    nomsId: string,
-    userCaseloads: string[],
-    token: string,
-    includeReleased: boolean,
-  ): Promise<PrisonApiPrisoner> {
-    try {
-      const prisonerDetail = await new PrisonApiClient(token).getPrisonerDetail(nomsId)
-      if (userCaseloads.includes(prisonerDetail.agencyId) || (includeReleased && prisonerDetail.agencyId === 'OUT')) {
-        return prisonerDetail
-      }
-      throw FullPageError.notInCaseLoadError()
-    } catch (error) {
-      if (error?.status === 404) {
-        throw FullPageError.notInCaseLoadError()
-      } else {
-        throw error
-      }
-    }
   }
 
   public async getCourtDateResults(nomsId: string, token: string): Promise<PrisonApiCourtDateResult[]> {
@@ -89,7 +54,7 @@ export default class PrisonerService {
   }
 
   async getStartOfSentenceEnvelope(
-    bookingId: number,
+    bookingId: string,
     token: string,
   ): Promise<{ earliestExcludingRecalls: Date; earliestSentence: Date }> {
     const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, token)

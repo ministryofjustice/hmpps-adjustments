@@ -3,7 +3,7 @@ import { EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import { dateItems } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 
 export default class RestoredAdditionalDaysForm extends AdjustmentsForm<RestoredAdditionalDaysForm> {
   'from-day': string
@@ -14,17 +14,17 @@ export default class RestoredAdditionalDaysForm extends AdjustmentsForm<Restored
 
   days: string
 
-  toAdjustment(prisonerDetails: PrisonApiPrisoner, nomsId: string, id: string): EditableAdjustment {
+  toAdjustment(prisonerDetails: PrisonerSearchApiPrisoner, nomsId: string, id: string): EditableAdjustment {
     return {
       id,
       adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
-      bookingId: prisonerDetails.bookingId,
+      bookingId: parseInt(prisonerDetails.bookingId, 10),
       fromDate: dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD'),
       toDate: null,
       person: nomsId,
       days: Number(this.days),
       sentenceSequence: null,
-      prisonId: prisonerDetails.agencyId,
+      prisonId: prisonerDetails.prisonId,
     }
   }
 

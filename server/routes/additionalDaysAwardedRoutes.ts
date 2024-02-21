@@ -15,14 +15,14 @@ export default class AdditionalDaysAwardedRoutes {
   public intercept: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId, offenderNo } = res.locals.prisoner
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
-    const adjustments = await new AdjustmentsClient(token).findByPerson(offenderNo)
+    const adjustments = await new AdjustmentsClient(token).findByPerson(prisonerNumber)
 
     const intercept: AdaIntercept = await this.additionalDaysAwardedService.shouldIntercept(
       req,
-      offenderNo,
+      prisonerNumber,
       adjustments,
       startOfSentenceEnvelope.earliestExcludingRecalls,
       token,

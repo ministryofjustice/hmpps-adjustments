@@ -12,7 +12,7 @@
   <nav>
     {{ govukBackLink({
       text: "Back",
-      href: "/" + prisoner.offenderNo + "/remand/view"
+      href: "/" + prisoner.prisonerNumber + "/remand/view"
     }) }}
   </nav>
 {% endblock %}
@@ -53,7 +53,7 @@
       {{ remandSummary({
         adjustment: model.adjustment,
         offences: model.listOffences(),
-        offenderNo: prisoner.offenderNo,
+        offenderNo: prisoner.prisonerNumber,
         isEdit: true
       }) }}
 
@@ -76,7 +76,7 @@
 
           {{ govukButton({
             text: "Cancel",
-            href: "/" + prisoner.offenderNo + "/remand/view",
+            href: "/" + prisoner.prisonerNumber + "/remand/view",
             classes: "govuk-button--secondary"
           }) }}
         </div>

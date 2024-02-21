@@ -55,7 +55,7 @@
   {{ 
       serviceHeader({
       environment: environment,
-      prisonNumber: prisoner.offenderNo
+      prisonNumber: prisoner.prisonerNumber
     })
   }}
 {% endblock %}
@@ -66,13 +66,13 @@
       {% include "./prisonerIdentityBar.njk" %}
     </aside>
     {% block subNavigation %}
-        {% if prisoner.offenderNo !== undefined %}
+        {% if prisoner.prisonerNumber !== undefined %}
           {{ subNavigation(
             environment, 
             {
               activeSubNav: 'adjustments'
             }, 
-            prisoner.offenderNo) 
+            prisoner.prisonerNumber) 
           }}
         {% endif %}
     {% endblock %}
