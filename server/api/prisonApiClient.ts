@@ -6,7 +6,6 @@ import type {
   PrisonApiCourtDateResult,
   PrisonApiIndividualAdjudication,
   PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
   PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
 
@@ -15,10 +14,6 @@ export default class PrisonApiClient {
 
   constructor(token: string) {
     this.restClient = new RestClient('Prison API', config.apis.prisonApi as ApiConfig, token)
-  }
-
-  async getPrisonerDetail(nomsId: string): Promise<PrisonApiPrisoner> {
-    return this.restClient.get({ path: `/api/offenders/${nomsId}` }) as Promise<PrisonApiPrisoner>
   }
 
   async getUsersCaseloads(): Promise<PrisonApiUserCaseloads[]> {
