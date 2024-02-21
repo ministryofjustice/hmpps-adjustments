@@ -1,17 +1,17 @@
 import { RequestHandler } from 'express'
-import PrisonerService from '../services/prisonerService'
 import FullPageError from '../model/FullPageError'
 import logger from '../../logger'
+import PrisonerSearchService from '../services/prisonerSearchService'
 
-export default function populateCurrentPrisoner(prisonerService: PrisonerService): RequestHandler {
+export default function populateCurrentPrisoner(prisonerSearchService: PrisonerSearchService): RequestHandler {
   return async (req, res, next) => {
-    const { token, caseloads } = res.locals.user
+    const { username, caseloads } = res.locals.user
     const { nomsId } = req.params
 
-    if (token && nomsId) {
+    if (username && nomsId) {
       try {
-        const prisoner = await prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-        if (caseloads.includes(prisoner.agencyId)) {
+        const prisoner = await prisonerSearchService.getPrisonerDetails(nomsId, caseloads, username)
+        if (caseloads.includes(prisoner.prisonId)) {
           res.locals.prisoner = prisoner
         } else {
           throw FullPageError.notInCaseLoadError()

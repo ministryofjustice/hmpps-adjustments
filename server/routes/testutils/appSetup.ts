@@ -8,7 +8,7 @@ import errorHandler from '../../errorHandler'
 import * as auth from '../../authentication/auth'
 import type { Services } from '../../services'
 import type { ApplicationInfo } from '../../applicationInfo'
-import { PrisonApiPrisoner } from '../../@types/prisonApi/prisonClientTypes'
+import { PrisonerSearchApiPrisoner } from '../../@types/prisonerSearchApi/prisonerSearchTypes'
 
 const testAppInfo: ApplicationInfo = {
   applicationName: 'test',
@@ -18,14 +18,14 @@ const testAppInfo: ApplicationInfo = {
   branchName: 'main',
 }
 
-const defaultPrisoner: PrisonApiPrisoner = {
-  offenderNo: 'ABC123',
+const defaultPrisoner: PrisonerSearchApiPrisoner = {
+  prisonerNumber: 'ABC123',
   firstName: 'Anon',
   lastName: 'Nobody',
   dateOfBirth: '24/06/2000',
-  bookingId: 12345,
-  agencyId: 'LDS',
-}
+  bookingId: '12345',
+  prisonId: 'LDS',
+} as PrisonerSearchApiPrisoner
 
 export const user: Express.User = {
   name: 'FIRST LAST',
@@ -45,7 +45,7 @@ function appSetup(
   services: Services,
   production: boolean,
   userSupplier: () => Express.User,
-  prisoner: PrisonApiPrisoner,
+  prisoner: PrisonerSearchApiPrisoner,
 ): Express {
   const app = express()
 
@@ -80,7 +80,7 @@ export function appWithAllRoutes({
   production?: boolean
   services?: Partial<Services>
   userSupplier?: () => Express.User
-  prisoner?: PrisonApiPrisoner
+  prisoner?: PrisonerSearchApiPrisoner
 }): Express {
   auth.default.authenticationMiddleware = () => (req, res, next) => next()
   return appSetup(services as Services, production, userSupplier, prisoner)

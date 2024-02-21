@@ -1,6 +1,6 @@
 import SessionAdjustment from '../AdjustmentTypes'
 import type { UserDetails } from '../../services/userService'
-import { PrisonApiPrisoner } from '../prisonApi/prisonClientTypes'
+import { PrisonerSearchApiPrisoner } from '../prisonerSearchApi/prisonerSearchTypes'
 
 export default {}
 
@@ -30,7 +30,7 @@ export declare global {
 
     interface Locals {
       user: Express.User
-      prisoner: PrisonApiPrisoner
+      prisoner: PrisonerSearchApiPrisoner
     }
   }
 }

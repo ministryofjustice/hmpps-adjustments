@@ -3,26 +3,6 @@ import { stubFor } from './wiremock'
 import { adjudications, adjudicationsNoReview, adjudicationsSearch, adjudicationsSearchNoReview } from './adjudications'
 
 export default {
-  stubGetPrisonerDetails: (): SuperAgentRequest => {
-    return stubFor({
-      request: {
-        method: 'GET',
-        urlPattern: '/prison-api/api/offenders/A1234AB',
-      },
-      response: {
-        status: 200,
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
-        jsonBody: {
-          offenderNo: 'A1234AB',
-          bookingId: '1234',
-          firstName: 'Marvin',
-          lastName: 'Haggler',
-          dateOfBirth: '1965-02-03',
-          agencyId: 'MDI',
-        },
-      },
-    })
-  },
   stubGetUserCaseloads: (): SuperAgentRequest => {
     return stubFor({
       request: {

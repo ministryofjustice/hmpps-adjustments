@@ -28,13 +28,13 @@ export default class TaggedBailRoutes {
 
   public add: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    const { bookingId, agencyId } = res.locals.prisoner
+    const { bookingId, prisonId } = res.locals.prisoner
 
     const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
       adjustmentType: 'TAGGED_BAIL',
-      bookingId,
+      bookingId: parseInt(bookingId, 10),
       person: nomsId,
-      prisonId: agencyId,
+      prisonId,
     })
 
     return res.redirect(`/${nomsId}/tagged-bail/select-case/add/${sessionId}`)
@@ -43,19 +43,19 @@ export default class TaggedBailRoutes {
   public selectCase: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
-    const { bookingId, offenderNo } = res.locals.prisoner
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
-      model: new TaggedBailSelectCaseModel(offenderNo, sentencesAndOffences, addOrEdit, id, adjustment),
+      model: new TaggedBailSelectCaseModel(prisonerNumber, sentencesAndOffences, addOrEdit, id, adjustment),
     })
   }
 
   public days: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit, id } = req.params
     const { caseSequence } = req.query as Record<string, string>
-    const { offenderNo } = res.locals.prisoner
+    const { prisonerNumber } = res.locals.prisoner
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     if (caseSequence) {
       this.adjustmentsStoreService.store(req, nomsId, id, {
@@ -66,19 +66,19 @@ export default class TaggedBailRoutes {
     const form = TaggedBailDaysForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/tagged-bail/days', {
-      model: new TaggedBailDaysModel(offenderNo, addOrEdit, id, form, adjustment),
+      model: new TaggedBailDaysModel(prisonerNumber, addOrEdit, id, form, adjustment),
     })
   }
 
   public submitDays: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit, id } = req.params
-    const { offenderNo } = res.locals.prisoner
+    const { prisonerNumber } = res.locals.prisoner
     const adjustmentForm = new TaggedBailDaysForm({ ...req.body, isEdit: addOrEdit === 'edit', adjustmentId: id })
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     await adjustmentForm.validate()
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/tagged-bail/days', {
-        model: new TaggedBailDaysModel(offenderNo, addOrEdit, id, adjustmentForm, adjustment),
+        model: new TaggedBailDaysModel(prisonerNumber, addOrEdit, id, adjustmentForm, adjustment),
       })
     }
 
@@ -89,7 +89,7 @@ export default class TaggedBailRoutes {
   public view: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId, offenderNo } = res.locals.prisoner
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const taggedBailAdjustments = adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
     if (!taggedBailAdjustments.length) {
@@ -104,14 +104,14 @@ export default class TaggedBailRoutes {
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
 
     return res.render('pages/adjustments/tagged-bail/view', {
-      model: new TaggedBailViewModel(offenderNo, taggedBailAdjustments, adjustmentType, sentencesAndOffences),
+      model: new TaggedBailViewModel(prisonerNumber, taggedBailAdjustments, adjustmentType, sentencesAndOffences),
     })
   }
 
   public remove: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
-    const { bookingId, offenderNo } = res.locals.prisoner
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     const adjustment = await this.adjustmentsService.get(id, token)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
@@ -150,7 +150,13 @@ export default class TaggedBailRoutes {
     )
 
     return res.render('pages/adjustments/tagged-bail/remove', {
-      model: new TaggedBailRemoveModel(offenderNo, adjustment, adjustmentType, sentenceAndOffence, showUnusedMessage),
+      model: new TaggedBailRemoveModel(
+        prisonerNumber,
+        adjustment,
+        adjustmentType,
+        sentenceAndOffence,
+        showUnusedMessage,
+      ),
     })
   }
 
@@ -158,7 +164,7 @@ export default class TaggedBailRoutes {
     const { token } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
     const { caseSequence } = req.query as Record<string, string>
-    const { bookingId, offenderNo } = res.locals.prisoner
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     if (caseSequence) {
       this.adjustmentsStoreService.store(req, nomsId, id, {
         ...this.adjustmentsStoreService.getById(req, nomsId, id),
@@ -169,7 +175,7 @@ export default class TaggedBailRoutes {
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
 
     return res.render('pages/adjustments/tagged-bail/review', {
-      model: new TaggedBailReviewModel(offenderNo, addOrEdit, id, sentencesAndOffences, adjustment),
+      model: new TaggedBailReviewModel(prisonerNumber, addOrEdit, id, sentencesAndOffences, adjustment),
     })
   }
 

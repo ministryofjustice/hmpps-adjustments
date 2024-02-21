@@ -8,7 +8,7 @@
 
 {% block content %}
 
-  {% set backUrl = '/' + prisoner.offenderNo + '/additional-days/review-prospective' if referrer==='REVIEW_PROSPECTIVE' else '/' + prisoner.offenderNo + '/additional-days/review-and-approve' %}
+  {% set backUrl = '/' + prisoner.prisonerNumber + '/additional-days/review-prospective' if referrer==='REVIEW_PROSPECTIVE' else '/' + prisoner.prisonerNumber + '/additional-days/review-and-approve' %}
 
   <a href="{{ backUrl }}" class="govuk-back-link">Back</a>
 

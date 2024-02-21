@@ -8,9 +8,9 @@
 {% block content %}
 
   {% if adasToReview.intercept.anyProspective %}
-    {% set url = "/" + prisoner.offenderNo + "/additional-days/review-prospective" %}
+    {% set url = "/" + prisoner.prisonerNumber + "/additional-days/review-prospective" %}
   {% else %}
-    {% set url = "/" + prisoner.offenderNo + "/additional-days/intercept" %}
+    {% set url = "/" + prisoner.prisonerNumber + "/additional-days/intercept" %}
   {% endif %}
   <a href="{{url}}" class="govuk-back-link">Back</a>
 

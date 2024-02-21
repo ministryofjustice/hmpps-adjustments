@@ -2,9 +2,9 @@
 {% if prisoner %}
     {{ mojIdentityBar({
          title: {
-             html: '<span class="govuk-!-margin-right-5"><strong>Prisoner name: </strong><a href="' + digitalPrisonServicesUrl + '/prisoner/' + prisoner.offenderNo + '">' + prisoner.firstName | title + ' ' + prisoner.lastName | title + '</a></span>' +
+             html: '<span class="govuk-!-margin-right-5"><strong>Prisoner name: </strong><a href="' + digitalPrisonServicesUrl + '/prisoner/' + prisoner.prisonerNumber + '">' + prisoner.firstName | title + ' ' + prisoner.lastName | title + '</a></span>' +
              '<strong> Date of birth: </strong><span class="govuk-!-margin-right-5">' + prisoner.dateOfBirth | date("DD MMMM YYYY")  + '</span>' +
-             '<strong>Prison number: </strong>' + prisoner.offenderNo
+             '<strong>Prison number: </strong>' + prisoner.prisonerNumber
          }
      }) }}
 {% endif %}
