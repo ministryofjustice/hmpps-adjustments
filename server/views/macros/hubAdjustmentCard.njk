@@ -1,20 +1,20 @@
 {% from "govuk/components/details/macro.njk" import govukDetails %}
-{% macro adjustmentCard(adjustmentType, model) %}
+{% macro adjustmentCard(adjustmentType, model, prisonerNumber) %}
   <div class="adjustment-card">
     <div class="govuk-summary-card__title-wrapper">
         <h2 class="govuk-summary-card__title">{{ adjustmentType.text }}</h2>
         <ul class="govuk-summary-card__actions">
             <li class="govuk-summary-card__action">
               {% if model.displayAddLink(adjustmentType) %}
-                    <a href="/{{ prisoner.offenderNo }}/{{ adjustmentType.url }}/add"
+                    <a href="/{{ prisonerNumber }}/{{ adjustmentType.url }}/add"
                       data-qa="add-{{ adjustmentType.url }}">Add new</a>
               {% else %}
-                <a href="/{{ prisoner.offenderNo }}/remand" class="govuk-!-text-align-right">Review remand</a>
+                <a href="/{{ prisonerNumber }}/remand" class="govuk-!-text-align-right">Review remand</a>
               {% endif %}
             </li>
             {% if model.showDetails(adjustmentType) %}
               <li class="govuk-summary-card__action">
-                <a href="/{{ prisoner.offenderNo }}/{{ adjustmentType.url }}/view"
+                <a href="/{{ prisonerNumber }}/{{ adjustmentType.url }}/view"
                   data-qa="view-{{ adjustmentType.url }}">View</a>
               </li>
             {% endif %}
@@ -45,7 +45,7 @@
               <br/>
               Reason for rejection: {{ model.remandDecision.rejectComment }}
               <br/>
-              <a href="{{ prisoner.offenderNo }}/remand">Re-review</a>
+              <a href="{{ prisonerNumber }}/remand">Re-review</a>
             {% endif %}
           </p>
         {% endif %}

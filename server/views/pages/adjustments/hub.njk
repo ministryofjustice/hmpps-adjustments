@@ -131,7 +131,7 @@
       </h2>
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.deductions() %}
-          {{ adjustmentCard(adjustmentType, model) }}
+          {{ adjustmentCard(adjustmentType, model, prisoner.offenderNo) }}
         {% endfor %}
       </div>
 
@@ -140,7 +140,7 @@
       </h2>
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.additions() %}
-          {{ adjustmentCard(adjustmentType, model) }}
+          {{ adjustmentCard(adjustmentType, model, prisoner.offenderNo) }}
         {% endfor %}
       </div>
     </div>
