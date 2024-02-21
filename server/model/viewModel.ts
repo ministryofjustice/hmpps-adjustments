@@ -1,5 +1,4 @@
 import dayjs from 'dayjs'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
@@ -9,7 +8,6 @@ export default class ViewModel {
   public adjustments: Adjustment[]
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     allAdjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
     public remandDecision: IdentifyRemandDecision,

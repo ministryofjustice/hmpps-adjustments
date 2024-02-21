@@ -99,10 +99,7 @@ describe('Future date tests', () => {
 
 describe('Calculate Release Dates Location', () => {
   it('Check redirection to reason is configured', () => {
-    const stubbedPrisonerData = {
-      offenderNo: 'A1234AA',
-    }
-    return expect(calculateReleaseDatesCheckInformationUrl(stubbedPrisonerData)).toContain(
+    return expect(calculateReleaseDatesCheckInformationUrl('A1234AA')).toContain(
       'http://localhost:8080/calculation/A1234AA/reason',
     )
   })

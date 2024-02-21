@@ -12,7 +12,7 @@
   <nav>
     {{ govukBackLink({
         text: "Back",
-        href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/view"
+        href: "/" + prisoner.offenderNo + "/" + model.adjustmentType.url + "/view"
     }) }}
   </nav>
 {% endblock %}
@@ -47,7 +47,7 @@
           {{ govukButton({
           text: "Cancel",
           classes: "govuk-button--secondary",
-          href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/view"
+          href: "/" + prisoner.offenderNo + "/" + model.adjustmentType.url + "/view"
         }) }}
         </div>
       </form>

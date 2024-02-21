@@ -8,9 +8,9 @@
 {% block content %}
 
   {% if adasToReview.intercept.anyProspective %}
-    {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/review-prospective" %}
+    {% set url = "/" + prisoner.offenderNo + "/additional-days/review-prospective" %}
   {% else %}
-    {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/intercept" %}
+    {% set url = "/" + prisoner.offenderNo + "/additional-days/intercept" %}
   {% endif %}
   <a href="{{url}}" class="govuk-back-link">Back</a>
 
@@ -37,7 +37,7 @@
             adas: adasToReview.awarded,
             total: adasToReview.totalAwarded,
             mainTitle: 'Awarded ADAs will be included in the calculation.',
-            emptyTitle: model.prisonerDetail.firstName | title + ' ' + model.prisonerDetail.lastName | title + ' has no ADAs that are applicable to the current sentences.'
+            emptyTitle: prisoner.firstName | title + ' ' + prisoner.lastName | title + ' has no ADAs that are applicable to the current sentences.'
             })
              }}
         {% endif %}

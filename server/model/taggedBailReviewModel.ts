@@ -1,10 +1,10 @@
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { dateToString, getMostRecentSentenceAndOffence } from '../utils/utils'
 
 export default class TaggedBailReviewModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
+    public prisonerNumber: string,
     private addOrEdit: string,
     public id: string,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
@@ -12,7 +12,7 @@ export default class TaggedBailReviewModel {
   ) {}
 
   public backlink(): string {
-    return `/${this.prisonerDetail.offenderNo}/tagged-bail/days/${this.addOrEdit}/${this.id}`
+    return `/${this.prisonerNumber}/tagged-bail/days/${this.addOrEdit}/${this.id}`
   }
 
   public getCaseDetails() {

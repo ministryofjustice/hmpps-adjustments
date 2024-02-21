@@ -1,11 +1,10 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { offencesForAdjustment } from '../utils/utils'
 
 export default class RemandViewModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
   ) {}

@@ -8,6 +8,7 @@ import errorHandler from '../../errorHandler'
 import * as auth from '../../authentication/auth'
 import type { Services } from '../../services'
 import type { ApplicationInfo } from '../../applicationInfo'
+import { PrisonApiPrisoner } from '../../@types/prisonApi/prisonClientTypes'
 
 const testAppInfo: ApplicationInfo = {
   applicationName: 'test',
@@ -15,6 +16,15 @@ const testAppInfo: ApplicationInfo = {
   gitRef: 'long ref',
   gitShortHash: 'short ref',
   branchName: 'main',
+}
+
+const defaultPrisoner: PrisonApiPrisoner = {
+  offenderNo: 'ABC123',
+  firstName: 'Anon',
+  lastName: 'Nobody',
+  dateOfBirth: '24/06/2000',
+  bookingId: 12345,
+  agencyId: 'LDS',
 }
 
 export const user: Express.User = {
@@ -31,7 +41,12 @@ export const user: Express.User = {
 
 export const flashProvider = jest.fn()
 
-function appSetup(services: Services, production: boolean, userSupplier: () => Express.User): Express {
+function appSetup(
+  services: Services,
+  production: boolean,
+  userSupplier: () => Express.User,
+  prisoner: PrisonApiPrisoner,
+): Express {
   const app = express()
 
   app.set('view engine', 'njk')
@@ -43,6 +58,7 @@ function appSetup(services: Services, production: boolean, userSupplier: () => E
     req.flash = flashProvider
     res.locals = {
       user: { ...req.user },
+      prisoner,
     }
     next()
   })
@@ -59,11 +75,13 @@ export function appWithAllRoutes({
   production = false,
   services = {},
   userSupplier = () => user,
+  prisoner = defaultPrisoner,
 }: {
   production?: boolean
   services?: Partial<Services>
   userSupplier?: () => Express.User
+  prisoner?: PrisonApiPrisoner
 }): Express {
   auth.default.authenticationMiddleware = () => (req, res, next) => next()
-  return appSetup(services as Services, production, userSupplier)
+  return appSetup(services as Services, production, userSupplier, prisoner)
 }

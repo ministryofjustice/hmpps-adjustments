@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween, offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
@@ -9,7 +9,7 @@ export default class RemandReviewModel {
   adjustmentIds: string[]
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
+    public prisonerNumber: string,
     public adjustments: Record<string, Adjustment>,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculateReleaseDatesValidationMessages: CalculateReleaseDatesValidationMessage[],
@@ -29,7 +29,7 @@ export default class RemandReviewModel {
   }
 
   public backlink(): string {
-    return `/${this.prisonerDetail.offenderNo}/remand/offences/add/${this.adjustmentIds[0]}`
+    return `/${this.prisonerNumber}/remand/offences/add/${this.adjustmentIds[0]}`
   }
 
   public adjustmentSummary(id: string) {
@@ -49,7 +49,7 @@ export default class RemandReviewModel {
           actions: {
             items: [
               {
-                href: `/${this.prisonerDetail.offenderNo}/remand/dates/add/${id}`,
+                href: `/${this.prisonerNumber}/remand/dates/add/${id}`,
                 text: 'Edit',
                 visuallyHiddenText: 'remand',
               },
@@ -75,7 +75,7 @@ export default class RemandReviewModel {
           actions: {
             items: [
               {
-                href: `/${this.prisonerDetail.offenderNo}/remand/offences/add/${id}`,
+                href: `/${this.prisonerNumber}/remand/offences/add/${id}`,
                 text: 'Edit',
                 visuallyHiddenText: 'remand',
               },
