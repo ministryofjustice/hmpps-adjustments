@@ -25,13 +25,10 @@ export default class RemandRoutes {
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-    const prisonerDetails = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetails.bookingId,
-      token,
-    )
+    const { bookingId, agencyId } = res.locals.prisoner
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
 
     if (!sentencesAndOffences.length) {
       return res.redirect(`/${nomsId}/remand/no-applicable-sentences`)
@@ -39,16 +36,16 @@ export default class RemandRoutes {
 
     const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
       adjustmentType: 'REMAND',
-      bookingId: prisonerDetails.bookingId,
+      bookingId,
       person: nomsId,
-      prisonId: prisonerDetails.agencyId,
+      prisonId: agencyId,
     })
     return res.redirect(`/${nomsId}/remand/dates/add/${sessionId}`)
   }
 
   public dates: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
+    const { offenderNo } = res.locals.prisoner
 
     if (!['edit', 'add'].includes(addOrEdit)) {
       throw FullPageError.notFoundError()
@@ -56,31 +53,28 @@ export default class RemandRoutes {
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
 
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-
     const form = RemandDatesForm.fromAdjustment(adjustment)
 
     return res.render('pages/adjustments/remand/dates', {
-      model: new RemandDatesModel(id, prisonerDetail, adjustments, form, addOrEdit),
+      model: new RemandDatesModel(id, offenderNo, adjustments, form, addOrEdit),
     })
   }
 
   public submitDates: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
-
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const { bookingId, offenderNo } = res.locals.prisoner
     const adjustmentForm = new RemandDatesForm({ ...req.body, isEdit: addOrEdit === 'edit', adjustmentId: id })
 
     await adjustmentForm.validate(
-      () => this.prisonerService.getSentencesAndOffencesFilteredForRemand(prisonerDetail.bookingId, token),
+      () => this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token),
       () => this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token),
     )
 
     const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/remand/dates', {
-        model: new RemandDatesModel(id, prisonerDetail, [sessionAdjustment], adjustmentForm, addOrEdit),
+        model: new RemandDatesModel(id, offenderNo, [sessionAdjustment], adjustmentForm, addOrEdit),
       })
     }
 
@@ -97,49 +91,42 @@ export default class RemandRoutes {
   }
 
   public offences: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
-
+    const { bookingId, offenderNo } = res.locals.prisoner
     if (!['edit', 'add'].includes(addOrEdit)) {
       throw FullPageError.notFoundError()
     }
 
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const form = RemandOffencesForm.fromAdjustment(adjustment, sentencesAndOffences)
 
     return res.render('pages/adjustments/remand/offences', {
-      model: new RemandSelectOffencesModel(id, prisonerDetail, adjustment, form, sentencesAndOffences, addOrEdit),
+      model: new RemandSelectOffencesModel(id, offenderNo, adjustment, form, sentencesAndOffences, addOrEdit),
     })
   }
 
   public submitOffences: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
+    const { bookingId, offenderNo } = res.locals.prisoner
 
     if (!['edit', 'add'].includes(addOrEdit)) {
       throw FullPageError.notFoundError()
     }
 
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
     const adjustmentForm = new RemandOffencesForm(req.body)
 
     await adjustmentForm.validate()
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
     if (adjustmentForm.errors.length) {
-      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-        prisonerDetail.bookingId,
-        token,
-      )
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
       return res.render('pages/adjustments/remand/offences', {
         model: new RemandSelectOffencesModel(
           id,
-          prisonerDetail,
+          offenderNo,
           adjustment,
           adjustmentForm,
           sentencesAndOffences,
@@ -158,8 +145,9 @@ export default class RemandRoutes {
   }
 
   public review: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
+    const { bookingId, offenderNo } = res.locals.prisoner
 
     const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
     Object.keys(sessionAdjustments).forEach(it => {
@@ -171,11 +159,7 @@ export default class RemandRoutes {
     if (!Object.keys(sessionAdjustments).length) {
       return res.redirect(`/${nomsId}`)
     }
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustments,
@@ -187,7 +171,7 @@ export default class RemandRoutes {
 
     return res.render('pages/adjustments/remand/review', {
       model: new RemandReviewModel(
-        prisonerDetail,
+        offenderNo,
         sessionAdjustments,
         sentencesAndOffences,
         unusedDeductions?.validationMessages || [],
@@ -197,19 +181,16 @@ export default class RemandRoutes {
   }
 
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
+    const { bookingId, offenderNo } = res.locals.prisoner
 
     const form = new ReviewRemandForm(req.body)
     await form.validate()
     if (form.errors.length) {
       const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
       const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-        prisonerDetail.bookingId,
-        token,
-      )
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
       const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
         sessionAdjustments,
         adjustments,
@@ -219,7 +200,7 @@ export default class RemandRoutes {
       )
       return res.render('pages/adjustments/remand/review', {
         model: new RemandReviewModel(
-          prisonerDetail,
+          offenderNo,
           sessionAdjustments,
           sentencesAndOffences,
           unusedDeductions?.validationMessages || [],
@@ -234,15 +215,11 @@ export default class RemandRoutes {
   }
 
   public save: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const { bookingId } = res.locals.prisoner
     const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
 
     const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
@@ -254,7 +231,7 @@ export default class RemandRoutes {
     )
 
     return res.render('pages/adjustments/remand/save', {
-      model: new RemandSaveModel(prisonerDetail, Object.values(sessionAdjustments), unusedDeductions?.unusedDeductions),
+      model: new RemandSaveModel(Object.values(sessionAdjustments), unusedDeductions?.unusedDeductions),
     })
   }
 
@@ -280,31 +257,25 @@ export default class RemandRoutes {
 
   public view: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    const { caseloads, token } = res.locals.user
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const { token } = res.locals.user
+    const { bookingId } = res.locals.prisoner
     const adjustments = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(
       it => it.adjustmentType === 'REMAND',
     )
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     this.adjustmentsStoreService.clear(req, nomsId)
 
     return res.render('pages/adjustments/remand/view', {
-      model: new RemandViewModel(prisonerDetail, adjustments, sentencesAndOffences),
+      model: new RemandViewModel(adjustments, sentencesAndOffences),
     })
   }
 
   public remove: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId, id } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const { bookingId } = res.locals.prisoner
     const adjustment = await this.adjustmentsService.get(id, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
 
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
       { [id]: adjustment },
@@ -326,27 +297,18 @@ export default class RemandRoutes {
     )
 
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandChangeModel(
-        prisonerDetail,
-        adjustment,
-        sentencesAndOffences,
-        unusedDeductions,
-        showUnusedMessage,
-      ),
+      model: new RemandChangeModel(adjustment, sentencesAndOffences, unusedDeductions, showUnusedMessage),
     })
   }
 
   public edit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId, id } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
+    const { bookingId } = res.locals.prisoner
     let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
       { [id]: sessionAdjustment },
       nomsId,
@@ -368,7 +330,6 @@ export default class RemandRoutes {
 
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
-        prisonerDetail,
         {
           ...sessionAdjustment,
           daysTotal: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
@@ -395,14 +356,6 @@ export default class RemandRoutes {
   }
 
   public noApplicableSentences: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
-    const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-
-    return res.render('pages/adjustments/remand/no-applicable-sentence', {
-      model: {
-        prisonerDetail,
-      },
-    })
+    return res.render('pages/adjustments/remand/no-applicable-sentence')
   }
 }

@@ -394,7 +394,7 @@ export default class AdditionalDaysAwardedService {
 
   public async shouldIntercept(
     req: Request,
-    prisonerDetail: PrisonApiPrisoner,
+    prisonerNumber: string,
     adjustments: Adjustment[],
     startOfSentenceEnvelope: Date,
     token: string,
@@ -404,7 +404,7 @@ export default class AdditionalDaysAwardedService {
     }
     const allAdaAdjustments = adjustments.filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
 
-    const adas: Ada[] = await this.lookupAdas(token, prisonerDetail.offenderNo, startOfSentenceEnvelope)
+    const adas: Ada[] = await this.lookupAdas(token, prisonerNumber, startOfSentenceEnvelope)
 
     const awardedOrPending: AdasByDateCharged[] = this.getAdasByDateCharged(adas, 'AWARDED_OR_PENDING')
     const { awaitingApproval, awarded } = this.filterAdasByMatchingAdjustment(awardedOrPending, allAdaAdjustments)
@@ -418,7 +418,7 @@ export default class AdditionalDaysAwardedService {
 
     return this.shouldInterceptLogic(
       req,
-      prisonerDetail.offenderNo,
+      prisonerNumber,
       allAdaAdjustments,
       [...awarded, ...prospectiveAwarded],
       awaitingApproval,
@@ -559,7 +559,7 @@ export default class AdditionalDaysAwardedService {
     const quashedAdjustments = quashed.map(it => {
       return allAdaAdjustments.find(adjustment => this.adjustmentMatchesAdjudication(it, adjustment))
     })
-    return new ReviewAndSubmitAdaViewModel(prisonerDetail, adjustmentsToCreate, allAdaAdjustments, quashedAdjustments)
+    return new ReviewAndSubmitAdaViewModel(adjustmentsToCreate, allAdaAdjustments, quashedAdjustments)
   }
 
   public async submitAdjustments(

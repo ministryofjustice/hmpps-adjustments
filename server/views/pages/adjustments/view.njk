@@ -11,7 +11,7 @@
   <nav>
     {{ govukBackLink({
       text: "Back",
-      href: "/" + model.prisonerDetail.offenderNo
+      href: "/" + prisoner.offenderNo
     }) }}
   </nav>
 {% endblock %}
@@ -40,11 +40,11 @@
         <div>
           {{ govukButton({
           text: "Add new",
-          href: "/" + model.prisonerDetail.offenderNo + "/" + model.adjustmentType.url + "/add"
+          href: "/" + prisoner.offenderNo + "/" + model.adjustmentType.url + "/add"
         }) }}
         </div>
       {% endif %}
-      <a href="/{{ model.prisonerDetail.offenderNo }}" class="govuk-link">Return to dashboard</a>
+      <a href="/{{ prisoner.offenderNo }}" class="govuk-link">Return to dashboard</a>
     </div>
   </div>
 {% endblock %}

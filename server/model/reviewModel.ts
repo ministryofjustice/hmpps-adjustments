@@ -1,15 +1,11 @@
 import dayjs from 'dayjs'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { daysBetween } from '../utils/utils'
 
 export default class ReviewModel {
-  constructor(
-    public prisonerDetail: PrisonApiPrisoner,
-    public adjustment: EditableAdjustment,
-  ) {}
+  constructor(public adjustment: EditableAdjustment) {}
 
   public adjustmentType(): AdjustmentType {
     return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)

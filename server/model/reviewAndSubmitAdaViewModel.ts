@@ -1,10 +1,8 @@
 import dayjs from 'dayjs'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class ReviewAndSubmitAdaViewModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: EditableAdjustment[],
     public existingAdjustments: Adjustment[],
     public quashedAdjustments: Adjustment[],

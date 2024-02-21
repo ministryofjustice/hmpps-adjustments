@@ -26,7 +26,7 @@ export default class AdjustmentsHubViewModel {
   public messageType: AdjustmentType
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
+    public prisonerNumber: string,
     public adjustments: Adjustment[],
     public relevantRemand: RemandResult,
     public remandDecision: IdentifyRemandDecision,
@@ -92,7 +92,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public calculateReleaseDatesUrl() {
-    return calculateReleaseDatesCheckInformationUrl(this.prisonerDetail)
+    return calculateReleaseDatesCheckInformationUrl(this.prisonerNumber)
   }
 
   private allDeductionsOnDps() {

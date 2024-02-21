@@ -1,11 +1,10 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 
 export default class RemandChangeModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustment: Adjustment,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculatedUnusedDeductions: UnusedDeductionCalculationResponse,
