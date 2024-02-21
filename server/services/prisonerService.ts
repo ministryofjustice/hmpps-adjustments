@@ -1,3 +1,4 @@
+import { Readable } from 'stream'
 import PrisonApiClient from '../api/prisonApiClient'
 import {
   PrisonApiBookingAndSentenceAdjustments,
@@ -64,6 +65,10 @@ export default class PrisonerService {
       ),
       earliestSentence: this.findStartOfSentenceEvelope(sentencesAndOffences),
     }
+  }
+
+  async getPrisonerImage(token: string, prisonerNumber: string): Promise<Readable> {
+    return new PrisonApiClient(token).getPrisonerImage(prisonerNumber)
   }
 
   private findStartOfSentenceEvelope(sentences: PrisonApiOffenderSentenceAndOffences[]): Date {

@@ -3,6 +3,7 @@ import path from 'path'
 import dayjs from 'dayjs'
 import nunjucks from 'nunjucks'
 import express from 'express'
+import { personDateOfBirth, personProfileName, personStatus } from 'hmpps-design-system-frontend/hmpps/utils/utils'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
@@ -68,4 +69,8 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   })
 
   njkEnv.addFilter('date', (date, format) => dayjs(date).format(format))
+
+  njkEnv.addFilter('personProfileName', personProfileName)
+  njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
+  njkEnv.addFilter('personStatus', personStatus)
 }
