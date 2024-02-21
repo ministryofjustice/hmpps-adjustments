@@ -18,6 +18,9 @@ export default {
           lastName: 'Haggler',
           dateOfBirth: '1965-02-03',
           prisonId: 'MDI',
+          status: 'ACTIVE IN',
+          prisonName: 'HMP Prison',
+          cellLocation: 'A-1-1',
         },
       },
     })

@@ -6,6 +6,7 @@ import AdjustmentRoutes from './adjustmentRoutes'
 import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
 import RemandRoutes from './remandRoutes'
 import TaggedBailRoutes from './taggedBailRoutes'
+import PrisonerImageRoutes from './prisonerImageRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -40,9 +41,13 @@ export default function routes(service: Services): Router {
     service.calculateReleaseDatesService,
   )
 
+  const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)
+
   get('/', (req, res, next) => {
     res.render('pages/index')
   })
+
+  get('/:nomsId/image', prisonerImageRoutes.getImage)
 
   get('/', adjustmentRoutes.entry)
   get('/:nomsId/start', adjustmentRoutes.start)

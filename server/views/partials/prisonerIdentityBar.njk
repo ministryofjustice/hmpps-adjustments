@@ -1,10 +1,4 @@
-{%- from "moj/components/identity-bar/macro.njk" import mojIdentityBar -%}
+{%- from "hmpps/components/mini-profile/macro.njk" import miniProfile -%}
 {% if prisoner %}
-    {{ mojIdentityBar({
-         title: {
-             html: '<span class="govuk-!-margin-right-5"><strong>Prisoner name: </strong><a href="' + digitalPrisonServicesUrl + '/prisoner/' + prisoner.prisonerNumber + '">' + prisoner.firstName | title + ' ' + prisoner.lastName | title + '</a></span>' +
-             '<strong> Date of birth: </strong><span class="govuk-!-margin-right-5">' + prisoner.dateOfBirth | date("DD MMMM YYYY")  + '</span>' +
-             '<strong>Prison number: </strong>' + prisoner.prisonerNumber
-         }
-     }) }}
+    {{ miniProfile(prisoner, '/' + prisoner.prisonerNumber + '/image', digitalPrisonServicesUrl + '/prisoner/' + prisoner.prisonerNumber) }}
 {% endif %}
