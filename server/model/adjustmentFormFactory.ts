@@ -76,7 +76,7 @@ export default class AdjustmentsFormFactory {
     }
   }
 
-  private static days(adjustment: Adjustment | EditableAdjustment): string {
+  public static days(adjustment: Adjustment | EditableAdjustment): string {
     if ('daysTotal' in adjustment) {
       return adjustment.daysTotal.toString()
     }
