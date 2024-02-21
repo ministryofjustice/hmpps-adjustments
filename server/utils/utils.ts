@@ -1,11 +1,7 @@
 import dayjs from 'dayjs'
 import ValidationError from '../model/validationError'
 import config from '../config'
-import {
-  PrisonApiOffence,
-  PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
-} from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import {
   CalculateReleaseDatesValidationMessage,
