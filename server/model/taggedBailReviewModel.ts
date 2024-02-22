@@ -9,6 +9,7 @@ export default class TaggedBailReviewModel {
     public id: string,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     public adjustment: SessionAdjustment,
+    public showUnusedMessage: boolean,
   ) {}
 
   public backlink(): string {
