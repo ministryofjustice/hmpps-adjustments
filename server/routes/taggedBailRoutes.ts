@@ -176,24 +176,16 @@ export default class TaggedBailRoutes {
       })
     }
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
-      { [id]: adjustment },
-      nomsId,
-      token,
-    )
+    const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
 
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
-      { [id]: adjustment },
+      sessionAdjustments,
       adjustments,
       sentencesAndOffences,
       nomsId,
       token,
-    )
-
-    const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
-      adjustments,
-      unusedDeductions,
     )
 
     return res.render('pages/adjustments/tagged-bail/review', {
@@ -203,7 +195,7 @@ export default class TaggedBailRoutes {
         id,
         sentencesAndOffences,
         adjustment,
-        showUnusedMessage,
+        !!unusedDeductions?.unusedDeductions,
       ),
     })
   }
