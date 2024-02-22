@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { AdjustmentTypes, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
 import { dateItems } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
@@ -31,7 +31,7 @@ export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjust
 
   options: GenericAdjustmentFormOptions
 
-  toAdjustment(prisonerDetails: PrisonerSearchApiPrisoner, nomsId: string, id: string): EditableAdjustment {
+  toAdjustment(prisonerDetails: PrisonerSearchApiPrisoner, nomsId: string, id: string): Adjustment {
     return {
       id,
       adjustmentType: this.options.adjustmentType,

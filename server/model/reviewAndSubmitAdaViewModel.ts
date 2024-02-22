@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
-import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class ReviewAndSubmitAdaViewModel {
   constructor(
-    public adjustments: EditableAdjustment[],
+    public adjustments: Adjustment[],
     public existingAdjustments: Adjustment[],
     public quashedAdjustments: Adjustment[],
   ) {}
@@ -11,7 +11,7 @@ export default class ReviewAndSubmitAdaViewModel {
   public displayBanner(): boolean {
     const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
     if (anyUnlinkedAdas) {
-      const existingDays = this.existingAdjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0)
+      const existingDays = this.existingAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       return existingDays !== newDays
     }
@@ -54,13 +54,13 @@ export default class ReviewAndSubmitAdaViewModel {
             return [
               { text: dayjs(it.fromDate).format('D MMM YYYY') },
               { html: it.additionalDaysAwarded.adjudicationId.join('<br/>') },
-              { text: it.daysTotal, format: 'numeric' },
+              { text: it.days, format: 'numeric' },
             ]
           }),
           [
             { text: 'Total Quashed ADAs', colspan: 2 },
             {
-              text: this.quashedAdjustments.map(a => a.daysTotal).reduce((sum, current) => sum + current, 0),
+              text: this.quashedAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
               format: 'numeric',
             },
           ],
