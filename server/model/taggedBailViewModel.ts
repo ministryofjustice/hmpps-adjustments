@@ -38,7 +38,7 @@ export default class TaggedBailViewModel {
       return [
         { text: sentenceAndOffence.courtDescription },
         { text: sentenceAndOffence.caseReference },
-        { text: it.daysTotal },
+        { text: it.days },
         this.actionCell(it),
       ]
     })
@@ -53,7 +53,7 @@ export default class TaggedBailViewModel {
   }
 
   public totalRow() {
-    const total = this.adjustments.map(it => it.daysTotal).reduce((a, b) => a + b, 0)
+    const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
     return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }, { text: '' }]]
   }
 

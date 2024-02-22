@@ -44,7 +44,7 @@ export default class TaggedBailRemoveModel {
 
   private getTaggedBailDays(): number {
     if (this.adjustment) {
-      return this.adjustment.daysTotal
+      return this.adjustment.days
     }
 
     return null

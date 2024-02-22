@@ -2,7 +2,6 @@ import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prison
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { dateToString } from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import AdjustmentsFormFactory from './adjustmentFormFactory'
 
 export default class TaggedBailEditModel {
   constructor(
@@ -67,7 +66,7 @@ export default class TaggedBailEditModel {
 
   private getTaggedBailDays(): number {
     if (this.adjustment) {
-      return Number(AdjustmentsFormFactory.days(this.adjustment))
+      return Number(this.adjustment.days)
     }
 
     return null

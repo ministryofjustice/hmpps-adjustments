@@ -59,7 +59,7 @@ export default class CalculateReleaseDatesService {
       const days = it.fromDate && it.toDate ? daysBetween(new Date(it.fromDate), new Date(it.toDate)) : it.days
       return {
         ...it,
-        daysTotal: days,
+        days,
         effectiveDays: days,
         sentenceSequence: sentence.sentenceSequence,
       }

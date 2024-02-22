@@ -1,6 +1,6 @@
-import { EditableAdjustment } from './adjustments/adjustmentsTypes'
+import { Adjustment } from './adjustments/adjustmentsTypes'
 
-type SessionAdjustment = EditableAdjustment & {
+type SessionAdjustment = Adjustment & {
   complete?: boolean
 }
 

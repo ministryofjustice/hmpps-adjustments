@@ -1,12 +1,11 @@
 import dayjs from 'dayjs'
-import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { daysBetween } from '../utils/utils'
-import AdjustmentsFormFactory from './adjustmentFormFactory'
 
 export default class ReviewModel {
-  constructor(public adjustment: EditableAdjustment) {}
+  constructor(public adjustment: Adjustment) {}
 
   public adjustmentType(): AdjustmentType {
     return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)
@@ -28,7 +27,7 @@ export default class ReviewModel {
     return ReviewModel.summaryRowsFromAdjustment(this.adjustment)
   }
 
-  public static summaryRowsFromAdjustment(adjustment: EditableAdjustment | Adjustment) {
+  public static summaryRowsFromAdjustment(adjustment: Adjustment) {
     if (adjustment.adjustmentType === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
         {
@@ -44,7 +43,7 @@ export default class ReviewModel {
             text: 'Number of days restored',
           },
           value: {
-            text: AdjustmentsFormFactory.days(adjustment),
+            text: adjustment.days,
           },
         },
       ]
@@ -61,14 +60,14 @@ export default class ReviewModel {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
       },
-      ...(AdjustmentsFormFactory.days(adjustment)
+      ...(adjustment.days
         ? [
             {
               key: {
                 text: 'Days',
               },
               value: {
-                text: AdjustmentsFormFactory.days(adjustment),
+                text: adjustment.days,
               },
             },
           ]

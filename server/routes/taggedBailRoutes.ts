@@ -203,7 +203,7 @@ export default class TaggedBailRoutes {
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const { caseSequence } = req.query as Record<string, string>
     let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.getAsEditableAdjustment(id, token))
+    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
     if (caseSequence) {
       sessionAdjustment = {
         ...sessionAdjustment,
