@@ -68,7 +68,7 @@ export default class ViewModel {
         return [
           { text: dayjs(it.fromDate).format('D MMM YYYY') },
           { text: it.prisonName || 'Unknown' },
-          { text: it.daysTotal, format: 'numeric' },
+          { text: it.days, format: 'numeric' },
           this.actionCell(it),
         ]
       })
@@ -80,7 +80,7 @@ export default class ViewModel {
           { text: dayjs(it.toDate).format('D MMM YYYY') },
           { text: it.prisonName || 'Unknown' },
           { text: it.unlawfullyAtLarge ? ualType.find(u => u.value === it.unlawfullyAtLarge.type)?.text : 'Unknown' },
-          { text: it.daysTotal, format: 'numeric' },
+          { text: it.days, format: 'numeric' },
           this.actionCell(it),
         ]
       })
@@ -89,7 +89,7 @@ export default class ViewModel {
       return [
         { text: dayjs(it.fromDate).format('D MMM YYYY') },
         ...(this.adjustmentType.value === 'REMAND' ? [{ text: dayjs(it.toDate).format('D MMM YYYY') }] : []),
-        { text: it.daysTotal, format: 'numeric' },
+        { text: it.days, format: 'numeric' },
         { text: it.prisonName || 'Unknown' },
         this.actionCell(it),
       ]
@@ -97,7 +97,7 @@ export default class ViewModel {
   }
 
   public totalRow() {
-    const total = this.adjustments.map(it => it.daysTotal).reduce((a, b) => a + b, 0)
+    const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
     if (
       this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED' ||
       this.adjustmentType.value === 'REMAND'

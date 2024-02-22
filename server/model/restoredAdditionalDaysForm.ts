@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
-import { EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
 import { dateItems } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class RestoredAdditionalDaysForm extends AdjustmentsForm<RestoredAdditionalDaysForm> {
   'from-day': string
@@ -14,7 +14,7 @@ export default class RestoredAdditionalDaysForm extends AdjustmentsForm<Restored
 
   days: string
 
-  toAdjustment(prisonerDetails: PrisonerSearchApiPrisoner, nomsId: string, id: string): EditableAdjustment {
+  toAdjustment(prisonerDetails: PrisonerSearchApiPrisoner, nomsId: string, id: string): Adjustment {
     return {
       id,
       adjustmentType: 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',

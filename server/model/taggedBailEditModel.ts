@@ -67,7 +67,7 @@ export default class TaggedBailEditModel {
 
   private getTaggedBailDays(): number {
     if (this.adjustment) {
-      return Number(AdjustmentsFormFactory.days(this.adjustment))
+      return Number(this.adjustment.days)
     }
 
     return null

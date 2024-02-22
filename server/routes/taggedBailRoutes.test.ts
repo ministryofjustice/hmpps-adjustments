@@ -83,12 +83,10 @@ const populatedAdjustment = {
   ...blankAdjustment,
   days: 9955,
   taggedBail: { caseSequence: 1 },
-  daysTotal: 9955,
 }
 const nomisAdjustment = {
   ...blankAdjustment,
   days: 9955,
-  daysTotal: 9955,
   sentenceSequence: 1,
 } as Adjustment
 
@@ -301,7 +299,7 @@ describe('Tagged bail routes tests', () => {
 
   it('GET /{nomsId}/tagged-bail/edit/{id} shows details', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.getAsEditableAdjustment.mockResolvedValue(populatedAdjustment)
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}?caseReference=1`)
       .expect(200)

@@ -3,27 +3,17 @@ import {
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
-  EditableAdjustment,
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentsService {
-  public async create(adjustments: EditableAdjustment[], token: string): Promise<CreateResponse> {
+  public async create(adjustments: Adjustment[], token: string): Promise<CreateResponse> {
     return new AdjustmentsClient(token).create(adjustments)
   }
 
   public async get(adjustmentId: string, token: string): Promise<Adjustment> {
     return new AdjustmentsClient(token).get(adjustmentId)
-  }
-
-  public async getAsEditableAdjustment(adjustmentId: string, token: string): Promise<EditableAdjustment> {
-    const adjustment = await new AdjustmentsClient(token).get(adjustmentId)
-    if (!(adjustment.fromDate && adjustment.toDate)) {
-      ;(adjustment as EditableAdjustment).days = adjustment.daysTotal
-    }
-    delete adjustment.daysTotal
-    return adjustment as EditableAdjustment
   }
 
   public async findByPerson(person: string, earliestSentenceDate: Date, token: string): Promise<Adjustment[]> {
@@ -38,7 +28,7 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).findByPersonAndStatus(person, status)
   }
 
-  public async update(adjustmentId: string, adjustment: EditableAdjustment, token: string): Promise<void> {
+  public async update(adjustmentId: string, adjustment: Adjustment, token: string): Promise<void> {
     return new AdjustmentsClient(token).update(adjustmentId, adjustment)
   }
 
@@ -46,7 +36,7 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).delete(adjustmentId)
   }
 
-  public async validate(adjustment: EditableAdjustment, token: string): Promise<ValidationMessage[]> {
+  public async validate(adjustment: Adjustment, token: string): Promise<ValidationMessage[]> {
     return new AdjustmentsClient(token).validate(adjustment)
   }
 

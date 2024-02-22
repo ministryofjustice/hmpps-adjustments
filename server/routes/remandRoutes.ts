@@ -306,7 +306,7 @@ export default class RemandRoutes {
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
     let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.getAsEditableAdjustment(id, token))
+    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
@@ -332,7 +332,7 @@ export default class RemandRoutes {
       model: new RemandChangeModel(
         {
           ...sessionAdjustment,
-          daysTotal: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
+          days: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
         },
         sentencesAndOffences,
         unusedDeductions,

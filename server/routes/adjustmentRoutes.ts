@@ -19,7 +19,7 @@ import { daysBetween } from '../utils/utils'
 import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
-import { Adjustment, EditableAdjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -144,11 +144,11 @@ export default class AdjustmentRoutes {
       }
     }
 
-    let adjustment: Adjustment | EditableAdjustment = null
+    let adjustment: Adjustment = null
     if (addOrEdit === 'edit') {
       const sessionAdjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
       if (id && sessionAdjustment?.id !== id) {
-        adjustment = await this.adjustmentsService.getAsEditableAdjustment(id, token)
+        adjustment = await this.adjustmentsService.get(id, token)
       } else {
         adjustment = sessionAdjustment
       }
@@ -333,7 +333,7 @@ export default class AdjustmentRoutes {
 
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
-      days: adjustment.daysTotal,
+      days: adjustment.days,
       action,
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)

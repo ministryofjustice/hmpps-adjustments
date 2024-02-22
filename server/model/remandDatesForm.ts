@@ -26,7 +26,7 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
   toAdjustment(adjustment: Adjustment): Adjustment {
     const fromDate = dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD')
     const toDate = dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD')
-    return { ...adjustment, fromDate, toDate }
+    return { ...adjustment, fromDate, toDate, days: null }
   }
 
   fromItems() {
