@@ -2,7 +2,6 @@ import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prison
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { dateToString } from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { AdjustmentType } from './adjustmentTypes'
 
 export default class TaggedBailEditModel {
   constructor(
@@ -11,7 +10,6 @@ export default class TaggedBailEditModel {
     public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
     public numberOfCases: number,
     public showUnusedMessage: boolean,
-    public adjustmentType: AdjustmentType,
   ) {}
 
   public summary() {

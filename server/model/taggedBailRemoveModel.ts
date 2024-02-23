@@ -1,13 +1,11 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { AdjustmentType } from './adjustmentTypes'
 import { dateToString } from '../utils/utils'
 
 export default class TaggedBailRemoveModel {
   constructor(
     public prisonerNumber: string,
     public adjustment: Adjustment,
-    public adjustmentType: AdjustmentType,
     public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
     public showUnusedMessage: boolean,
   ) {}
