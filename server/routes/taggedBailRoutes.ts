@@ -227,6 +227,12 @@ export default class TaggedBailRoutes {
         taggedBail: { caseSequence: Number(caseSequence) },
       }
     }
+
+    const adjustmentType = adjustmentTypes.find(it => it.url === 'tagged-bail')
+    if (!adjustmentType) {
+      return res.redirect(`/${nomsId}`)
+    }
+
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
 
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
@@ -262,6 +268,7 @@ export default class TaggedBailRoutes {
         sentenceAndOffence,
         sentencesByCaseSequence.length,
         showUnusedMessage,
+        adjustmentType,
       ),
     })
   }
