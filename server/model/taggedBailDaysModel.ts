@@ -25,6 +25,6 @@ export default class TaggedBailDaysModel {
       return `/${this.prisonerNumber}/tagged-bail/view`
     }
 
-    return `/${this.prisonerNumber}/tagged-bail/${this.addOrEdit}/${this.id}`
+    return `/${this.prisonerNumber}`
   }
 }
