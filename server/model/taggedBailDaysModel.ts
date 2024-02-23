@@ -19,4 +19,12 @@ export default class TaggedBailDaysModel {
     }
     return `/${this.prisonerNumber}/tagged-bail/select-case/${this.addOrEdit}/${this.id}`
   }
+
+  public cancelLink(): string {
+    if (this.addOrEdit === 'edit') {
+      return `/${this.prisonerNumber}/tagged-bail/view`
+    }
+
+    return `/${this.prisonerNumber}`
+  }
 }
