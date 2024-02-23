@@ -1,6 +1,5 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { AdjustmentType } from './adjustmentTypes'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
@@ -14,7 +13,6 @@ export default class TaggedBailViewModel {
   constructor(
     public prisonerNumber: string,
     public adjustments: Adjustment[],
-    public adjustmentType: AdjustmentType,
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)

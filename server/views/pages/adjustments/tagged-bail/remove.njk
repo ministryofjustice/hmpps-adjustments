@@ -3,7 +3,7 @@
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{% set pageTitle = applicationName + " - Delete " +  model.adjustmentType.shortText %}
+{% set pageTitle = applicationName + " - Delete tagged bail" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
@@ -11,7 +11,7 @@
 <nav>
     {{ govukBackLink({
     text: "Back",
-    href: "/" + prisoner.prisonerNumber + "/" + model.adjustmentType.url + "/view"
+    href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
     }) }}
 </nav>
 {% endblock %}
@@ -55,7 +55,7 @@
                 {{ govukButton({
                 text: "Cancel",
                 classes: "govuk-button--secondary",
-                href: "/" + prisoner.prisonerNumber
+                href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
                 }) }}
             </div>
         </form>

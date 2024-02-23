@@ -5,7 +5,7 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
-{% set pageTitle = applicationName + " - Enter remand dates" %}
+{% set pageTitle = applicationName + " - Enter tagged bail dates" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
@@ -84,7 +84,7 @@
         {{ govukButton({
           text: "Cancel",
           classes: "govuk-button--secondary",
-          href: "/" + prisoner.prisonerNumber
+          href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
         }) }}
       </form>
     </div>

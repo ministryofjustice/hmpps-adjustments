@@ -7,7 +7,6 @@ import TaggedBailDaysModel from '../model/taggedBailDaysModel'
 import TaggedBailDaysForm from '../model/taggedBailDaysForm'
 import TaggedBailReviewModel from '../model/taggedBailReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
-import adjustmentTypes from '../model/adjustmentTypes'
 import TaggedBailViewModel from '../model/taggedBailViewModel'
 import {
   getActiveSentencesByCaseSequence,
@@ -100,15 +99,10 @@ export default class TaggedBailRoutes {
       return res.redirect(`/${nomsId}`)
     }
 
-    const adjustmentType = adjustmentTypes.find(it => it.url === 'tagged-bail')
-    if (!adjustmentType) {
-      return res.redirect(`/${nomsId}`)
-    }
-
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
 
     return res.render('pages/adjustments/tagged-bail/view', {
-      model: new TaggedBailViewModel(prisonerNumber, taggedBailAdjustments, adjustmentType, sentencesAndOffences),
+      model: new TaggedBailViewModel(prisonerNumber, taggedBailAdjustments, sentencesAndOffences),
     })
   }
 
@@ -118,11 +112,6 @@ export default class TaggedBailRoutes {
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const adjustment = await this.adjustmentsService.get(id, token)
     if (!adjustment) {
-      return res.redirect(`/${nomsId}`)
-    }
-
-    const adjustmentType = adjustmentTypes.find(it => it.url === 'tagged-bail')
-    if (!adjustmentType) {
       return res.redirect(`/${nomsId}`)
     }
 
@@ -154,13 +143,7 @@ export default class TaggedBailRoutes {
     )
 
     return res.render('pages/adjustments/tagged-bail/remove', {
-      model: new TaggedBailRemoveModel(
-        prisonerNumber,
-        adjustment,
-        adjustmentType,
-        sentenceAndOffence,
-        showUnusedMessage,
-      ),
+      model: new TaggedBailRemoveModel(prisonerNumber, adjustment, sentenceAndOffence, showUnusedMessage),
     })
   }
 
@@ -227,6 +210,7 @@ export default class TaggedBailRoutes {
         taggedBail: { caseSequence: Number(caseSequence) },
       }
     }
+
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
 
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
