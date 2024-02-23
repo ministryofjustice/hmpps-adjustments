@@ -22,9 +22,9 @@ export default class TaggedBailDaysModel {
 
   public cancelLink(): string {
     if (this.addOrEdit === 'edit') {
-      return `/${this.prisonerNumber}/tagged-bail/${this.addOrEdit}/${this.id}`
+      return `/${this.prisonerNumber}/tagged-bail/view`
     }
 
-    return `/${this.prisonerNumber}/tagged-bail/view`
+    return `/${this.prisonerNumber}/tagged-bail/${this.addOrEdit}/${this.id}`
   }
 }
