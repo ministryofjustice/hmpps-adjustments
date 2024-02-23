@@ -176,10 +176,27 @@ export default class TaggedBailRoutes {
       })
     }
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
+    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
 
+    const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
+      sessionAdjustments,
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      token,
+    )
+
     return res.render('pages/adjustments/tagged-bail/review', {
-      model: new TaggedBailReviewModel(prisonerNumber, addOrEdit, id, sentencesAndOffences, adjustment),
+      model: new TaggedBailReviewModel(
+        prisonerNumber,
+        addOrEdit,
+        id,
+        sentencesAndOffences,
+        adjustment,
+        !!unusedDeductions?.unusedDeductions,
+      ),
     })
   }
 
