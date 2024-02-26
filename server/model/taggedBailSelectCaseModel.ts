@@ -1,6 +1,10 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { getActiveSentencesByCaseSequence, SentencesByCaseSequence } from '../utils/utils'
+import {
+  getActiveSentencesByCaseSequence,
+  relevantSentenceForTaggedBailAdjustment,
+  SentencesByCaseSequence,
+} from '../utils/utils'
 
 type SentenceWithCaseDetails = PrisonApiOffenderSentenceAndOffences & { selected: boolean; selectCaseHref: string }
 
@@ -43,11 +47,7 @@ export default class TaggedBailSelectCaseModel {
       if (this.adjustment.taggedBail) {
         selected = this.adjustment.taggedBail.caseSequence === it.caseSequence
       } else if (this.adjustment.bookingId) {
-        selected = !!it.sentences.find(
-          sentence =>
-            sentence.bookingId === this.adjustment.bookingId &&
-            sentence.caseSequence === this.adjustment.sentenceSequence,
-        )
+        selected = relevantSentenceForTaggedBailAdjustment(it, this.adjustment)
       }
 
       return {
