@@ -43,16 +43,9 @@ export default class TaggedBailSelectCaseModel {
         selectCaseHref = `/${this.prisonerNumber}/tagged-bail/days/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`
       }
 
-      let selected = false
-      if (this.adjustment.taggedBail) {
-        selected = this.adjustment.taggedBail.caseSequence === it.caseSequence
-      } else if (this.adjustment.bookingId) {
-        selected = relevantSentenceForTaggedBailAdjustment(it, this.adjustment)
-      }
-
       return {
         ...it.sentences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0],
-        selected,
+        selected: relevantSentenceForTaggedBailAdjustment(it, this.adjustment),
         selectCaseHref,
       }
     })
