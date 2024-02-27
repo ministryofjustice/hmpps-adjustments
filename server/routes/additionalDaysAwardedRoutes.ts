@@ -13,21 +13,19 @@ export default class AdditionalDaysAwardedRoutes {
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
-    const adjustments = await new AdjustmentsClient(token).findByPerson(prisonerDetail.offenderNo)
+    const { bookingId, prisonerNumber } = res.locals.prisoner
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+
+    const adjustments = await new AdjustmentsClient(token).findByPerson(prisonerNumber)
 
     const intercept: AdaIntercept = await this.additionalDaysAwardedService.shouldIntercept(
       req,
-      prisonerDetail,
+      prisonerNumber,
       adjustments,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
+      token,
     )
 
     if (intercept.type === 'NONE') {
@@ -36,25 +34,21 @@ export default class AdditionalDaysAwardedRoutes {
 
     return res.render('pages/adjustments/additional-days/intercept', {
       model: {
-        prisonerDetail,
         intercept,
       },
     })
   }
 
   public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const { prisoner } = res.locals
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(prisoner.bookingId, token)
+
     const adasToReview: AdasToReview = await this.additionalDaysAwardedService.getAdasToApprove(
       req,
       nomsId,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
@@ -62,9 +56,8 @@ export default class AdditionalDaysAwardedRoutes {
       // Intercepted for PADAs, none have been selected.
       await this.additionalDaysAwardedService.submitAdjustments(
         req,
-        prisonerDetail,
-        startOfSentenceEnvelope,
-        username,
+        prisoner,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       )
       return res.redirect(`/${nomsId}`)
@@ -76,9 +69,6 @@ export default class AdditionalDaysAwardedRoutes {
     }
 
     return res.render('pages/adjustments/additional-days/review-and-approve', {
-      model: {
-        prisonerDetail,
-      },
       adasToReview,
     })
   }
@@ -94,30 +84,24 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const { bookingId } = res.locals.prisoner
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+
     const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
       nomsId,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
     return res.render('pages/adjustments/additional-days/review-prospective', {
-      model: {
-        prisonerDetail,
-      },
       padasToReview,
     })
   }
 
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
 
     const padaForm = new PadaForm(req.body)
@@ -125,21 +109,15 @@ export default class AdditionalDaysAwardedRoutes {
     await padaForm.validate()
 
     if (padaForm.errors.length) {
-      const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-        prisonerDetail.bookingId,
-        token,
-      )
+      const { bookingId } = res.locals.prisoner
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+
       const padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
         nomsId,
-        startOfSentenceEnvelope,
-        username,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       )
       return res.render('pages/adjustments/additional-days/review-prospective', {
-        model: {
-          prisonerDetail,
-        },
         padasToReview,
         padaForm,
       })
@@ -157,21 +135,16 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
-    const { nomsId } = req.params
+    const { token } = res.locals.user
     const { referrer } = req.query as Record<string, string>
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const { bookingId } = res.locals.prisoner
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
     return res.render('pages/adjustments/additional-days/review-and-submit', {
       model: await this.additionalDaysAwardedService.getReviewAndSubmitModel(
         req,
-        prisonerDetail,
-        startOfSentenceEnvelope,
-        username,
+        res.locals.prisoner,
+        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
       ),
       referrer,
@@ -179,18 +152,15 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submit: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const { bookingId } = res.locals.prisoner
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+
     await this.additionalDaysAwardedService.submitAdjustments(
       req,
-      prisonerDetail,
-      startOfSentenceEnvelope,
-      username,
+      res.locals.prisoner,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
@@ -201,40 +171,31 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public addWarning: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token } = res.locals.user
-    const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const { token } = res.locals.user
+    const { bookingId } = res.locals.prisoner
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
     return res.render('pages/adjustments/additional-days/add-warning', {
       model: {
-        prisonerDetail,
         startOfSentenceEnvelope,
       },
     })
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { caseloads, token, username } = res.locals.user
+    const { token } = res.locals.user
     const { nomsId } = req.params
-    const prisonerDetail = await this.prisonerService.getPrisonerDetail(nomsId, caseloads, token)
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelopeExcludingRecalls(
-      prisonerDetail.bookingId,
-      token,
-    )
+    const { bookingId } = res.locals.prisoner
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+
     const adas = await this.additionalDaysAwardedService.viewAdjustments(
       nomsId,
-      startOfSentenceEnvelope,
-      username,
+      startOfSentenceEnvelope.earliestExcludingRecalls,
       token,
     )
 
     return res.render('pages/adjustments/additional-days/view', {
       model: {
-        prisonerDetail,
         adas,
       },
     })

@@ -1,15 +1,11 @@
 import dayjs from 'dayjs'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { daysBetween } from '../utils/utils'
 
 export default class ReviewModel {
-  constructor(
-    public prisonerDetail: PrisonApiPrisoner,
-    public adjustment: Adjustment,
-  ) {}
+  constructor(public adjustment: Adjustment) {}
 
   public adjustmentType(): AdjustmentType {
     return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)
@@ -64,14 +60,14 @@ export default class ReviewModel {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
       },
-      ...(adjustment.days || adjustment.daysBetween || adjustment.effectiveDays
+      ...(adjustment.days
         ? [
             {
               key: {
                 text: 'Days',
               },
               value: {
-                text: adjustment.days || adjustment.daysBetween || adjustment.effectiveDays,
+                text: adjustment.days,
               },
             },
           ]

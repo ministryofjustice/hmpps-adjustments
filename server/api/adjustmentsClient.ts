@@ -19,8 +19,14 @@ export default class AdjustmentsClient {
     return this.restClient.get({ path: `/adjustments/${adjustmentsId}` }) as Promise<Adjustment>
   }
 
-  async findByPerson(person: string): Promise<Adjustment[]> {
-    return this.restClient.get({ path: `/adjustments?person=${person}` }) as Promise<Adjustment[]>
+  async findByPerson(person: string, earliestSentenceDate?: string): Promise<Adjustment[]> {
+    let url = `/adjustments?person=${person}`
+    if (earliestSentenceDate) {
+      url += `&sentenceEnvelopeDate=${earliestSentenceDate}`
+    }
+    return this.restClient.get({
+      path: url,
+    }) as Promise<Adjustment[]>
   }
 
   async findByPersonAndStatus(person: string, status: AdjustmentStatus): Promise<Adjustment[]> {

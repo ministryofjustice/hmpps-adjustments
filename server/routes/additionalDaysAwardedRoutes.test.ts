@@ -3,7 +3,6 @@ import request from 'supertest'
 import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
@@ -15,7 +14,7 @@ jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
@@ -25,15 +24,6 @@ const additionalDaysAwardedService = new AdditionalDaysAwardedService(
 ) as jest.Mocked<AdditionalDaysAwardedService>
 
 const NOMS_ID = 'ABC123'
-
-const stubbedPrisonerData = {
-  offenderNo: NOMS_ID,
-  firstName: 'Anon',
-  lastName: 'Nobody',
-  dateOfBirth: '24/06/2000',
-  bookingId: 12345,
-  agencyId: 'LDS',
-} as PrisonApiPrisoner
 
 const allPadas = {
   awaitingApproval: [
@@ -221,8 +211,10 @@ afterEach(() => {
 describe('Additional Days Awarded routes tests', () => {
   describe('Review and approve tests', () => {
     it('GET /{nomsId}/additional-days/review-and-approve when only PADAs exist redirects to review and submit', () => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+        earliestSentence: new Date(),
+        earliestExcludingRecalls: new Date(),
+      })
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(allPadas)
 
       return request(app)
@@ -232,24 +224,30 @@ describe('Additional Days Awarded routes tests', () => {
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when no awaiting approval records exist does not redirect', () => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+        earliestSentence: new Date(),
+        earliestExcludingRecalls: new Date(),
+      })
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when quashed records exist does not redirect', () => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+        earliestSentence: new Date(),
+        earliestExcludingRecalls: new Date(),
+      })
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when mix of PADAs and others exist does not redirect', () => {
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
-      prisonerService.getStartOfSentenceEnvelopeExcludingRecalls.mockResolvedValue(new Date())
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+        earliestSentence: new Date(),
+        earliestExcludingRecalls: new Date(),
+      })
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)

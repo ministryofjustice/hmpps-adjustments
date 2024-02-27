@@ -30,3 +30,12 @@
   background: #f8f8f8;
   padding: 20px;
 }
+
+/**
+Removes the header from the govukNotificationBanner.
+ */
+.govuk-notification-banner__no-header {
+  .govuk-notification-banner__header {
+    display: none;
+  }
+}

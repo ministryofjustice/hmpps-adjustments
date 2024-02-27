@@ -1,11 +1,9 @@
 import dayjs from 'dayjs'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import RecallForm from './recallForm'
 
 export default class RecallModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public form: RecallForm,
   ) {}
@@ -42,12 +40,12 @@ export default class RecallModel {
   }
 
   private remandText(adjustment: Adjustment) {
-    return `Remand ${adjustment.daysBetween || adjustment.effectiveDays} days from  ${dayjs(adjustment.fromDate).format(
+    return `Remand ${adjustment.days} days from  ${dayjs(adjustment.fromDate).format(
       'D MMM YYYY',
     )} to ${dayjs(adjustment.toDate).format('D MMM YYYY')}`
   }
 
   private taggedBailText(adjustment: Adjustment) {
-    return `Tagged bail ${adjustment.days || adjustment.effectiveDays} days`
+    return `Tagged bail ${adjustment.days} days`
   }
 }

@@ -1,10 +1,8 @@
 import dayjs from 'dayjs'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class ReviewAndSubmitAdaViewModel {
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
     public adjustments: Adjustment[],
     public existingAdjustments: Adjustment[],
     public quashedAdjustments: Adjustment[],
@@ -13,9 +11,7 @@ export default class ReviewAndSubmitAdaViewModel {
   public displayBanner(): boolean {
     const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
     if (anyUnlinkedAdas) {
-      const existingDays = this.existingAdjustments
-        .map(a => a.days || a.effectiveDays)
-        .reduce((sum, current) => sum + current, 0)
+      const existingDays = this.existingAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       return existingDays !== newDays
     }
@@ -37,7 +33,10 @@ export default class ReviewAndSubmitAdaViewModel {
           }),
           [
             { text: 'Total ADAs', colspan: 2 },
-            { text: this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0), format: 'numeric' },
+            {
+              text: this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
+              format: 'numeric',
+            },
           ],
         ],
       }

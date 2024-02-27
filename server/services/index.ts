@@ -8,22 +8,24 @@ import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
 import UnusedDeductionsService from './unusedDeductionsService'
+import PrisonerSearchService from './prisonerSearchService'
 
 export const services = () => {
-  const { hmppsAuthClient, applicationInfo } = dataAccess()
+  const { applicationInfo, hmppsAuthClient, manageUsersApiClient } = dataAccess()
 
-  const userService = new UserService(hmppsAuthClient)
-  const prisonerService = new PrisonerService(hmppsAuthClient)
+  const prisonerService = new PrisonerService()
+  const userService = new UserService(manageUsersApiClient, prisonerService)
   const adjustmentsService = new AdjustmentsService()
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()
   const adjustmentsStoreService = new AdjustmentsStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
   const additionalDaysAwardedService = new AdditionalDaysAwardedService(
-    hmppsAuthClient,
     additionalDaysAwardedStoreService,
+    adjustmentsService,
   )
   const calculateReleaseDatesService = new CalculateReleaseDatesService()
   const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, calculateReleaseDatesService)
+  const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
 
   return {
     applicationInfo,
@@ -36,6 +38,7 @@ export const services = () => {
     additionalDaysAwardedStoreService,
     calculateReleaseDatesService,
     unusedDeductionsService,
+    prisonerSearchService,
   }
 }
 

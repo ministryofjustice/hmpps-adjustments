@@ -1,4 +1,6 @@
 import SessionAdjustment from '../AdjustmentTypes'
+import type { UserDetails } from '../../services/userService'
+import { PrisonerSearchApiPrisoner } from '../prisonerSearchApi/prisonerSearchTypes'
 
 export default {}
 
@@ -7,16 +9,15 @@ declare module 'express-session' {
   interface SessionData {
     returnTo: string
     nowInMinutes: number
-    adjustments: { string?: { string?: SessionAdjustment } }
-    additionalDayApprovals: { string?: Date }
-    additionalDayPadas: { string?: string[] }
+    adjustments?: Record<string, Record<string, SessionAdjustment>>
+    additionalDayApprovals?: Record<string, Date>
+    additionalDayPadas?: Record<string, string[]>
   }
 }
 
 export declare global {
   namespace Express {
-    interface User {
-      username: string
+    interface User extends Partial<UserDetails> {
       token: string
       authSource: string
     }
@@ -25,6 +26,11 @@ export declare global {
       verified?: boolean
       id: string
       logout(done: (err: unknown) => void): void
+    }
+
+    interface Locals {
+      user: Express.User
+      prisoner: PrisonerSearchApiPrisoner
     }
   }
 }

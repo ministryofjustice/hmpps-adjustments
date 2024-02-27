@@ -4,11 +4,11 @@ import AdaSubmitPage from '../pages/adaSubmit'
 import HubPage from '../pages/hub'
 import PadaPage from '../pages/pada'
 
-context('Enter a RADA', () => {
+context('Enter an ADA', () => {
   beforeEach(() => {
     cy.task('reset')
     cy.task('stubSignIn')
-    cy.task('stubAuthUser')
+    cy.task('stubManageUser')
     cy.task('stubGetPrisonerDetails')
     cy.task('stubGetUserCaseloads')
     cy.task('stubGetAdjustments')
@@ -21,20 +21,20 @@ context('Enter a RADA', () => {
     cy.task('stubCreateAdjustment')
   })
 
-  it('Enter a RADA', () => {
+  it('Enter an AADA', () => {
     cy.signIn()
     const intercept = AdaInterceptPage.goTo('A1234AB')
     intercept.reviewLink().click()
     const pada = PadaPage.verifyOnPage(PadaPage)
 
     // Test frontend script for unselecting
-    pada.checkboxByIndex(0).click()
+    pada.checkboxByIndex(0).click({ force: true })
     pada.checkboxByIndex(0).should('be.checked')
     pada.noneSelectedCheckbox().should('not.be.checked')
-    pada.noneSelectedCheckbox().click()
+    pada.noneSelectedCheckbox().click({ force: true })
     pada.noneSelectedCheckbox().should('be.checked')
     pada.checkboxByIndex(0).should('not.be.checked')
-    pada.checkboxByIndex(1).click()
+    pada.checkboxByIndex(1).click({ force: true })
     pada.noneSelectedCheckbox().should('not.be.checked')
 
     pada.continueButton().click()

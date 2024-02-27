@@ -6,6 +6,7 @@ import AdjustmentRoutes from './adjustmentRoutes'
 import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
 import RemandRoutes from './remandRoutes'
 import TaggedBailRoutes from './taggedBailRoutes'
+import PrisonerImageRoutes from './prisonerImageRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -37,11 +38,16 @@ export default function routes(service: Services): Router {
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
+    service.calculateReleaseDatesService,
   )
+
+  const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)
 
   get('/', (req, res, next) => {
     res.render('pages/index')
   })
+
+  get('/:nomsId/image', prisonerImageRoutes.getImage)
 
   get('/', adjustmentRoutes.entry)
   get('/:nomsId/start', adjustmentRoutes.start)
@@ -79,11 +85,15 @@ export default function routes(service: Services): Router {
   get('/:nomsId/remand/no-applicable-sentences', remandRoutes.noApplicableSentences)
 
   get('/:nomsId/tagged-bail/add', taggedBailRoutes.add)
+  get('/:nomsId/tagged-bail/view', taggedBailRoutes.view)
+  get('/:nomsId/tagged-bail/remove/:id', taggedBailRoutes.remove)
   get('/:nomsId/tagged-bail/select-case/:addOrEdit/:id', taggedBailRoutes.selectCase)
   get('/:nomsId/tagged-bail/days/:addOrEdit/:id', taggedBailRoutes.days)
   post('/:nomsId/tagged-bail/days/:addOrEdit/:id', taggedBailRoutes.submitDays)
   get('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.review)
   post('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.submitReview)
+  get('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.edit)
+  post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

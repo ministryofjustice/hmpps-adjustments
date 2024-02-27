@@ -14,7 +14,7 @@
 {% block beforeContent %}
   {{ super() }}
   <nav>
-    {% set backlink = "/" + model.prisonerDetail.offenderNo + "/remand/review" %}
+    {% set backlink = "/" + prisoner.prisonerNumber + "/remand/review" %}
     {{ govukBackLink({
       text: "Back",
       href: backlink
@@ -68,7 +68,7 @@
           {{ govukButton({
             text: "Cancel",
             classes: "govuk-button--secondary",
-            href: "/" + model.prisonerDetail.offenderNo
+            href: "/" + prisoner.prisonerNumber
           }) }}
         </div>
       </form>

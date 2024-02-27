@@ -18,10 +18,11 @@
         {% if model.intercept.type == 'FIRST_TIME' %} 
             The first time you use the adjustments service, you need to check if the existing adjustment information from NOMIS is correct.
             {% elif model.intercept.type == 'PADA' %}
-            There is a prospective ADA recorded for Joe Bloggs.
+            There is a prospective ADA recorded for {{ prisoner.firstName | title }}
+          {{ prisoner.lastName | title }}.
             {% elif model.intercept.type == 'UPDATE' %}
-            Updates have been made to {{ model.prisonerDetail.firstName | title }}
-          {{ model.prisonerDetail.lastName | title }}'s adjustment information, which need to be approved.
+            Updates have been made to {{ prisoner.firstName | title }}
+          {{ prisoner.lastName | title }}'s adjustment information, which need to be approved.
             {% endif %}
       </p>
       <article class="moj-ticket-panel govuk-!-margin-bottom-4 govuk-!-margin-left-2">
@@ -41,9 +42,9 @@
           {% endif %}
 
           {% if model.intercept.anyProspective %}
-            {% set url = "/" + model.prisonerDetail.offenderNo + "/additional-days/review-prospective" %}
+            {% set url = "/" + prisoner.prisonerNumber + "/additional-days/review-prospective" %}
           {% else %}
-            {% set url =  "/" + model.prisonerDetail.offenderNo + "/additional-days/review-and-approve" %}
+            {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
           {% endif %}
           <a class="govuk-link" data-qa="review-link" href="{{url}}">Review</a>
 

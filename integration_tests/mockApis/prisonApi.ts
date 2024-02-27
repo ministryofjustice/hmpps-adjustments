@@ -1,27 +1,8 @@
 import { SuperAgentRequest } from 'superagent'
 import { stubFor } from './wiremock'
+import { adjudications, adjudicationsNoReview, adjudicationsSearch, adjudicationsSearchNoReview } from './adjudications'
 
 export default {
-  stubGetPrisonerDetails: (): SuperAgentRequest => {
-    return stubFor({
-      request: {
-        method: 'GET',
-        urlPattern: '/prison-api/api/offenders/A1234AB',
-      },
-      response: {
-        status: 200,
-        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
-        jsonBody: {
-          offenderNo: 'A1234AB',
-          bookingId: '1234',
-          firstName: 'Marvin',
-          lastName: 'Haggler',
-          dateOfBirth: '1965-02-03',
-          agencyId: 'MDI',
-        },
-      },
-    })
-  },
   stubGetUserCaseloads: (): SuperAgentRequest => {
     return stubFor({
       request: {
@@ -75,5 +56,80 @@ export default {
         ],
       },
     })
+  },
+  stubSearchAdjudicationsNoReview: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/prison-api/api/offenders/A1234AB/adjudications',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: adjudicationsSearchNoReview,
+      },
+    })
+  },
+  stubSearchAdjudications: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/prison-api/api/offenders/A1234AB/adjudications',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: adjudicationsSearch,
+      },
+    })
+  },
+  sstubSearchAdjudicationsNoResults: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/prison-api/api/offenders/A1234AB/adjudications',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          results: [],
+        },
+      },
+    })
+  },
+  stubIndividualAdjudicationsNoReview: (): Promise<unknown> => {
+    return Promise.all(
+      adjudicationsNoReview.map(it => {
+        return stubFor({
+          request: {
+            method: 'GET',
+            urlPattern: `/prison-api/api/offenders/A1234AB/adjudications/${it.adjudicationNumber}`,
+          },
+          response: {
+            status: 200,
+            headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+            jsonBody: it,
+          },
+        })
+      }),
+    )
+  },
+  stubIndividualAdjudications: (): Promise<unknown> => {
+    return Promise.all(
+      adjudications.map(it => {
+        return stubFor({
+          request: {
+            method: 'GET',
+            urlPattern: `/prison-api/api/offenders/A1234AB/adjudications/${it.adjudicationNumber}`,
+          },
+          response: {
+            status: 200,
+            headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+            jsonBody: it,
+          },
+        })
+      }),
+    )
   },
 }

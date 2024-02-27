@@ -16,7 +16,11 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(token).get(adjustmentId)
   }
 
-  public async findByPerson(person: string, token: string): Promise<Adjustment[]> {
+  public async findByPerson(person: string, earliestSentenceDate: Date, token: string): Promise<Adjustment[]> {
+    return new AdjustmentsClient(token).findByPerson(person, earliestSentenceDate.toISOString().substring(0, 10))
+  }
+
+  public async findByPersonOutsideSentenceEnvelope(person: string, token: string): Promise<Adjustment[]> {
     return new AdjustmentsClient(token).findByPerson(person)
   }
 
@@ -38,5 +42,15 @@ export default class AdjustmentsService {
 
   public async restore(restore: RestoreAdjustments, token: string): Promise<void> {
     return new AdjustmentsClient(token).restore(restore)
+  }
+
+  public async getAdjustmentsExceptOneBeingEdited(
+    sessionAdjustment: Record<string, Adjustment>,
+    nomsId: string,
+    token: string,
+  ) {
+    // When editing there is only one session adjustment
+    const id = Object.keys(sessionAdjustment)[0]
+    return (await this.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(it => it.id !== id)
   }
 }

@@ -1,6 +1,5 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
@@ -26,26 +25,20 @@ export default class AdjustmentsHubViewModel {
   public messageType: AdjustmentType
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
+    public prisonerNumber: string,
     public adjustments: Adjustment[],
     public relevantRemand: RemandResult,
     public remandDecision: IdentifyRemandDecision,
     public roles: string[],
     public message: Message,
+    public serviceHasCalculatedUnusedDeductions: boolean,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
   }
 
   public deductions(): AdjustmentType[] {
     return this.adjustmentTypes.filter(it =>
-      [
-        'REMAND',
-        'TAGGED_BAIL',
-        'LAWFULLY_AT_LARGE',
-        'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED',
-        'SPECIAL_REMISSION',
-        'TIME_SPENT_IN_CUSTODY_ABROAD',
-      ].includes(it.value),
+      ['REMAND', 'TAGGED_BAIL', 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'].includes(it.value),
     )
   }
 
@@ -76,7 +69,7 @@ export default class AdjustmentsHubViewModel {
   public getTotalDays(adjustmentType: AdjustmentType) {
     return this.adjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
-      .map(a => a.days || a.daysBetween || a.effectiveDays)
+      .map(a => a.days)
       .reduce((sum, current) => sum + current, 0)
   }
 
@@ -98,40 +91,27 @@ export default class AdjustmentsHubViewModel {
   }
 
   public calculateReleaseDatesUrl() {
-    return calculateReleaseDatesCheckInformationUrl(this.prisonerDetail)
+    return calculateReleaseDatesCheckInformationUrl(this.prisonerNumber)
   }
 
   private allDeductionsOnDps() {
-    return !this.allDeductions().some(it => it.days == null && it.daysBetween == null)
+    const anyDeductionFromNomis = this.allDeductions().some(
+      it => !it.remand?.chargeId?.length && !it.taggedBail?.caseSequence,
+    )
+    return !anyDeductionFromNomis
   }
 
   private allDeductions() {
     return this.adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
   }
 
-  private unusedDeductions() {
-    return this.adjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
-  }
-
-  public showUnusedDeductions() {
-    return this.allDeductionsOnDps() && this.unusedDeductions().length
-  }
-
-  public totalDeductions(): number {
-    return this.allDeductions()
-      .map(a => a.days || a.daysBetween)
-      .reduce((sum, current) => sum + current, 0)
-  }
-
-  public totalUnusedDeductions(): number {
-    return this.unusedDeductions()
-      .map(a => a.days || a.daysBetween)
-      .reduce((sum, current) => sum + current, 0)
-  }
-
-  public totalEffectiveDeductions(): number {
-    return this.allDeductions()
-      .map(a => a.effectiveDays)
-      .reduce((sum, current) => sum + current, 0)
+  public getUnused(adjustmentType: AdjustmentType): number {
+    if (this.allDeductionsOnDps()) {
+      const adjustments = this.adjustments.filter(it => it.adjustmentType === adjustmentType.value)
+      const total = adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
+      const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
+      return total - effective
+    }
+    return 0
   }
 }

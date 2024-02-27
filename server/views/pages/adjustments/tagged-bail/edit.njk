@@ -1,0 +1,61 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - Edit tagged bail" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+{{ super() }}
+<nav>
+    {{ govukBackLink({
+    text: "Back",
+    href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
+    }) }}
+</nav>
+{% endblock %}
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-l">
+            Edit tagged bail
+        </h1>
+    </div>
+</div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-m">
+            Tagged bail details
+        </h1>
+    </div>
+</div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        {{ govukSummaryList(
+        model.summary()
+        ) }}
+        {% if model.showUnusedMessage %}
+            <div class="govuk-!-margin-bottom-7">
+                <p>The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
+            </div>
+        {% endif %}
+        <form method="post">
+            <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+            <div class="govuk-button-group">
+                {{ govukButton({
+                text: "Save",
+                type: submit,
+                preventDoubleClick: true,
+                attributes: { 'data-qa': 'save-button' }
+                }) }}
+                {{ govukButton({
+                text: "Cancel",
+                classes: "govuk-button--secondary",
+                href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
+                }) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,13 +1,13 @@
 import dayjs from 'dayjs'
 import ValidationError from '../model/validationError'
 import config from '../config'
-import {
-  PrisonApiOffence,
-  PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
-} from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import {
+  CalculateReleaseDatesValidationMessage,
+  UnusedDeductionCalculationResponse,
+} from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import PrisonerService from '../services/prisonerService'
 
 const properCase = (word: string): string =>
   word.length >= 1 ? word[0].toUpperCase() + word.toLowerCase().slice(1) : word
@@ -95,8 +95,8 @@ export function delay(ms: number): Promise<void> {
   })
 }
 
-export function calculateReleaseDatesCheckInformationUrl(prisonerDetail: PrisonApiPrisoner) {
-  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerDetail.offenderNo}/reason`
+export function calculateReleaseDatesCheckInformationUrl(prisonerNumber: string) {
+  return `${config.services.calculateReleaseDatesUI.url}/calculation/${prisonerNumber}/reason`
 }
 
 export const fieldsToDate = (day: string, month: string, year: string): Date =>
@@ -107,15 +107,88 @@ export const dateToString = (date: Date): string => dayjs(date).format('DD MMM Y
 export function offencesForAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-): PrisonApiOffence[] {
+): (PrisonApiOffence & { recall: boolean })[] {
   return sentencesAndOffences.flatMap(so => {
-    return so.offences.filter(off => {
-      if (adjustment.remand?.chargeId?.length) {
-        return adjustment.remand?.chargeId.includes(off.offenderChargeId)
-      }
-      return adjustment.sentenceSequence === so.sentenceSequence
-    })
+    return so.offences
+      .filter(off => {
+        if (adjustment.remand?.chargeId?.length) {
+          return adjustment.remand?.chargeId.includes(off.offenderChargeId)
+        }
+        return adjustment.sentenceSequence === so.sentenceSequence
+      })
+      .map(off => {
+        return { ...off, recall: PrisonerService.recallTypes.includes(so.sentenceCalculationType) }
+      })
   })
+}
+
+/**
+ * Type used to organise sentences and offences by caseSequence.
+ */
+export type SentencesByCaseSequence = {
+  caseSequence: number
+  sentences: PrisonApiOffenderSentenceAndOffences[]
+}
+
+/**
+ * Takes a list of sentences and offences and converts them to a collection of active sentences for each case sequence.
+ * @param sentencesAndOffences sentences and offences to be converted.
+ * @returns a collection of active sentences for each case sequence.
+ */
+export function getActiveSentencesByCaseSequence(
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): SentencesByCaseSequence[] {
+  return sentencesAndOffences
+    .filter(it => it.sentenceStatus === 'A')
+    .reduce((acc: SentencesByCaseSequence[], cur) => {
+      if (acc.some(it => it.caseSequence === cur.caseSequence)) {
+        const record = acc.find(it => it.caseSequence === cur.caseSequence)
+        record.sentences.push(cur)
+      } else {
+        acc.push({ caseSequence: cur.caseSequence, sentences: [cur] } as SentencesByCaseSequence)
+      }
+      return acc
+    }, [])
+}
+
+/**
+ * Takes a list of sentences and offences and returns the most recent one based on sentence date.
+ * @param sentencesAndOffences sentences and offences to filter.
+ * @returns The most recent sentence and offence.
+ */
+export function getMostRecentSentenceAndOffence(
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): PrisonApiOffenderSentenceAndOffences {
+  return sentencesAndOffences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0]
+}
+
+/**
+ * Takes the calculated unused deductions and checks the days against adjustments of type 'UNUSED_DEDUCTION'.
+ * @param currentAdjustments The current adjustments.
+ * @param calculatedUnusedDeductions The calculated unused deductions.
+ * @returns Whether the calculated unused deduction days differ from the adjustments of type 'UNUSED_DEDUCTION' days.
+ */
+export function hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
+  currentAdjustments: Adjustment[],
+  calculatedUnusedDeductions: UnusedDeductionCalculationResponse,
+): boolean {
+  if (calculatedUnusedDeductions?.unusedDeductions != null) {
+    const currentUnusedDeductions = currentAdjustments
+      .filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+      .map(it => it.effectiveDays)
+      .reduce((sum, current) => sum + current, 0)
+
+    const toBeUnusedDeductions = calculatedUnusedDeductions.unusedDeductions
+
+    return toBeUnusedDeductions !== currentUnusedDeductions
+  }
+  return false
+}
+
+export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSequence, adjustment: Adjustment): boolean {
+  return adjustment.taggedBail?.caseSequence
+    ? it.caseSequence === adjustment.taggedBail?.caseSequence
+    : it.sentences.some(sent => sent.sentenceSequence === adjustment.sentenceSequence)
 }
 
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
-import { daysBetween, remandRelatedValidationSummary } from '../utils/utils'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import { daysBetween, offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
@@ -9,8 +9,8 @@ export default class RemandReviewModel {
   adjustmentIds: string[]
 
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
-    public adjustments: { string?: Adjustment },
+    public prisonerNumber: string,
+    public adjustments: Record<string, Adjustment>,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculateReleaseDatesValidationMessages: CalculateReleaseDatesValidationMessage[],
     public form: ReviewRemandForm,
@@ -29,14 +29,12 @@ export default class RemandReviewModel {
   }
 
   public backlink(): string {
-    return `/${this.prisonerDetail.offenderNo}/remand/offences/add/${this.adjustmentIds[0]}`
+    return `/${this.prisonerNumber}/remand/offences/add/${this.adjustmentIds[0]}`
   }
 
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
-    const offences = this.sentencesAndOffences.flatMap(it =>
-      it.offences.filter(off => adjustment.remand.chargeId.includes(off.offenderChargeId)),
-    )
+    const offences = offencesForAdjustment(adjustment, this.sentencesAndOffences)
     return {
       rows: [
         {
@@ -51,7 +49,7 @@ export default class RemandReviewModel {
           actions: {
             items: [
               {
-                href: `/${this.prisonerDetail.offenderNo}/remand/dates/add/${id}`,
+                href: `/${this.prisonerNumber}/remand/dates/add/${id}`,
                 text: 'Edit',
                 visuallyHiddenText: 'remand',
               },
@@ -64,13 +62,20 @@ export default class RemandReviewModel {
           },
           value: {
             html: `<ul class="govuk-list govuk-list--bullet">
-                    ${offences.map(it => `<li>${it.offenceDescription}</li>`).join('')}
+                    ${offences
+                      .map(
+                        it =>
+                          `<li>${it.offenceDescription}${
+                            it.recall ? '<strong class="govuk-tag">Recall</strong>' : ''
+                          }</li>`,
+                      )
+                      .join('')}
                   </ul>`,
           },
           actions: {
             items: [
               {
-                href: `/${this.prisonerDetail.offenderNo}/remand/offences/add/${id}`,
+                href: `/${this.prisonerNumber}/remand/offences/add/${id}`,
                 text: 'Edit',
                 visuallyHiddenText: 'remand',
               },

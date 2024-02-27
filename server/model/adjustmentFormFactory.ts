@@ -14,7 +14,7 @@ export default class AdjustmentsFormFactory {
         'from-day': dayjs(adjustment.fromDate).get('date').toString(),
         'from-month': (dayjs(adjustment.fromDate).get('month') + 1).toString(),
         'from-year': dayjs(adjustment.fromDate).get('year').toString(),
-        days: (adjustment.days || adjustment.daysBetween || adjustment.effectiveDays).toString(),
+        days: adjustment.days.toString(),
       })
     }
     if (adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
@@ -36,7 +36,7 @@ export default class AdjustmentsFormFactory {
       'to-day': dayjs(adjustment.toDate).get('date').toString(),
       'to-month': (dayjs(adjustment.toDate).get('month') + 1).toString(),
       'to-year': dayjs(adjustment.toDate).get('year').toString(),
-      days: adjustment.days?.toString(),
+      days: adjustment.days.toString(),
       sentence: adjustment.sentenceSequence?.toString(),
     })
   }

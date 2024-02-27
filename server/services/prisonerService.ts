@@ -1,31 +1,19 @@
-import type HmppsAuthClient from '../data/hmppsAuthClient'
+import { Readable } from 'stream'
 import PrisonApiClient from '../api/prisonApiClient'
 import {
   PrisonApiBookingAndSentenceAdjustments,
   PrisonApiCourtDateResult,
   PrisonApiOffence,
   PrisonApiOffenderSentenceAndOffences,
-  PrisonApiPrisoner,
+  PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
 import FullPageError from '../model/FullPageError'
 
 export default class PrisonerService {
-  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
-
-  async getPrisonerDetailIncludingReleased(
-    nomsId: string,
-    userCaseloads: string[],
-    token: string,
-  ): Promise<PrisonApiPrisoner> {
-    return this.getPrisonerDetailImpl(nomsId, userCaseloads, token, true)
-  }
-
-  async getPrisonerDetail(nomsId: string, userCaseloads: string[], token: string): Promise<PrisonApiPrisoner> {
-    return this.getPrisonerDetailImpl(nomsId, userCaseloads, token, false)
-  }
+  constructor() {}
 
   async getSentencesAndOffencesFilteredForRemand(
-    bookingId: number,
+    bookingId: string,
     token: string,
   ): Promise<PrisonApiOffenderSentenceAndOffences[]> {
     return (await this.getSentencesAndOffences(bookingId, token))
@@ -41,7 +29,7 @@ export default class PrisonerService {
       })
   }
 
-  async getSentencesAndOffences(bookingId: number, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
+  async getSentencesAndOffences(bookingId: string, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
     const sentencesAndOffences = (await new PrisonApiClient(token).getSentencesAndOffences(bookingId)).filter(
       it => it.sentenceStatus === 'A',
     )
@@ -51,29 +39,12 @@ export default class PrisonerService {
     return sentencesAndOffences
   }
 
-  private async getPrisonerDetailImpl(
-    nomsId: string,
-    userCaseloads: string[],
-    token: string,
-    includeReleased: boolean,
-  ): Promise<PrisonApiPrisoner> {
-    try {
-      const prisonerDetail = await new PrisonApiClient(token).getPrisonerDetail(nomsId)
-      if (userCaseloads.includes(prisonerDetail.agencyId) || (includeReleased && prisonerDetail.agencyId === 'OUT')) {
-        return prisonerDetail
-      }
-      throw FullPageError.notInCaseLoadError()
-    } catch (error) {
-      if (error?.status === 404) {
-        throw FullPageError.notInCaseLoadError()
-      } else {
-        throw error
-      }
-    }
-  }
-
   public async getCourtDateResults(nomsId: string, token: string): Promise<PrisonApiCourtDateResult[]> {
     return new PrisonApiClient(token).getCourtDateResults(nomsId)
+  }
+
+  async getUsersCaseloads(token: string): Promise<PrisonApiUserCaseloads[]> {
+    return new PrisonApiClient(token).getUsersCaseloads()
   }
 
   async getBookingAndSentenceAdjustments(
@@ -83,12 +54,21 @@ export default class PrisonerService {
     return new PrisonApiClient(token).getBookingAndSentenceAdjustments(bookingId)
   }
 
-  async getStartOfSentenceEnvelopeExcludingRecalls(bookingId: number, token: string): Promise<Date> {
-    return this.findStartOfSentenceEvelope(
-      (await this.getSentencesAndOffences(bookingId, token)).filter(
-        it => !this.recallTypes.includes(it.sentenceCalculationType),
+  async getStartOfSentenceEnvelope(
+    bookingId: string,
+    token: string,
+  ): Promise<{ earliestExcludingRecalls: Date; earliestSentence: Date }> {
+    const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, token)
+    return {
+      earliestExcludingRecalls: this.findStartOfSentenceEvelope(
+        sentencesAndOffences.filter(it => !PrisonerService.recallTypes.includes(it.sentenceCalculationType)),
       ),
-    )
+      earliestSentence: this.findStartOfSentenceEvelope(sentencesAndOffences),
+    }
+  }
+
+  async getPrisonerImage(token: string, prisonerNumber: string): Promise<Readable> {
+    return new PrisonApiClient(token).getPrisonerImage(prisonerNumber)
   }
 
   private findStartOfSentenceEvelope(sentences: PrisonApiOffenderSentenceAndOffences[]): Date {
@@ -118,7 +98,7 @@ export default class PrisonerService {
     return sentence.sentenceCalculationType === 'A/FINE' && offence.offenceStatute === 'ZZ01'
   }
 
-  private recallTypes = [
+  public static recallTypes = [
     'LR',
     'LR_ORA',
     'LR_YOI_ORA',

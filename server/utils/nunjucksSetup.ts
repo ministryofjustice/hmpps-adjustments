@@ -1,8 +1,9 @@
 /* eslint-disable no-param-reassign */
 import path from 'path'
-import express from 'express'
-import nunjucks from 'nunjucks'
 import dayjs from 'dayjs'
+import nunjucks from 'nunjucks'
+import express from 'express'
+import { personDateOfBirth, personProfileName, personStatus } from 'hmpps-design-system-frontend/hmpps/utils/utils'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
@@ -14,6 +15,18 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
 
   app.locals.asset_path = '/assets/'
   app.locals.applicationName = 'Adjustments'
+  app.locals.environmentName = config.environmentName
+  app.locals.environmentNameColour = config.environmentName === 'PRE-PRODUCTION' ? 'govuk-tag--green' : ''
+
+  if (config.environmentName === 'LOCAL') {
+    app.locals.environment = 'local'
+  } else if (config.environmentName === 'DEV') {
+    app.locals.environment = 'dev'
+  } else if (config.environmentName === 'PRE-PRODUCTION') {
+    app.locals.environment = 'pre'
+  } else {
+    app.locals.environment = 'prod'
+  }
 
   // Cachebusting version string
   if (production) {
@@ -30,10 +43,9 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   const njkEnv = nunjucks.configure(
     [
       path.join(__dirname, '../../server/views'),
-      'node_modules/govuk-frontend/',
-      'node_modules/govuk-frontend/components/',
+      'node_modules/govuk-frontend/dist/',
       'node_modules/@ministryofjustice/frontend/',
-      'node_modules/@ministryofjustice/frontend/moj/components/',
+      'node_modules/hmpps-design-system-frontend/',
     ],
     {
       autoescape: true,
@@ -57,4 +69,8 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   })
 
   njkEnv.addFilter('date', (date, format) => dayjs(date).format(format))
+
+  njkEnv.addFilter('personProfileName', personProfileName)
+  njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
+  njkEnv.addFilter('personStatus', personStatus)
 }

@@ -64,9 +64,9 @@
           }}
 
           {% for sentence in sentences %}
-            {% for offence in sentence.offences %}
+            {% for offence in model.getOffences(sentence) %}
               <div class="shadow-card govuk-!-margin-bottom-6">
-                <h4 class="govuk-heading-s">{{offence.offenceDescription}}</h4>
+                <h4 class="govuk-heading-s">{{offence.offenceDescription}}{% if offence.recall %}<strong class="govuk-tag govuk-!-margin-left-1">Recall</strong>{% endif %}</h4>
                 <p class="govuk-body">
                   {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
                         Committed from {{ offence.offenceStartDate | date('DD MMMM YYYY') }} to {{ offence.offenceEndDate | date('DD MMMM YYYY') }}
@@ -102,7 +102,7 @@
           {{ govukButton({
             text: "Cancel",
             classes: "govuk-button--secondary",
-            href: model.backlink() if model.addOrEdit === 'edit' else "/" + model.prisonerDetail.offenderNo
+            href: model.backlink() if model.addOrEdit === 'edit' else "/" + prisoner.prisonerNumber
           }) }}
         </div>
       </form>

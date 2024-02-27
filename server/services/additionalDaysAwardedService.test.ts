@@ -1,21 +1,21 @@
 import nock from 'nock'
 import { Request } from 'express'
-import HmppsAuthClient from '../data/hmppsAuthClient'
 import AdditionalDaysAwardedService from './additionalDaysAwardedService'
-import TokenStore from '../data/tokenStore'
 import config from '../config'
 import { AdjudicationSearchResponse, IndividualAdjudication } from '../@types/adjudications/adjudicationTypes'
 import { AdaIntercept, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
+import AdjustmentsService from './adjustmentsService'
+import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 
 jest.mock('../data/hmppsAuthClient')
 jest.mock('./additionalDaysApprovalStoreService')
+jest.mock('./adjustmentsService')
 
-const hmppsAuthClient = new HmppsAuthClient({} as TokenStore) as jest.Mocked<HmppsAuthClient>
 const storeService = new AdditionalDaysAwardedStoreService() as jest.Mocked<AdditionalDaysAwardedStoreService>
-const adaService = new AdditionalDaysAwardedService(hmppsAuthClient, storeService)
+const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
+const adaService = new AdditionalDaysAwardedService(storeService, adjustmentsService)
 
 const token = 'token'
 
@@ -45,15 +45,15 @@ const adjudication3SearchResponse =
   `           }`
 
 const oneAdjudicationSearchResponse = JSON.parse(
-  `{"results": {"content": [${adjudication1SearchResponse}] } }`,
+  `{"results": [${adjudication1SearchResponse}] }`,
 ) as AdjudicationSearchResponse
 
 const twoAdjudicationsSearchResponse = JSON.parse(
-  `{"results": {"content": [${adjudication1SearchResponse}, ${adjudication2SearchResponse}] } }`,
+  `{"results": [${adjudication1SearchResponse}, ${adjudication2SearchResponse}] }`,
 ) as AdjudicationSearchResponse
 
 const threeAdjudicationsSearchResponse = JSON.parse(
-  `{"results": {"content": [${adjudication1SearchResponse}, ${adjudication2SearchResponse}, ${adjudication3SearchResponse}] } }`,
+  `{"results": [${adjudication1SearchResponse}, ${adjudication2SearchResponse}, ${adjudication3SearchResponse}] }`,
 ) as AdjudicationSearchResponse
 
 const adjudicationOne = JSON.parse(
@@ -122,14 +122,11 @@ const adjustmentResponsesWithChargeNumber = [
 ]
 
 describe('Additional Days Added Service', () => {
-  let adjudicationsApi: nock.Scope
-  let adjustmentApi: nock.Scope
+  let prisonApi: nock.Scope
 
   beforeEach(() => {
-    config.apis.adjudications.url = 'http://localhost:8100'
-    adjudicationsApi = nock(config.apis.adjudications.url)
-    config.apis.adjustments.url = 'http://localhost:8101'
-    adjustmentApi = nock(config.apis.adjustments.url)
+    config.apis.prisonApi.url = 'http://localhost:8100'
+    prisonApi = nock(config.apis.prisonApi.url)
   })
 
   afterEach(() => {
@@ -138,13 +135,11 @@ describe('Additional Days Added Service', () => {
   describe('ADA Review screen', () => {
     it('Get concurrent adjudications ', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwo)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeWithTwoSanctions)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwo)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeWithTwoSanctions)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -152,7 +147,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -226,11 +220,9 @@ describe('Additional Days Added Service', () => {
 
     it('Get adjudication where only one charge exists', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, oneAdjudicationSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -238,7 +230,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -278,12 +269,10 @@ describe('Additional Days Added Service', () => {
 
     it('Get adjudication where consecutive charges exist', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, twoAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, twoAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -291,7 +280,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -341,13 +329,11 @@ describe('Additional Days Added Service', () => {
 
     it('Get adjudication where a mix of consecutive and concurrent charges exist', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      adjustmentsService.findByPerson.mockResolvedValue([
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
           person: 'AA1234A',
@@ -355,7 +341,7 @@ describe('Additional Days Added Service', () => {
           adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
           fromDate: '2023-08-03',
           days: 10,
-          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -365,7 +351,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -425,13 +410,11 @@ describe('Additional Days Added Service', () => {
 
     it('View adjustments for adjudications awarded.', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      adjustmentsService.findByPerson.mockResolvedValue([
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
           person: 'AA1234A',
@@ -439,17 +422,12 @@ describe('Additional Days Added Service', () => {
           adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
           fromDate: '2023-08-03',
           days: 10,
-          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const adasToView: AdasToView = await adaService.viewAdjustments(
-        nomsId,
-        startOfSentenceEnvelope,
-        'username',
-        token,
-      )
+      const adasToView: AdasToView = await adaService.viewAdjustments(nomsId, startOfSentenceEnvelope, token)
 
       expect(adasToView).toEqual({
         awarded: [
@@ -496,17 +474,15 @@ describe('Additional Days Added Service', () => {
 
     it('Get adjudication where adjustment has been quashed', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneQuashed)
-      adjudicationsApi
-        .get('/adjudications/AA1234A/charge/1525917', '')
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneQuashed)
+      prisonApi
+        .get('/api/offenders/AA1234A/adjudications/1525917', '')
         .reply(200, adjudicationTwoConsecutiveToOneQuashed)
-      adjudicationsApi
-        .get('/adjudications/AA1234A/charge/1525918', '')
+      prisonApi
+        .get('/api/offenders/AA1234A/adjudications/1525918', '')
         .reply(200, adjudicationThreeConcurrentToOneQuashed)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [
+      adjustmentsService.findByPerson.mockResolvedValue([
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
           person: 'AA1234A',
@@ -514,7 +490,7 @@ describe('Additional Days Added Service', () => {
           adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
           fromDate: '2023-08-03',
           days: 10,
-          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918] },
+          additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
         },
       ])
       const startOfSentenceEnvelope = new Date('2023-01-01')
@@ -524,7 +500,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -582,11 +557,9 @@ describe('Additional Days Added Service', () => {
     })
     it('Get adjudication where prospective ada exists and selected', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, oneAdjudicationSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
+      adjustmentsService.findByPerson.mockResolvedValue([])
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
@@ -596,7 +569,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -636,11 +608,9 @@ describe('Additional Days Added Service', () => {
 
     it('Get adjudication where prospective ada exists and not selected', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, oneAdjudicationSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
+      adjustmentsService.findByPerson.mockResolvedValue([])
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
@@ -650,7 +620,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -673,19 +642,12 @@ describe('Additional Days Added Service', () => {
 
     it('Get padas where prospective ada exists', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, oneAdjudicationSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, [])
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
+      adjustmentsService.findByPerson.mockResolvedValue([])
       const startOfSentenceEnvelope = new Date('2023-01-01')
 
-      const padaToReview: PadasToReview = await adaService.getPadasToApprove(
-        nomsId,
-        startOfSentenceEnvelope,
-        'username',
-        token,
-      )
+      const padaToReview: PadasToReview = await adaService.getPadasToApprove(nomsId, startOfSentenceEnvelope, token)
 
       expect(padaToReview).toEqual({
         prospective: [
@@ -712,13 +674,11 @@ describe('Additional Days Added Service', () => {
 
     it('Get adjudication where ada is consecutive to a non-ada - edge case, this  really stems from bad data in nomis ', async () => {
       const nomsId = 'AA1234A'
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecToNonAda)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeNonAda)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecToNonAda)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeNonAda)
+      adjustmentsService.findByPerson.mockResolvedValue(adjustmentResponsesWithChargeNumber)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
 
@@ -726,7 +686,6 @@ describe('Additional Days Added Service', () => {
         request,
         nomsId,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
 
@@ -776,18 +735,12 @@ describe('Additional Days Added Service', () => {
 
     it('Approve ADAs where a mix of consecutive and concurrent charges exist', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
-      adjustmentApi.get(`/adjustments?person=${nomsId}`).reply(200, adjustmentResponsesWithChargeNumber)
-      adjustmentApi.delete(`/adjustments/8569b6d4-9c6f-48d2-83db-bb5091f1011e`).reply(200)
-      adjustmentApi.delete(`/adjustments/d8069e08-5334-4f90-b59d-1748afbcfa6f`).reply(200)
-      adjustmentApi.delete(`/adjustments/a44b3d0b-3c56-4035-86d2-5ff75a85adfa`).reply(200)
-      adjustmentApi.post(`/adjustments`).reply(201)
+      const bookingId = '1234'
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue(adjustmentResponsesWithChargeNumber)
 
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
@@ -795,37 +748,26 @@ describe('Additional Days Added Service', () => {
       await adaService.submitAdjustments(
         request,
         {
-          offenderNo: nomsId,
+          prisonerNumber: nomsId,
           bookingId,
-        } as PrisonApiPrisoner,
+        } as PrisonerSearchApiPrisoner,
         startOfSentenceEnvelope,
-        'username',
         token,
       )
       expect(storeService.setLastApprovedDate.mock.calls).toHaveLength(1)
+      expect(adjustmentsService.delete).toHaveBeenCalledTimes(3)
+      expect(adjustmentsService.create).toHaveBeenCalledTimes(1)
     })
     it('Should intercept mix of concurrent consec', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
       storeService.getLastApprovedDate.mockReturnValue(null)
-      const intercept = await adaService.shouldIntercept(
-        request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
-        [],
-        startOfSentenceEnvelope,
-        'username',
-      )
+      const intercept = await adaService.shouldIntercept(request, nomsId, [], startOfSentenceEnvelope, token)
 
       expect(intercept).toEqual({
         type: 'UPDATE',
@@ -835,22 +777,16 @@ describe('Additional Days Added Service', () => {
     })
     it('Shouldnt intercept when already persisted in adjustment api', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, threeAdjudicationsSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
       storeService.getLastApprovedDate.mockReturnValue(null)
       const intercept = await adaService.shouldIntercept(
         request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
+        nomsId,
         [
           {
             person: 'AA1234A',
@@ -872,26 +808,46 @@ describe('Additional Days Added Service', () => {
       } as AdaIntercept)
     })
 
-    it('Shouldnt intercept when recently saved prospective', async () => {
+    it('Should intercept when already persisted adjustment has different days', async () => {
       const nomsId = 'AA1234A'
-      const bookingId = 1234
-      adjudicationsApi
-        .get('/adjudications/AA1234A/adjudications?size=1000', '')
-        .reply(200, oneAdjudicationSearchResponse)
-      adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneProspective)
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOne)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525918', '').reply(200, adjudicationThreeConcurrentToOne)
       const startOfSentenceEnvelope = new Date('2023-01-01')
       const request = {} as jest.Mocked<Request>
-      storeService.getLastApprovedDate.mockReturnValue(new Date())
+      storeService.getLastApprovedDate.mockReturnValue(null)
       const intercept = await adaService.shouldIntercept(
         request,
-        {
-          offenderNo: nomsId,
-          bookingId,
-        } as PrisonApiPrisoner,
-        [],
+        nomsId,
+        [
+          {
+            person: 'AA1234A',
+            bookingId: 1234,
+            adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+            fromDate: '2023-08-03',
+            days: 5,
+            additionalDaysAwarded: { adjudicationId: [1525916, 1525917, 1525918], prospective: false },
+          },
+        ],
         startOfSentenceEnvelope,
         'username',
       )
+
+      expect(intercept).toEqual({
+        type: 'UPDATE',
+        number: 1,
+        anyProspective: false,
+      } as AdaIntercept)
+    })
+    it('Shouldnt intercept when recently saved prospective', async () => {
+      const nomsId = 'AA1234A'
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, oneAdjudicationSearchResponse)
+      prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneProspective)
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.getLastApprovedDate.mockReturnValue(new Date())
+      const intercept = await adaService.shouldIntercept(request, nomsId, [], startOfSentenceEnvelope, 'username')
 
       expect(intercept).toEqual({
         type: 'NONE',
@@ -903,20 +859,10 @@ describe('Additional Days Added Service', () => {
 
   it('Shouldnt intercept when there are no non recall sentences', async () => {
     const nomsId = 'AA1234A'
-    const bookingId = 1234
     const startOfSentenceEnvelope: Date = null
     const request = {} as jest.Mocked<Request>
     storeService.getLastApprovedDate.mockReturnValue(new Date())
-    const intercept = await adaService.shouldIntercept(
-      request,
-      {
-        offenderNo: nomsId,
-        bookingId,
-      } as PrisonApiPrisoner,
-      [],
-      startOfSentenceEnvelope,
-      'username',
-    )
+    const intercept = await adaService.shouldIntercept(request, nomsId, [], startOfSentenceEnvelope, token)
 
     expect(intercept).toEqual({
       type: 'NONE',
@@ -927,24 +873,18 @@ describe('Additional Days Added Service', () => {
 
   it('Should intercept if all adas quashed', async () => {
     const nomsId = 'AA1234A'
-    const bookingId = 1234
-    adjudicationsApi
-      .get('/adjudications/AA1234A/adjudications?size=1000', '')
-      .reply(200, threeAdjudicationsSearchResponse)
-    adjudicationsApi.get('/adjudications/AA1234A/charge/1525916', '').reply(200, adjudicationOneQuashed)
-    adjudicationsApi.get('/adjudications/AA1234A/charge/1525917', '').reply(200, adjudicationTwoConsecutiveToOneQuashed)
-    adjudicationsApi
-      .get('/adjudications/AA1234A/charge/1525918', '')
+    prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, threeAdjudicationsSearchResponse)
+    prisonApi.get('/api/offenders/AA1234A/adjudications/1525916', '').reply(200, adjudicationOneQuashed)
+    prisonApi.get('/api/offenders/AA1234A/adjudications/1525917', '').reply(200, adjudicationTwoConsecutiveToOneQuashed)
+    prisonApi
+      .get('/api/offenders/AA1234A/adjudications/1525918', '')
       .reply(200, adjudicationThreeConcurrentToOneQuashed)
     const startOfSentenceEnvelope = new Date('2023-01-01')
     const request = {} as jest.Mocked<Request>
 
     const intercept = await adaService.shouldIntercept(
       request,
-      {
-        offenderNo: nomsId,
-        bookingId,
-      } as PrisonApiPrisoner,
+      nomsId,
       [
         {
           id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',

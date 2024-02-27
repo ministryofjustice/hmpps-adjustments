@@ -6,30 +6,22 @@ import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService() as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
-
-const stubbedPrisonerData = {
-  offenderNo: NOMS_ID,
-  firstName: 'Anon',
-  lastName: 'Nobody',
-  dateOfBirth: '24/06/2000',
-  bookingId: 12345,
-  agencyId: 'LDS',
-} as PrisonApiPrisoner
 
 const sentenceAndOffenceBaseRecord = {
   terms: [
@@ -81,8 +73,9 @@ const stubbedSentencesAndOffencesWithSelected = [
 ]
 
 const blankAdjustment = {
+  id: '1',
   person: NOMS_ID,
-  bookingId: stubbedPrisonerData.bookingId,
+  bookingId: 12345,
   adjustmentType: 'TAGGED_BAIL',
 } as SessionAdjustment
 
@@ -91,6 +84,11 @@ const populatedAdjustment = {
   days: 9955,
   taggedBail: { caseSequence: 1 },
 }
+const nomisAdjustment = {
+  ...blankAdjustment,
+  days: 9955,
+  sentenceSequence: 1,
+} as Adjustment
 
 let app: Express
 
@@ -111,7 +109,6 @@ afterEach(() => {
 
 describe('Tagged bail routes tests', () => {
   it('GET /{nomsId}/tagged-bail/add redirects correctly', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
@@ -121,7 +118,6 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('GET /{nomsId}/tagged-bail/select-case/add shows correct information', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
@@ -135,7 +131,6 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('GET /{nomsId}/tagged-bail/days/add shows correct information', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
@@ -146,9 +141,85 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/tagged-bail/review/add shows correct information', () => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
+  it('GET /{nomsId}/tagged-bail/view DPS adjustment shows correct information', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([populatedAdjustment])
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Tagged bail overview')
+        expect(res.text).toContain('Court 2')
+        expect(res.text).toContain('CASE001')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/view NOMIS adjustment shows correct information', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([nomisAdjustment])
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Tagged bail overview')
+        expect(res.text).toContain('Court 2')
+        expect(res.text).toContain('CASE001')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([nomisAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows unused deductions message', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([blankAdjustment])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain(
+          'The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS',
+        )
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/review/add shows correct information', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`)
@@ -161,10 +232,9 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('POST /{nomsId}/tagged-bail/review/add', () => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = populatedAdjustment
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`)
       .expect(302)
@@ -174,13 +244,13 @@ describe('Tagged bail routes tests', () => {
   test.each`
     addOrEdit | complete | backLink                                                                       | selectHref
     ${'add'}  | ${true}  | ${`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}" class="govuk-back-link"`} | ${`<a class="govuk-link" href=/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`}
+    ${'edit'} | ${false} | ${`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}" class="govuk-back-link"`}       | ${`<a class="govuk-link" href=/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`}
     ${'add'}  | ${false} | ${`/${NOMS_ID}" class="govuk-back-link"`}                                      | ${`<a class="govuk-link" href=/${NOMS_ID}/tagged-bail/days/add/${SESSION_ID}`}
   `(
     'GET /{nomsId}/tagged-bail/select-case/:addOrEdit back link and select href tests',
     async ({ addOrEdit, complete, backLink, selectHref }) => {
-      const adjustments = {}
+      const adjustments: Record<string, SessionAdjustment> = {}
       adjustments[SESSION_ID] = blankAdjustment
-      prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
       adjustmentsStoreService.getById.mockReturnValue({ ...populatedAdjustment, complete })
       prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
 
@@ -197,11 +267,11 @@ describe('Tagged bail routes tests', () => {
   test.each`
     addOrEdit | complete | backLink
     ${'add'}  | ${true}  | ${`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}" class="govuk-back-link"`}
+    ${'edit'} | ${true}  | ${`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}" class="govuk-back-link"`}
     ${'add'}  | ${false} | ${`/${NOMS_ID}/tagged-bail/select-case/add/${SESSION_ID}" class="govuk-back-link"`}
   `('GET /{nomsId}/tagged-bail/days/:addOrEdit back link tests', async ({ addOrEdit, complete, backLink }) => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue({ ...populatedAdjustment, complete })
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
 
@@ -214,9 +284,8 @@ describe('Tagged bail routes tests', () => {
   })
 
   it('GET /{nomsId}/tagged-bail/review/select-case/add/:id shows selected if a record has already been chosen', () => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue({ ...populatedAdjustment, complete: true })
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffencesWithSelected)
 
@@ -227,6 +296,18 @@ describe('Tagged bail routes tests', () => {
         expect(res.text).toContain('Selected')
       })
   })
+
+  it('GET /{nomsId}/tagged-bail/edit/{id} shows details', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}?caseReference=1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
 })
 
 describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
@@ -234,7 +315,6 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
     addOrEdit | redirectLocation
     ${'add'}  | ${`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`}
   `('POST of days when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     adjustmentsService.validate.mockResolvedValue([])
     return request(app)
@@ -250,9 +330,8 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
     ${'add'}
     ${'edit'}
   `('POST /{nomsId}/tagged-bail/dates/add empty form validation', async ({ addOrEdit }) => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/days/${addOrEdit}/${SESSION_ID}`)
@@ -271,9 +350,8 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
     ${'edit'} | ${`-1`}
     ${'edit'} | ${`1.5`}
   `('POST /{nomsId}/tagged-bail/dates/:addOrEdit invalid number entered for days', async ({ addOrEdit, days }) => {
-    const adjustments = {}
+    const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = blankAdjustment
-    prisonerService.getPrisonerDetail.mockResolvedValue(stubbedPrisonerData)
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/days/${addOrEdit}/${SESSION_ID}`)

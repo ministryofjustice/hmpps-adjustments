@@ -1,9 +1,10 @@
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "./remandOffence.njk" import offenceList %}
 
 {% macro remandCard(adjustment, offenderNo) %}
-<div class="adjustment-card wider clear">
+<div class="adjustment-card full clear govuk-!-margin-bottom-4">
     <div class="govuk-summary-card__title-wrapper adjustment-card-heading clear">
         <h2 class="govuk-summary-card__title">{{'From ' + adjustment.fromDate | date("DD MMM YYYY") + ' to ' + adjustment.toDate | date("DD MMM YYYY")}}</h2>
         <ul class="govuk-summary-card__actions">
@@ -37,31 +38,4 @@
         }) }}
     </div>
 </div>
-{% endmacro %}
-
-{% macro offenceList(offences) %}
-  <ul class='govuk-list'>
-    {% for o in offences %}
-      <li>
-        {{ o.offenceDescription }}
-        <br>
-        <span class="govuk-hint">
-                    {{ offenceCommittedText(o) }}
-                </span>
-      </li>
-    {% endfor %}
-  </ul>
-{% endmacro %}
-
-
-{% macro offenceCommittedText(offence) %}
-  {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
-    Committed from {{ offence.offenceStartDate | date("DD MMM YYYY") }} to {{ offence.offenceEndDate | date("DD MMM YYYY") }}
-    {% elif offence.offenceStartDate %}
-    Committed on {{ offence.offenceStartDate | date("DD MMM YYYY") }}
-    {% elif offence.offenceEndDate %}
-    Committed on {{ offence.offenceEndDate | date("DD MMM YYYY") }}
-  {% else %}
-    Offence date not entered
-  {% endif %}
 {% endmacro %}

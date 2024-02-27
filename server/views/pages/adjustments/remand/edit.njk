@@ -12,7 +12,7 @@
   <nav>
     {{ govukBackLink({
       text: "Back",
-      href: "/" + model.prisonerDetail.offenderNo + "/remand/view"
+      href: "/" + prisoner.prisonerNumber + "/remand/view"
     }) }}
   </nav>
 {% endblock %}
@@ -53,13 +53,13 @@
       {{ remandSummary({
         adjustment: model.adjustment,
         offences: model.listOffences(),
-        offenderNo: model.prisonerDetail.offenderNo,
+        offenderNo: prisoner.prisonerNumber,
         isEdit: true
       }) }}
 
       <h2 class="govuk-heading-m">Now save the remand time</h2>
 
-      {% if model.showUnusedMessage() %}
+      {% if model.showUnusedMessage %}
         <p class="govuk-body">The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
       {% endif %}
 
@@ -76,7 +76,7 @@
 
           {{ govukButton({
             text: "Cancel",
-            href: "/" + model.prisonerDetail.offenderNo + "/remand/view",
+            href: "/" + prisoner.prisonerNumber + "/remand/view",
             classes: "govuk-button--secondary"
           }) }}
         </div>

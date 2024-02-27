@@ -5,7 +5,7 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
-{% set pageTitle = applicationName + " - Enter remand dates" %}
+{% set pageTitle = applicationName + " - Enter tagged bail dates" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
@@ -44,7 +44,7 @@
           actions: {
           items: [
             {
-              href: "/" + model.prisonerDetail.offenderNo + "/tagged-bail/select-case/add/" + model.id,
+              href: "/" + prisoner.prisonerNumber + "/tagged-bail/select-case/add/" + model.id,
               text: "Edit"
             }
           ]
@@ -60,7 +60,7 @@
           actions: {
           items: [
             {
-              href: "/" + model.prisonerDetail.offenderNo + "/tagged-bail/days/add/" + model.id,
+              href: "/" + prisoner.prisonerNumber + "/tagged-bail/days/add/" + model.id,
               text: "Edit"
             }
           ]
@@ -68,6 +68,9 @@
         }
       ]
     }) }}
+    {% if model.showUnusedMessage %}
+    <p>The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
+    {% endif %}
 
     <div class="govuk-button-group">
       <form class="form" method="post">
@@ -81,7 +84,7 @@
         {{ govukButton({
           text: "Cancel",
           classes: "govuk-button--secondary",
-          href: "/" + model.prisonerDetail.offenderNo
+          href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
         }) }}
       </form>
     </div>

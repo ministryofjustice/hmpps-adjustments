@@ -105,7 +105,7 @@ export interface components {
   schemas: {
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never>
+        [key: string]: Record<string, never> | undefined
       }
       messageId: string
     }
@@ -156,6 +156,8 @@ export interface components {
       comment?: string
       /** @description The NOMIS active or inactive flag */
       active: boolean
+      /** @description Has the prisoner been released from the NOMIS booking */
+      bookingReleased: boolean
     }
     /** @description The details of an additional days awarded (ADA) adjustment */
     AdditionalDaysAwardedDto: {
@@ -202,7 +204,7 @@ export interface components {
       fromDate?: string
       /**
        * Format: int32
-       * @description The number of adjustment days
+       * @description The number of days of the adjustment
        */
       days?: number
       remand?: components['schemas']['RemandDto']
@@ -214,6 +216,13 @@ export interface components {
        * @example LDS
        */
       prisonId?: string
+      /**
+       * Format: int32
+       * @description The NOMIS sentence sequence of the adjustment
+       */
+      sentenceSequence?: number
+      /** @description Human readable text for type of adjustment */
+      adjustmentTypeText?: string
       /**
        * @description The name name of the prison where the prisoner was located at the time the adjustment was created
        * @example Leeds
@@ -232,20 +241,21 @@ export interface components {
        */
       lastUpdatedDate?: string
       /**
+       * Format: date-time
+       * @description The date and time this adjustment was last created
+       */
+      createdDate?: string
+      /**
        * Format: int32
        * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
        */
       effectiveDays?: number
       /**
        * Format: int32
-       * @description The NOMIS sentence sequence of the adjustment
+       * @deprecated
+       * @description The total number of adjustment days
        */
-      sentenceSequence?: number
-      /**
-       * Format: int32
-       * @description The days between the from and two date
-       */
-      daysBetween?: number
+      days?: number
     }
     /** @description The details of remand adjustment */
     RemandDto: {
@@ -334,8 +344,6 @@ export interface components {
   headers: never
   pathItems: never
 }
-
-export type $defs = Record<string, never>
 
 export type external = Record<string, never>
 
@@ -430,17 +438,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -456,17 +458,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -519,17 +515,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -545,17 +535,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -687,17 +671,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   /**
@@ -737,17 +715,11 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment restored */
-      200: {
-        content: never
-      }
+      200: never
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: never
-      }
+      401: never
       /** @description Adjustment not found */
-      404: {
-        content: never
-      }
+      404: never
     }
   }
   getDlqMessages: {

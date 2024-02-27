@@ -1,54 +1,53 @@
-import { PrisonApiOffenderSentenceAndOffences, PrisonApiPrisoner } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-
-type SentencesByCaseSequence = {
-  caseSequence: number
-  sentences: PrisonApiOffenderSentenceAndOffences[]
-}
+import {
+  getActiveSentencesByCaseSequence,
+  relevantSentenceForTaggedBailAdjustment,
+  SentencesByCaseSequence,
+} from '../utils/utils'
 
 type SentenceWithCaseDetails = PrisonApiOffenderSentenceAndOffences & { selected: boolean; selectCaseHref: string }
 
 export default class TaggedBailSelectCaseModel {
+  private sentencesByCaseSequence: SentencesByCaseSequence[]
+
   constructor(
-    public prisonerDetail: PrisonApiPrisoner,
+    public prisonerNumber: string,
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private addOrEdit: string,
     private id: string,
     public adjustment: SessionAdjustment,
-  ) {}
+  ) {
+    this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
+  }
 
   public backlink(): string {
-    if (this.adjustment.complete) {
-      return `/${this.prisonerDetail.offenderNo}/tagged-bail/review/${this.addOrEdit}/${this.id}`
+    if (this.addOrEdit === 'edit') {
+      return `/${this.prisonerNumber}/tagged-bail/${this.addOrEdit}/${this.id}`
     }
-    return `/${this.prisonerDetail.offenderNo}`
+    if (this.adjustment.complete) {
+      return `/${this.prisonerNumber}/tagged-bail/review/${this.addOrEdit}/${this.id}`
+    }
+    return `/${this.prisonerNumber}`
   }
 
   // returns the sentence data for each unique case sequence; i.e. the record that has the earliest sentence date when multiple ones exist
   public activeSentences(): SentenceWithCaseDetails[] {
-    const sentencesBySequenceNumber = this.getSentencesByCaseSequence()
-    return sentencesBySequenceNumber.map(it => {
+    return this.sentencesByCaseSequence.map(it => {
+      let selectCaseHref
+      if (this.addOrEdit === 'edit') {
+        selectCaseHref = `/${this.prisonerNumber}/tagged-bail/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`
+      } else if (this.adjustment.complete) {
+        selectCaseHref = `/${this.prisonerNumber}/tagged-bail/review/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`
+      } else {
+        selectCaseHref = `/${this.prisonerNumber}/tagged-bail/days/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`
+      }
+
       return {
         ...it.sentences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0],
-        selected: this.adjustment.taggedBail?.caseSequence === it.caseSequence,
-        selectCaseHref: this.adjustment.complete
-          ? `/${this.prisonerDetail.offenderNo}/tagged-bail/review/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`
-          : `/${this.prisonerDetail.offenderNo}/tagged-bail/days/${this.addOrEdit}/${this.id}?caseSequence=${it.caseSequence}`,
+        selected: relevantSentenceForTaggedBailAdjustment(it, this.adjustment),
+        selectCaseHref,
       }
     })
-  }
-
-  private getSentencesByCaseSequence(): SentencesByCaseSequence[] {
-    return this.sentencesAndOffences
-      .filter(it => it.sentenceStatus === 'A')
-      .reduce((acc: SentencesByCaseSequence[], cur) => {
-        if (acc.some(it => it.caseSequence === cur.caseSequence)) {
-          const record = acc.find(it => it.caseSequence === cur.caseSequence)
-          record.sentences.push(cur)
-        } else {
-          acc.push({ caseSequence: cur.caseSequence, sentences: [cur] } as SentencesByCaseSequence)
-        }
-        return acc
-      }, [])
   }
 }
