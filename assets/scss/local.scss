@@ -39,3 +39,16 @@ Removes the header from the govukNotificationBanner.
     display: none;
   }
 }
+
+/**
+Custom style for the tags used on sentences that have a calculation type of recall.
+ */
+.govuk-tag--recall {
+  margin: 0 0 0 10px;
+  padding: 2px 5px;
+  color: #505A5E;
+  background-color: transparent;
+  border: solid 2px #505A5E;
+  font-weight: 600;
+  font-size: 14px;
+}

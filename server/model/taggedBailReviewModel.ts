@@ -1,6 +1,11 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { dateToString, getMostRecentSentenceAndOffence } from '../utils/utils'
+import {
+  dateToString,
+  getMostRecentSentenceAndOffence,
+  getSentenceRecallTagHTML,
+  isSentenceRecalled,
+} from '../utils/utils'
 
 export default class TaggedBailReviewModel {
   constructor(
@@ -23,8 +28,12 @@ export default class TaggedBailReviewModel {
       ),
     )
 
-    return `${selectedCase.courtDescription}<br>${selectedCase.caseReference || ''} ${dateToString(
-      new Date(selectedCase.sentenceDate),
-    )}`
+    return isSentenceRecalled(selectedCase.sentenceCalculationType)
+      ? `${selectedCase.courtDescription} ${getSentenceRecallTagHTML()}<br>${selectedCase.caseReference || ''} ${dateToString(
+          new Date(selectedCase.sentenceDate),
+        )}`
+      : `${selectedCase.courtDescription}<br>${selectedCase.caseReference || ''} ${dateToString(
+          new Date(selectedCase.sentenceDate),
+        )}`
   }
 }
