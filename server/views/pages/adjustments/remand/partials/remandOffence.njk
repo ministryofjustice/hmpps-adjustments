@@ -1,15 +1,15 @@
 {% macro offenceList(offences) %}
-  <ul class='govuk-list'>
+  <div class='govuk-list'>
     {% for o in offences %}
-      <li>
+      <div>
         {{ o.offenceDescription }} {% if o.recall %}<strong class="govuk-tag">Recall</strong>{% endif %}
         <br>
         <span class="govuk-hint">
                     {{ offenceCommittedText(o) }}
                 </span>
-      </li>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 {% endmacro %}
 
 
