@@ -28,12 +28,6 @@ export default class TaggedBailReviewModel {
       ),
     )
 
-    return isSentenceRecalled(selectedCase.sentenceCalculationType)
-      ? `${selectedCase.courtDescription} ${getSentenceRecallTagHTML()}<br>${selectedCase.caseReference || ''} ${dateToString(
-          new Date(selectedCase.sentenceDate),
-        )}`
-      : `${selectedCase.courtDescription}<br>${selectedCase.caseReference || ''} ${dateToString(
-          new Date(selectedCase.sentenceDate),
-        )}`
+    return `${selectedCase.courtDescription} ${isSentenceRecalled(selectedCase.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${selectedCase.caseReference || ''} ${dateToString(new Date(selectedCase.sentenceDate))}`
   }
 }

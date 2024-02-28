@@ -15,13 +15,13 @@ export default class TaggedBailRemoveModel {
   }
 
   public rows() {
-    const caseDetailsHTML = isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType)
-      ? {
-          html: `${this.getCourtName()} ${getSentenceRecallTagHTML()}<br>${this.getCaseReference()} ${this.getSentenceDate()}`,
-        }
-      : { html: `${this.getCourtName()}<br>${this.getCaseReference()} ${this.getSentenceDate()}` }
     return [
-      [{ text: 'Case details' }, caseDetailsHTML],
+      [
+        { text: 'Case details' },
+        {
+          html: `${this.getCourtName()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getCaseReference()} ${this.getSentenceDate()}`,
+        },
+      ],
       [{ text: 'Days' }, { text: this.getTaggedBailDays() }],
     ]
   }

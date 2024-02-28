@@ -143,7 +143,7 @@ export function isSentenceRecalled(sentenceCalculationType: string): boolean {
  * Returns the HTML for the sentence recall tag.
  */
 export function getSentenceRecallTagHTML(): string {
-  return '<strong class="govuk-tag govuk-tag--recall">RECALL</strong>'
+  return '<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>'
 }
 
 /**
