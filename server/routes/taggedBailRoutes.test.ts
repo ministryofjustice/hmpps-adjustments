@@ -176,7 +176,7 @@ describe('Tagged bail routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Delete Tagged Bail details')
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <br>CASE001 19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -190,7 +190,7 @@ describe('Tagged bail routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Delete Tagged Bail details')
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <br>CASE001 19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -212,7 +212,7 @@ describe('Tagged bail routes tests', () => {
         expect(res.text).toContain(
           'The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS',
         )
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <br>CASE001 19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -226,7 +226,7 @@ describe('Tagged bail routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Tagged bail details')
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <br>CASE001 19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -304,7 +304,7 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}?caseReference=1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <br>CASE001 19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })

@@ -2,11 +2,16 @@ import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prison
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import {
   getActiveSentencesByCaseSequence,
+  isSentenceRecalled,
   relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
 } from '../utils/utils'
 
-type SentenceWithCaseDetails = PrisonApiOffenderSentenceAndOffences & { selected: boolean; selectCaseHref: string }
+type SentenceWithCaseDetails = PrisonApiOffenderSentenceAndOffences & {
+  selected: boolean
+  selectCaseHref: string
+  recall: boolean
+}
 
 export default class TaggedBailSelectCaseModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]
@@ -47,6 +52,7 @@ export default class TaggedBailSelectCaseModel {
         ...it.sentences.sort((a, b) => new Date(a.sentenceDate).getTime() - new Date(b.sentenceDate).getTime())[0],
         selected: relevantSentenceForTaggedBailAdjustment(it, this.adjustment),
         selectCaseHref,
+        recall: isSentenceRecalled(it.sentences[0].sentenceCalculationType),
       }
     })
   }

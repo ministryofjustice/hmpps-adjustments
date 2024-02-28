@@ -3,6 +3,8 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
+  getSentenceRecallTagHTML,
+  isSentenceRecalled,
   relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
 } from '../utils/utils'
@@ -33,12 +35,12 @@ export default class TaggedBailViewModel {
       )
       const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
 
-      return [
-        { text: sentenceAndOffence.courtDescription },
-        { text: sentenceAndOffence.caseReference },
-        { text: it.days },
-        this.actionCell(it),
-      ]
+      const recall = isSentenceRecalled(sentencesForCaseSequence.sentences[0].sentenceCalculationType)
+      const descriptionRow = recall
+        ? { html: `${sentenceAndOffence.courtDescription} ${getSentenceRecallTagHTML()}` }
+        : { text: sentenceAndOffence.courtDescription }
+
+      return [descriptionRow, { text: sentenceAndOffence.caseReference }, { text: it.days }, this.actionCell(it)]
     })
   }
 

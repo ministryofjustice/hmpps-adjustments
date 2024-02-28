@@ -36,7 +36,12 @@
     {% for activeSentence in model.activeSentences() %}
       <div class="govuk-summary-card">
         <div class="govuk-summary-card__title-wrapper">
-          <h2 class="govuk-summary-card__title">{{ activeSentence.courtDescription }}</h2>
+            <h2 class="govuk-summary-card__title">
+              {{ activeSentence.courtDescription }}
+              {% if activeSentence.recall %}
+                <span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>
+              {% endif %}
+            </h2>
           <ul class="govuk-summary-card__actions">
             <li class="govuk-summary-card__action">
               {% if activeSentence.selected %}

@@ -39,3 +39,10 @@ Removes the header from the govukNotificationBanner.
     display: none;
   }
 }
+
+/**
+Custom style for the badges used on sentences that have a calculation type of recall.
+ */
+.moj-badge--recall {
+  margin: 0 0 0 10px;
+}

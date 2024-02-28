@@ -117,7 +117,7 @@ export function offencesForAdjustment(
         return adjustment.sentenceSequence === so.sentenceSequence
       })
       .map(off => {
-        return { ...off, recall: PrisonerService.recallTypes.includes(so.sentenceCalculationType) }
+        return { ...off, recall: isSentenceRecalled(so.sentenceCalculationType) }
       })
   })
 }
@@ -128,6 +128,22 @@ export function offencesForAdjustment(
 export type SentencesByCaseSequence = {
   caseSequence: number
   sentences: PrisonApiOffenderSentenceAndOffences[]
+}
+
+/**
+ * Used to determine if the given sentence calculation type is a recall type.
+ * @param sentenceCalculationType The calculation type to check.
+ * @returns true if the calculation type is a recall type.
+ */
+export function isSentenceRecalled(sentenceCalculationType: string): boolean {
+  return PrisonerService.recallTypes.includes(sentenceCalculationType)
+}
+
+/**
+ * Returns the HTML for the sentence recall tag.
+ */
+export function getSentenceRecallTagHTML(): string {
+  return '<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>'
 }
 
 /**
