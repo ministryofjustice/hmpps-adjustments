@@ -46,6 +46,9 @@ export default class TaggedBailRoutes {
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
       model: new TaggedBailSelectCaseModel(prisonerNumber, sentencesAndOffences, addOrEdit, id, adjustment),
@@ -57,6 +60,9 @@ export default class TaggedBailRoutes {
     const { caseSequence } = req.query as Record<string, string>
     const { prisonerNumber } = res.locals.prisoner
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
     if (caseSequence) {
       this.adjustmentsStoreService.store(req, nomsId, id, {
         ...adjustment,

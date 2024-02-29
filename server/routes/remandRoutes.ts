@@ -51,6 +51,9 @@ export default class RemandRoutes {
       throw FullPageError.notFoundError()
     }
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
     const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
 
     const form = RemandDatesForm.fromAdjustment(adjustment)
@@ -99,6 +102,9 @@ export default class RemandRoutes {
     }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const form = RemandOffencesForm.fromAdjustment(adjustment, sentencesAndOffences)
 
