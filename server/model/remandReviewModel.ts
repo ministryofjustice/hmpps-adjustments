@@ -1,7 +1,12 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { daysBetween, offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
+import {
+  daysBetween,
+  getSentenceRecallTagHTML,
+  offencesForAdjustment,
+  remandRelatedValidationSummary,
+} from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
@@ -80,9 +85,7 @@ export default class RemandReviewModel {
             html: `<div>
                     ${offences
                       .map(it => {
-                        return `<div>${it.offenceDescription}${
-                          it.recall ? '<strong class="govuk-tag">Recall</strong>' : ''
-                        }<br>
+                        return `<div>${it.offenceDescription}${it.recall ? getSentenceRecallTagHTML() : ''}<br>
                         <span class="govuk-hint">
                           ${this.getCommittedText(it)}
                         </span></div>`

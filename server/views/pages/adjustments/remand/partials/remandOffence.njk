@@ -2,7 +2,7 @@
   <div class='govuk-list'>
     {% for o in offences %}
       <div>
-        {{ o.offenceDescription }} {% if o.recall %}<strong class="govuk-tag">Recall</strong>{% endif %}
+        {{ o.offenceDescription }} {% if o.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}
         <br>
         <span class="govuk-hint">
                     {{ offenceCommittedText(o) }}
