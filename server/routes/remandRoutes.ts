@@ -297,7 +297,7 @@ export default class RemandRoutes {
     )
 
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandChangeModel(adjustment, sentencesAndOffences, unusedDeductions, showUnusedMessage),
+      model: new RemandChangeModel(adjustment, null, sentencesAndOffences, unusedDeductions, showUnusedMessage),
     })
   }
 
@@ -305,6 +305,7 @@ export default class RemandRoutes {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
+    const dbAdjustment = await this.adjustmentsService.get(id, token)
     let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
@@ -334,6 +335,7 @@ export default class RemandRoutes {
           ...sessionAdjustment,
           days: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
         },
+        dbAdjustment,
         sentencesAndOffences,
         unusedDeductions,
         showUnusedMessage,
