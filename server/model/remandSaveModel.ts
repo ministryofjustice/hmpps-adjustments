@@ -10,7 +10,7 @@ export default class RemandSaveModel {
 
   public table() {
     return {
-      head: [{ text: 'Period of remand' }, { text: 'Days spent on remand' }],
+      head: [{ text: 'Remand period' }, { text: 'Days spent on remand' }],
       rows: [...this.rows(), this.totalRow()],
     }
   }
