@@ -9,19 +9,6 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      {% if not model.serviceHasCalculatedUnusedDeductions %}
-        {% set html %}
-          <p class="govuk-notification-banner__heading">
-            Unused deductions time cannot be calculated.<br />
-            Any unused deductions must be entered in NOMIS.
-          </p>
-        {% endset %}
-
-        {{ govukNotificationBanner({
-          html: html,
-          titleId: 'unused-deductions-notification'
-        }) }}
-      {% endif %}
       {% if model.message %}
         {% if model.message.action === 'CREATE' %}
           {% set html %}
@@ -125,7 +112,16 @@
              data-qa="relevant-remand">Review</a>
         </div>
       {% endif %}
-     
+
+      {% if not model.serviceHasCalculatedUnusedDeductions %}
+        <h3 class="govuk-heading-m">
+          Unused deductions
+        </h3>
+        <div class="govuk-inset-text">
+          Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.
+        </div>
+      {% endif %}
+
       <h2 class="govuk-heading-m govuk-!-padding-left-4">
         Deductions
       </h2>
