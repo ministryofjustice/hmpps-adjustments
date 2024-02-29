@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween, offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
@@ -77,25 +77,14 @@ export default class RemandReviewModel {
             text: 'Offences',
           },
           value: {
-            html: `<div class="govuk-list">
+            html: `<div>
                     ${offences
                       .map(it => {
-                        let committedText
-                        if (it.offenceEndDate && it.offenceStartDate && it.offenceEndDate !== it.offenceStartDate) {
-                          committedText = `Committed from ${dayjs(it.offenceStartDate).format('DD MMMM YYYY')} to ${dayjs(it.offenceEndDate).format('DD MMMM YYYY')}`
-                        } else if (it.offenceStartDate) {
-                          committedText = `Committed on ${dayjs(it.offenceStartDate).format('DD MMMM YYYY')}`
-                        } else if (it.offenceEndDate) {
-                          committedText = `Committed on ${dayjs(it.offenceEndDate).format('DD MMMM YYYY')}`
-                        } else {
-                          committedText = 'Offence date not entered'
-                        }
-
                         return `<div>${it.offenceDescription}${
                           it.recall ? '<strong class="govuk-tag">Recall</strong>' : ''
                         }<br>
                         <span class="govuk-hint">
-                          ${committedText}
+                          ${this.getCommittedText(it)}
                         </span></div>`
                       })
                       .join('')}
@@ -121,6 +110,21 @@ export default class RemandReviewModel {
         },
       ],
     }
+  }
+
+  public getCommittedText(offence: PrisonApiOffence & { recall: boolean }): string {
+    let committedText
+    if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
+      committedText = `Committed from ${dayjs(offence.offenceStartDate).format('DD MMMM YYYY')} to ${dayjs(offence.offenceEndDate).format('DD MMMM YYYY')}`
+    } else if (offence.offenceStartDate) {
+      committedText = `Committed on ${dayjs(offence.offenceStartDate).format('DD MMMM YYYY')}`
+    } else if (offence.offenceEndDate) {
+      committedText = `Committed on ${dayjs(offence.offenceEndDate).format('DD MMMM YYYY')}`
+    } else {
+      committedText = 'Offence date not entered'
+    }
+
+    return committedText
   }
 
   public totalDaysSummary() {
