@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween, offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
@@ -26,6 +26,22 @@ export default class RemandReviewModel {
     return Object.values(this.adjustments)
       .map(it => daysBetween(new Date(it.fromDate), new Date(it.toDate)))
       .reduce((sum, current) => sum + current, 0)
+  }
+
+  public multipleRemandAdjustments(): boolean {
+    return Object.values(this.adjustments).length > 1
+  }
+
+  remandTotals() {
+    return [
+      ...Object.values(this.adjustments).map(it => {
+        return [
+          { text: `From ${dayjs(it.fromDate).format('DD MMM YYYY')} to ${dayjs(it.toDate).format('DD MMM YYYY')}` },
+          { text: daysBetween(new Date(it.fromDate), new Date(it.toDate)) },
+        ]
+      }),
+      [{ text: 'Total days', classes: 'govuk-table__header' }, { text: this.totalDays() }],
+    ]
   }
 
   public backlink(): string {
@@ -61,16 +77,18 @@ export default class RemandReviewModel {
             text: 'Offences',
           },
           value: {
-            html: `<ul class="govuk-list govuk-list--bullet">
+            html: `<div>
                     ${offences
-                      .map(
-                        it =>
-                          `<li>${it.offenceDescription}${
-                            it.recall ? '<strong class="govuk-tag">Recall</strong>' : ''
-                          }</li>`,
-                      )
+                      .map(it => {
+                        return `<div>${it.offenceDescription}${
+                          it.recall ? '<strong class="govuk-tag">Recall</strong>' : ''
+                        }<br>
+                        <span class="govuk-hint">
+                          ${this.getCommittedText(it)}
+                        </span></div>`
+                      })
                       .join('')}
-                  </ul>`,
+                  </div>`,
           },
           actions: {
             items: [
@@ -84,7 +102,7 @@ export default class RemandReviewModel {
         },
         {
           key: {
-            text: 'Days spend on remand',
+            text: 'Days spent on remand',
           },
           value: {
             text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
@@ -92,6 +110,21 @@ export default class RemandReviewModel {
         },
       ],
     }
+  }
+
+  public getCommittedText(offence: PrisonApiOffence & { recall: boolean }): string {
+    let committedText
+    if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
+      committedText = `Committed from ${dayjs(offence.offenceStartDate).format('DD MMMM YYYY')} to ${dayjs(offence.offenceEndDate).format('DD MMMM YYYY')}`
+    } else if (offence.offenceStartDate) {
+      committedText = `Committed on ${dayjs(offence.offenceStartDate).format('DD MMMM YYYY')}`
+    } else if (offence.offenceEndDate) {
+      committedText = `Committed on ${dayjs(offence.offenceEndDate).format('DD MMMM YYYY')}`
+    } else {
+      committedText = 'Offence date not entered'
+    }
+
+    return committedText
   }
 
   public totalDaysSummary() {
