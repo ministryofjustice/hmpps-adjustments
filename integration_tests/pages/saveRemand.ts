@@ -3,7 +3,7 @@ import { PageElement } from './page'
 
 export default class SaveRemandPage extends AdjustmentsPage {
   constructor() {
-    super('Adjust release dates')
+    super('Confirm and save')
   }
 
   public submit = (): PageElement => cy.get('[data-qa=submit-form]')
