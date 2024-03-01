@@ -712,6 +712,43 @@ describe('Remand routes tests', () => {
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
   })
 
+  it('GET /{nomsId}/remand/edit/:id No save button because of no changes made', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).not.toContain('Confirm and save')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit/:id Save button visible because of changes made', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
+    const modifiedAdjustmentWithDatesAndCharges = { ...adjustmentWithDatesAndCharges }
+    modifiedAdjustmentWithDatesAndCharges.fromDate = '2023-01-07'
+    adjustmentsService.get.mockResolvedValue(modifiedAdjustmentWithDatesAndCharges)
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
   it('GET /{nomsId}/remand/edit with CRD error', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[SESSION_ID] = adjustmentWithDatesAndCharges

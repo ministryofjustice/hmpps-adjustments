@@ -21,29 +21,18 @@ export default class RemandChangeModel {
   }
 
   public isModified(): boolean {
-    let modified = false
-    if (this.dbAdjustment) {
-      if (this.adjustment.remand.chargeId.length !== this.dbAdjustment.remand.chargeId.length) {
-        modified = true
-      } else {
-        const sessionAdjustmentCharges = this.adjustment.remand.chargeId.sort((a, b) => a - b)
-        const dbAdjustmentCharges = this.dbAdjustment.remand.chargeId.sort((a, b) => a - b)
-
-        for (let i = 0; i < sessionAdjustmentCharges.length; i += 1) {
-          if (sessionAdjustmentCharges[i] !== dbAdjustmentCharges[i]) {
-            modified = true
-          }
-        }
-      }
-
-      if (
-        !modified &&
-        (this.adjustment.toDate !== this.dbAdjustment.toDate || this.adjustment.fromDate !== this.dbAdjustment.fromDate)
-      ) {
-        modified = true
-      }
+    if (!this.dbAdjustment) {
+      return false
     }
 
-    return modified
+    const sessionCharges = this.adjustment.remand.chargeId.sort((a, b) => a - b)
+    const dbCharges = this.dbAdjustment.remand.chargeId.sort((a, b) => a - b)
+
+    const chargeIdModified = !sessionCharges.every((chargeId, index) => chargeId === dbCharges[index])
+
+    const dateModified =
+      this.adjustment.toDate !== this.dbAdjustment.toDate || this.adjustment.fromDate !== this.dbAdjustment.fromDate
+
+    return chargeIdModified || dateModified
   }
 }
