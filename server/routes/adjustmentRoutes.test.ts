@@ -164,7 +164,7 @@ describe('Adjustment routes tests', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Unused deductions time cannot be calculated')
+        expect(res.text).toContain('Unused remand/tagged bail time cannot be calculated')
       })
   })
   it('GET /{nomsId} with remand role', () => {
