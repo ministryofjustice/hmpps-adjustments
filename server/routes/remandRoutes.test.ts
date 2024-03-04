@@ -726,6 +726,7 @@ describe('Remand routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).not.toContain('Confirm and save')
+        expect(res.text).toContain('Edit remand')
       })
   })
 
@@ -746,6 +747,7 @@ describe('Remand routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Confirm and save')
+        expect(res.text).not.toContain('Edit remand')
       })
   })
 

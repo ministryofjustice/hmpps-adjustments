@@ -45,7 +45,11 @@
     </div>
   {% endif %}
   <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
-    Edit remand
+    {% if model.isModified() %}
+      Confirm and save
+    {% else %}
+      Edit remand
+    {% endif %}
   </h1>
 
   <div class="govuk-grid-row">
