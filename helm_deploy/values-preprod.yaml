@@ -23,5 +23,14 @@ generic-service:
     ENVIRONMENT_NAME: PRE-PRODUCTION
     PRISONER_SEARCH_API_URL: "https://prisoner-search-preprod.prison.service.justice.gov.uk"
 
+  allowlist:
+    cymulate-1: 54.217.50.18/32
+    cymulate-2: 52.208.202.111/32
+    cymulate-3: 52.49.144.209/32
+    groups:
+      - internal
+      - prisons
+      - private_prisons
+
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
