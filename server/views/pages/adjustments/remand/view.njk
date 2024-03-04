@@ -23,9 +23,10 @@
       <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
         Remand overview for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}
       </h1>
-      
 
-      {{remandTotals(model.remandTotals())}}
+      {% if model.adjustmentsWithOffences().length > 1 %}
+        {{remandTotals(model.remandTotals())}}
+      {% endif %}
 
       <div class="adjustment-card-container">
         {% for adjustment in model.adjustmentsWithOffences() %}
