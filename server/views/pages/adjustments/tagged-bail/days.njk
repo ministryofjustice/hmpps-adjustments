@@ -38,12 +38,12 @@
       </h1>
     </div>
   </div>
-  <p class="govuk-body">Enter the number of days as it’s written on the warrant.</p>
+  <p class="govuk-body">The number of days should be entered as it's written on the warrant.</p>
   <form class="form" method="post">
     <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
     {{ govukInput({
       label: {
-        text: "Amount of days"
+        text: "Number of days"
       },
       classes: "govuk-input--width-5",
       id: "days",
