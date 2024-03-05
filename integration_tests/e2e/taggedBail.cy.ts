@@ -37,6 +37,5 @@ context('Enter Tagged Bail', () => {
     const hub = HubPage.goTo('A1234AB')
     hub.viewTaggedBailLink().click()
     ViewTaggedBailPage.verifyOnPage(ViewTaggedBailPage)
-    // TODO enhance this view test + edit/delete (awaiting redesign tickets)
   })
 })
