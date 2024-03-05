@@ -44,6 +44,31 @@ export default {
             sentenceSequence: 1,
             sentenceStatus: 'A',
             sentenceDate: '2001-01-01',
+            courtDescription: 'Whiterun Hall of Justice',
+            offences: [
+              {
+                offenceEndDate: '2000-02-03',
+                offenceCode: 'abc',
+                offenderChargeId: 111,
+                offenceDescription: 'Doing a crime',
+              },
+            ],
+          },
+          {
+            terms: [
+              {
+                years: 3,
+              },
+            ],
+            sentenceCalculationType: 'ADIMP',
+            sentenceTypeDescription: 'SDS Standard Sentence',
+            caseSequence: 2,
+            lineSequence: 2,
+            caseReference: 'ABC123',
+            sentenceSequence: 2,
+            sentenceStatus: 'A',
+            sentenceDate: '2001-02-01',
+            courtDescription: 'Whiterun Hall of Justice',
             offences: [
               {
                 offenceEndDate: '2000-02-03',

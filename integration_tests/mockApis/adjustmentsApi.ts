@@ -45,6 +45,18 @@ export default {
             days: 22,
             prisonName: 'Leeds',
           },
+          {
+            id: '4c3c057c-896d-4793-9022-f3001e209a36',
+            bookingId: 1204935,
+            sentenceSequence: 2,
+            person: 'A1234AB',
+            adjustmentType: 'TAGGED_BAIL',
+            toDate: null,
+            fromDate: '2023-03-30',
+            days: 22,
+            prisonName: 'Leeds',
+            taggedBail: { caseSequence: 2 },
+          },
         ],
       },
     })
