@@ -30,7 +30,7 @@ context('Enter Remand', () => {
     form.enterToDate('2023-04-17')
     form.submitButton().click()
     const selectOffencesPage = RemandSelectOffencesPage.verifyOnPage(RemandSelectOffencesPage)
-    selectOffencesPage.offenceRadio().click({ force: true })
+    selectOffencesPage.offenceRadio().first().click({ force: true })
     selectOffencesPage.submit().click()
     const reviewRemand = ReviewRemandPage.verifyOnPage(ReviewRemandPage)
     reviewRemand.noMoreRemandRadio().click({ force: true })
