@@ -37,7 +37,7 @@ export default class TaggedBailEditModel {
         },
         {
           key: {
-            text: 'Days',
+            text: 'Number of days',
           },
           value: {
             text: `${this.getTaggedBailDays()}`,
