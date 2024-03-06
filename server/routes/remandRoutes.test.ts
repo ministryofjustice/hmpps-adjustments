@@ -612,7 +612,7 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/save`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_ADDED%22,%22days%22:10%7D`)
   })
 
   it('GET /{nomsId}/remand/remove', () => {

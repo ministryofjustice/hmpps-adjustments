@@ -41,6 +41,11 @@
             <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
             {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
           {% endset %}
+          {% elif model.message.action === 'REMAND_ADDED' %}
+          {% set html %}
+          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of remand have been saved</h3>
+          {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
+          {% endset %}
           {% elif model.message.action === 'REMAND_UPDATED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
@@ -154,7 +159,7 @@
 {% endblock %}
 
 {% macro calcReleaseDatesMessage(calculateReleaseDatesdUrl, prisonerDetail) %}
-  <p class="govuk-body">Once all adjustments have been made, you will need to
-    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a> for {{ prisonerDetail.firstName | title }} {{ prisonerDetail.lastName | title }}.
+  <p class="govuk-body">Once all adjustments have been applied, you must
+    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a>.
   </p>
 {% endmacro %}

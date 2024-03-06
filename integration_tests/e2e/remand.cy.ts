@@ -38,7 +38,7 @@ context('Enter Remand', () => {
 
     const saveRemand = SaveRemandPage.verifyOnPage(SaveRemandPage)
     saveRemand.submit().click()
-    hub.successMessage().contains('Remand details have been saved')
+    hub.successMessage().contains('13 days of remand have been saved')
   })
 
   it('View Remand', () => {

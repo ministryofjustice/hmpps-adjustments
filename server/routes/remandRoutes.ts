@@ -249,8 +249,14 @@ export default class RemandRoutes {
 
     await this.adjustmentsService.create(adjustments, token)
 
+    const days = adjustments.reduce(
+      (sum, current) => sum + daysBetween(new Date(current.fromDate), new Date(current.toDate)),
+      0,
+    )
+
     const message = {
-      action: 'REMAND_UPDATED',
+      action: 'REMAND_ADDED',
+      days,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
