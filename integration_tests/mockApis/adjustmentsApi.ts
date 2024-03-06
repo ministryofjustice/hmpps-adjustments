@@ -141,7 +141,7 @@ export default {
       },
     })
   },
-  stubGetAdjustment: (): SuperAgentRequest => {
+  stubGetRadaAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'GET',
@@ -163,10 +163,45 @@ export default {
       },
     })
   },
+  stubGetTaggedBailAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        jsonBody: {
+          id: '4c3c057c-896d-4793-9022-f3001e209a36',
+          adjustmentType: 'TAGGED_BAIL',
+          bookingId: '1234',
+          fromDate: '2023-04-05',
+          toDate: null,
+          person: 'A1234AB',
+          days: 25,
+          sentenceSequence: 2,
+          taggedBail: { caseSequence: 2 },
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
   stubUpdateAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteTaggedBail: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
         urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
       },
       response: {
