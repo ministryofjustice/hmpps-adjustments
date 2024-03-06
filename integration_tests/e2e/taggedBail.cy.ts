@@ -1,8 +1,10 @@
 import HubPage from '../pages/hub'
 import FormPage from '../pages/form'
-import ReviewTaggedBailPage from '../pages/reviewTaggedBail'
-import ViewTaggedBailPage from '../pages/viewTaggedBail'
-import TaggedBailSelectCasePage from '../pages/taggedBailSelectCase'
+import ReviewTaggedBailPage from '../pages/tagged-bail/reviewTaggedBail'
+import ViewTaggedBailPage from '../pages/tagged-bail/viewTaggedBail'
+import TaggedBailSelectCasePage from '../pages/tagged-bail/taggedBailSelectCase'
+import EditTaggedBailPage from '../pages/tagged-bail/editTaggedBail'
+import RemoveTaggedBailPage from '../pages/tagged-bail/removeTaggedBail'
 
 context('Enter Tagged Bail', () => {
   beforeEach(() => {
@@ -12,10 +14,13 @@ context('Enter Tagged Bail', () => {
     cy.task('stubGetPrisonerDetails')
     cy.task('stubGetUserCaseloads')
     cy.task('stubGetAdjustments')
+    cy.task('stubGetTaggedBailAdjustment')
     cy.task('stubSearchAdjudicationsNoReview')
     cy.task('stubIndividualAdjudicationsNoReview')
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubCreateAdjustment')
+    cy.task('stubUpdateAdjustment')
+    cy.task('stubDeleteTaggedBail')
   })
 
   it('Add Tagged Bail', () => {
@@ -37,5 +42,32 @@ context('Enter Tagged Bail', () => {
     const hub = HubPage.goTo('A1234AB')
     hub.viewTaggedBailLink().click()
     ViewTaggedBailPage.verifyOnPage(ViewTaggedBailPage)
+  })
+
+  it('Edit Tagged Bail', () => {
+    cy.signIn()
+    const hub = HubPage.goTo('A1234AB')
+    hub.viewTaggedBailLink().click()
+    const viewTaggedBailPage = ViewTaggedBailPage.verifyOnPage(ViewTaggedBailPage)
+    viewTaggedBailPage.editLink().click()
+    let editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
+    editTaggedBailPage.editLink().click()
+    const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Enter the amount of tagged bail')
+    form.enterDays('10')
+    form.submitButton().click()
+    editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
+    editTaggedBailPage.submit().click()
+    hub.successMessage().contains('Tagged bail details have been saved')
+  })
+
+  it('Delete Tagged Bail', () => {
+    cy.signIn()
+    const hub = HubPage.goTo('A1234AB')
+    hub.viewTaggedBailLink().click()
+    const viewTaggedBailPage = ViewTaggedBailPage.verifyOnPage(ViewTaggedBailPage)
+    viewTaggedBailPage.deleteLink().click()
+    const removeTaggedBailPage = RemoveTaggedBailPage.verifyOnPage(RemoveTaggedBailPage)
+    removeTaggedBailPage.submit().click()
+    hub.successMessage().contains('Tagged bail details have been deleted')
   })
 })

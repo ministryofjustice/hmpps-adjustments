@@ -1,4 +1,4 @@
-import AdjustmentsPage from './adjustmentsPage'
+import AdjustmentsPage from '../adjustmentsPage'
 
 export default class TaggedBailDaysPage extends AdjustmentsPage {
   constructor() {

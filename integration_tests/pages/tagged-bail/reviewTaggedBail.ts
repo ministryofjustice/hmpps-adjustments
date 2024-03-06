@@ -1,5 +1,5 @@
-import AdjustmentsPage from './adjustmentsPage'
-import { PageElement } from './page'
+import AdjustmentsPage from '../adjustmentsPage'
+import { PageElement } from '../page'
 
 export default class ReviewTaggedBailPage extends AdjustmentsPage {
   constructor() {

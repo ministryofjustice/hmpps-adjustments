@@ -16,7 +16,7 @@ context('Enter a RADA', () => {
     cy.task('stubGetRelevantRemand')
     cy.task('stubValidateAdjustmentWithWarning')
     cy.task('stubCreateAdjustment')
-    cy.task('stubGetAdjustment')
+    cy.task('stubGetRadaAdjustment')
     cy.task('stubUpdateAdjustment')
     cy.task('stubDeleteRada')
     cy.task('stubGetRemandDecision')
