@@ -14,6 +14,7 @@ export type Message = {
     | 'REJECTED'
     | 'VALIDATION'
     | 'ADDITIONAL_DAYS_UPDATED'
+    | 'REMAND_ADDED'
     | 'REMAND_UPDATED'
     | 'REMAND_REMOVED'
     | 'TAGGED_BAIL_UPDATED'
