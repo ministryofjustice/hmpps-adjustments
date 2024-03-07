@@ -80,6 +80,14 @@
     <div class="govuk-inset-text">
       If you think some information is wrong, you can edit it in NOMIS and <a href="">reload this page</a>.
     </div>
+
+    <div class="govuk-button-group">
+      {{ govukButton({
+      text: "Cancel",
+      classes: "govuk-button--secondary",
+      href: model.backlink()
+      }) }}
+    </div>
   </div>
 </div>
 {% endblock %}
