@@ -19,7 +19,7 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
         <h1 class="govuk-heading-l">
-            Delete Tagged Bail details
+            Delete Tagged Bail
         </h1>
     </div>
 </div>
@@ -36,9 +36,6 @@
         model.table()
         ) }}
         <div class="govuk-!-margin-bottom-7">
-            <h1 class="govuk-heading-m">
-                Are you sure you want to delete the tagged bail?
-            </h1>
             {% if model.showUnusedMessage %}
                 <p>The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
             {% endif %}
@@ -47,7 +44,7 @@
             <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
             <div class="govuk-button-group">
                 {{ govukButton({
-                text: "Delete record",
+                text: "Delete",
                 type: submit,
                 preventDoubleClick: true,
                 attributes: { 'data-qa': 'remove-button' }
