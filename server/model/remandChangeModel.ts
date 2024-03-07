@@ -25,8 +25,8 @@ export default class RemandChangeModel {
       return false
     }
 
-    const sessionCharges = this.adjustment.remand.chargeId.sort((a, b) => a - b)
-    const dbCharges = this.dbAdjustment.remand.chargeId.sort((a, b) => a - b)
+    const sessionCharges = (this.adjustment?.remand?.chargeId || []).sort((a, b) => a - b)
+    const dbCharges = (this.dbAdjustment?.remand?.chargeId || []).sort((a, b) => a - b)
 
     const chargeIdModified = !sessionCharges.every((chargeId, index) => chargeId === dbCharges[index])
 

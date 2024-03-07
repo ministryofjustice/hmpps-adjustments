@@ -13,6 +13,7 @@ import {
   CalculateReleaseDatesValidationMessage,
   UnusedDeductionCalculationResponse,
 } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -91,6 +92,11 @@ const adjustmentWithDatesAndCharges = {
   },
   complete: true,
 } as SessionAdjustment
+
+const nomisAdjustment = {
+  ...adjustmentWithDatesAndCharges,
+  remand: null,
+} as Adjustment
 
 const remandOverlapWithSentenceMessage = {
   code: 'REMAND_OVERLAPS_WITH_SENTENCE',
@@ -682,6 +688,50 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Edit remand')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit without changes', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).not.toContain('Confirm and save')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit with changes', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit with NOMIS adjustments', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(nomisAdjustment)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
       })
   })
 
