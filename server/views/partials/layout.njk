@@ -69,7 +69,13 @@
           {{ subNavigation(
             environment, 
             {
-              activeSubNav: 'adjustments'
+              activeSubNav: 'adjustments',
+              courtCases: {
+                  enabled: false
+              },
+              documents: {
+                  enabled: false
+              }
             }, 
             prisoner.prisonerNumber) 
           }}
