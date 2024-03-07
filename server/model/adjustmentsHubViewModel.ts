@@ -117,7 +117,7 @@ export default class AdjustmentsHubViewModel {
     } else if (this.message.action.indexOf('REMOVED') > -1) {
       heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
     } else {
-      heading = `${type} details have been saved`
+      heading = `${type} details have been updated`
     }
 
     return heading
