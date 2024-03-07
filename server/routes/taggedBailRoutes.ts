@@ -198,7 +198,8 @@ export default class TaggedBailRoutes {
     await this.adjustmentsService.create([adjustment], token)
 
     const message = {
-      action: 'TAGGED_BAIL_UPDATED',
+      action: 'TAGGED_BAIL_ADDED',
+      days: adjustment.days,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
