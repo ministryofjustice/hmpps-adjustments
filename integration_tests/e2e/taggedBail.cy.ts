@@ -57,7 +57,7 @@ context('Enter Tagged Bail', () => {
     form.submitButton().click()
     editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
     editTaggedBailPage.submit().click()
-    hub.successMessage().contains('Tagged bail details have been saved')
+    hub.successMessage().contains('Tagged bail details have been updated')
   })
 
   it('Delete Tagged Bail', () => {
