@@ -720,6 +720,21 @@ describe('Remand routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/remand/edit with different charges', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getById.mockReturnValue({ ...adjustmentWithDatesAndCharges, remand: { chargeId: [1] } })
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
   it('GET /{nomsId}/remand/edit with NOMIS adjustments', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(nomisAdjustment)
