@@ -3,7 +3,7 @@ import { PageElement } from './page'
 
 export default class ReviewPage extends AdjustmentsPage {
   constructor() {
-    super('Check your answers')
+    super('Confirm and save')
   }
 
   public submit = (): PageElement => cy.get('[data-qa=submit]')
