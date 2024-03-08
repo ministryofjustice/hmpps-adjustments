@@ -41,30 +41,10 @@
             <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
             {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
           {% endset %}
-          {% elif model.message.action === 'REMAND_ADDED' %}
+          {% elif model.isRemandOrTaggedBailAction() %}
           {% set html %}
-          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of remand have been saved</h3>
+          <h3 class="govuk-notification-banner__heading">{{ model.getNotificationBannerHeading() }}</h3>
           {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_UPDATED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_REMOVED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of remand have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-        {% elif model.message.action === 'TAGGED_BAIL_UPDATED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Tagged bail details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'TAGGED_BAIL_REMOVED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Tagged bail details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
           {% endset %}
         {% endif %}
 
