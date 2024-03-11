@@ -41,7 +41,7 @@
             <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
             {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
           {% endset %}
-          {% elif model.isRemandOrTaggedBailAction() %}
+          {% elif model.showDaysChanged() %}
           {% set html %}
           <h3 class="govuk-notification-banner__heading">{{ model.getNotificationBannerHeading() }}</h3>
           {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}

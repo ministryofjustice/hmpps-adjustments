@@ -7,20 +7,26 @@ export type Message = {
   type: string
   days: number
   text: string
-  action:
-    | 'CREATE'
-    | 'REMOVE'
-    | 'UPDATE'
-    | 'REJECTED'
-    | 'VALIDATION'
-    | 'ADDITIONAL_DAYS_UPDATED'
-    | 'REMAND_ADDED'
-    | 'REMAND_UPDATED'
-    | 'REMAND_REMOVED'
-    | 'TAGGED_BAIL_ADDED'
-    | 'TAGGED_BAIL_UPDATED'
-    | 'TAGGED_BAIL_REMOVED'
+  action: MessageAction
 }
+
+export type MessageAction =
+  | 'CREATE'
+  | 'REMOVE'
+  | 'UPDATE'
+  | 'REJECTED'
+  | 'VALIDATION'
+  | 'ADDITIONAL_DAYS_UPDATE'
+  | 'REMAND_CREATE'
+  | 'REMAND_UPDATE'
+  | 'REMAND_REMOVE'
+  | 'TAGGED_BAIL_CREATE'
+  | 'TAGGED_BAIL_UPDATE'
+  | 'TAGGED_BAIL_REMOVE'
+  | 'UNLAWFULLY_AT_LARGE_CREATE'
+  | 'UNLAWFULLY_AT_LARGE_UPDATE'
+  | 'UNLAWFULLY_AT_LARGE_REMOVE'
+
 export default class AdjustmentsHubViewModel {
   public adjustmentTypes = adjustmentTypes
 
@@ -36,6 +42,25 @@ export default class AdjustmentsHubViewModel {
     public serviceHasCalculatedUnusedDeductions: boolean,
   ) {
     this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
+  }
+
+  public static getMessageAction(
+    adjustmentType:
+      | 'REMAND'
+      | 'TAGGED_BAIL'
+      | 'UNLAWFULLY_AT_LARGE'
+      | 'LAWFULLY_AT_LARGE'
+      | 'ADDITIONAL_DAYS_AWARDED'
+      | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
+      | 'SPECIAL_REMISSION'
+      | 'UNUSED_DEDUCTIONS',
+    action: 'CREATE' | 'UPDATE' | 'REMOVE',
+  ): MessageAction {
+    if (adjustmentType === 'REMAND' || adjustmentType === 'TAGGED_BAIL' || adjustmentType === 'UNLAWFULLY_AT_LARGE') {
+      return `${adjustmentType}_${action}`
+    }
+
+    return action
   }
 
   public deductions(): AdjustmentType[] {
@@ -88,15 +113,20 @@ export default class AdjustmentsHubViewModel {
     return this.getTotalDays(adjustmentType) !== 0
   }
 
-  public isRemandOrTaggedBailAction(): boolean {
-    return [
-      'REMAND_ADDED',
-      'REMAND_UPDATED',
-      'REMAND_REMOVED',
-      'TAGGED_BAIL_ADDED',
-      'TAGGED_BAIL_UPDATED',
-      'TAGGED_BAIL_REMOVED',
-    ].includes(this.message.action)
+  public showDaysChanged(): boolean {
+    return (
+      [
+        'REMAND_CREATE',
+        'REMAND_UPDATE',
+        'REMAND_REMOVE',
+        'TAGGED_BAIL_CREATE',
+        'TAGGED_BAIL_UPDATE',
+        'TAGGED_BAIL_REMOVE',
+        'UNLAWFULLY_AT_LARGE_CREATE',
+        'UNLAWFULLY_AT_LARGE_UPDATE',
+        'UNLAWFULLY_AT_LARGE_REMOVE',
+      ] as MessageAction[]
+    ).includes(this.message.action)
   }
 
   public getNotificationBannerHeading(): string {
@@ -109,13 +139,15 @@ export default class AdjustmentsHubViewModel {
       type = 'Remand'
     } else if (this.message.action.indexOf('TAGGED_BAIL') > -1) {
       type = 'Tagged bail'
+    } else if (this.message.action.indexOf('UNLAWFULLY_AT_LARGE') > -1) {
+      type = 'UAL'
     }
 
     let heading
-    if (this.message.action.indexOf('ADDED') > -1) {
-      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been saved`
-    } else if (this.message.action.indexOf('REMOVED') > -1) {
-      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
+    if (this.message.action.indexOf('CREATE') > -1) {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type === 'UAL' ? type : type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been saved`
+    } else if (this.message.action.indexOf('REMOVE') > -1) {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type === 'UAL' ? type : type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
     } else {
       heading = `${type} details have been updated`
     }

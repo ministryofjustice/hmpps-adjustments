@@ -255,7 +255,7 @@ export default class RemandRoutes {
     )
 
     const message = {
-      action: 'REMAND_ADDED',
+      action: 'REMAND_CREATE',
       days,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
@@ -363,7 +363,7 @@ export default class RemandRoutes {
     await this.adjustmentsService.update(id, adjustment, token)
 
     const message = {
-      action: 'REMAND_UPDATED',
+      action: 'REMAND_UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
