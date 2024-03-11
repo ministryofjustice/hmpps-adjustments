@@ -19,7 +19,7 @@ export default class TaggedBailRemoveModel {
       [
         { text: 'Case details' },
         {
-          html: `${this.getCourtName()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getCaseReference()} ${this.getSentenceDate()}`,
+          html: `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`,
         },
       ],
       [{ text: 'Number of days' }, { text: this.getTaggedBailDays() }],
