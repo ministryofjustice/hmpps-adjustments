@@ -57,7 +57,7 @@ export default class TaggedBailEditModel {
   }
 
   private getCaseDetailsCell(): string {
-    return `${this.getCourtName()} | ${this.getCaseReference()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`
+    return `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`
   }
 
   private getCourtName(): string {

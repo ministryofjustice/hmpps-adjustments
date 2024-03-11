@@ -28,6 +28,6 @@ export default class TaggedBailReviewModel {
       ),
     )
 
-    return `${selectedCase.courtDescription} | ${selectedCase.caseReference || ''} ${isSentenceRecalled(selectedCase.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${dateToString(new Date(selectedCase.sentenceDate))}`
+    return `${selectedCase.courtDescription} <span class="vertical-bar"></span> ${selectedCase.caseReference || ''} ${isSentenceRecalled(selectedCase.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${dateToString(new Date(selectedCase.sentenceDate))}`
   }
 }
