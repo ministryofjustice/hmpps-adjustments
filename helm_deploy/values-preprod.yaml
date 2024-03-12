@@ -35,4 +35,4 @@ generic-service:
       - private_prisons
 
 generic-prometheus-alerts:
-  alertSeverity: legacy-replacements-alerts-non-prod
+  alertSeverity: legacy-replacement-alerts-non-prod
