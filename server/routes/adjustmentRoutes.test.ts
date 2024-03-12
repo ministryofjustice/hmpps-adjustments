@@ -534,9 +534,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI(
-          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"CREATE"}',
-        )}`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22CREATE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.create.mock.calls).toHaveLength(1)
@@ -551,9 +549,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI(
-          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"UPDATE"}',
-        )}`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22UPDATE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
@@ -606,9 +602,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI(
-          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"REMOVE"}',
-        )}`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22REMOVE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.delete.mock.calls).toHaveLength(1)

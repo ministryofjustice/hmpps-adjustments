@@ -238,7 +238,10 @@ describe('Tagged bail routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22TAGGED_BAIL_ADDED%22,%22days%22:9955%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22CREATE%22,%22days%22:9955%7D`,
+      )
   })
 
   test.each`
