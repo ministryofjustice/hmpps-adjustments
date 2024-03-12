@@ -5,12 +5,17 @@ import { AdaIntercept, AdasToReview } from '../@types/AdaTypes'
 import AdjustmentsClient from '../api/adjustmentsClient'
 import { Message } from '../model/adjustmentsHubViewModel'
 import PadaForm from '../model/padaForm'
+import adjustmentTypes, { AdjustmentType } from '../model/adjustmentTypes'
 
 export default class AdditionalDaysAwardedRoutes {
+  private additionalDaysAwardedAdjustmentType: AdjustmentType
+
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly additionalDaysAwardedService: AdditionalDaysAwardedService,
-  ) {}
+  ) {
+    this.additionalDaysAwardedAdjustmentType = adjustmentTypes.find(it => it.value === 'ADDITIONAL_DAYS_AWARDED')
+  }
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
@@ -165,7 +170,8 @@ export default class AdditionalDaysAwardedRoutes {
     )
 
     const message = {
-      action: 'ADDITIONAL_DAYS_UPDATED',
+      type: this.additionalDaysAwardedAdjustmentType,
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
