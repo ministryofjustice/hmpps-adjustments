@@ -23,6 +23,10 @@ export default class UnusedDeductionsService {
       let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
 
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+      if (!deductions.length) {
+        // If there are no deductions then unused deductions doesn't need to be calculated
+        return true
+      }
       if (this.anyDeductionFromNomis(deductions)) {
         // won't calculate unused deductions if adjusments are not from DPS.
         return false
@@ -68,6 +72,10 @@ export default class UnusedDeductionsService {
   ): Promise<boolean> {
     try {
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+      if (!deductions.length) {
+        // If there are no deductions then unused deductions doesn't need to be calculated
+        return true
+      }
       if (this.anyDeductionFromNomis(deductions)) {
         return false
       }
