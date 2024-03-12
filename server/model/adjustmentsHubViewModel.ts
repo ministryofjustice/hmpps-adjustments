@@ -4,7 +4,7 @@ import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
 export type Message = {
-  type: AdjustmentType
+  type: string
   days: number
   text: string
   action: MessageAction
@@ -13,10 +13,6 @@ export type Message = {
 export type MessageAction = 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED' | 'VALIDATION'
 
 export default class AdjustmentsHubViewModel {
-  public adjustmentTypes = adjustmentTypes
-
-  public messageType: AdjustmentType
-
   constructor(
     public prisonerNumber: string,
     public adjustments: Adjustment[],
@@ -25,18 +21,16 @@ export default class AdjustmentsHubViewModel {
     public roles: string[],
     public message: Message,
     public serviceHasCalculatedUnusedDeductions: boolean,
-  ) {
-    this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type.value)
-  }
+  ) {}
 
   public deductions(): AdjustmentType[] {
-    return this.adjustmentTypes.filter(it =>
+    return adjustmentTypes.filter(it =>
       ['REMAND', 'TAGGED_BAIL', 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'].includes(it.value),
     )
   }
 
   public additions(): AdjustmentType[] {
-    return this.adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
+    return adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
   }
 
   public hasRemandToolRole(): boolean {
@@ -88,18 +82,20 @@ export default class AdjustmentsHubViewModel {
       return null
     }
 
+    const adjustmentType = adjustmentTypes.find(it => it.value === this.message.type)
+
     const useShortText =
-      this.message.type.value.indexOf('UNLAWFULLY_AT_LARGE') > -1 ||
-      this.message.type.value.indexOf('RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') > -1 ||
-      this.message.type.value.indexOf('ADDITIONAL_DAYS_AWARDED') > -1
+      adjustmentType.value === 'UNLAWFULLY_AT_LARGE' ||
+      adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED' ||
+      adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED'
 
     let heading
     if (this.message.action === 'CREATE') {
-      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${this.message.type.shortText} ${this.message.days > 1 ? 'have' : 'has'} been saved`
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${adjustmentType.shortText} ${this.message.days > 1 ? 'have' : 'has'} been saved`
     } else if (this.message.action === 'REMOVE') {
-      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${this.message.type.shortText} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${adjustmentType.shortText} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
     } else {
-      heading = `${useShortText ? this.message.type.shortText : this.message.type.text} details have been updated`
+      heading = `${useShortText ? adjustmentType.shortText : adjustmentType.text} details have been updated`
     }
 
     return heading

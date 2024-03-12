@@ -15,19 +15,14 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
 import RemandViewModel from '../model/remandViewModel'
 import RemandChangeModel from '../model/remandChangeModel'
-import adjustmentTypes, { AdjustmentType } from '../model/adjustmentTypes'
 
 export default class RemandRoutes {
-  private remandAdjustmentType: AdjustmentType
-
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
-  ) {
-    this.remandAdjustmentType = adjustmentTypes.find(it => it.value === 'REMAND')
-  }
+  ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
@@ -260,7 +255,7 @@ export default class RemandRoutes {
     )
 
     const message = {
-      type: this.remandAdjustmentType,
+      type: 'REMAND',
       action: 'CREATE',
       days,
     } as Message
@@ -369,7 +364,7 @@ export default class RemandRoutes {
     await this.adjustmentsService.update(id, adjustment, token)
 
     const message = {
-      type: this.remandAdjustmentType,
+      type: 'REMAND',
       action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)

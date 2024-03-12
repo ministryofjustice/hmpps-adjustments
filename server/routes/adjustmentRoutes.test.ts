@@ -534,7 +534,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22text%22:%22RADA%20(Restoration%20of%20added%20days)%22,%22alternativeText%22:%22RADA%22,%22shortText%22:%22RADA%22,%22url%22:%22restored-additional-days%22%7D,%22days%22:24,%22action%22:%22CREATE%22%7D`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22CREATE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.create.mock.calls).toHaveLength(1)
@@ -549,7 +549,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22text%22:%22RADA%20(Restoration%20of%20added%20days)%22,%22alternativeText%22:%22RADA%22,%22shortText%22:%22RADA%22,%22url%22:%22restored-additional-days%22%7D,%22days%22:24,%22action%22:%22UPDATE%22%7D`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22UPDATE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
@@ -602,7 +602,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22text%22:%22RADA%20(Restoration%20of%20added%20days)%22,%22alternativeText%22:%22RADA%22,%22shortText%22:%22RADA%22,%22url%22:%22restored-additional-days%22%7D,%22days%22:24,%22action%22:%22REMOVE%22%7D`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22REMOVE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.delete.mock.calls).toHaveLength(1)

@@ -240,7 +240,7 @@ describe('Tagged bail routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22TAGGED_BAIL%22,%22text%22:%22Tagged%20bail%22,%22shortText%22:%22tagged%20bail%22,%22url%22:%22tagged-bail%22%7D,%22action%22:%22CREATE%22,%22days%22:9955%7D`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22CREATE%22,%22days%22:9955%7D`,
       )
   })
 
