@@ -25,6 +25,7 @@ const defaultPrisoner: PrisonerSearchApiPrisoner = {
   dateOfBirth: '24/06/2000',
   bookingId: '12345',
   prisonId: 'LDS',
+  imprisonmentStatusDescription: 'Life imprisonment',
 } as PrisonerSearchApiPrisoner
 
 export const user: Express.User = {
