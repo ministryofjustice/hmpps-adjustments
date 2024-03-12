@@ -227,9 +227,8 @@ export default class AdjustmentRoutes {
       } else {
         await this.adjustmentsService.create([adjustment], token)
       }
-
       const message = {
-        type: adjustmentTypes.find(it => it.value === adjustment.adjustmentType),
+        type: adjustment.adjustmentType,
         days: adjustment.days || daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         action: adjustment.id ? 'UPDATE' : 'CREATE',
       } as Message
@@ -323,10 +322,19 @@ export default class AdjustmentRoutes {
 
     const adjustment = await this.adjustmentsService.get(id, token)
     await this.adjustmentsService.delete(id, token)
+    let action
+    if (adjustment.adjustmentType === 'REMAND') {
+      action = 'REMAND_REMOVED'
+    } else if (adjustment.adjustmentType === 'TAGGED_BAIL') {
+      action = 'TAGGED_BAIL_REMOVED'
+    } else {
+      action = 'REMOVE'
+    }
+
     const message = JSON.stringify({
-      type: adjustmentTypes.find(it => it.value === adjustment.adjustmentType),
+      type: adjustment.adjustmentType,
       days: adjustment.days,
-      action: 'REMOVE',
+      action,
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }
@@ -357,8 +365,7 @@ export default class AdjustmentRoutes {
     }
     await this.adjustmentsService.restore({ ids: recallForm.getSelectedAdjustments() }, token)
     const message = {
-      type: adjustmentTypes.find(it => it.value === 'REMAND'),
-      action: 'UPDATE',
+      action: 'REMAND_UPDATED',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
