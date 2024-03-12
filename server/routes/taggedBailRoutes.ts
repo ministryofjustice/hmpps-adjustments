@@ -17,14 +17,19 @@ import {
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailChangeModel from '../model/taggedBailEditModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
+import adjustmentTypes, { AdjustmentType } from '../model/adjustmentTypes'
 
 export default class TaggedBailRoutes {
+  private taggedBailAdjustmentType: AdjustmentType
+
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
-  ) {}
+  ) {
+    this.taggedBailAdjustmentType = adjustmentTypes.find(it => it.value === 'TAGGED_BAIL')
+  }
 
   public add: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
@@ -198,7 +203,8 @@ export default class TaggedBailRoutes {
     await this.adjustmentsService.create([adjustment], token)
 
     const message = {
-      action: 'TAGGED_BAIL_CREATE',
+      type: this.taggedBailAdjustmentType,
+      action: 'CREATE',
       days: adjustment.days,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
@@ -266,7 +272,8 @@ export default class TaggedBailRoutes {
     await this.adjustmentsService.update(id, adjustment, token)
 
     const message = {
-      action: 'TAGGED_BAIL_UPDATE',
+      type: this.taggedBailAdjustmentType,
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

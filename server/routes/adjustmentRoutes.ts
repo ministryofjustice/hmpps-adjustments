@@ -228,15 +228,10 @@ export default class AdjustmentRoutes {
         await this.adjustmentsService.create([adjustment], token)
       }
 
-      const messageAction = AdjustmentsHubViewModel.getMessageAction(
-        adjustment.adjustmentType,
-        adjustment.id ? 'UPDATE' : 'CREATE',
-      )
-
       const message = {
-        type: adjustment.adjustmentType,
+        type: adjustmentTypes.find(it => it.value === adjustment.adjustmentType),
         days: adjustment.days || daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
-        action: messageAction,
+        action: adjustment.id ? 'UPDATE' : 'CREATE',
       } as Message
       return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
     }
@@ -328,11 +323,10 @@ export default class AdjustmentRoutes {
 
     const adjustment = await this.adjustmentsService.get(id, token)
     await this.adjustmentsService.delete(id, token)
-    const messageAction = AdjustmentsHubViewModel.getMessageAction(adjustment.adjustmentType, 'REMOVE')
     const message = JSON.stringify({
-      type: adjustment.adjustmentType,
+      type: adjustmentTypes.find(it => it.value === adjustment.adjustmentType),
       days: adjustment.days,
-      action: messageAction,
+      action: 'REMOVE',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }
@@ -363,7 +357,8 @@ export default class AdjustmentRoutes {
     }
     await this.adjustmentsService.restore({ ids: recallForm.getSelectedAdjustments() }, token)
     const message = {
-      action: 'REMAND_UPDATE',
+      type: adjustmentTypes.find(it => it.value === 'REMAND'),
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

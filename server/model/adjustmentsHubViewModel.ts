@@ -4,28 +4,13 @@ import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
 export type Message = {
-  type: string
+  type: AdjustmentType
   days: number
   text: string
   action: MessageAction
 }
 
-export type MessageAction =
-  | 'CREATE'
-  | 'REMOVE'
-  | 'UPDATE'
-  | 'REJECTED'
-  | 'VALIDATION'
-  | 'ADDITIONAL_DAYS_UPDATE'
-  | 'REMAND_CREATE'
-  | 'REMAND_UPDATE'
-  | 'REMAND_REMOVE'
-  | 'TAGGED_BAIL_CREATE'
-  | 'TAGGED_BAIL_UPDATE'
-  | 'TAGGED_BAIL_REMOVE'
-  | 'UNLAWFULLY_AT_LARGE_CREATE'
-  | 'UNLAWFULLY_AT_LARGE_UPDATE'
-  | 'UNLAWFULLY_AT_LARGE_REMOVE'
+export type MessageAction = 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED' | 'VALIDATION'
 
 export default class AdjustmentsHubViewModel {
   public adjustmentTypes = adjustmentTypes
@@ -41,26 +26,7 @@ export default class AdjustmentsHubViewModel {
     public message: Message,
     public serviceHasCalculatedUnusedDeductions: boolean,
   ) {
-    this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
-  }
-
-  public static getMessageAction(
-    adjustmentType:
-      | 'REMAND'
-      | 'TAGGED_BAIL'
-      | 'UNLAWFULLY_AT_LARGE'
-      | 'LAWFULLY_AT_LARGE'
-      | 'ADDITIONAL_DAYS_AWARDED'
-      | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
-      | 'SPECIAL_REMISSION'
-      | 'UNUSED_DEDUCTIONS',
-    action: 'CREATE' | 'UPDATE' | 'REMOVE',
-  ): MessageAction {
-    if (adjustmentType === 'REMAND' || adjustmentType === 'TAGGED_BAIL' || adjustmentType === 'UNLAWFULLY_AT_LARGE') {
-      return `${adjustmentType}_${action}`
-    }
-
-    return action
+    this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type.value)
   }
 
   public deductions(): AdjustmentType[] {
@@ -113,43 +79,27 @@ export default class AdjustmentsHubViewModel {
     return this.getTotalDays(adjustmentType) !== 0
   }
 
-  public showDaysChanged(): boolean {
-    return (
-      [
-        'REMAND_CREATE',
-        'REMAND_UPDATE',
-        'REMAND_REMOVE',
-        'TAGGED_BAIL_CREATE',
-        'TAGGED_BAIL_UPDATE',
-        'TAGGED_BAIL_REMOVE',
-        'UNLAWFULLY_AT_LARGE_CREATE',
-        'UNLAWFULLY_AT_LARGE_UPDATE',
-        'UNLAWFULLY_AT_LARGE_REMOVE',
-      ] as MessageAction[]
-    ).includes(this.message.action)
+  public isAddEditDelete(): boolean {
+    return ['CREATE', 'REMOVE', 'UPDATE'].includes(this.message.action)
   }
 
-  public getNotificationBannerHeading(): string {
-    if (!this.message || !this.message.action) {
+  public getNotificationBannerHeadingForAddEditDelete(): string {
+    if (!this.message || !this.message.action || !this.message.type) {
       return null
     }
 
-    let type = ''
-    if (this.message.action.indexOf('REMAND') > -1) {
-      type = 'Remand'
-    } else if (this.message.action.indexOf('TAGGED_BAIL') > -1) {
-      type = 'Tagged bail'
-    } else if (this.message.action.indexOf('UNLAWFULLY_AT_LARGE') > -1) {
-      type = 'UAL'
-    }
+    const useShortText =
+      this.message.type.value.indexOf('UNLAWFULLY_AT_LARGE') > -1 ||
+      this.message.type.value.indexOf('RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') > -1 ||
+      this.message.type.value.indexOf('ADDITIONAL_DAYS_AWARDED') > -1
 
     let heading
-    if (this.message.action.indexOf('CREATE') > -1) {
-      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type === 'UAL' ? type : type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been saved`
-    } else if (this.message.action.indexOf('REMOVE') > -1) {
-      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type === 'UAL' ? type : type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
+    if (this.message.action === 'CREATE') {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${this.message.type.shortText} ${this.message.days > 1 ? 'have' : 'has'} been saved`
+    } else if (this.message.action === 'REMOVE') {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${this.message.type.shortText} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
     } else {
-      heading = `${type} details have been updated`
+      heading = `${useShortText ? this.message.type.shortText : this.message.type.text} details have been updated`
     }
 
     return heading

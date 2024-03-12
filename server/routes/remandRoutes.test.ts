@@ -618,7 +618,10 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/save`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_CREATE%22,%22days%22:10%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22REMAND%22,%22text%22:%22Remand%22,%22shortText%22:%22remand%22,%22url%22:%22remand%22%7D,%22action%22:%22CREATE%22,%22days%22:10%7D`,
+      )
   })
 
   it('GET /{nomsId}/remand/remove', () => {
@@ -650,7 +653,10 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMAND_REMOVE%22%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22REMAND%22,%22text%22:%22Remand%22,%22shortText%22:%22remand%22,%22url%22:%22remand%22%7D,%22action%22:%22REMOVE%22%7D`,
+      )
   })
 
   it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
@@ -774,7 +780,10 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATE%22%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%7B%22value%22:%22REMAND%22,%22text%22:%22Remand%22,%22shortText%22:%22remand%22,%22url%22:%22remand%22%7D,%22action%22:%22UPDATE%22%7D`,
+      )
   })
 
   it('GET /{nomsId}/remand/edit/:id No save button because of no changes made', () => {
