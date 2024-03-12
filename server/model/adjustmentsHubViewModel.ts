@@ -17,6 +17,7 @@ export type Message = {
     | 'REMAND_ADDED'
     | 'REMAND_UPDATED'
     | 'REMAND_REMOVED'
+    | 'TAGGED_BAIL_ADDED'
     | 'TAGGED_BAIL_UPDATED'
     | 'TAGGED_BAIL_REMOVED'
 }
@@ -85,6 +86,41 @@ export default class AdjustmentsHubViewModel {
 
   public showDetails(adjustmentType: AdjustmentType) {
     return this.getTotalDays(adjustmentType) !== 0
+  }
+
+  public isRemandOrTaggedBailAction(): boolean {
+    return [
+      'REMAND_ADDED',
+      'REMAND_UPDATED',
+      'REMAND_REMOVED',
+      'TAGGED_BAIL_ADDED',
+      'TAGGED_BAIL_UPDATED',
+      'TAGGED_BAIL_REMOVED',
+    ].includes(this.message.action)
+  }
+
+  public getNotificationBannerHeading(): string {
+    if (!this.message || !this.message.action) {
+      return null
+    }
+
+    let type = ''
+    if (this.message.action.indexOf('REMAND') > -1) {
+      type = 'Remand'
+    } else if (this.message.action.indexOf('TAGGED_BAIL') > -1) {
+      type = 'Tagged bail'
+    }
+
+    let heading
+    if (this.message.action.indexOf('ADDED') > -1) {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been saved`
+    } else if (this.message.action.indexOf('REMOVED') > -1) {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${type.toLowerCase()} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
+    } else {
+      heading = `${type} details have been updated`
+    }
+
+    return heading
   }
 
   public getTotalDaysRelevantRemand() {

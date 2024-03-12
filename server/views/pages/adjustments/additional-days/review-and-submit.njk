@@ -46,12 +46,11 @@
           ) }}
       {% endif %}
       <div class="govuk-!-margin-top-8">
-        <h2 class="govuk-heading-m">Submit adjustment details</h2>
         <p class="govuk-body">Once submitted, the ADA adjustment details will be saved in NOMIS. You will then need to recalculate the release dates.</p>
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
           {{ govukButton({
-                text: "Submit",
+                text: "Confirm and save",
                 type: submit,
                 preventDoubleClick: true,
                 attributes: {'data-qa': 'submit-button'}
