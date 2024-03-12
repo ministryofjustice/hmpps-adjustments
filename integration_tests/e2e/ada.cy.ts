@@ -48,6 +48,6 @@ context('Enter an ADA', () => {
     submit.submitButton().click()
 
     const hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('ADA updates have been saved')
+    hub.successMessage().contains('ADA details have been updated')
   })
 })

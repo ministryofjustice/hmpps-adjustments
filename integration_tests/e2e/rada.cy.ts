@@ -39,7 +39,7 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('25 days of RADA have been added')
+    hub.successMessage().contains('25 days of RADA have been saved')
   })
 
   it('Add a RADA when no ADAs exist produces error message', () => {
@@ -73,7 +73,7 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('26 days of RADA have been update')
+    hub.successMessage().contains('RADA details have been updated')
   })
 
   it('View and remove a RADA', () => {
@@ -86,6 +86,6 @@ context('Enter a RADA', () => {
     const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Are you sure you want to remove RADA')
     removePage.removeButton().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('25 days of RADA have been removed')
+    hub.successMessage().contains('25 days of RADA have been deleted')
   })
 })
