@@ -165,7 +165,8 @@ export default class AdditionalDaysAwardedRoutes {
     )
 
     const message = {
-      action: 'ADDITIONAL_DAYS_UPDATED',
+      type: 'ADDITIONAL_DAYS_AWARDED',
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

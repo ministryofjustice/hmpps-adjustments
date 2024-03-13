@@ -10,61 +10,15 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
       {% if model.message %}
-        {% if model.message.action === 'CREATE' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
-              of {{ model.messageType.shortText }} have been added</h3>
-            <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on
-              this page.</p>
-            <p class="govuk-body">Once all adjustments have been applied, you must
-              <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
-                release dates.</a>
-            </p>
-          {% endset %}
-          {% elif model.message.action === 'REMOVE' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
-              of {{ model.messageType.shortText }} have been removed</h3>
-          {% endset %}
-          {% elif model.message.action === 'UPDATE' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
-              of {{ model.messageType.shortText }} have been updated</h3>
-          {% endset %}
-          {% elif model.message.action === 'REJECTED' %}
+        {% if model.message.action === 'REJECTED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of suggested remand have been
               rejected</h3>
           {% endset %}
-          {% elif model.message.action === 'ADDITIONAL_DAYS_UPDATED' %}
+        {% elif model.isAddEditDelete() %}
           {% set html %}
-            <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_ADDED' %}
-          {% set html %}
-          <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of remand have been saved</h3>
+          <h3 class="govuk-notification-banner__heading">{{ model.getNotificationBannerHeadingForAddEditDelete() }}</h3>
           {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_UPDATED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_REMOVED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of remand have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-        {% elif model.message.action === 'TAGGED_BAIL_UPDATED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Tagged bail details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'TAGGED_BAIL_REMOVED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Tagged bail details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
           {% endset %}
         {% endif %}
 

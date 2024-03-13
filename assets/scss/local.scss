@@ -46,3 +46,11 @@ Custom style for the badges used on sentences that have a calculation type of re
 .moj-badge--recall {
   margin: 0 0 0 10px;
 }
+
+.vertical-bar {
+  height: 1rem;
+  margin: 0 5px -1px 5px;
+  width: 1.5px;
+  background-color: black;
+  display: inline-block;
+}

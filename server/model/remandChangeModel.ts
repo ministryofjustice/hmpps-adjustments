@@ -25,14 +25,15 @@ export default class RemandChangeModel {
       return false
     }
 
-    const sessionCharges = (this.adjustment?.remand?.chargeId || []).sort((a, b) => a - b)
-    const dbCharges = (this.dbAdjustment?.remand?.chargeId || []).sort((a, b) => a - b)
+    const sessionCharges = this.adjustment?.remand?.chargeId || []
+    const dbCharges = this.dbAdjustment?.remand?.chargeId || []
 
-    const chargeIdModified = !sessionCharges.every((chargeId, index) => chargeId === dbCharges[index])
+    const chargesSame = sessionCharges.length === dbCharges.length && sessionCharges.every(it => dbCharges.includes(it))
 
-    const dateModified =
-      this.adjustment.toDate !== this.dbAdjustment.toDate || this.adjustment.fromDate !== this.dbAdjustment.fromDate
+    const datesSame =
+      this.adjustment.toDate === this.dbAdjustment.toDate && this.adjustment.fromDate === this.dbAdjustment.fromDate
 
-    return chargeIdModified || dateModified
+    const adjustmentSame = chargesSame && datesSame
+    return !adjustmentSame
   }
 }

@@ -23,7 +23,7 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjust release dates</span>
-                                Check your answers
+                                Confirm and save
                             </h1>
     </div>
   </div>
@@ -33,7 +33,6 @@
       {{ govukSummaryList({
         rows: model.summaryRows()
       }) }}
-      <h2>Submit adjustment details</h2>
       <p class="govuk-body">Your data will be saved in NOMIS. After submitting you will need to recalculate the dates for this prisoner.</p>
     </div>
   </div>
@@ -44,7 +43,7 @@
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
 
         {{ govukButton({
-            text: "Submit",
+            text: "Confirm and save",
             type: submit,
             preventDoubleClick: true,
             attributes: { 'data-qa': 'submit' }   

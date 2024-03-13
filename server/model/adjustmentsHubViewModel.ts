@@ -7,24 +7,12 @@ export type Message = {
   type: string
   days: number
   text: string
-  action:
-    | 'CREATE'
-    | 'REMOVE'
-    | 'UPDATE'
-    | 'REJECTED'
-    | 'VALIDATION'
-    | 'ADDITIONAL_DAYS_UPDATED'
-    | 'REMAND_ADDED'
-    | 'REMAND_UPDATED'
-    | 'REMAND_REMOVED'
-    | 'TAGGED_BAIL_UPDATED'
-    | 'TAGGED_BAIL_REMOVED'
+  action: MessageAction
 }
+
+export type MessageAction = 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED' | 'VALIDATION'
+
 export default class AdjustmentsHubViewModel {
-  public adjustmentTypes = adjustmentTypes
-
-  public messageType: AdjustmentType
-
   constructor(
     public prisonerNumber: string,
     public adjustments: Adjustment[],
@@ -33,18 +21,16 @@ export default class AdjustmentsHubViewModel {
     public roles: string[],
     public message: Message,
     public serviceHasCalculatedUnusedDeductions: boolean,
-  ) {
-    this.messageType = message && this.adjustmentTypes.find(it => it.value === message.type)
-  }
+  ) {}
 
   public deductions(): AdjustmentType[] {
-    return this.adjustmentTypes.filter(it =>
+    return adjustmentTypes.filter(it =>
       ['REMAND', 'TAGGED_BAIL', 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'].includes(it.value),
     )
   }
 
   public additions(): AdjustmentType[] {
-    return this.adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
+    return adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
   }
 
   public hasRemandToolRole(): boolean {
@@ -85,6 +71,34 @@ export default class AdjustmentsHubViewModel {
 
   public showDetails(adjustmentType: AdjustmentType) {
     return this.getTotalDays(adjustmentType) !== 0
+  }
+
+  public isAddEditDelete(): boolean {
+    return ['CREATE', 'REMOVE', 'UPDATE'].includes(this.message.action)
+  }
+
+  public getNotificationBannerHeadingForAddEditDelete(): string {
+    if (!this.message || !this.message.action || !this.message.type) {
+      return null
+    }
+
+    const adjustmentType = adjustmentTypes.find(it => it.value === this.message.type)
+
+    const useShortText =
+      adjustmentType.value === 'UNLAWFULLY_AT_LARGE' ||
+      adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED' ||
+      adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED'
+
+    let heading
+    if (this.message.action === 'CREATE') {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${adjustmentType.shortText} ${this.message.days > 1 ? 'have' : 'has'} been saved`
+    } else if (this.message.action === 'REMOVE') {
+      heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${adjustmentType.shortText} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
+    } else {
+      heading = `${useShortText ? adjustmentType.shortText : adjustmentType.text} details have been updated`
+    }
+
+    return heading
   }
 
   public getTotalDaysRelevantRemand() {

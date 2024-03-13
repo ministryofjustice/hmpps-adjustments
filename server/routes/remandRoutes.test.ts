@@ -618,7 +618,10 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/save`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_ADDED%22,%22days%22:10%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22CREATE%22,%22days%22:10%7D`,
+      )
   })
 
   it('GET /{nomsId}/remand/remove', () => {
@@ -650,7 +653,7 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMAND_REMOVED%22%7D`)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMOVE%22%7D`)
   })
 
   it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
@@ -720,6 +723,21 @@ describe('Remand routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/remand/edit with different charges', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getById.mockReturnValue({ ...adjustmentWithDatesAndCharges, remand: { chargeId: [1] } })
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
   it('GET /{nomsId}/remand/edit with NOMIS adjustments', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(nomisAdjustment)
@@ -759,7 +777,7 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22UPDATE%22%7D`)
   })
 
   it('GET /{nomsId}/remand/edit/:id No save button because of no changes made', () => {

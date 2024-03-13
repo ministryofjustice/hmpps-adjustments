@@ -34,7 +34,7 @@ context('Enter Tagged Bail', () => {
     form.submitButton().click()
     const reviewTaggedBail = ReviewTaggedBailPage.verifyOnPage(ReviewTaggedBailPage)
     reviewTaggedBail.submit().click()
-    hub.successMessage().contains('Tagged bail details have been saved')
+    hub.successMessage().contains('10 days of tagged bail have been saved')
   })
 
   it('View Tagged Bail', () => {
@@ -57,7 +57,7 @@ context('Enter Tagged Bail', () => {
     form.submitButton().click()
     editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
     editTaggedBailPage.submit().click()
-    hub.successMessage().contains('Tagged bail details have been saved')
+    hub.successMessage().contains('Tagged bail details have been updated')
   })
 
   it('Delete Tagged Bail', () => {
@@ -68,6 +68,6 @@ context('Enter Tagged Bail', () => {
     viewTaggedBailPage.deleteLink().click()
     const removeTaggedBailPage = RemoveTaggedBailPage.verifyOnPage(RemoveTaggedBailPage)
     removeTaggedBailPage.submit().click()
-    hub.successMessage().contains('Tagged bail details have been deleted')
+    hub.successMessage().contains('25 days of tagged bail have been deleted')
   })
 })
