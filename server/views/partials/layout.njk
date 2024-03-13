@@ -46,13 +46,13 @@
     <!-- End Google Tag Manager -->
   {% endif %}
 
+  <link href="/assets/stylesheets/application.css?{{ version }}" rel="stylesheet"/>
+
   {% if feComponents.cssIncludes %}
     {% for css in feComponents.cssIncludes %}
       <link href="{{ css }}" nonce="{{ cspNonce }}" rel="stylesheet" />
     {% endfor %}
   {% endif %}
-
-  <link href="/assets/stylesheets/application.css?{{ version }}" rel="stylesheet"/>
 {% endblock %}
 
 {% block pageTitle %}{{pageTitle | default(applicationName)}}{% endblock %}
