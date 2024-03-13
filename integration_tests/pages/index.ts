@@ -11,4 +11,8 @@ export default class IndexPage extends AdjustmentsPage {
   courtRegisterLink = (): PageElement => cy.get('[href="/court-register"]')
 
   headerPhaseBanner = (): PageElement => cy.get('[data-qa=header-phase-banner]')
+
+  commonComponentsHeader = (): PageElement => cy.get('[data-qa=common-header]')
+
+  designLibraryFooter = (): PageElement => cy.get('[data-qa=ccrds-footer]')
 }

@@ -19,6 +19,7 @@ context('Enter Remand', () => {
     cy.task('stubIndividualAdjudicationsNoReview')
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubCreateAdjustment')
+    cy.task('stubComponents')
   })
 
   it('Add Remand', () => {
