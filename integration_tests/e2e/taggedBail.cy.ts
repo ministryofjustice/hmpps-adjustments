@@ -20,7 +20,7 @@ context('Enter Tagged Bail', () => {
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubCreateAdjustment')
     cy.task('stubUpdateAdjustment')
-    cy.task('stubDeleteTaggedBail')
+    cy.task('stubDeleteTaggedBailAdjustment')
   })
 
   it('Add Tagged Bail', () => {
