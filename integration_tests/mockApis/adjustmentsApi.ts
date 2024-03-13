@@ -186,6 +186,29 @@ export default {
       },
     })
   },
+  stubGetRemandAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+      },
+      response: {
+        jsonBody: {
+          id: '5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+          bookingId: 1204935,
+          sentenceSequence: 1,
+          person: 'A1234AB',
+          adjustmentType: 'REMAND',
+          toDate: '2023-01-20',
+          fromDate: '2023-01-10',
+          days: 11,
+          prisonName: 'Leeds',
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
   stubUpdateAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
@@ -198,11 +221,35 @@ export default {
       },
     })
   },
-  stubDeleteTaggedBail: (): SuperAgentRequest => {
+  stubUpdateRemandAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteTaggedBailAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'DELETE',
         urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteRemandAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
       },
       response: {
         status: 200,
