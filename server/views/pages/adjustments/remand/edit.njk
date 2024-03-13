@@ -72,7 +72,8 @@
             {{ govukButton({
               text: "Confirm and save",
               type: submit,
-              preventDoubleClick: true
+              preventDoubleClick: true,
+              attributes: { 'data-qa': 'save-button' }
             }) }}
           {% endif %}
 

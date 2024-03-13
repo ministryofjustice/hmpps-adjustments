@@ -7,6 +7,15 @@ export default class FormPage extends AdjustmentsPage {
     super(title)
   }
 
+  public clearToAndFromDateFields = (): void => {
+    cy.get('[name=from-day]').clear()
+    cy.get('[name=from-month]').clear()
+    cy.get('[name=from-year]').clear()
+    cy.get('[name=to-day]').clear()
+    cy.get('[name=to-month]').clear()
+    cy.get('[name=to-year]').clear()
+  }
+
   public enterFromDate = (date: string): void => {
     const days = dayjs(date).get('date').toString()
     const months = (dayjs(date).get('month') + 1).toString()
