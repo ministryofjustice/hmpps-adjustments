@@ -25,6 +25,7 @@ export default function setUpWebSecurity(): Router {
   const fontSrc = ["'self'"]
   const imgSrc = ["'self'", 'data:']
   const formAction = [`'self' ${config.apis.hmppsAuth.externalUrl}`]
+  const connectSrc = ["'self'", '*.googletagmanager.com', '*.google-analytics.com', '*.analytics.google.com']
 
   if (config.apis.frontendComponents.url) {
     scriptSrc.push(config.apis.frontendComponents.url)
@@ -43,6 +44,7 @@ export default function setUpWebSecurity(): Router {
           fontSrc,
           imgSrc,
           formAction,
+          connectSrc,
         },
       },
       crossOriginEmbedderPolicy: true,
