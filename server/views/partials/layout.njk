@@ -1,6 +1,7 @@
 {% extends "govuk/template.njk" %}
 {% from "hmpps/components/court-cases-release-dates/service-header/macro.njk" import serviceHeader %}
 {% from "hmpps/components/court-cases-release-dates/sub-navigation/macro.njk" import subNavigation %}
+{% from "hmpps/components/court-cases-release-dates/footer/macro.njk" import footer %}
 
 {% block head %}
   {% if tagManagerContainerId %}
@@ -45,13 +46,23 @@
     <!-- End Google Tag Manager -->
   {% endif %}
 
+  {% if feComponents.cssIncludes %}
+    {% for css in feComponents.cssIncludes %}
+      <link href="{{ css }}" nonce="{{ cspNonce }}" rel="stylesheet" />
+    {% endfor %}
+  {% endif %}
+
   <link href="/assets/stylesheets/application.css?{{ version }}" rel="stylesheet"/>
 {% endblock %}
 
 {% block pageTitle %}{{pageTitle | default(applicationName)}}{% endblock %}
 
 {% block header %}
-  {% include "./header.njk" %}
+  {% if feComponents.header %}
+    {{ feComponents.header | safe }}
+  {% else %}
+    {% include "./header.njk" %}
+  {% endif %}
   {{ 
       serviceHeader({
       environment: environment,
@@ -87,7 +98,27 @@
 {% block bodyStart %}
 {% endblock %}
 
+{% block footer %}
+  {% if feComponents.enabled %}
+    {{ 
+      footer({ 
+        environment: environment, 
+        attributes: {
+          "data-qa": "ccrds-footer"
+        } 
+      }) 
+    }}
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block bodyEnd %}
+  {% if feComponents.jsInclude %}
+    {% for js in feComponents.jsIncludes %}
+      <script src="{{ js }}" nonce="{{ cspNonce }}"></script>
+    {% endfor %}
+  {% endif %}
   <script type="module" src="/assets/govukFrontendInit.js"></script>
   <script src="/assets/moj/all.js"></script>
   <script src="/assets/mojFrontendInit.js"></script>

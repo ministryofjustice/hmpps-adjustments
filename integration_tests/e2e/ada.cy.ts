@@ -19,6 +19,7 @@ context('Enter an ADA', () => {
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubDeleteAda')
     cy.task('stubCreateAdjustment')
+    cy.task('stubComponents')
   })
 
   it('Enter an AADA', () => {
