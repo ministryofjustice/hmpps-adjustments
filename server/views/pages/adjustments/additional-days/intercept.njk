@@ -46,8 +46,14 @@
           {% else %}
             {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
           {% endif %}
+
+          {% if model.intercept.number > 1 %}
+            {% set buttonLabel = "Review ADAs" %}
+          {% else %}
+            {% set buttonLabel = "Review ADA" %}
+          {% endif %}
           {{ govukButton({
-            text: model.intercept.number > 1 ? "Review ADAs" : "Review ADA",
+            text: buttonLabel,
             href: url,
             preventDoubleClick: true,
             attributes: {'data-qa': 'review-link'}
