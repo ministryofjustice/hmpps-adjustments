@@ -63,10 +63,16 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
                 {% if not params.hideStatuses %}
                   <td class="govuk-table__cell">
                     {% if not params.checkboxes %}
-                      <span class="moj-badge moj-badge--blue">{{ ada.status }}</span>
+                      {% if ada.status === 'SUSPENDED' %}
+                        <strong class="govuk-tag govuk-tag--red">{{ ada.status }}</strong>
+                      {% elif ada.status === 'PENDING APPROVAL' or ada.status === 'AWARDED' %}
+                        <strong class="govuk-tag govuk-tag--">{{ ada.status }}</strong>
+                      {% else %}
+                        <strong class="govuk-tag govuk-tag--blue">{{ ada.status }}</strong>
+                      {% endif %}
                     {% endif %}
                     {% if charge.status === 'PROSPECTIVE' %}
-                      <span class="moj-badge moj-badge--purple">{{ charge.status }}</span>
+                      <strong class="govuk-tag govuk-tag--purple">{{ charge.status }}</strong>
                     {% endif %}
                   </td>
                 {% endif %}
@@ -78,7 +84,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
           {% if not params.checkboxes and loop.last %}
             <tfoot>
             <tr class="govuk-table__row">
-              <th class="govuk-table__cell govuk-!-text-align-left" scope="row" colspan="{{3 if params.hideStatuses else 4}}">
+              <th class="govuk-table__cell govuk-!-text-align-right" scope="row" colspan="{{3 if params.hideStatuses else 4}}">
                 {{ params.totalText if params.totalText else 'Total' }}
               </th>
               <td class="govuk-table__cell govuk-!-text-align-right">{{ params.total }}</td>
