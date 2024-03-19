@@ -3,7 +3,7 @@ import { PageElement } from './page'
 
 export default class AdaInterceptPage extends AdjustmentsPage {
   constructor() {
-    super('Review adjustment information')
+    super('Review ADA updates')
   }
 
   public static goTo(prisonerId: string): AdaInterceptPage {

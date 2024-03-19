@@ -8,58 +8,47 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjustments</span>
-              Review adjustment information
-          </h1>
+          {% if model.intercept.type == 'FIRST_TIME' %}
+            Review ADA adjudication{% if model.intercept.number > 1%}s{% endif %}
+          {% elif model.intercept.type == 'PADA' %}
+            Review PADA{% if model.intercept.number > 1%}s{% endif %}
+            </h2>
+          {% elif model.intercept.type == 'UPDATE' %}
+            Review ADA updates
+          {% else %}
+            Review adjustment information
+          {% endif %}
+      </h1>
 
       <p class="govuk-body">
-        {% if model.intercept.type == 'FIRST_TIME' %} 
-            The first time you use the adjustments service, you need to check if the existing adjustment information from NOMIS is correct.
-            {% elif model.intercept.type == 'PADA' %}
-            There is a prospective ADA recorded for {{ prisoner.firstName | title }}
-          {{ prisoner.lastName | title }}.
-            {% elif model.intercept.type == 'UPDATE' %}
-            Updates have been made to {{ prisoner.firstName | title }}
-          {{ prisoner.lastName | title }}'s adjustment information, which need to be approved.
-            {% endif %}
+        {% if model.intercept.type == 'FIRST_TIME' %}
+          The first time you use the adjustments service, you must check that the ADA (Additional days awarded) information is correct.
+        {% elif model.intercept.type == 'PADA' %}
+          Review and approve the PADAs that are relevant to the current sentence.
+        {% elif model.intercept.type == 'UPDATE' %}
+          Review and approve the changes that have been made to the ADAs
+        {% endif %}
       </p>
-      <article class="moj-ticket-panel govuk-!-margin-bottom-4 govuk-!-margin-left-2">
-        <section class="moj-ticket-panel__content moj-ticket-panel__content--blue moj-ticket-panel__content--inline">
 
-          {% if model.intercept.type == 'FIRST_TIME' %}
-            <h2 class="govuk-heading-m">Review ADA adjudication{% if model.intercept.number > 1%}s{% endif %}
-            </h2>
-            <p class="govuk-body">The first time you use the adjustments service, you must check that the ADA (Additional days awarded) information is correct.</p>
-          {% elif model.intercept.type == 'PADA' %}
-            <h2 class="govuk-heading-m">Review PADA{% if model.intercept.number > 1%}s{% endif %}
-            </h2>
-            <p class="govuk-body">Review and approve the PADAs that are relevant to the current sentence.</p>
-          {% elif model.intercept.type == 'UPDATE' %}
-            <h2 class="govuk-heading-m">Review ADA updates</h2>
-            <p class="govuk-body">Review and approve the changes that have been made to the ADAs</p>
-          {% endif %}
+      {% if model.intercept.anyProspective %}
+        {% set url = "/" + prisoner.prisonerNumber + "/additional-days/review-prospective" %}
+      {% else %}
+        {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
+      {% endif %}
 
-          {% if model.intercept.anyProspective %}
-            {% set url = "/" + prisoner.prisonerNumber + "/additional-days/review-prospective" %}
-          {% else %}
-            {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
-          {% endif %}
-
-          {% if model.intercept.number > 1 %}
-            {% set buttonLabel = "Review ADAs" %}
-          {% else %}
-            {% set buttonLabel = "Review ADA" %}
-          {% endif %}
-          {{ govukButton({
-            text: buttonLabel,
-            href: url,
-            preventDoubleClick: true,
-            attributes: {'data-qa': 'review-link'}
-          }) }}
-        </section>
-      </article>
+      {% if model.intercept.number > 1 %}
+        {% set buttonLabel = "Review ADAs" %}
+      {% else %}
+        {% set buttonLabel = "Review ADA" %}
+      {% endif %}
+      {{ govukButton({
+        text: buttonLabel,
+        href: url,
+        preventDoubleClick: true,
+        attributes: {'data-qa': 'review-link'}
+      }) }}
     </div>
   </div>
 
