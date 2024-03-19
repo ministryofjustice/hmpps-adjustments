@@ -7,18 +7,18 @@
 
 {% set pageTitle = applicationName + " - " + model.addOrEdit + " " + model.form.adjustmentType().shortText %}
 {% set mainClasses = "app-container govuk-body" %}
+{% if model.addOrEdit == 'edit' and model.id %}
+  {% set backlink = "/" + prisoner.prisonerNumber + "/" + model
+  .form
+    .adjustmentType()
+  .url + "/view" %}
+{% else %}
+  {% set backlink = "/" + prisoner.prisonerNumber %}
+{% endif %}
 
 {% block beforeContent %}
   {{ super() }}
   <nav>
-    {% if model.addOrEdit == 'edit' and model.id %}
-      {% set backlink = "/" + prisoner.prisonerNumber + "/" + model
-      .form
-        .adjustmentType()
-      .url + "/view" %}
-    {% else %}
-      {% set backlink = "/" + prisoner.prisonerNumber %}
-    {% endif %}
     {{ govukBackLink({
       text: "Back",
       href: backlink
@@ -55,12 +55,20 @@
           .form
           .fragment() %}
 
-        {{ govukButton({
-          text: "Continue",
-          type: submit,
-          preventDoubleClick: true,
-          attributes: { 'data-qa': 'submit-form' }
-        }) }}
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href:  backlink
+          }) }}
+        </div>
       </form>
     </div>
   </div>
