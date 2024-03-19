@@ -10,7 +10,7 @@
     <div class="govuk-grid-column-full">
 
       <h1 class="govuk-heading-l">
-        <span class="govuk-caption-xl">Adjust release dates</span>
+        <span class="govuk-caption-xl">Adjustments</span>
               Review adjustment information
           </h1>
 
@@ -31,7 +31,7 @@
           {% if model.intercept.type == 'FIRST_TIME' %}
             <h2 class="govuk-heading-m">Review ADA adjudication{% if model.intercept.number > 1%}s{% endif %}
             </h2>
-            <p class="govuk-body">Review and approve adjudications where additional days have been awarded.</p>
+            <p class="govuk-body">The first time you use the adjustments service, you must check that the ADA (Additional days awarded) information is correct.</p>
           {% elif model.intercept.type == 'PADA' %}
             <h2 class="govuk-heading-m">Review PADA{% if model.intercept.number > 1%}s{% endif %}
             </h2>
@@ -46,8 +46,18 @@
           {% else %}
             {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
           {% endif %}
-          <a class="govuk-link" data-qa="review-link" href="{{url}}">Review</a>
 
+          {% if model.intercept.number > 1 %}
+            {% set buttonLabel = "Review ADAs" %}
+          {% else %}
+            {% set buttonLabel = "Review ADA" %}
+          {% endif %}
+          {{ govukButton({
+            text: buttonLabel,
+            href: url,
+            preventDoubleClick: true,
+            attributes: {'data-qa': 'review-link'}
+          }) }}
         </section>
       </article>
     </div>
