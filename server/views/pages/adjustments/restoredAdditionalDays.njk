@@ -8,7 +8,7 @@
         items: model.form.fromItems(),
         fieldset: {
             legend: {
-                text: "Date the days were restored",
+                text: "Date of days restored",
                 classes: "govuk-fieldset__legend--s"
             }
         },
@@ -18,18 +18,21 @@
         errorMessage: model.form.messageForField('from-day', 'from-month', 'from-year')
         })
     }}
-  {{ govukInput({
-    label: {
-        text: "Number of additional days restored",
-        classes: "govuk-label--s"
-    },
-    id: "days",
-    name: "days",
-    inputmode: "numeric",
-    attributes: { "maxlength": "4" },
-    value: model.form.days,
-    classes: "govuk-input--width-4",
-    errorMessage: model.form.messageForField('days')
-  })
-}}
+
+
+    {{ govukInput({
+      label: {
+        text: "Number of additional days restored"
+      },
+      classes: "govuk-input--width-5",
+      id: "days",
+      name: "days",
+      inputmode: "numeric",
+      value: model.form.days,
+      suffix: {
+        text: "days"
+      },
+      spellcheck: false,
+      errorMessage: model.form.messageForField('days')
+    }) }}
 </div>
