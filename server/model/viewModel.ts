@@ -37,9 +37,9 @@ export default class ViewModel {
   public columnHeadings() {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
-        { text: 'Date the days were restored' },
+        { text: 'Date of days restored' },
         { text: 'Entered by' },
-        { text: 'Number of days restored', format: 'numeric' },
+        { text: 'Number of additional days restored', format: 'numeric' },
         { text: 'Actions' },
       ]
     }
@@ -122,32 +122,11 @@ export default class ViewModel {
     return [[{ html: '<b>Total days</b>' }, { html: `<b>${total}</b>`, format: 'numeric' }, { text: '' }, { html: '' }]]
   }
 
-  public showAddNewButton(): boolean {
-    return !this.viewingRemandThatIsIneditable()
-  }
-
-  private viewingRemandThatIsIneditable(): boolean {
-    return (
-      this.adjustmentType.value === 'REMAND' &&
-      (!this.remandDecision || this.remandDecision.accepted) &&
-      this.hasRemandToolRole()
-    )
-  }
-
-  public hasRemandToolRole(): boolean {
-    return this.roles.includes('REMAND_IDENTIFIER')
-  }
-
   private actionCell(adjustment: Adjustment) {
-    if (this.viewingRemandThatIsIneditable()) {
-      return {
-        html: `<a class="govuk-link" href="/${adjustment.person}/remand">Review</a><br />`,
-      }
-    }
     return {
       html: `
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Remove</a><br />
+      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a>
+      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Delete</a>
     `,
     }
   }
