@@ -5,7 +5,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{% set pageTitle = applicationName + " - check your answers" %}
+{% set pageTitle = applicationName + " - Confirm and save" %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
@@ -33,7 +33,6 @@
       {{ govukSummaryList({
         rows: model.summaryRows()
       }) }}
-      <p class="govuk-body">Your data will be saved in NOMIS. After submitting you will need to recalculate the dates for this prisoner.</p>
     </div>
   </div>
   <div class="govuk-grid-row">
@@ -42,17 +41,19 @@
       <form class="form" method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
 
-        {{ govukButton({
-            text: "Confirm and save",
-            type: submit,
-            preventDoubleClick: true,
-            attributes: { 'data-qa': 'submit' }   
-        }) }}
-        {{ govukButton({
-          text: "Edit",
-          classes: "govuk-button--secondary",
-          href: "/" + prisoner.prisonerNumber + "/" + model.adjustmentType().url + "/edit"
-        }) }}
+        <div class="govuk-button-group">
+          {{ govukButton({
+              text: "Confirm and save",
+              type: submit,
+              preventDoubleClick: true,
+              attributes: { 'data-qa': 'submit' }   
+          }) }}
+            {{ govukButton({
+              text: "Cancel",
+              classes: "govuk-button--secondary",
+              href: "/" + prisoner.prisonerNumber
+            }) }}
+        </div>
       </form>
     </div>
   </div>

@@ -516,7 +516,7 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Date the days were restored')
+        expect(res.text).toContain('Date of days restored')
         expect(res.text).toContain('5 Apr 2023')
         expect(res.text).toContain('Number of days restored')
         expect(res.text).toContain('24')
