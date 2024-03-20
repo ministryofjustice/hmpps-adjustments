@@ -1,15 +1,15 @@
 {#
 This macro creates a table of ADAs. It has the following params
 
-tableId: required, id of the table
-adas: required, the data to display
+tableId: required, id of the table.
+adas: required, the data to display.
 total: required, the total number of days.
-mainTitle: optional, title above table
-emptyTitle: optional, displayed if table is empty
+mainTitle: optional, title above table.
+emptyTitle: optional, displayed if table is empty.
 checkboxes: optional, defaults to false, does table have checkboxes
-hideStatuses: optional,  defaults to false , should the status of the ada be displayed
+hideStatuses: optional,  defaults to false , should the status of the ada be displayed.
 totalText: optional,  defaults to 'Total' , the text displayed next to the total.
-showTotalPerDateCharged: optional,  defaults to false, should the total be shown per charge date
+showTotalPerDateCharged: optional,  defaults to false, should the total be shown per charge date.
 #}
 {% macro adaTable(params) %}
   {% if params.adas | length %}
@@ -18,21 +18,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
     {% endif %}
 
     {% for ada in params.adas %}
-      <div class="govuk-!-margin-bottom-6">
-        {% if params.checkboxes %}
-          {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
-          <div class="govuk-form-group">
-            <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-              <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
-                <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</label>
-              </div>
-            </div>
-          </div>
-        {% else %}
-          <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</h3>
-        {% endif %}
-
+      {% set html %}
         <table id="{{ params.tableId }}"
               class="govuk-table {{ 'govuk-!-margin-bottom-8' if not params.checkboxes else 'govuk-!-margin-bottom-2' }}">
           <thead class="govuk-table__head">
@@ -61,18 +47,22 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
                   {{ charge.heardAt }}
                 </td>
                 {% if not params.hideStatuses %}
-                  <td class="govuk-table__cell">
+                  <td class="govuk-table__cell status-cell">
                     {% if not params.checkboxes %}
+                      <div class="status-tag-row">
                       {% if ada.status === 'SUSPENDED' %}
-                        <strong class="govuk-tag govuk-tag--red">{{ ada.status }}</strong>
-                      {% elif ada.status === 'PENDING APPROVAL' or ada.status === 'AWARDED' %}
-                        <strong class="govuk-tag govuk-tag--">{{ ada.status }}</strong>
+                        <strong class="govuk-tag govuk-tag--red">{{ ada.status | title }}</strong>
+                      {% elif ada.status === 'AWARDED' %}
+                        <strong class="govuk-tag govuk-tag--green">{{ ada.status | title }}</strong>
                       {% else %}
-                        <strong class="govuk-tag govuk-tag--blue">{{ ada.status }}</strong>
+                        <strong class="govuk-tag govuk-tag--blue">{{ ada.status | title }}</strong>
                       {% endif %}
+                      </div>
                     {% endif %}
                     {% if charge.status === 'PROSPECTIVE' %}
-                      <strong class="govuk-tag govuk-tag--purple">{{ charge.status }}</strong>
+                      <div class="status-tag-row">
+                        <strong class="govuk-tag govuk-tag--purple">{{ charge.status | title }}</strong>
+                      </div>
                     {% endif %}
                   </td>
                 {% endif %}
@@ -92,14 +82,37 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
             </tfoot>
           {% endif %}
         </table>
-      </div>
+      {% endset %}
+
+      {% if params.checkboxes %}
+        <div class="govuk-summary-card govuk-!-margin-bottom-4">
+          <div class="govuk-summary-card__content equal-padding">
+            <h2 class="govuk-heading-m">Date charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</h2>
+            {{ html | safe }}
+            {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
+            <div class="govuk-form-group govuk-!-margin-top-6 govuk-!-margin-bottom-2">
+              <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+                <div class="govuk-checkboxes__item">
+                  <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
+                  <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">Select this adjudication</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="govuk-!-margin-bottom-6">
+          <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</h3>
+          {{ html | safe }}
+        </div>
+      {% endif %}
     {% endfor %}
     {% if params.checkboxes %}
-      <div class="govuk-form-group govuk-!-margin-bottom-4">
+      <div class="govuk-form-group checkbox-padding govuk-!-margin-bottom-4">
         <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
           <div class="govuk-checkboxes__item">
             <input class="govuk-checkboxes__input" id="unselect-all" name="none" type="checkbox" value="none">
-            <label class="govuk-label govuk-checkboxes__label" for="unselect-all">None of these PADAs apply</label>
+            <label class="govuk-label govuk-checkboxes__label" for="unselect-all">None of these apply</label>
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@
   <a href="{{url}}" class="govuk-back-link">Back</a>
 
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-grid-column-full">
       <div class="govuk-form-group govuk-body">
         <h1 class="govuk-heading-l">
           <span class="govuk-caption-xl">Adjustments</span>
@@ -84,18 +84,20 @@
         <p class="govuk-body">If all the ADA information is correct, approve the pending ADAs.</p>
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
-          {{ govukButton({
-                text: "Approve",
-                type: submit,
-                preventDoubleClick: true,
-                attributes: {'data-qa': 'approve-button'}
-              }) }}
+          <div class="govuk-button-group">
+            {{ govukButton({
+                  text: "Approve",
+                  type: submit,
+                  preventDoubleClick: true,
+                  attributes: {'data-qa': 'approve-button'}
+                }) }}
 
-          {{ govukButton({
-            text: "Cancel",
-            href: "/" + prisoner.prisonerNumber,
-            classes: "govuk-button--secondary"
-          }) }}
+            {{ govukButton({
+              text: "Cancel",
+              href: "/" + prisoner.prisonerNumber,
+              classes: "govuk-button--secondary"
+            }) }}
+          </div>
         </form>
       </div>
     </div>
