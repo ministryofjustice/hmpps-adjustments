@@ -260,7 +260,7 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('The number of additional days restored must be entered.')
         expect(res.text).toContain('This date must include a valid day, month and year.')
       })
   })
@@ -518,7 +518,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Date of days restored')
         expect(res.text).toContain('5 Apr 2023')
-        expect(res.text).toContain('Number of days restored')
+        expect(res.text).toContain('Number of additional days restored')
         expect(res.text).toContain('24')
         expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/edit`)

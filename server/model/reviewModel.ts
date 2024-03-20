@@ -28,10 +28,10 @@ export default class ReviewModel {
   }
 
   public summaryRows() {
-    return ReviewModel.summaryRowsFromAdjustment(this.adjustment)
+    return ReviewModel.summaryRowsFromAdjustment(this.adjustment, true)
   }
 
-  public static summaryRowsFromAdjustment(adjustment: Adjustment) {
+  public static summaryRowsFromAdjustment(adjustment: Adjustment, includeEdit: boolean) {
     if (adjustment.adjustmentType === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
         {
@@ -41,21 +41,21 @@ export default class ReviewModel {
           value: {
             text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
           },
-          ...ReviewModel.editActions(adjustment),
+          ...ReviewModel.editActions(adjustment, includeEdit),
         },
         {
           key: {
-            text: 'Number of days restored',
+            text: 'Number of additional days restored',
           },
           value: {
             text: adjustment.days,
           },
-          ...ReviewModel.editActions(adjustment),
+          ...ReviewModel.editActions(adjustment, includeEdit),
         },
       ]
     }
     if (adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
-      return this.ualRows(adjustment)
+      return this.ualRows(adjustment, includeEdit)
     }
     return [
       {
@@ -65,7 +65,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
-        ...ReviewModel.editActions(adjustment),
+        ...ReviewModel.editActions(adjustment, includeEdit),
       },
       ...(adjustment.days
         ? [
@@ -76,7 +76,7 @@ export default class ReviewModel {
               value: {
                 text: adjustment.days,
               },
-              ...ReviewModel.editActions(adjustment),
+              ...ReviewModel.editActions(adjustment, includeEdit),
             },
           ]
         : []),
@@ -89,14 +89,17 @@ export default class ReviewModel {
               value: {
                 text: dayjs(adjustment.toDate).format('D MMM YYYY'),
               },
-              ...ReviewModel.editActions(adjustment),
+              ...ReviewModel.editActions(adjustment, includeEdit),
             },
           ]
         : []),
     ]
   }
 
-  private static editActions(adjustment: Adjustment) {
+  private static editActions(adjustment: Adjustment, includeEdit: boolean) {
+    if (!includeEdit) {
+      return {}
+    }
     const adjustmentType = ReviewModel.adjustmentTypeFromAdjustment(adjustment)
     return {
       actions: {
@@ -111,7 +114,7 @@ export default class ReviewModel {
     }
   }
 
-  private static ualRows(adjustment: Adjustment) {
+  private static ualRows(adjustment: Adjustment, includeEdit: boolean) {
     const type = ualType.find(it => it.value === adjustment.unlawfullyAtLarge?.type)
     return [
       {
@@ -121,7 +124,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
-        ...ReviewModel.editActions(adjustment),
+        ...ReviewModel.editActions(adjustment, includeEdit),
       },
       {
         key: {
@@ -130,7 +133,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.toDate).format('D MMM YYYY'),
         },
-        ...ReviewModel.editActions(adjustment),
+        ...ReviewModel.editActions(adjustment, includeEdit),
       },
       {
         key: {
@@ -139,7 +142,7 @@ export default class ReviewModel {
         value: {
           text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         },
-        ...ReviewModel.editActions(adjustment),
+        ...ReviewModel.editActions(adjustment, includeEdit),
       },
       {
         key: {
@@ -148,7 +151,7 @@ export default class ReviewModel {
         value: {
           text: type ? type.text : 'Unknown',
         },
-        ...ReviewModel.editActions(adjustment),
+        ...ReviewModel.editActions(adjustment, includeEdit),
       },
     ]
   }

@@ -9,6 +9,6 @@ export default class RemoveModel {
   ) {}
 
   public summaryRows() {
-    return ReviewModel.summaryRowsFromAdjustment(this.adjustment)
+    return ReviewModel.summaryRowsFromAdjustment(this.adjustment, false)
   }
 }
