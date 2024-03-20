@@ -3,7 +3,7 @@
   <div class="adjustment-card">
     <div class="govuk-summary-card__title-wrapper">
         <h2 class="govuk-summary-card__title">{{ adjustmentType.text }}</h2>
-        <ul class="govuk-summary-card__actions">
+        <ul class="govuk-summary-card__actions govuk-!-width-one-third">
             <li class="govuk-summary-card__action">
               {% if model.displayAddLink(adjustmentType) %}
                     <a href="/{{ prisonerNumber }}/{{ adjustmentType.url }}/add"
