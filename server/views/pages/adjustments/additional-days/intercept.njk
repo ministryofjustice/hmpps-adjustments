@@ -10,10 +10,16 @@
     <div class="govuk-grid-column-full">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjustments</span>
+          {% if model.intercept.number > 1 %}
+            {% set pluralisation = "s" %}
+          {% else %}
+            {% set pluralisation = "" %}
+          {% endif %}
+
           {% if model.intercept.type == 'FIRST_TIME' %}
-            Review ADA adjudication{% if model.intercept.number > 1%}s{% endif %}
+            Review ADA adjudication{{pluralisation}}
           {% elif model.intercept.type == 'PADA' %}
-            Review PADA{% if model.intercept.number > 1%}s{% endif %}
+            Review PADA{{pluralisation}}
             </h2>
           {% elif model.intercept.type == 'UPDATE' %}
             Review ADA updates
@@ -26,9 +32,13 @@
         {% if model.intercept.type == 'FIRST_TIME' %}
           The first time you use the adjustments service, you must check that the ADA (Additional days awarded) information is correct.
         {% elif model.intercept.type == 'PADA' %}
-          Review and approve the PADAs that are relevant to the current sentence.
+          {% if model.intercept.number > 1 %}
+            There are PADAs (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADAs and approve the ones that are relevant to the current sentence.
+          {% else %}
+            There is a PADA (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADA and approve if it's relevant to the current sentence.
+          {% endif %}
         {% elif model.intercept.type == 'UPDATE' %}
-          Review and approve the changes that have been made to the ADAs
+          Updates have been made to ADA (Additional days awarded) information, which need to be approved.
         {% endif %}
       </p>
 
@@ -38,13 +48,14 @@
         {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
       {% endif %}
 
-      {% if model.intercept.number > 1 %}
-        {% set buttonLabel = "Review ADAs" %}
+      {% if model.intercept.type == 'PADA' %}
+        {% set interceptType = "PADA" %}
       {% else %}
-        {% set buttonLabel = "Review ADA" %}
+        {% set interceptType = "ADA" %}
       {% endif %}
+
       {{ govukButton({
-        text: buttonLabel,
+        text: "Review " + interceptType + pluralisation,
         href: url,
         preventDoubleClick: true,
         attributes: {'data-qa': 'review-link'}
