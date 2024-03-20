@@ -8,7 +8,11 @@ export default class ReviewModel {
   constructor(public adjustment: Adjustment) {}
 
   public adjustmentType(): AdjustmentType {
-    return adjustmentTypes.find(it => it.value === this.adjustment.adjustmentType)
+    return ReviewModel.adjustmentTypeFromAdjustment(this.adjustment)
+  }
+
+  private static adjustmentTypeFromAdjustment(adjustment: Adjustment) {
+    return adjustmentTypes.find(it => it.value === adjustment.adjustmentType)
   }
 
   public changeLink(): string {
@@ -32,11 +36,12 @@ export default class ReviewModel {
       return [
         {
           key: {
-            text: 'Date the days were restored',
+            text: 'Date of days restored',
           },
           value: {
             text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
           },
+          ...ReviewModel.editActions(adjustment),
         },
         {
           key: {
@@ -45,6 +50,7 @@ export default class ReviewModel {
           value: {
             text: adjustment.days,
           },
+          ...ReviewModel.editActions(adjustment),
         },
       ]
     }
@@ -59,6 +65,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
+        ...ReviewModel.editActions(adjustment),
       },
       ...(adjustment.days
         ? [
@@ -69,6 +76,7 @@ export default class ReviewModel {
               value: {
                 text: adjustment.days,
               },
+              ...ReviewModel.editActions(adjustment),
             },
           ]
         : []),
@@ -81,10 +89,26 @@ export default class ReviewModel {
               value: {
                 text: dayjs(adjustment.toDate).format('D MMM YYYY'),
               },
+              ...ReviewModel.editActions(adjustment),
             },
           ]
         : []),
     ]
+  }
+
+  private static editActions(adjustment: Adjustment) {
+    const adjustmentType = ReviewModel.adjustmentTypeFromAdjustment(adjustment)
+    return {
+      actions: {
+        items: [
+          {
+            href: `/${adjustment.person}/${adjustmentType.url}/edit`,
+            text: 'Edit',
+            visuallyHiddenText: adjustmentType.text,
+          },
+        ],
+      },
+    }
   }
 
   private static ualRows(adjustment: Adjustment) {
@@ -97,6 +121,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
+        ...ReviewModel.editActions(adjustment),
       },
       {
         key: {
@@ -105,6 +130,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.toDate).format('D MMM YYYY'),
         },
+        ...ReviewModel.editActions(adjustment),
       },
       {
         key: {
@@ -113,6 +139,7 @@ export default class ReviewModel {
         value: {
           text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         },
+        ...ReviewModel.editActions(adjustment),
       },
       {
         key: {
@@ -121,6 +148,7 @@ export default class ReviewModel {
         value: {
           text: type ? type.text : 'Unknown',
         },
+        ...ReviewModel.editActions(adjustment),
       },
     ]
   }
