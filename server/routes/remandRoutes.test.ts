@@ -591,7 +591,7 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(
-          'Once the remand time has been saved, this service will record unused deductions. You may need to add the unused remand alert on NOMIS.',
+          'When you save this remand, the unused deductions will automatically be recorded. Check that the unused remand alert has been added.',
         )
         expect(res.text).toContainInOrder(['Remand period', 'Days spent on remand', '10', 'Total days', '10'])
       })
