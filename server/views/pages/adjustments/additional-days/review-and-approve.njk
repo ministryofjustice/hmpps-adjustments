@@ -64,12 +64,12 @@
           }) }}
 
         {% if adasToReview.quashed | length %}
-          <h2 class="govuk-heading-m">Review and approve quashed ADAs</h2>
+          <h2 class="govuk-heading-m">Quashed ADAs</h2>
           {{ adaTable({
             tableId: 'quashed-approval-adas',
             adas: adasToReview.quashed,
             total: adasToReview.totalQuashed,
-            totalText: 'Total quashed ADAs',
+            totalText: 'Total days',
             mainTitle: 'Once you have reviewed and approved the quashed ADAs, they will not be added to the sentence calculation.'
             }) }}
         {% endif %}

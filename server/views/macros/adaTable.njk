@@ -52,7 +52,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
                       <div class="status-tag-row">
                       {% if ada.status === 'SUSPENDED' %}
                         <strong class="govuk-tag govuk-tag--red">{{ ada.status | title }}</strong>
-                      {% elif ada.status === 'AWARDED' %}
+                      {% elif ada.status === 'AWARDED' or ada.status === 'PENDING APPROVAL' %}
                         <strong class="govuk-tag govuk-tag--green">{{ ada.status | title }}</strong>
                       {% else %}
                         <strong class="govuk-tag govuk-tag--blue">{{ ada.status | title }}</strong>
