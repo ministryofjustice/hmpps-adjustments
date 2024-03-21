@@ -21,10 +21,12 @@ export default class ReviewModel {
     }`
   }
 
+  public isEdit(): boolean {
+    return !!this.adjustment.id
+  }
+
   public cancelLink(): string {
-    return this.adjustment.id
-      ? `/${this.adjustment.person}/${this.adjustmentType().url}/view`
-      : `/${this.adjustment.person}`
+    return this.isEdit() ? `/${this.adjustment.person}/${this.adjustmentType().url}/view` : `/${this.adjustment.person}`
   }
 
   public summaryRows() {
