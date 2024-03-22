@@ -24,13 +24,15 @@
 
     <div class="adjustment-card_content">
         <span class="count govuk-body">{{ model.getTotalDays(adjustmentType) }}</span>
-        <span>Days</span>
-        {% if model.getUnused(adjustmentType) %}
-          <span class="govuk-hint">including {{model.getUnused(adjustmentType)}} days unused </span>
-        {% endif %}
+        <span class="govuk-body">
+          Days
+          {% if model.getUnused(adjustmentType) %}
+            including {{model.getUnused(adjustmentType)}} days unused
+          {% endif %}
+        </span>
         {% if model.showDetails(adjustmentType) %}
           <br />
-          <p class="govuk-body govuk-!-font-size-14">Last update
+          <p class="govuk-hint govuk-!-font-size-14">Last update
             on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMMM YYYY") }}
             by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</p>
         {% endif %}
