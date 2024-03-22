@@ -25,19 +25,19 @@
 {% block content %}
 
 
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full">
-        {% if model.unusedDeductions %}
-          {% set html %}
-            <p class="govuk-notification-banner__heading">
-              Once the remand time has been saved, this service will record unused deductions. You may need to add the unused remand alert on NOMIS.
-            </p>
-          {% endset %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      {% if model.unusedDeductions %}
+        {% set html %}
+          <p class="govuk-notification-banner__heading">
+            When you save this remand, the unused deductions will automatically be recorded. Check that the unused remand alert has been added.
+          </p>
+        {% endset %}
 
-          {{ govukNotificationBanner({
-            html: html
-          }) }}
-        {% endif %}
+        {{ govukNotificationBanner({
+          html: html
+        }) }}
+      {% endif %}
     </div>
   </div>
   <div class="govuk-grid-row">
