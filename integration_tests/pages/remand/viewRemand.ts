@@ -2,7 +2,7 @@ import AdjustmentsPage, { PageElement } from '../adjustmentsPage'
 
 export default class ViewRemandPage extends AdjustmentsPage {
   constructor() {
-    super('Remand overview for Marvin Haggler')
+    super('Remand overview')
   }
 
   public editLink = (): PageElement => cy.get('a.govuk-link').first()
