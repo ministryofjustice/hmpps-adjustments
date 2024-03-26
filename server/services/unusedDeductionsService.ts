@@ -70,7 +70,6 @@ export default class UnusedDeductionsService {
       }
     } catch {
       // Error couldn't calculate unused deductions.
-      return 'UNKNOWN'
     }
 
     return 'UNKNOWN'
