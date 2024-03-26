@@ -117,7 +117,7 @@ export default class UnusedDeductionsService {
         }
       }
 
-      return 'NONE'
+      return 'UNKNOWN'
     } catch {
       return 'UNKNOWN'
     }
