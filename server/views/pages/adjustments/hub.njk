@@ -70,11 +70,12 @@
         </div>
       {% endif %}
 
+      <h2 class="govuk-heading-m govuk-!-padding-left-4">
+        Deductions
+      </h2>
+
       {% if model.unusedDeductionMessage != 'NONE' %}
-        <h2 class="govuk-heading-m">
-          Unused deductions
-        </h2>
-        <div class="govuk-inset-text">
+        <div class="govuk-inset-text govuk-!-margin-left-4">
           {% if model.unusedDeductionMessage == 'UNSUPPORTED' %}
             Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
           {% elif model.unusedDeductionMessage == 'VALIDATION' %}
@@ -98,9 +99,6 @@
         </div>
       {% endif %}
 
-      <h2 class="govuk-heading-m govuk-!-padding-left-4">
-        Deductions
-      </h2>
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.deductions() %}
           {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
