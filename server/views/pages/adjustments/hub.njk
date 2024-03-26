@@ -66,17 +66,35 @@
             NOMIS, {{ prisoner.firstName | title }}
             {{ prisoner.lastName | title }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
             Review the remand to make sure it is relevant.</p>
-          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button"
-             data-qa="relevant-remand">Review</a>
+          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button" data-qa="relevant-remand">Review</a>
         </div>
       {% endif %}
 
-      {% if not model.serviceHasCalculatedUnusedDeductions %}
+      {% if model.unusedDeductionMessage != 'NONE' %}
         <h2 class="govuk-heading-m">
           Unused deductions
         </h2>
         <div class="govuk-inset-text">
-          Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.
+          {% if model.unusedDeductionMessage == 'UNSUPPORTED' %}
+            Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+          {% elif model.unusedDeductionMessage == 'VALIDATION' %}
+            Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.
+            <br />
+            To continue, you must:
+            <ol>
+              <li>
+                <a href="{{ model.checkInformationLink }}" target="_blank">Review the incorrect details</a>
+              </li>
+              <li>
+                Update these details
+              </li>
+              <li>
+                Reload this page
+              </li>
+            </ol>
+          {% elif model.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
+            Existing deductions have been added on NOMIS. This means unused deductions cannot be automatically calculated. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+          {% endif %}
         </div>
       {% endif %}
 

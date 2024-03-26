@@ -1,5 +1,7 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import config from '../config'
+import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 
@@ -13,6 +15,8 @@ export type Message = {
 export type MessageAction = 'CREATE' | 'REMOVE' | 'UPDATE' | 'REJECTED' | 'VALIDATION'
 
 export default class AdjustmentsHubViewModel {
+  public checkInformationLink: string
+
   constructor(
     public prisonerNumber: string,
     public adjustments: Adjustment[],
@@ -20,8 +24,10 @@ export default class AdjustmentsHubViewModel {
     public remandDecision: IdentifyRemandDecision,
     public roles: string[],
     public message: Message,
-    public serviceHasCalculatedUnusedDeductions: boolean,
-  ) {}
+    public unusedDeductionMessage: UnusedDeductionMessageType,
+  ) {
+    this.checkInformationLink = `${config.services.calculateReleaseDatesUI.url}/calculation/${this.prisonerNumber}/check-information?hasErrors=true`
+  }
 
   public deductions(): AdjustmentType[] {
     return adjustmentTypes.filter(it =>

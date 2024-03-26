@@ -18,7 +18,7 @@ import FullPageError from '../model/FullPageError'
 import { daysBetween } from '../utils/utils'
 import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
-import UnusedDeductionsService from '../services/unusedDeductionsService'
+import UnusedDeductionsService, { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentRoutes {
@@ -54,14 +54,11 @@ export default class AdjustmentRoutes {
 
     const message = req.flash('message')
     const messageExists = message && message[0]
-    let serviceHasCalculatedUnusedDeductions = true
+    let unusedDeductionMessage: UnusedDeductionMessageType = 'NONE'
     if (messageExists) {
       this.adjustmentsStoreService.clear(req, nomsId)
 
-      serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.waitUntilUnusedRemandCreated(
-        nomsId,
-        token,
-      )
+      unusedDeductionMessage = await this.unusedDeductionsService.waitUntilUnusedRemandCreated(nomsId, token)
     }
 
     const adjustments = await this.adjustmentsService.findByPerson(
@@ -71,7 +68,7 @@ export default class AdjustmentRoutes {
     )
 
     if (!messageExists) {
-      serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.serviceHasCalculatedUnusedDeductions(
+      unusedDeductionMessage = await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessage(
         nomsId,
         adjustments,
         token,
@@ -107,7 +104,7 @@ export default class AdjustmentRoutes {
         remandDecision,
         roles,
         message && message[0] && (JSON.parse(message[0]) as Message),
-        serviceHasCalculatedUnusedDeductions,
+        unusedDeductionMessage,
       ),
     })
   }
