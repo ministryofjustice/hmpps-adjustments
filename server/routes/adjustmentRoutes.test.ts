@@ -213,6 +213,28 @@ describe('Adjustment routes tests', () => {
         )
       })
   })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of an exception', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('UNKNOWN')
+    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.',
+        )
+      })
+  })
   it('GET /{nomsId} with remand role', () => {
     userInTest = userWithRemandRole
     adjustmentsService.findByPerson.mockResolvedValue([

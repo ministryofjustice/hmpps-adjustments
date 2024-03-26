@@ -95,6 +95,8 @@
             </ol>
           {% elif model.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
             Existing deductions have been added on NOMIS. This means unused deductions cannot be automatically calculated. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+          {% elif model.unusedDeductionMessage == 'UNKNOWN' %}
+            Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.
           {% endif %}
         </div>
       {% endif %}
