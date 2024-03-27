@@ -126,6 +126,7 @@ export default class AdditionalDaysAwardedService {
 
     const totalAwarded: number = this.getTotalDays(awarded)
     const totalAwaitingApproval: number = this.getTotalDays(awaitingApproval)
+    const totalExistingAdads = allAdaAdjustments.reduce((acc, cur) => acc + cur.days, 0) || null
     return {
       totalAwarded,
       awarded,
@@ -144,6 +145,8 @@ export default class AdditionalDaysAwardedService {
         prospective,
         quashed,
       ),
+      showExistingAdaMessage: !awaitingApproval.length && !quashed.length && !awarded.length,
+      totalExistingAdads,
     } as AdasToReview
   }
 

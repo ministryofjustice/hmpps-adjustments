@@ -33,6 +33,8 @@ type AdasToReview = {
   awaitingApproval: AdasByDateCharged[]
   totalAwaitingApproval: number
   intercept: AdaIntercept
+  totalExistingAdads: number
+  showExistingAdaMessage: boolean
 }
 
 type AdasToView = {

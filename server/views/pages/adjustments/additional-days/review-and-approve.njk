@@ -1,6 +1,7 @@
 {% extends "../../../partials/layout.njk" %}
 {% from "../../../macros/adaTable.njk" import adaTable %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
 {% set pageTitle = applicationName + " - Review and approve ADAs" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -22,6 +23,17 @@
           Review and approve ADAs
         </h1>
 
+        {% if adasToReview.showExistingAdaMessage %}
+          {% set html %}
+          <h3 class="govuk-notification-banner__heading">Missing adjudication record</h3>
+          <p class="govuk-body">{{adasToReview.totalExistingAdads}} ADA have been added in NOMIS but no adjudication record exists. To continue, you must either remove the ADA, or contact the team responsible for adding adjudications. <br/>
+Check the comment field in the adjudications DPS service for any missing information.</p>
+          {% endset %}
+
+          {{ govukNotificationBanner({
+            html: html
+          }) }}
+        {% endif %}
         <p>
           {% if adasToReview.intercept.type == 'FIRST_TIME'%}
             ADA adjustments are based on adjudication records. To apply ADAs, you must confirm that the adjustment information below is correct.
@@ -85,12 +97,14 @@
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
           <div class="govuk-button-group">
+            {% if not adasToReview.showExistingAdaMessage %}
             {{ govukButton({
                   text: "Approve",
                   type: submit,
                   preventDoubleClick: true,
                   attributes: {'data-qa': 'approve-button'}
                 }) }}
+            {% endif %}
 
             {{ govukButton({
               text: "Cancel",

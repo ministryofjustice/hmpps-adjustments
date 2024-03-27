@@ -182,6 +182,8 @@ const mixPadasAndPending = {
     type: 'UPDATE',
     anyProspective: false,
   },
+  showExistingAdaMessage: false,
+  totalExistingAdads: null,
 } as AdasToReview
 
 let app: Express
@@ -251,6 +253,26 @@ describe('Additional Days Awarded routes tests', () => {
       additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve when no matching adjudication exists', () => {
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+        earliestSentence: new Date(),
+        earliestExcludingRecalls: new Date(),
+      })
+      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue({
+        ...noAwaitingApproval,
+        showExistingAdaMessage: true,
+        totalExistingAdads: 10,
+      })
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/review-and-approve`)
+        .expect(200)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('10 ADA have been added in NOMIS but no adjudication record exists.')
+        })
     })
   })
 })
