@@ -23,7 +23,6 @@ export default class UnusedDeductionsService {
   async waitUntilUnusedRemandCreated(nomsId: string, token: string): Promise<UnusedDeductionMessageType> {
     try {
       let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       if (!deductions.length) {
         // If there are no deductions then unused deductions doesn't need to be calculated
@@ -48,12 +47,12 @@ export default class UnusedDeductionsService {
         return 'VALIDATION'
       }
 
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (this.anyDeductionFromNomis(deductions)) {
         // won't calculate unused deductions if adjusments are not from DPS.
         return 'NOMIS_ADJUSTMENT'
       }
 
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       /* eslint-disable no-await-in-loop */
       for (let i = 0; i < this.maxTries; i += 1) {
         if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
@@ -83,17 +82,17 @@ export default class UnusedDeductionsService {
     token: string,
   ): Promise<UnusedDeductionMessageType> {
     try {
-      const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
-        nomsId,
-        adjustments,
-        token,
-      )
-
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       if (!deductions.length) {
         // If there are no deductions then unused deductions doesn't need to be calculated
         return 'NONE'
       }
+
+      const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
+        nomsId,
+        adjustments,
+        token,
+      )
 
       if (unusedDeductionsResponse.validationMessages?.length) {
         if (
@@ -107,11 +106,11 @@ export default class UnusedDeductionsService {
         return 'VALIDATION'
       }
 
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (this.anyDeductionFromNomis(deductions)) {
         return 'NOMIS_ADJUSTMENT'
       }
 
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
         const dbDeductions = this.getTotalUnusedRemand(adjustments)
         if (calculatedUnusedDeducions === dbDeductions) {
