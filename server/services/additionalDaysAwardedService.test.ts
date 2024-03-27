@@ -56,6 +56,8 @@ const threeAdjudicationsSearchResponse = JSON.parse(
   `{"results": [${adjudication1SearchResponse}, ${adjudication2SearchResponse}, ${adjudication3SearchResponse}] }`,
 ) as AdjudicationSearchResponse
 
+const emptyAdjudicationSearchResponse = JSON.parse(`{"results": [] }`) as AdjudicationSearchResponse
+
 const adjudicationOne = JSON.parse(
   '{"adjudicationNumber":1525916,"incidentTime":"2023-08-01T09:00:00","establishment":"Moorland (HMP & YOI)","interiorLocation":"Circuit","incidentDetails":"some details","reportNumber":1503215,"reportType":"Governor\'s Report","reporterFirstName":"TIM","reporterLastName":"WRIGHT","reportTime":"2023-08-02T09:09:00","hearings":[{"oicHearingId":2012687,"hearingType":"Governor\'s Hearing Adult","hearingTime":"2023-08-03T16:45:00","establishment":"Moorland (HMP & YOI)","location":"Adj","heardByFirstName":"JOHN","heardByLastName":"FERGUSON","results":[{"oicOffenceCode":"51:16","offenceType":"Prison Rule 51","offenceDescription":"Intentionally or recklessly sets fire to any part of a prison or any other property, whether or not his own","plea":"Guilty","finding":"Charge Proved","sanctions":[{"sanctionType":"Additional Days Added","sanctionDays":5,"effectiveDate":"2023-08-09T00:00:00","status":"Immediate","sanctionSeq":15}]}]}]}',
 ) as IndividualAdjudication
@@ -215,6 +217,8 @@ describe('Additional Days Added Service', () => {
           type: 'UPDATE',
           anyProspective: false,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: null,
       } as AdasToReview)
     })
 
@@ -264,6 +268,8 @@ describe('Additional Days Added Service', () => {
           type: 'UPDATE',
           anyProspective: false,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: null,
       } as AdasToReview)
     })
 
@@ -324,6 +330,8 @@ describe('Additional Days Added Service', () => {
           type: 'UPDATE',
           anyProspective: false,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: null,
       } as AdasToReview)
     })
 
@@ -405,6 +413,8 @@ describe('Additional Days Added Service', () => {
           type: 'NONE',
           anyProspective: false,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: 10,
       } as AdasToReview)
     })
 
@@ -553,6 +563,8 @@ describe('Additional Days Added Service', () => {
           type: 'UPDATE',
           anyProspective: false,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: 10,
       } as AdasToReview)
     })
     it('Get adjudication where prospective ada exists and selected', async () => {
@@ -603,6 +615,8 @@ describe('Additional Days Added Service', () => {
           type: 'UPDATE',
           anyProspective: true,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: null,
       } as AdasToReview)
     })
 
@@ -637,6 +651,52 @@ describe('Additional Days Added Service', () => {
           type: 'PADA',
           anyProspective: true,
         },
+        showExistingAdaMessage: true,
+        totalExistingAdads: null,
+      } as AdasToReview)
+    })
+
+    it('Get adjudication where ADA adjustment exists and no matching adjudications', async () => {
+      const nomsId = 'AA1234A'
+      prisonApi.get('/api/offenders/AA1234A/adjudications', '').reply(200, emptyAdjudicationSearchResponse)
+      adjustmentsService.findByPerson.mockResolvedValue([
+        {
+          id: 'c5b61b4e-8b47-4dfc-b88b-5eb58fc04691',
+          person: 'AA1234A',
+          bookingId: 1234,
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          fromDate: '2023-08-03',
+          days: 10,
+          effectiveDays: 10,
+        },
+      ])
+      const startOfSentenceEnvelope = new Date('2023-01-01')
+      const request = {} as jest.Mocked<Request>
+      storeService.getSelectedPadas.mockReturnValue([])
+
+      const adaToReview: AdasToReview = await adaService.getAdasToApprove(
+        request,
+        nomsId,
+        startOfSentenceEnvelope,
+        token,
+      )
+
+      expect(adaToReview).toEqual({
+        awaitingApproval: [],
+        suspended: [],
+        awarded: [],
+        quashed: [],
+        totalAwarded: 0,
+        totalQuashed: 0,
+        totalAwaitingApproval: 0,
+        totalSuspended: 0,
+        intercept: {
+          number: 0,
+          type: 'FIRST_TIME',
+          anyProspective: false,
+        },
+        showExistingAdaMessage: true,
+        totalExistingAdads: 10,
       } as AdasToReview)
     })
 
@@ -730,6 +790,8 @@ describe('Additional Days Added Service', () => {
           type: 'UPDATE',
           anyProspective: false,
         },
+        showExistingAdaMessage: false,
+        totalExistingAdads: null,
       } as AdasToReview)
     })
 
