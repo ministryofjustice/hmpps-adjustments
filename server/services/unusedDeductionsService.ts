@@ -24,6 +24,12 @@ export default class UnusedDeductionsService {
     try {
       let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
 
+      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+      if (!deductions.length) {
+        // If there are no deductions then unused deductions doesn't need to be calculated
+        return 'NONE'
+      }
+
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
         adjustments,
@@ -41,13 +47,8 @@ export default class UnusedDeductionsService {
 
         return 'VALIDATION'
       }
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
 
-      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      if (!deductions.length) {
-        // If there are no deductions then unused deductions doesn't need to be calculated
-        return 'NONE'
-      }
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (this.anyDeductionFromNomis(deductions)) {
         // won't calculate unused deductions if adjusments are not from DPS.
         return 'NOMIS_ADJUSTMENT'
@@ -88,6 +89,12 @@ export default class UnusedDeductionsService {
         token,
       )
 
+      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+      if (!deductions.length) {
+        // If there are no deductions then unused deductions doesn't need to be calculated
+        return 'NONE'
+      }
+
       if (unusedDeductionsResponse.validationMessages?.length) {
         if (
           unusedDeductionsResponse.validationMessages.find(
@@ -99,13 +106,8 @@ export default class UnusedDeductionsService {
 
         return 'VALIDATION'
       }
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
 
-      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      if (!deductions.length) {
-        // If there are no deductions then unused deductions doesn't need to be calculated
-        return 'NONE'
-      }
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (this.anyDeductionFromNomis(deductions)) {
         return 'NOMIS_ADJUSTMENT'
       }
