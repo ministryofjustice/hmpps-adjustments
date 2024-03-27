@@ -3,6 +3,8 @@ import { delay } from '../utils/utils'
 import AdjustmentsService from './adjustmentsService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
 
+export type UnusedDeductionMessageType = 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'UNKNOWN' | 'NONE'
+
 export default class UnusedDeductionsService {
   private maxTries = 6 // 3 seconds max wait
 
@@ -18,18 +20,13 @@ export default class UnusedDeductionsService {
   }
 
   /* Wait until calclulated unused deductions matches with adjustments database. */
-  async waitUntilUnusedRemandCreated(nomsId: string, token: string): Promise<boolean> {
+  async waitUntilUnusedRemandCreated(nomsId: string, token: string): Promise<UnusedDeductionMessageType> {
     try {
       let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       if (!deductions.length) {
         // If there are no deductions then unused deductions doesn't need to be calculated
-        return true
-      }
-      if (this.anyDeductionFromNomis(deductions)) {
-        // won't calculate unused deductions if adjusments are not from DPS.
-        return false
+        return 'NONE'
       }
 
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
@@ -39,46 +36,58 @@ export default class UnusedDeductionsService {
       )
 
       if (unusedDeductionsResponse.validationMessages?.length) {
-        return false
-      }
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
+        if (
+          unusedDeductionsResponse.validationMessages.find(
+            it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
+          )
+        ) {
+          return 'UNSUPPORTED'
+        }
 
+        return 'VALIDATION'
+      }
+
+      if (this.anyDeductionFromNomis(deductions)) {
+        // won't calculate unused deductions if adjusments are not from DPS.
+        return 'NOMIS_ADJUSTMENT'
+      }
+
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       /* eslint-disable no-await-in-loop */
       for (let i = 0; i < this.maxTries; i += 1) {
         if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
           const dbDeductions = this.getTotalUnusedRemand(adjustments)
           if (calculatedUnusedDeducions === dbDeductions) {
-            return true
+            return 'NONE'
           }
           await delay(this.waitBetweenTries)
           adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
           // Try again
         } else {
           // Unable to calculate unused deductions.
-          return false
+          return 'UNKNOWN'
         }
       }
     } catch {
       // Error couldn't calculate unused deductions.
     }
-    return false
+
+    return 'UNKNOWN'
     /* eslint-enable no-await-in-loop */
   }
 
-  async serviceHasCalculatedUnusedDeductions(
+  async getCalculatedUnusedDeductionsMessage(
     nomsId: string,
     adjustments: Adjustment[],
     token: string,
-  ): Promise<boolean> {
+  ): Promise<UnusedDeductionMessageType> {
     try {
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       if (!deductions.length) {
         // If there are no deductions then unused deductions doesn't need to be calculated
-        return true
+        return 'NONE'
       }
-      if (this.anyDeductionFromNomis(deductions)) {
-        return false
-      }
+
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
         adjustments,
@@ -86,19 +95,32 @@ export default class UnusedDeductionsService {
       )
 
       if (unusedDeductionsResponse.validationMessages?.length) {
-        return false
-      }
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
+        if (
+          unusedDeductionsResponse.validationMessages.find(
+            it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
+          )
+        ) {
+          return 'UNSUPPORTED'
+        }
 
+        return 'VALIDATION'
+      }
+
+      if (this.anyDeductionFromNomis(deductions)) {
+        return 'NOMIS_ADJUSTMENT'
+      }
+
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
         const dbDeductions = this.getTotalUnusedRemand(adjustments)
         if (calculatedUnusedDeducions === dbDeductions) {
-          return true
+          return 'NONE'
         }
       }
-      return false
+
+      return 'UNKNOWN'
     } catch {
-      return false
+      return 'UNKNOWN'
     }
   }
 
