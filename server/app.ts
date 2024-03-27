@@ -39,8 +39,8 @@ export default function createApp(services: Services): express.Application {
   app.use(authorisationMiddleware())
   app.use(setUpCsrf())
   app.use(setUpCurrentUser(services))
-  app.use('/:nomsId', populateCurrentPrisoner(services.prisonerSearchService))
   app.get('*', getFrontendComponents(services))
+  app.use('/:nomsId', populateCurrentPrisoner(services.prisonerSearchService))
 
   app.use(routes(services))
 
