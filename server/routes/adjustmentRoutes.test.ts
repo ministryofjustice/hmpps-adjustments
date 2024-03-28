@@ -658,7 +658,7 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('5 Apr 2023')
         expect(res.text).toContain('22')
-        expect(res.text).toContain('This will remove this record.')
+        expect(res.text).toContain('Are you sure you want to delete this RADA?')
       })
   })
 
