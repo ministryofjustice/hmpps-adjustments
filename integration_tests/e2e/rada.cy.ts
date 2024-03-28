@@ -84,7 +84,7 @@ context('Enter a RADA', () => {
     const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA overview')
     const id = '4c3c057c-896d-4793-9022-f3001e209a36'
     viewPage.removeLink(id).click()
-    const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Are you sure you want to remove RADA')
+    const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Delete RADA')
     removePage.removeButton().click()
     hub = HubPage.verifyOnPage(HubPage)
     hub.successMessage().contains('25 days of RADA have been deleted')
