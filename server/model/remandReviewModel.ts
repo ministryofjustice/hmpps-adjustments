@@ -63,8 +63,8 @@ export default class RemandReviewModel {
             text: 'Remand period',
           },
           value: {
-            text: `${dayjs(adjustment.fromDate).format('DD MMMM YYYY')} to ${dayjs(adjustment.toDate).format(
-              'DD MMMM YYYY',
+            text: `${dayjs(adjustment.fromDate).format('DD MMM YYYY')} to ${dayjs(adjustment.toDate).format(
+              'DD MMM YYYY',
             )}`,
           },
           actions: {
@@ -118,11 +118,11 @@ export default class RemandReviewModel {
   public getCommittedText(offence: PrisonApiOffence & { recall: boolean }): string {
     let committedText
     if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
-      committedText = `Committed from ${dayjs(offence.offenceStartDate).format('DD MMMM YYYY')} to ${dayjs(offence.offenceEndDate).format('DD MMMM YYYY')}`
+      committedText = `Committed from ${dayjs(offence.offenceStartDate).format('DD MMM YYYY')} to ${dayjs(offence.offenceEndDate).format('DD MMM YYYY')}`
     } else if (offence.offenceStartDate) {
-      committedText = `Committed on ${dayjs(offence.offenceStartDate).format('DD MMMM YYYY')}`
+      committedText = `Committed on ${dayjs(offence.offenceStartDate).format('DD MMM YYYY')}`
     } else if (offence.offenceEndDate) {
-      committedText = `Committed on ${dayjs(offence.offenceEndDate).format('DD MMMM YYYY')}`
+      committedText = `Committed on ${dayjs(offence.offenceEndDate).format('DD MMM YYYY')}`
     } else {
       committedText = 'Offence date not entered'
     }
