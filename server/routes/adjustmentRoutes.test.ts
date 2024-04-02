@@ -143,7 +143,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).not.toContain('Nobody may have 20 days remand')
         expect(res.text).toContain('24')
-        expect(res.text).toContainInOrder(['Last update', 'on 05 April 2023', 'by Leeds'])
+        expect(res.text).toContainInOrder(['Last update', 'on 05 Apr 2023', 'by Leeds'])
         expect(res.text).toContain('including 10 days unused')
       })
   })

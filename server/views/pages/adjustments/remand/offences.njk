@@ -69,9 +69,9 @@
                 <h4 class="govuk-heading-s">{{offence.offenceDescription}}{% if offence.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}</h4>
                 <p class="govuk-body">
                   {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
-                        Committed from {{ offence.offenceStartDate | date('DD MMMM YYYY') }} to {{ offence.offenceEndDate | date('DD MMMM YYYY') }}
+                        Committed from {{ offence.offenceStartDate | date('DD MMM YYYY') }} to {{ offence.offenceEndDate | date('DD MMM YYYY') }}
                   {% elif(offence.offenceEndDate or offence.offenceStartDate) %}
-                        Committed on {{ (offence.offenceEndDate or offence.offenceStartDate) | date('DD MMMM YYYY') }}
+                        Committed on {{ (offence.offenceEndDate or offence.offenceStartDate) | date('DD MMM YYYY') }}
                   {% else %}
                         Offence date not entered
                   {% endif %}

@@ -33,7 +33,7 @@
         {% if model.showDetails(adjustmentType) %}
           <br />
           <p class="govuk-hint govuk-!-font-size-14">Last update
-            on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMMM YYYY") }}
+            on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMM YYYY") }}
             by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</p>
         {% endif %}
         {% if adjustmentType.value == 'REMAND' and model
@@ -41,7 +41,7 @@
         .hasRemandToolRole() %}
           <p class="govuk-body">{{ model.remandDecision.days }} days of suggested remand was
             {{ "accepted" if model.remandDecision.accepted else "rejected" }}
-            on {{ model.remandDecision.decisionOn | date("DD MMMM YYYY HH:mm") }}
+            on {{ model.remandDecision.decisionOn | date("DD MMM YYYY HH:mm") }}
             by {{ model.remandDecision.decisionByPrisonDescription }}.
             {% if not model.remandDecision.accepted %}
               <br/>
