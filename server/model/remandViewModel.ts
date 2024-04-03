@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import {
-  getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
   getSentenceRecallTagHTML,
   isSentenceRecalled,
