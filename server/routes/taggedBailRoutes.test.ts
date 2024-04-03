@@ -175,7 +175,7 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Delete Tagged Bail')
+        expect(res.text).toContain('Delete tagged bail')
         expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })
@@ -189,7 +189,7 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Delete Tagged Bail')
+        expect(res.text).toContain('Delete tagged bail')
         expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })
@@ -208,7 +208,7 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Delete Tagged Bail')
+        expect(res.text).toContain('Delete tagged bail')
         expect(res.text).toContain(
           'The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS',
         )
