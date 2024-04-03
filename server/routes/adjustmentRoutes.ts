@@ -18,7 +18,7 @@ import FullPageError from '../model/FullPageError'
 import { daysBetween } from '../utils/utils'
 import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
-import UnusedDeductionsService, { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
+import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class AdjustmentRoutes {
@@ -54,11 +54,8 @@ export default class AdjustmentRoutes {
 
     const message = req.flash('message')
     const messageExists = message && message[0]
-    let unusedDeductionMessage: UnusedDeductionMessageType = 'NONE'
     if (messageExists) {
       this.adjustmentsStoreService.clear(req, nomsId)
-
-      unusedDeductionMessage = await this.unusedDeductionsService.waitUntilUnusedRemandCreated(nomsId, token)
     }
 
     const adjustments = await this.adjustmentsService.findByPerson(
@@ -66,14 +63,13 @@ export default class AdjustmentRoutes {
       startOfSentenceEnvelope.earliestSentence,
       token,
     )
+    const unusedDeductionMessage = await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessage(
+      nomsId,
+      adjustments,
+      !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
+      token,
+    )
 
-    if (!messageExists) {
-      unusedDeductionMessage = await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessage(
-        nomsId,
-        adjustments,
-        token,
-      )
-    }
     if (!messageExists) {
       const intercept = await this.additionalDaysAwardedService.shouldIntercept(
         req,
