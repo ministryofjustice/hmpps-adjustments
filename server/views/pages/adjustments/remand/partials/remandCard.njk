@@ -21,10 +21,18 @@
           rows: [
           {  
             key: {
+              text: "Court name"
+            },
+            value: {
+              html: adjustment.courtName
+            }
+          },    
+          {  
+            key: {
               text: "Offences"
             },
             value: {
-              html: offenceList(adjustment.offences)
+              html: offenceList(adjustment.offences, true)
             }
           },    
           {
