@@ -39,7 +39,7 @@ export default class ViewModel {
       return [
         { text: 'Date of days restored' },
         { text: 'Entered by' },
-        { text: 'Number of additional days restored', format: 'numeric' },
+        { text: 'Number of days', format: 'numeric' },
         { text: 'Actions' },
       ]
     }
