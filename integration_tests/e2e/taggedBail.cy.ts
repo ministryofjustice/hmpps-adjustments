@@ -53,7 +53,7 @@ context('Enter Tagged Bail', () => {
     viewTaggedBailPage.editLink().click()
     let editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
     editTaggedBailPage.editLink().click()
-    const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Enter the amount of tagged bail')
+    const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit the amount of tagged bail')
     form.enterDays('10')
     form.submitButton().click()
     editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)

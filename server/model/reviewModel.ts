@@ -47,7 +47,7 @@ export default class ReviewModel {
         },
         {
           key: {
-            text: 'Number of additional days restored',
+            text: 'Number of days',
           },
           value: {
             text: adjustment.days,
