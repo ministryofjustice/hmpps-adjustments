@@ -48,7 +48,7 @@
                 Selected
               {% else %}
                 <a class="govuk-link" href={{ activeSentence.selectCaseHref }}>
-                  Select this case <span class="govuk-visually-hidden">{{ activeSentence.courtDescription }} {{ activeSentence.sentenceDate | date("DD MMM YYYY") }}
+                  Select this case <span class="govuk-visually-hidden">{{ activeSentence.courtDescription }} {{ activeSentence.sentenceDate | date("DD MMM YYYY") }}</span>
                 </a>
               {% endif %}
             </li>
