@@ -85,3 +85,10 @@ Used for table columns containing statuses which use the govuk-tag.
     }
   }
 }
+
+/**
+Used to remove padding from GDS classes.
+*/
+.no-padding {
+  padding: 0 !important;
+}
