@@ -39,16 +39,19 @@ export const dateItems = (year: string, month: string, day: string, prefix: stri
       name: `day`,
       classes: `govuk-input--width-2${fieldHasErrors(errors, `${prefix}-day`) ? ' govuk-input--error' : ''}`,
       value: day,
+      attributes: { maxLength: 2 },
     },
     {
       name: `month`,
       classes: `govuk-input--width-2${fieldHasErrors(errors, `${prefix}-month`) ? ' govuk-input--error' : ''}`,
       value: month,
+      attributes: { maxLength: 2 },
     },
     {
       name: `year`,
       classes: `govuk-input--width-4${fieldHasErrors(errors, `${prefix}-year`) ? ' govuk-input--error' : ''}`,
       value: year,
+      attributes: { maxLength: 4 },
     },
   ]
 }
