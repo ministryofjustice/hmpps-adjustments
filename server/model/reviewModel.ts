@@ -121,7 +121,7 @@ export default class ReviewModel {
     return [
       {
         key: {
-          text: 'First day spent unlawfully at large',
+          text: 'First day spent UAL',
         },
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
@@ -130,7 +130,7 @@ export default class ReviewModel {
       },
       {
         key: {
-          text: 'Last day spent unlawfully at large',
+          text: 'Last day spent UAL',
         },
         value: {
           text: dayjs(adjustment.toDate).format('D MMM YYYY'),
