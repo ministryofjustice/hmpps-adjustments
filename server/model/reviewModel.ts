@@ -43,7 +43,7 @@ export default class ReviewModel {
           value: {
             text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
           },
-          ...ReviewModel.editActions(adjustment, includeEdit),
+          ...ReviewModel.editActions(adjustment, includeEdit, 'date of days restored'),
         },
         {
           key: {
@@ -52,7 +52,7 @@ export default class ReviewModel {
           value: {
             text: adjustment.days,
           },
-          ...ReviewModel.editActions(adjustment, includeEdit),
+          ...ReviewModel.editActions(adjustment, includeEdit, 'number of days'),
         },
       ]
     }
@@ -67,7 +67,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'from date'),
       },
       ...(adjustment.days
         ? [
@@ -91,17 +91,18 @@ export default class ReviewModel {
               value: {
                 text: dayjs(adjustment.toDate).format('D MMM YYYY'),
               },
-              ...ReviewModel.editActions(adjustment, includeEdit),
+              ...ReviewModel.editActions(adjustment, includeEdit, 'to date'),
             },
           ]
         : []),
     ]
   }
 
-  private static editActions(adjustment: Adjustment, includeEdit: boolean) {
+  private static editActions(adjustment: Adjustment, includeEdit: boolean, visuallyHiddenText?: string) {
     if (!includeEdit) {
       return {}
     }
+
     const adjustmentType = ReviewModel.adjustmentTypeFromAdjustment(adjustment)
     return {
       actions: {
@@ -109,7 +110,7 @@ export default class ReviewModel {
           {
             href: `/${adjustment.person}/${adjustmentType.url}/edit`,
             text: 'Edit',
-            visuallyHiddenText: adjustmentType.text,
+            visuallyHiddenText: visuallyHiddenText || adjustmentType.text,
           },
         ],
       },
@@ -126,7 +127,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'first day spent on UAL'),
       },
       {
         key: {
@@ -135,7 +136,7 @@ export default class ReviewModel {
         value: {
           text: dayjs(adjustment.toDate).format('D MMM YYYY'),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'last day spent on UAL'),
       },
       {
         key: {
@@ -144,7 +145,7 @@ export default class ReviewModel {
         value: {
           text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'number of days'),
       },
       {
         key: {
@@ -153,7 +154,7 @@ export default class ReviewModel {
         value: {
           text: type ? type.text : 'Unknown',
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'type of UAL'),
       },
     ]
   }
