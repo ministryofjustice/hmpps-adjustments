@@ -1,8 +1,7 @@
-import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
-import { daysBetween } from '../utils/utils'
+import { daysBetween, formatDate } from '../utils/utils'
 
 export default class ReviewModel {
   constructor(public adjustment: Adjustment) {}
@@ -41,7 +40,7 @@ export default class ReviewModel {
             text: 'Date of days restored',
           },
           value: {
-            text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+            text: formatDate(adjustment.fromDate),
           },
           ...ReviewModel.editActions(adjustment, includeEdit, 'date of days restored'),
         },
@@ -65,7 +64,7 @@ export default class ReviewModel {
           text: 'From',
         },
         value: {
-          text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+          text: formatDate(adjustment.fromDate),
         },
         ...ReviewModel.editActions(adjustment, includeEdit, 'from date'),
       },
@@ -89,7 +88,7 @@ export default class ReviewModel {
                 text: 'To',
               },
               value: {
-                text: dayjs(adjustment.toDate).format('D MMM YYYY'),
+                text: formatDate(adjustment.toDate),
               },
               ...ReviewModel.editActions(adjustment, includeEdit, 'to date'),
             },
@@ -125,7 +124,7 @@ export default class ReviewModel {
           text: 'First day spent UAL',
         },
         value: {
-          text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+          text: formatDate(adjustment.fromDate),
         },
         ...ReviewModel.editActions(adjustment, includeEdit, 'first day spent on UAL'),
       },
@@ -134,7 +133,7 @@ export default class ReviewModel {
           text: 'Last day spent UAL',
         },
         value: {
-          text: dayjs(adjustment.toDate).format('D MMM YYYY'),
+          text: formatDate(adjustment.toDate),
         },
         ...ReviewModel.editActions(adjustment, includeEdit, 'last day spent on UAL'),
       },
