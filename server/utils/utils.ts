@@ -210,7 +210,7 @@ export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSeque
     : it.sentences.some(sent => sent.sentenceSequence === adjustment.sentenceSequence)
 }
 
-export function formatDate(date: string | Date | number, format: string = 'DD MMM YYYY'): string {
+export function formatDate(date: string | Date | number, format: string = 'D MMM YYYY'): string {
   return dayjs(date).format(format)
 }
 
