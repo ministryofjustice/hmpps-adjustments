@@ -210,6 +210,10 @@ export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSeque
     : it.sentences.some(sent => sent.sentenceSequence === adjustment.sentenceSequence)
 }
 
+export function formatDate(date: string | Date | number, format: string = 'DD MMM YYYY'): string {
+  return dayjs(date).format(format)
+}
+
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {
   const remandRelatedValidationCodes = ['REMAND_OVERLAPS_WITH_REMAND', 'REMAND_OVERLAPS_WITH_SENTENCE']
 
