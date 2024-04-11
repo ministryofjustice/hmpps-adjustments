@@ -3,6 +3,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import {
   daysBetween,
+  formatDate,
   getSentenceRecallTagHTML,
   offencesForAdjustment,
   remandRelatedValidationSummary,
@@ -53,6 +54,14 @@ export default class RemandReviewModel {
     return `/${this.prisonerNumber}/remand/offences/add/${this.adjustmentIds[0]}`
   }
 
+  public fromDate(id: string) {
+    return formatDate(this.adjustments[id].fromDate)
+  }
+
+  public toDate(id: string) {
+    return formatDate(this.adjustments[id].toDate)
+  }
+
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
     const offences = offencesForAdjustment(adjustment, this.sentencesAndOffences)
@@ -72,7 +81,7 @@ export default class RemandReviewModel {
               {
                 href: `/${this.prisonerNumber}/remand/dates/add/${id}`,
                 text: 'Edit',
-                visuallyHiddenText: 'remand',
+                visuallyHiddenText: 'remand period',
               },
             ],
           },
@@ -98,7 +107,7 @@ export default class RemandReviewModel {
               {
                 href: `/${this.prisonerNumber}/remand/offences/add/${id}`,
                 text: 'Edit',
-                visuallyHiddenText: 'remand',
+                visuallyHiddenText: 'offences',
               },
             ],
           },
