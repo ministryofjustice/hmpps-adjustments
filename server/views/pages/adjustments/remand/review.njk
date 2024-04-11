@@ -88,7 +88,9 @@
                   <h2 class="govuk-summary-card__title"><span class="govuk-visually-hidden">Remand adjustment</span></h2>
                   <ul class="govuk-summary-card__actions">
                       <li class="govuk-summary-card__action">
-                          <a class="govuk-link" href="/{{prisoner.prisonerNumber}}/remand/session/remove/{{adjustmentId}}">Remove this period of remand</a>
+                          <a class="govuk-link" href="/{{prisoner.prisonerNumber}}/remand/session/remove/{{adjustmentId}}">
+                            Remove this period of remand<span class="govuk-visually-hidden">from {{ model.fromDate(adjustmentId) }} to {{ model.toDate(adjustmentId) }}</span>
+                          </a>
                       </li>
                   </ul>
               </div>
