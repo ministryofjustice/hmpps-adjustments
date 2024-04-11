@@ -63,13 +63,17 @@ export default class TaggedBailViewModel {
   }
 
   private actionCell(adjustment: Adjustment, caseReference: string, courtDescription: string) {
+    const visuallyHiddenText = caseReference
+      ? `tagged bail for case ${caseReference} at ${courtDescription}`
+      : `${adjustment.days} days of tagged bail at ${courtDescription}`
+
     return {
       html: `
       <div class="govuk-grid-column-one-quarter govuk-!-margin-right-2 govuk-!-padding-0">
-        <a class="govuk-link" href="/${adjustment.person}/tagged-bail/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> tagged bail for case ${caseReference} at ${courtDescription}</span></a><br />
+        <a class="govuk-link" href="/${adjustment.person}/tagged-bail/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
       <div class="govuk-grid-column-one-half govuk-!-padding-0">
-        <a class="govuk-link" href="/${adjustment.person}/tagged-bail/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete<span class="govuk-visually-hidden"> tagged bail for case ${caseReference} at ${courtDescription}</span></a><br />
+        <a class="govuk-link" href="/${adjustment.person}/tagged-bail/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
     `,
     }
