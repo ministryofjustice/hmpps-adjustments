@@ -34,12 +34,11 @@
           Court name
         </strong>
         {{ sentence.courtDescription }}
-        {% if sentence.caseReference %}
-            <br/><strong>
-              Case reference
-            </strong>
-            {{ sentence.caseReference }}
-        {% endif %}
+        <br/>
+        <strong>
+          Case reference
+        </strong>
+        {{ sentence.caseReference or 'Not entered' }}
       </p>
       <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-2">
         <strong>
