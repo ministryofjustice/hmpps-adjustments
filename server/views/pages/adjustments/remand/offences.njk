@@ -5,6 +5,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "./partials/remandOffence.njk" import offencesCard %}
 
 {% set pageTitle = applicationName + " - Select offences" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -47,7 +48,6 @@
   </div>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      <h2 class="govuk-heading-m">Court cases</h2>
 
       <form class="form" method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
@@ -55,35 +55,8 @@
         {% for sentences in model
           .cases
           .values() %}
-
-          <h3 class="govuk-heading-s">Case {{sentences[0].caseSequence}}</h2>
-          {{ govukSummaryList({
-              classes: 'govuk-summary-list--no-border',
-              rows: model.caseSummary(sentences[0])
-          })
-          }}
-
           {% for sentence in sentences %}
-            {% for offence in model.getOffences(sentence) %}
-              <div class="shadow-card govuk-!-margin-bottom-6">
-                <h4 class="govuk-heading-s">{{offence.offenceDescription}}{% if offence.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}</h4>
-                <p class="govuk-body">
-                  {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
-                        Committed from {{ offence.offenceStartDate | date('DD MMM YYYY') }} to {{ offence.offenceEndDate | date('DD MMM YYYY') }}
-                  {% elif(offence.offenceEndDate or offence.offenceStartDate) %}
-                        Committed on {{ (offence.offenceEndDate or offence.offenceStartDate) | date('DD MMM YYYY') }}
-                  {% else %}
-                        Offence date not entered
-                  {% endif %}
-                </p>
-                <div class="govuk-checkboxes__item govuk-checkboxes--small">
-                  <input type="checkbox" class="govuk-checkboxes__input" id="charge-{{ offence.offenderChargeId }}"
-                       name="chargeId" value="{{ offence.offenderChargeId }}"  {{ "checked" if model.form.isChecked(offence.offenderChargeId) }}>
-                  <label class="govuk-label govuk-checkboxes__label" for="charge-{{ offence.offenderChargeId }}">Select this offence</label>
-                </div>
-              </div>
-            {% endfor %}
-
+            {{ offencesCard(sentence, model.getOffences(sentence)) }}
           {% endfor %}
 
         {% endfor %}

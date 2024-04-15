@@ -30,9 +30,15 @@ export default class RemandSelectOffencesModel {
     return daysBetween(new Date(this.adjustment.fromDate), new Date(this.adjustment.toDate))
   }
 
-  public getOffences(sentence: PrisonApiOffenderSentenceAndOffences): PrisonApiOffence & { recall: boolean }[] {
+  public getOffences(
+    sentence: PrisonApiOffenderSentenceAndOffences,
+  ): PrisonApiOffence & { recall: boolean; isChecked: boolean }[] {
     return sentence.offences.map(off => {
-      return { ...off, recall: PrisonerService.recallTypes.includes(sentence.sentenceCalculationType) }
+      return {
+        ...off,
+        recall: PrisonerService.recallTypes.includes(sentence.sentenceCalculationType),
+        isChecked: this.form.isChecked(off.offenderChargeId),
+      }
     })
   }
 
