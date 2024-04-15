@@ -87,16 +87,21 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
       {% if params.checkboxes %}
         <div class="govuk-summary-card govuk-!-margin-bottom-4">
           <div class="govuk-summary-card__content equal-padding">
-            <h2 class="govuk-heading-m">Date charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</h2>
-            {{ html | safe }}
             {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
-            <div class="govuk-form-group govuk-!-margin-top-6 govuk-!-margin-bottom-2">
-              <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-                <div class="govuk-checkboxes__item">
-                  <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
-                  <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">Select this adjudication</label>
-                </div>
+            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
+                <span class="govuk-visually-hidden">Select this adjudication</span>
+                <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">Date charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</label>
               </div>
+            </div>
+            <div class="govuk-!-padding-left-9">
+              <p class="govuk-body govuk-!-margin-top-4">
+                <strong>
+                  Adjudication details
+                </strong>
+              </p>
+              {{ html | safe }}
             </div>
           </div>
         </div>
@@ -109,9 +114,10 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
     {% endfor %}
     {% if params.checkboxes %}
       <div class="govuk-form-group checkbox-padding govuk-!-margin-bottom-4">
-        <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           <div class="govuk-checkboxes__item">
             <input class="govuk-checkboxes__input" id="unselect-all" name="none" type="checkbox" value="none">
+            <span class="govuk-visually-hidden">Select</span>
             <label class="govuk-label govuk-checkboxes__label" for="unselect-all">None of these apply</label>
           </div>
         </div>

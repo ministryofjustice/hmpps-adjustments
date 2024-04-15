@@ -10,11 +10,11 @@
   <a href="/{{prisoner.prisonerNumber}}" class="govuk-back-link">Back</a>
 
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-grid-column-three-quarters">
       <div class="govuk-form-group">
-        <h1 class="govuk-heading-l">You cannot add ADAs using this service</h1>
+        <h1 class="govuk-heading-l">ADAs can only be added by approving adjudications</h1>
         {% if model.startOfSentenceEnvelope %}
-          <p class="govuk-body">To add an ADA, contact the team who manage adjudications.</p>
+          <p class="govuk-body">There are currently no adjudications to approve. To add an ADA, contact the team who manages adjudications. </p>
         {% else %}
           <p class="govuk-body">This person is being recalled on license. ADAs cannot be added for a person during a licence recall with this service.</p>
           <p class="govuk-body">Email <a href="mailto:calculatereleasedates@digital.justice.gov.uk?subject=Adjustments service - ADA within recall period">calculatereleasedates@digital.justice.gov.uk</a> and ask the team to add the ADA information.</p>
