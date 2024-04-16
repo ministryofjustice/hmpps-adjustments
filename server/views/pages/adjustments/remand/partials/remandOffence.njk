@@ -24,3 +24,40 @@
     Offence date not entered
   {% endif %}
 {% endmacro %}
+
+{% macro offencesCard(sentence, offences) %}
+  <h2 class="govuk-heading-m">Court case {{sentence.caseSequence}}</h2>
+  <div class="govuk-summary-card govuk-!-margin-bottom-7">
+    <div class="govuk-summary-card__content equal-padding">
+      <p class="govuk-body">
+        <strong>
+          Court name
+        </strong>
+        {{ sentence.courtDescription }}
+        <br/>
+        <strong>
+          Case reference
+        </strong>
+        {{ sentence.caseReference or 'Not entered' }}
+      </p>
+      <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-2">
+        <strong>
+          Offences
+        </strong>
+        <br/>
+        <span class="govuk-hint">Select all that apply</span>
+      </p>
+      {% for offence in offences %}
+        <div class="govuk-checkboxes__item">
+          <input type="checkbox" class="govuk-checkboxes__input" id="charge-{{ offence.offenderChargeId }}" name="chargeId" value="{{ offence.offenderChargeId }}"  {{ "checked" if offence.isChecked }}>
+          <label class="govuk-label govuk-checkboxes__label" for="charge-{{ offence.offenderChargeId }}">
+            {{offence.offenceDescription}}{% if offence.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}<br/>
+            <span class="govuk-hint">
+              {{ offenceCommittedText(offence) }}
+            </span>
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}
