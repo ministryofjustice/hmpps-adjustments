@@ -88,11 +88,13 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
         <div class="govuk-summary-card govuk-!-margin-bottom-4">
           <div class="govuk-summary-card__content equal-padding">
             {% set isoDate = ada.dateChargeProved | date("YYYY-MM-DD") %}
-            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-              <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
-                <span class="govuk-visually-hidden">Select this adjudication</span>
-                <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">Date charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</label>
+            <div class="govuk-form-group">
+              <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                <div class="govuk-checkboxes__item">
+                  <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox"value="{{ isoDate }}">
+                  <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">
+                  <span class="govuk-visually-hidden">Select this adjudication</span> Date charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }}</label>
+                </div>
               </div>
             </div>
             <div class="govuk-!-padding-left-9">
@@ -117,7 +119,6 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
           <div class="govuk-checkboxes__item">
             <input class="govuk-checkboxes__input" id="unselect-all" name="none" type="checkbox" value="none">
-            <span class="govuk-visually-hidden">Select</span>
             <label class="govuk-label govuk-checkboxes__label" for="unselect-all">None of these apply</label>
           </div>
         </div>
