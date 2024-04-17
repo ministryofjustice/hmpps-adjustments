@@ -3,7 +3,7 @@ import { PageElement } from './page'
 
 export default class PadaPage extends AdjustmentsPage {
   constructor() {
-    super('Select the relevant PADAs')
+    super('Select all the relevant PADAs')
   }
 
   public checkboxByIndex(index: number): PageElement {
