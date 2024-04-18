@@ -5,7 +5,7 @@ import {
   daysBetween,
   formatDate,
   getSentenceRecallTagHTML,
-  offencesForAdjustment,
+  offencesForRemandAdjustment,
   remandRelatedValidationSummary,
 } from '../utils/utils'
 import ReviewRemandForm from './reviewRemandForm'
@@ -64,7 +64,7 @@ export default class RemandReviewModel {
 
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
-    const offences = offencesForAdjustment(adjustment, this.sentencesAndOffences)
+    const offences = offencesForRemandAdjustment(adjustment, this.sentencesAndOffences)
     return {
       rows: [
         {

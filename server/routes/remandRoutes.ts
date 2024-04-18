@@ -10,7 +10,11 @@ import RemandReviewModel from '../model/remandReviewModel'
 import ReviewRemandForm from '../model/reviewRemandForm'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import RemandSaveModel from '../model/remandSaveModel'
-import { daysBetween, hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays } from '../utils/utils'
+import {
+  daysBetween,
+  hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays,
+  offencesForRemandAdjustment,
+} from '../utils/utils'
 import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
 import RemandViewModel from '../model/remandViewModel'
@@ -358,8 +362,16 @@ export default class RemandRoutes {
   public submitEdit: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
+    const { bookingId } = res.locals.prisoner
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    if (!adjustment.remand?.chargeId?.length) {
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
+      adjustment.remand = {
+        chargeId: offencesForRemandAdjustment(adjustment, sentencesAndOffences).map(it => it.offenderChargeId),
+      }
+    }
 
     await this.adjustmentsService.update(id, adjustment, token)
 

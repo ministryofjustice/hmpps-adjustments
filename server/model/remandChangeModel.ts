@@ -1,7 +1,7 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
-import { offencesForAdjustment, remandRelatedValidationSummary } from '../utils/utils'
+import { offencesForRemandAdjustment, remandRelatedValidationSummary } from '../utils/utils'
 
 export default class RemandChangeModel {
   constructor(
@@ -13,7 +13,7 @@ export default class RemandChangeModel {
   ) {}
 
   public listOffences() {
-    return offencesForAdjustment(this.adjustment, this.sentencesAndOffences)
+    return offencesForRemandAdjustment(this.adjustment, this.sentencesAndOffences)
   }
 
   public remandRelatedValidationSummary() {

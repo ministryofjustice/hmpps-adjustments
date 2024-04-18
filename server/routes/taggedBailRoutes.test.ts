@@ -311,6 +311,30 @@ describe('Tagged bail routes tests', () => {
         expect(res.text).toContain('9955')
       })
   })
+
+  it('POST /{nomsId}/tagged-bail/edit/:id dps adjustment', () => {
+    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+
+    return request(app)
+      .post(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22UPDATE%22%7D`)
+  })
+
+  it('POST /{nomsId}/tagged-bail/edit/:id nomis adjustment sets tagged bail case ids.', () => {
+    adjustmentsStoreService.getById.mockReturnValue(nomisAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+
+    return request(app)
+      .post(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22UPDATE%22%7D`)
+      .expect(() => {
+        const updateCall = adjustmentsService.update.mock.calls[0]
+        const updateAdjustment = updateCall[1] as Adjustment
+        expect(updateAdjustment.taggedBail.caseSequence).toEqual(1)
+      })
+  })
 })
 
 describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
