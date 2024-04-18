@@ -107,7 +107,7 @@ export const fieldsToDate = (day: string, month: string, year: string): Date =>
 
 export const dateToString = (date: Date): string => dayjs(date).format('DD MMM YYYY')
 
-export function offencesForAdjustment(
+export function offencesForRemandAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
 ): (PrisonApiOffence & { recall: boolean })[] {
