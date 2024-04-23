@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { getMostRecentSentenceAndOffence, offencesForRemandAdjustment } from '../utils/utils'
+import { offencesForRemandAdjustment } from '../utils/utils'
 
 export default class RemandViewModel {
   constructor(
@@ -23,7 +23,6 @@ export default class RemandViewModel {
 
   public adjustmentsWithOffences() {
     return this.adjustments.map(it => {
-      const sentenceAndOffence = getMostRecentSentenceAndOffence(this.sentencesAndOffences)
       return {
         ...it,
         daysToDisplay: it.days,
