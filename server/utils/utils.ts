@@ -110,7 +110,7 @@ export const dateToString = (date: Date): string => dayjs(date).format('DD MMM Y
 export function offencesForRemandAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-): (PrisonApiOffence & { recall: boolean })[] {
+): (PrisonApiOffence & { recall: boolean; courtDescription: string })[] {
   return sentencesAndOffences.flatMap(so => {
     return so.offences
       .filter(off => {
@@ -120,7 +120,7 @@ export function offencesForRemandAdjustment(
         return adjustment.sentenceSequence === so.sentenceSequence
       })
       .map(off => {
-        return { ...off, recall: isSentenceRecalled(so.sentenceCalculationType) }
+        return { ...off, recall: isSentenceRecalled(so.sentenceCalculationType), courtDescription: so.courtDescription }
       })
   })
 }

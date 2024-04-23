@@ -2,11 +2,11 @@
   <div class='govuk-list'>
     {% for o in offences %}
       <div>
-        {{ o.offenceDescription }} {% if o.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}
+        <strong>{{ o.offenceDescription }}</strong> {% if o.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}
         <br>
-        <span class="govuk-hint">
-                    {{ offenceCommittedText(o) }}
-                </span>
+        <span class="govuk-body-s">
+          {{ offenceCommittedText(o) }}
+        </span>
       </div>
     {% endfor %}
   </div>
@@ -22,6 +22,9 @@
     Committed on {{ offence.offenceEndDate | date("DD MMM YYYY") }}
   {% else %}
     Offence date not entered
+  {% endif %}
+  {% if offence.courtDescription %}
+    <br/>Heard at {{ offence.courtDescription }}
   {% endif %}
 {% endmacro %}
 
@@ -51,8 +54,8 @@
         <div class="govuk-checkboxes__item">
           <input type="checkbox" class="govuk-checkboxes__input" id="charge-{{ offence.offenderChargeId }}" name="chargeId" value="{{ offence.offenderChargeId }}"  {{ "checked" if offence.isChecked }}>
           <label class="govuk-label govuk-checkboxes__label" for="charge-{{ offence.offenderChargeId }}">
-            {{offence.offenceDescription}}{% if offence.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}<br/>
-            <span class="govuk-hint">
+            <strong>{{offence.offenceDescription}}<strong>{% if offence.recall %}<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>{% endif %}<br/>
+            <span class="govuk-body-s">
               {{ offenceCommittedText(offence) }}
             </span>
           </label>
