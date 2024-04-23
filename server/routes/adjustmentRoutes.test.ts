@@ -143,7 +143,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).not.toContain('Nobody may have 20 days remand')
         expect(res.text).toContain('24')
-        expect(res.text).toContainInOrder(['Last update', 'on 05 April 2023', 'by Leeds'])
+        expect(res.text).toContainInOrder(['Last update', 'on 05 Apr 2023', 'by Leeds'])
         expect(res.text).toContain('including 10 days unused')
       })
   })
@@ -586,7 +586,7 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Date of days restored')
         expect(res.text).toContain('5 Apr 2023')
-        expect(res.text).toContain('Number of additional days restored')
+        expect(res.text).toContain('Number of days')
         expect(res.text).toContain('24')
         expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/edit`)
@@ -658,7 +658,6 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('5 Apr 2023')
         expect(res.text).toContain('22')
-        expect(res.text).toContain('Are you sure you want to delete this RADA?')
       })
   })
 

@@ -96,6 +96,7 @@ const adjustmentWithDatesAndCharges = {
 const nomisAdjustment = {
   ...adjustmentWithDatesAndCharges,
   remand: null,
+  sentenceSequence: 1,
 } as Adjustment
 
 const remandOverlapWithSentenceMessage = {
@@ -460,9 +461,9 @@ describe('Remand routes tests', () => {
             'Court 1',
             'CASE001',
             'Doing a crime',
-            'Committed from 04 January 2021 to 05 January 2021',
+            'Committed from 04 Jan 2021 to 05 Jan 2021',
             'Doing a different crime',
-            'Committed on 06 March 2021',
+            'Committed on 06 Mar 2021',
           ])
         })
     })
@@ -529,7 +530,7 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
           'Remand period',
-          '01 January 2023 to 10 January 2023',
+          '01 Jan 2023 to 10 Jan 2023',
           'Offences',
           'Doing a crime',
           'Doing a different crime',
@@ -771,13 +772,28 @@ describe('Remand routes tests', () => {
       })
   })
 
-  it('POST /{nomsId}/remand/edit/:id', () => {
+  it('POST /{nomsId}/remand/edit/:id dps adjustment', () => {
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
 
     return request(app)
       .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(302)
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22UPDATE%22%7D`)
+  })
+
+  it('POST /{nomsId}/remand/edit/:id nomis adjustment sets charge ids.', () => {
+    adjustmentsStoreService.getById.mockReturnValue(nomisAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+
+    return request(app)
+      .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22UPDATE%22%7D`)
+      .expect(() => {
+        const updateCall = adjustmentsService.update.mock.calls[0]
+        const updateAdjustment = updateCall[1] as Adjustment
+        expect(updateAdjustment.remand.chargeId).toEqual([1, 2])
+      })
   })
 
   it('GET /{nomsId}/remand/edit/:id No save button because of no changes made', () => {

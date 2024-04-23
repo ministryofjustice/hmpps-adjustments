@@ -4,7 +4,12 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{% set pageTitle = applicationName + " - Enter tagged bail dates" %}
+{% if model.addOrEdit === 'edit' %}
+  {% set pageContentTitle = "Edit the amount of tagged bail" %}
+{% else %}
+  {% set pageContentTitle = "Enter the amount of tagged bail" %}
+{% endif %}
+{% set pageTitle = applicationName + " - " + pageContentTitle %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
@@ -34,16 +39,16 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-xl">Adjustments</span>
-        Enter the amount of tagged bail
+        {{ pageContentTitle }}
       </h1>
     </div>
   </div>
-  <p class="govuk-body">The number of days should be entered as it's written on the warrant.</p>
+  <p class="govuk-body">Enter the number of days as it's written on the warrant.</p>
   <form class="form" method="post">
     <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
     {{ govukInput({
       label: {
-        text: "Number of days"
+        html: "<strong>Number of days</strong>"
       },
       classes: "govuk-input--width-5",
       id: "days",

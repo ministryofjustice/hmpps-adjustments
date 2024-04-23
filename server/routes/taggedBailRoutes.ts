@@ -261,8 +261,22 @@ export default class TaggedBailRoutes {
   public submitEdit: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
+    const { bookingId } = res.locals.prisoner
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    if (!adjustment.taggedBail?.caseSequence) {
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
+
+      const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
+      const sentencesForCaseSequence = sentencesByCaseSequence.find(it =>
+        relevantSentenceForTaggedBailAdjustment(it, adjustment),
+      )
+
+      adjustment.taggedBail = {
+        caseSequence: sentencesForCaseSequence.caseSequence,
+      }
+    }
 
     await this.adjustmentsService.update(id, adjustment, token)
 

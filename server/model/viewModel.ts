@@ -3,6 +3,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { formatDate } from '../utils/utils'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
@@ -39,7 +40,7 @@ export default class ViewModel {
       return [
         { text: 'Date of days restored' },
         { text: 'Entered by' },
-        { text: 'Number of additional days restored', format: 'numeric' },
+        { text: 'Number of days', format: 'numeric' },
         { text: 'Actions' },
       ]
     }
@@ -125,9 +126,27 @@ export default class ViewModel {
   private actionCell(adjustment: Adjustment) {
     return {
       html: `
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a>
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Delete</a>
+      <div class="govuk-grid-column-one-quarter govuk-!-margin-right-1 govuk-!-padding-0">
+        <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">
+          Edit<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
+        </a>
+      </div>
+      <div class="govuk-grid-column-one-quarter govuk-!-padding-0">
+        <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">
+          Delete<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
+        </a>
+      </div>
     `,
     }
+  }
+
+  private getVisuallyHiddenTagContent(adjustment: Adjustment): string {
+    if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
+      return `${adjustment.days} ${adjustment.days > 1 ? 'days' : 'day'} restored on ${formatDate(adjustment.fromDate)}`
+    }
+
+    return adjustment.toDate
+      ? `${this.adjustmentType.shortText} from ${formatDate(adjustment.fromDate)} to ${formatDate(adjustment.toDate)}`
+      : `${this.adjustmentType.shortText} on ${formatDate(adjustment.fromDate)}`
   }
 }

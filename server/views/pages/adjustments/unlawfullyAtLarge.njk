@@ -8,16 +8,13 @@
        class="govuk-link" rel="noreferrer noopener"
        target="_blank">the policy framework</a>.
   </p>
-  <p class="govuk-body">
-    Make sure you review the policy when entering the first and last day of UAL.
-  </p>
   {{ govukDateInput({
     id: "from",
     namePrefix: "from",
     items: model.form.fromItems(),
     fieldset: {
       legend: {
-        text: "First day spent unlawfully at large",
+        text: "First day spent UAL",
         classes: "govuk-fieldset__legend--s"
       }
     },
@@ -32,7 +29,7 @@
     items: model.form.toItems(),
     fieldset: {
       legend: {
-        text: "Last day spent unlawfully at large",
+        text: "Last day spent UAL",
         classes: "govuk-fieldset__legend--s"
       }
     },

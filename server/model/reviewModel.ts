@@ -1,8 +1,7 @@
-import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
-import { daysBetween } from '../utils/utils'
+import { daysBetween, formatDate } from '../utils/utils'
 
 export default class ReviewModel {
   constructor(public adjustment: Adjustment) {}
@@ -41,18 +40,18 @@ export default class ReviewModel {
             text: 'Date of days restored',
           },
           value: {
-            text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+            text: formatDate(adjustment.fromDate),
           },
-          ...ReviewModel.editActions(adjustment, includeEdit),
+          ...ReviewModel.editActions(adjustment, includeEdit, 'date of days restored'),
         },
         {
           key: {
-            text: 'Number of additional days restored',
+            text: 'Number of days',
           },
           value: {
             text: adjustment.days,
           },
-          ...ReviewModel.editActions(adjustment, includeEdit),
+          ...ReviewModel.editActions(adjustment, includeEdit, 'number of days'),
         },
       ]
     }
@@ -65,9 +64,9 @@ export default class ReviewModel {
           text: 'From',
         },
         value: {
-          text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+          text: formatDate(adjustment.fromDate),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'from date'),
       },
       ...(adjustment.days
         ? [
@@ -89,19 +88,20 @@ export default class ReviewModel {
                 text: 'To',
               },
               value: {
-                text: dayjs(adjustment.toDate).format('D MMM YYYY'),
+                text: formatDate(adjustment.toDate),
               },
-              ...ReviewModel.editActions(adjustment, includeEdit),
+              ...ReviewModel.editActions(adjustment, includeEdit, 'to date'),
             },
           ]
         : []),
     ]
   }
 
-  private static editActions(adjustment: Adjustment, includeEdit: boolean) {
+  private static editActions(adjustment: Adjustment, includeEdit: boolean, visuallyHiddenText?: string) {
     if (!includeEdit) {
       return {}
     }
+
     const adjustmentType = ReviewModel.adjustmentTypeFromAdjustment(adjustment)
     return {
       actions: {
@@ -109,7 +109,7 @@ export default class ReviewModel {
           {
             href: `/${adjustment.person}/${adjustmentType.url}/edit`,
             text: 'Edit',
-            visuallyHiddenText: adjustmentType.text,
+            visuallyHiddenText: visuallyHiddenText || adjustmentType.text,
           },
         ],
       },
@@ -121,21 +121,21 @@ export default class ReviewModel {
     return [
       {
         key: {
-          text: 'First day spent unlawfully at large',
+          text: 'First day spent UAL',
         },
         value: {
-          text: dayjs(adjustment.fromDate).format('D MMM YYYY'),
+          text: formatDate(adjustment.fromDate),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'first day spent on UAL'),
       },
       {
         key: {
-          text: 'Last day spent unlawfully at large',
+          text: 'Last day spent UAL',
         },
         value: {
-          text: dayjs(adjustment.toDate).format('D MMM YYYY'),
+          text: formatDate(adjustment.toDate),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'last day spent on UAL'),
       },
       {
         key: {
@@ -144,7 +144,7 @@ export default class ReviewModel {
         value: {
           text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'number of days'),
       },
       {
         key: {
@@ -153,7 +153,7 @@ export default class ReviewModel {
         value: {
           text: type ? type.text : 'Unknown',
         },
-        ...ReviewModel.editActions(adjustment, includeEdit),
+        ...ReviewModel.editActions(adjustment, includeEdit, 'type of UAL'),
       },
     ]
   }

@@ -40,7 +40,12 @@ export default class TaggedBailViewModel {
         ? { html: `${sentenceAndOffence.courtDescription} ${getSentenceRecallTagHTML()}` }
         : { text: sentenceAndOffence.courtDescription }
 
-      return [descriptionRow, { text: sentenceAndOffence.caseReference }, { text: it.days }, this.actionCell(it)]
+      return [
+        descriptionRow,
+        { text: sentenceAndOffence.caseReference },
+        { text: it.days },
+        this.actionCell(it, sentenceAndOffence.caseReference, sentenceAndOffence.courtDescription),
+      ]
     })
   }
 
@@ -57,16 +62,18 @@ export default class TaggedBailViewModel {
     return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }, { text: '' }]]
   }
 
-  private actionCell(adjustment: Adjustment) {
+  private actionCell(adjustment: Adjustment, caseReference: string, courtDescription: string) {
+    const visuallyHiddenText = caseReference
+      ? `tagged bail for case ${caseReference} at ${courtDescription}`
+      : `${adjustment.days} days of tagged bail at ${courtDescription}`
+
     return {
       html: `
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-one-quarter">
-          <a class="govuk-link" href="/${adjustment.person}/tagged-bail/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
-        </div>
-        <div class="govuk-grid-column-one-quarter">
-          <a class="govuk-link" href="/${adjustment.person}/tagged-bail/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete</a><br />
-        </div>
+      <div class="govuk-grid-column-one-quarter govuk-!-margin-right-2 govuk-!-padding-0">
+        <a class="govuk-link" href="/${adjustment.person}/tagged-bail/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
+      </div>
+      <div class="govuk-grid-column-one-half govuk-!-padding-0">
+        <a class="govuk-link" href="/${adjustment.person}/tagged-bail/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
     `,
     }
