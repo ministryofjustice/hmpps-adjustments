@@ -10,6 +10,7 @@ import CalculateReleaseDatesService from './calculateReleaseDatesService'
 import UnusedDeductionsService from './unusedDeductionsService'
 import PrisonerSearchService from './prisonerSearchService'
 import FeComponentsService from './feComponentsService'
+import AdditionalDaysAwardedBackendService from './additionalDaysAwardedBackendService'
 
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient, feComponentsClient } = dataAccess()
@@ -28,6 +29,10 @@ export const services = () => {
   const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, calculateReleaseDatesService)
   const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
   const feComponentsService = new FeComponentsService(feComponentsClient)
+  const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(
+    adjustmentsService,
+    additionalDaysAwardedStoreService,
+  )
 
   return {
     applicationInfo,
@@ -42,6 +47,7 @@ export const services = () => {
     unusedDeductionsService,
     prisonerSearchService,
     feComponentsService,
+    additionalDaysAwardedBackendService,
   }
 }
 

@@ -97,6 +97,18 @@ export interface paths {
   '/queue-admin/get-dlq-messages/{dlqName}': {
     get: operations['getDlqMessages']
   }
+  '/adjustments/{person}/intercept': {
+    /** Determine if there needs to be an adjustment-interception for this person */
+    get: operations['determineAdaIntercept']
+  }
+  '/adjustments/additional-days/{person}/intercept': {
+    /** Determine if there needs to be an adjustment-interception for this person */
+    get: operations['determineAdaIntercept_1']
+  }
+  '/adjustments/additional-days/{person}/adjudication-details': {
+    /** Get all details of adjudications and associated adjustments */
+    get: operations['getAdaAdjudicationDetails']
+  }
 }
 
 export type webhooks = Record<string, never>
@@ -105,7 +117,7 @@ export interface components {
   schemas: {
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never> | undefined
+        [key: string]: Record<string, never>
       }
       messageId: string
     }
@@ -212,11 +224,6 @@ export interface components {
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
       taggedBail?: components['schemas']['TaggedBailDto']
       /**
-       * @description The prison where the prisoner was located at the time the adjustment was created (a 3 character code identifying the prison)
-       * @example LDS
-       */
-      prisonId?: string
-      /**
        * Format: int32
        * @description The NOMIS sentence sequence of the adjustment
        */
@@ -224,10 +231,20 @@ export interface components {
       /** @description Human readable text for type of adjustment */
       adjustmentTypeText?: string
       /**
+       * @description Indicates whether the adjustment was an addition or deduction
+       * @enum {string}
+       */
+      adjustmentArithmeticType?: 'ADDITION' | 'DEDUCTION' | 'NONE'
+      /**
        * @description The name name of the prison where the prisoner was located at the time the adjustment was created
        * @example Leeds
        */
       prisonName?: string
+      /**
+       * @description The prison where the prisoner was located at the time the adjustment was created (a 3 character code identifying the prison)
+       * @example LDS
+       */
+      prisonId?: string
       /** @description The person last updating this adjustment */
       lastUpdatedBy?: string
       /**
@@ -250,12 +267,6 @@ export interface components {
        * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
        */
       effectiveDays?: number
-      /**
-       * Format: int32
-       * @deprecated
-       * @description The total number of adjustment days
-       */
-      days?: number
     }
     /** @description The details of remand adjustment */
     RemandDto: {
@@ -337,6 +348,63 @@ export interface components {
       messagesReturnedCount: number
       messages: components['schemas']['DlqMessage'][]
     }
+    AdaIntercept: {
+      /** @enum {string} */
+      type: 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'
+      /** Format: int32 */
+      number: number
+      anyProspective: boolean
+      messageArguments: string[]
+      message?: string
+    }
+    Ada: {
+      /** Format: date */
+      dateChargeProved: string
+      /** Format: int64 */
+      chargeNumber: number
+      toBeServed?: string
+      heardAt?: string
+      /** @enum {string} */
+      status: 'AWARDED_OR_PENDING' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
+      /** Format: int32 */
+      days: number
+      /** Format: int64 */
+      sequence?: number
+      /** Format: int64 */
+      consecutiveToSequence?: number
+    }
+    AdaAdjudicationDetails: {
+      awarded: components['schemas']['AdasByDateCharged'][]
+      /** Format: int32 */
+      totalAwarded: number
+      suspended: components['schemas']['AdasByDateCharged'][]
+      /** Format: int32 */
+      totalSuspended: number
+      quashed: components['schemas']['AdasByDateCharged'][]
+      /** Format: int32 */
+      totalQuashed: number
+      awaitingApproval: components['schemas']['AdasByDateCharged'][]
+      /** Format: int32 */
+      totalAwaitingApproval: number
+      prospective: components['schemas']['AdasByDateCharged'][]
+      /** Format: int32 */
+      totalProspective: number
+      intercept: components['schemas']['AdaIntercept']
+      /** Format: int32 */
+      totalExistingAdas: number
+      showExistingAdaMessage: boolean
+    }
+    AdasByDateCharged: {
+      /** Format: date */
+      dateChargeProved: string
+      charges: components['schemas']['Ada'][]
+      /** Format: int32 */
+      total?: number
+      /** @enum {string} */
+      status?: 'AWARDED' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
+      /** Format: uuid */
+      adjustmentId?: string
+    }
   }
   responses: never
   parameters: never
@@ -344,6 +412,8 @@ export interface components {
   headers: never
   pathItems: never
 }
+
+export type $defs = Record<string, never>
 
 export type external = Record<string, never>
 
@@ -438,11 +508,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -458,11 +534,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -515,11 +597,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -535,11 +623,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment deleted */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -671,11 +765,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment update */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   /**
@@ -715,11 +815,17 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment restored */
-      200: never
+      200: {
+        content: never
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: never
+      }
       /** @description Adjustment not found */
-      404: never
+      404: {
+        content: never
+      }
     }
   }
   getDlqMessages: {
@@ -736,6 +842,102 @@ export interface operations {
       200: {
         content: {
           '*/*': components['schemas']['GetDlqResult']
+        }
+      }
+    }
+  }
+  /** Determine if there needs to be an adjustment-interception for this person */
+  determineAdaIntercept: {
+    parameters: {
+      path: {
+        /**
+         * @description The noms ID of the person
+         * @example AA1256A
+         */
+        person: string
+      }
+    }
+    responses: {
+      /** @description Intercept decision returned */
+      200: {
+        content: {
+          'application/json': components['schemas']['AdaIntercept']
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['AdaIntercept']
+        }
+      }
+      /** @description Adjustment not found */
+      404: {
+        content: {
+          'application/json': components['schemas']['AdaIntercept']
+        }
+      }
+    }
+  }
+  /** Determine if there needs to be an adjustment-interception for this person */
+  determineAdaIntercept_1: {
+    parameters: {
+      path: {
+        /**
+         * @description The noms ID of the person
+         * @example AA1256A
+         */
+        person: string
+      }
+    }
+    responses: {
+      /** @description Intercept decision returned */
+      200: {
+        content: {
+          'application/json': components['schemas']['AdaIntercept']
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['AdaIntercept']
+        }
+      }
+      /** @description Adjustment not found */
+      404: {
+        content: {
+          'application/json': components['schemas']['AdaIntercept']
+        }
+      }
+    }
+  }
+  /** Get all details of adjudications and associated adjustments */
+  getAdaAdjudicationDetails: {
+    parameters: {
+      path: {
+        /**
+         * @description The noms ID of the person
+         * @example AA1256A
+         */
+        person: string
+      }
+    }
+    responses: {
+      /** @description Details of adjudications and adjustments returned */
+      200: {
+        content: {
+          'application/json': components['schemas']['AdaAdjudicationDetails']
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['AdaAdjudicationDetails']
+        }
+      }
+      /** @description Adjustment not found */
+      404: {
+        content: {
+          'application/json': components['schemas']['AdaAdjudicationDetails']
         }
       }
     }
