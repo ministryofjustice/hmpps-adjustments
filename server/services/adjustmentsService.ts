@@ -1,5 +1,6 @@
 import AdjustmentsClient from '../api/adjustmentsClient'
 import {
+  AdaAdjudicationDetails,
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
@@ -52,5 +53,13 @@ export default class AdjustmentsService {
     // When editing there is only one session adjustment
     const id = Object.keys(sessionAdjustment)[0]
     return (await this.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(it => it.id !== id)
+  }
+
+  public async getAdaAdjudicationDetails(
+    person: string,
+    token: string,
+    selectedPadas: string[] = [],
+  ): Promise<AdaAdjudicationDetails> {
+    return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, selectedPadas)
   }
 }

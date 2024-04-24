@@ -49,13 +49,14 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
                 {% if not params.hideStatuses %}
                   <td class="govuk-table__cell status-cell">
                     {% if not params.checkboxes %}
+                      {% set adaStatus = 'PENDING APPROVAL' if ada.status == 'PENDING_APPROVAL' else ada.status%}
                       <div class="status-tag-row">
-                      {% if ada.status === 'SUSPENDED' %}
-                        <strong class="govuk-tag govuk-tag--red">{{ ada.status | title }}</strong>
-                      {% elif ada.status === 'AWARDED' or ada.status === 'PENDING APPROVAL' %}
-                        <strong class="govuk-tag govuk-tag--green">{{ ada.status | title }}</strong>
+                      {% if adaStatus === 'SUSPENDED' %}
+                        <strong class="govuk-tag govuk-tag--red">{{ adaStatus | title }}</strong>
+                      {% elif adaStatus === 'AWARDED' or adaStatus === 'PENDING APPROVAL' %}
+                        <strong class="govuk-tag govuk-tag--green">{{ adaStatus | title }}</strong>
                       {% else %}
-                        <strong class="govuk-tag govuk-tag--blue">{{ ada.status | title }}</strong>
+                        <strong class="govuk-tag govuk-tag--blue">{{ adaStatus | title }}</strong>
                       {% endif %}
                       </div>
                     {% endif %}
