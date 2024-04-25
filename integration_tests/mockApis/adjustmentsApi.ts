@@ -312,4 +312,110 @@ export default {
       },
     })
   },
+  subAdaDetailsForIntercept: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/additional-days/A1234AB/adjudication-details.*',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          totalAwarded: 0,
+          awarded: [],
+          totalSuspended: 0,
+          suspended: [],
+          awaitingApproval: [
+            {
+              dateChargeProved: '2014-11-24',
+              charges: [
+                {
+                  dateChargeProved: '2014-11-24',
+                  chargeNumber: 998947,
+                  heardAt: 'Doncaster (HMP)',
+                  status: 'AWARDED_OR_PENDING',
+                  days: 21,
+                  sequence: 9,
+                  toBeServed: 'Concurrent',
+                },
+                {
+                  dateChargeProved: '2014-11-24',
+                  chargeNumber: 998946,
+                  heardAt: 'Doncaster (HMP)',
+                  status: 'AWARDED_OR_PENDING',
+                  days: 21,
+                  sequence: 8,
+                  toBeServed: 'Concurrent',
+                },
+              ],
+              total: 21,
+              status: 'PENDING APPROVAL',
+            },
+            {
+              dateChargeProved: '2017-01-19',
+              charges: [
+                {
+                  dateChargeProved: '2017-01-19',
+                  chargeNumber: 1468919,
+                  heardAt: 'Kirkham (HMP)',
+                  status: 'PROSPECTIVE',
+                  days: 10,
+                  sequence: 13,
+                  toBeServed: 'Forthwith',
+                },
+              ],
+              total: 10,
+              status: 'PENDING APPROVAL',
+            },
+          ],
+          totalAwaitingApproval: 31,
+          quashed: [],
+          totalQuashed: 0,
+          intercept: {
+            type: 'UPDATE',
+            number: 2,
+            anyProspective: true,
+          },
+          prospective: [
+            {
+              dateChargeProved: '2000-07-25',
+              charges: [
+                {
+                  dateChargeProved: '2000-07-25',
+                  chargeNumber: 104841,
+                  heardAt: 'Preston (HMP)',
+                  status: 'PROSPECTIVE',
+                  days: 7,
+                  sequence: 6,
+                  toBeServed: 'Forthwith',
+                },
+              ],
+              total: 7,
+              status: 'PENDING APPROVAL',
+            },
+            {
+              dateChargeProved: '2017-01-19',
+              charges: [
+                {
+                  dateChargeProved: '2017-01-19',
+                  chargeNumber: 1468919,
+                  heardAt: 'Kirkham (HMP)',
+                  status: 'PROSPECTIVE',
+                  days: 10,
+                  sequence: 13,
+                  toBeServed: 'Forthwith',
+                },
+              ],
+              total: 10,
+              status: 'PENDING APPROVAL',
+            },
+          ],
+          totalProspective: 17,
+          showExistingAdaMessage: false,
+          totalExistingAdads: 40,
+        },
+      },
+    })
+  },
 }
