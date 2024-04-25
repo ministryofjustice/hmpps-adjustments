@@ -7,7 +7,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
+import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import './testutils/toContainInOrder'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 
@@ -15,7 +15,7 @@ jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
-jest.mock('../services/additionalDaysAwardedService')
+jest.mock('../services/additionalDaysAwardedBackendService')
 jest.mock('../services/unusedDeductionsService')
 
 const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
@@ -23,10 +23,10 @@ const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsSe
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
-const additionalDaysAwardedService = new AdditionalDaysAwardedService(
+const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(
   null,
   null,
-) as jest.Mocked<AdditionalDaysAwardedService>
+) as jest.Mocked<AdditionalDaysAwardedBackendService>
 
 const NOMS_ID = 'ABC123'
 
@@ -105,7 +105,7 @@ beforeEach(() => {
       adjustmentsService,
       identifyRemandPeriodsService,
       adjustmentsStoreService,
-      additionalDaysAwardedService,
+      additionalDaysAwardedBackendService,
       unusedDeductionsService,
     },
     userSupplier: () => userInTest,
@@ -130,7 +130,7 @@ describe('Adjustment routes tests', () => {
     ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NONE')
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -155,7 +155,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('UNSUPPORTED')
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -177,7 +177,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('VALIDATION')
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -199,7 +199,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NOMIS_ADJUSTMENT')
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -221,7 +221,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('UNKNOWN')
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -245,7 +245,11 @@ describe('Adjustment routes tests', () => {
       earliestSentence: new Date(),
     })
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0, anyProspective: false })
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
     unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NONE')
     return request(app)
       .get(`/${NOMS_ID}`)
@@ -262,7 +266,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
     ])
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'FIRST_TIME',
       number: 5,
       anyProspective: true,

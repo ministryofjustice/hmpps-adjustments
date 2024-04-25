@@ -13,13 +13,13 @@ import ViewModel from '../model/viewModel'
 import RemoveModel from '../model/removeModel'
 import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
 import { daysBetween } from '../utils/utils'
 import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -27,8 +27,8 @@ export default class AdjustmentRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
-    private readonly additionalDaysAwardedService: AdditionalDaysAwardedService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
+    private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -71,13 +71,7 @@ export default class AdjustmentRoutes {
     )
 
     if (!messageExists) {
-      const intercept = await this.additionalDaysAwardedService.shouldIntercept(
-        req,
-        prisonerNumber,
-        adjustments,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
+      const intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(prisonerNumber, token)
 
       if (intercept.type !== 'NONE') {
         return res.redirect(`/${nomsId}/additional-days/intercept`)

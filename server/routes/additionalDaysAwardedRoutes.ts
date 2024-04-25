@@ -1,8 +1,6 @@
 import { RequestHandler } from 'express'
 import PrisonerService from '../services/prisonerService'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import { AdaIntercept, AdasToReview, PadasToReview } from '../@types/AdaTypes'
-import AdjustmentsClient from '../api/adjustmentsClient'
 import { Message } from '../model/adjustmentsHubViewModel'
 import PadaForm from '../model/padaForm'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
@@ -10,31 +8,17 @@ import AdditionalDaysAwardedBackendService from '../services/additionalDaysAward
 export default class AdditionalDaysAwardedRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
-    private readonly additionalDaysAwardedService: AdditionalDaysAwardedService,
     private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId, prisonerNumber } = res.locals.prisoner
-    const { service } = req.query as Record<string, string>
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
-
-    const adjustments = await new AdjustmentsClient(token).findByPerson(prisonerNumber)
-
-    let intercept: AdaIntercept
-    if (service === 'new') {
-      intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(prisonerNumber, token)
-    } else {
-      intercept = await this.additionalDaysAwardedService.shouldIntercept(
-        req,
-        prisonerNumber,
-        adjustments,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
-    }
+    const { prisonerNumber } = res.locals.prisoner
+    const intercept: AdaIntercept = await this.additionalDaysAwardedBackendService.shouldIntercept(
+      prisonerNumber,
+      token,
+    )
 
     if (intercept.type === 'NONE') {
       return res.redirect(`/${nomsId}`)
@@ -51,29 +35,16 @@ export default class AdditionalDaysAwardedRoutes {
     const { token } = res.locals.user
     const { nomsId } = req.params
     const { prisoner } = res.locals
-    const { service } = req.query as Record<string, string>
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(prisoner.bookingId, token)
 
-    let adasToReview: AdasToReview
-    if (service === 'new') {
-      adasToReview = await this.additionalDaysAwardedBackendService.getAdasToApprove(req, nomsId, token)
-    } else {
-      adasToReview = await this.additionalDaysAwardedService.getAdasToApprove(
-        req,
-        nomsId,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
-    }
+    const adasToReview: AdasToReview = await this.additionalDaysAwardedBackendService.getAdasToApprove(
+      req,
+      nomsId,
+      token,
+    )
 
     if (adasToReview.intercept.type === 'PADA' && !adasToReview.awaitingApproval.length) {
       // Intercepted for PADAs, none have been selected.
-      await this.additionalDaysAwardedService.submitAdjustments(
-        req,
-        prisoner,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
+      await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, token)
       return res.redirect(`/${nomsId}`)
     }
 
@@ -100,20 +71,8 @@ export default class AdditionalDaysAwardedRoutes {
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId } = res.locals.prisoner
-    const { service } = req.query as Record<string, string>
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
-    let padasToReview: PadasToReview
-    if (service === 'new') {
-      padasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(nomsId, token)
-    } else {
-      padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
-        nomsId,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
-    }
+    const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(nomsId, token)
 
     return res.render('pages/adjustments/additional-days/review-prospective', {
       padasToReview,
@@ -123,34 +82,23 @@ export default class AdditionalDaysAwardedRoutes {
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { service } = req.query as Record<string, string>
 
     const padaForm = new PadaForm(req.body)
 
     await padaForm.validate()
 
     if (padaForm.errors.length) {
-      const { bookingId } = res.locals.prisoner
-      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
-
-      let padasToReview: PadasToReview
-      if (service === 'new') {
-        padasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(nomsId, token)
-      } else {
-        padasToReview = await this.additionalDaysAwardedService.getPadasToApprove(
-          nomsId,
-          startOfSentenceEnvelope.earliestExcludingRecalls,
-          token,
-        )
-      }
-
+      const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(
+        nomsId,
+        token,
+      )
       return res.render('pages/adjustments/additional-days/review-prospective', {
         padasToReview,
         padaForm,
       })
     }
 
-    this.additionalDaysAwardedService.storeSelectedPadas(req, nomsId, padaForm)
+    this.additionalDaysAwardedBackendService.storeSelectedPadas(req, nomsId, padaForm)
 
     return res.redirect(`/${nomsId}/additional-days/review-and-approve`)
   }
@@ -164,22 +112,11 @@ export default class AdditionalDaysAwardedRoutes {
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { referrer } = req.query as Record<string, string>
-    const { bookingId } = res.locals.prisoner
-    const { service } = req.query as Record<string, string>
-
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
-
-    let model
-    if (service === 'new') {
-      model = await this.additionalDaysAwardedBackendService.getReviewAndSubmitModel(req, res.locals.prisoner, token)
-    } else {
-      model = await this.additionalDaysAwardedService.getReviewAndSubmitModel(
-        req,
-        res.locals.prisoner,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
-    }
+    const model = await this.additionalDaysAwardedBackendService.getReviewAndSubmitModel(
+      req,
+      res.locals.prisoner,
+      token,
+    )
     return res.render('pages/adjustments/additional-days/review-and-submit', {
       model,
       referrer,
@@ -189,20 +126,8 @@ export default class AdditionalDaysAwardedRoutes {
   public submit: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId } = res.locals.prisoner
-    const { service } = req.query as Record<string, string>
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
-    if (service === 'new') {
-      await this.additionalDaysAwardedBackendService.submitAdjustments(req, res.locals.prisoner, token)
-    } else {
-      await this.additionalDaysAwardedService.submitAdjustments(
-        req,
-        res.locals.prisoner,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
-    }
+    await this.additionalDaysAwardedBackendService.submitAdjustments(req, res.locals.prisoner, token)
 
     const message = {
       type: 'ADDITIONAL_DAYS_AWARDED',
@@ -226,20 +151,7 @@ export default class AdditionalDaysAwardedRoutes {
   public view: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId } = req.params
-    const { bookingId } = res.locals.prisoner
-    const { service } = req.query as Record<string, string>
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
-
-    let adas
-    if (service === 'new') {
-      adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, token)
-    } else {
-      adas = await this.additionalDaysAwardedService.viewAdjustments(
-        nomsId,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
-        token,
-      )
-    }
+    const adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, token)
 
     return res.render('pages/adjustments/additional-days/view', {
       model: {

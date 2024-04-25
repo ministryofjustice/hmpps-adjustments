@@ -19,8 +19,8 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
-    service.additionalDaysAwardedService,
     service.unusedDeductionsService,
+    service.additionalDaysAwardedBackendService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,
@@ -31,7 +31,6 @@ export default function routes(service: Services): Router {
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
     service.prisonerService,
-    service.additionalDaysAwardedService,
     service.additionalDaysAwardedBackendService,
   )
 

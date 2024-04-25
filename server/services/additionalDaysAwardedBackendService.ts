@@ -1,9 +1,9 @@
 import { Request } from 'express'
-import { AdaIntercept, AdasByDateCharged, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
+import { AdaIntercept, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
 import PadaForm from '../model/padaForm'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import AdjustmentsService from './adjustmentsService'
-import { Adjustment, AdasByDateCharged as AdasByDateChargedBackend } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, AdasByDateCharged } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 
@@ -17,7 +17,7 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
 
     return {
-      awarded: response.awarded as unknown as AdasByDateCharged[],
+      awarded: response.awarded,
       totalAwarded: response.totalAwarded,
     }
   }
@@ -27,13 +27,13 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, selected)
 
     return {
-      awarded: response.awarded as unknown as AdasByDateCharged[],
+      awarded: response.awarded,
       totalAwarded: response.totalAwarded,
-      awaitingApproval: response.awaitingApproval as unknown as AdasByDateCharged[],
+      awaitingApproval: response.awaitingApproval,
       totalAwaitingApproval: response.totalAwaitingApproval,
-      suspended: response.suspended as unknown as AdasByDateCharged[],
+      suspended: response.suspended,
       totalSuspended: response.totalSuspended,
-      quashed: response.quashed as unknown as AdasByDateCharged[],
+      quashed: response.quashed,
       totalQuashed: response.totalQuashed,
       intercept: response.intercept,
       totalExistingAdads: response.totalExistingAdas,
@@ -45,7 +45,7 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
 
     return {
-      prospective: response.prospective as unknown as AdasByDateCharged[],
+      prospective: response.prospective,
       totalProspective: response.totalProspective,
     }
   }
@@ -114,7 +114,7 @@ export default class AdditionalDaysAwardedBackendService {
     this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.prisonerNumber)
   }
 
-  private adjustmentMatchesAdjudication(adjudication: AdasByDateChargedBackend, adjustment: Adjustment): boolean {
+  private adjustmentMatchesAdjudication(adjudication: AdasByDateCharged, adjustment: Adjustment): boolean {
     return (
       adjudication.total === adjustment.days &&
       adjudication.dateChargeProved === adjustment.fromDate &&
@@ -129,9 +129,9 @@ export default class AdditionalDaysAwardedBackendService {
     token: string,
   ): Promise<{
     adjustmentsToCreate: Adjustment[]
-    awarded: AdasByDateChargedBackend[]
+    awarded: AdasByDateCharged[]
     allAdaAdjustments: Adjustment[]
-    quashed: AdasByDateChargedBackend[]
+    quashed: AdasByDateCharged[]
   }> {
     const allAdaAdjustments = (
       await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(prisonerDetail.prisonerNumber, token)
@@ -152,7 +152,7 @@ export default class AdditionalDaysAwardedBackendService {
     }
   }
 
-  private toAdjustment(prisonerDetail: PrisonerSearchApiPrisoner, it: AdasByDateChargedBackend) {
+  private toAdjustment(prisonerDetail: PrisonerSearchApiPrisoner, it: AdasByDateCharged) {
     return {
       person: prisonerDetail.prisonerNumber,
       bookingId: parseInt(prisonerDetail.bookingId, 10),
