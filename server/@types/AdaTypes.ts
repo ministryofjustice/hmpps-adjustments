@@ -1,27 +1,4 @@
-type ChargeDetails = {
-  chargeNumber: number
-  toBeServed: string
-  heardAt: string
-  status: ChargeStatus
-  days: number
-  sequence: number
-  consecutiveToSequence: number
-}
-
-type ChargeStatus = 'AWARDED_OR_PENDING' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
-type AdaStatus = 'AWARDED' | 'PENDING APPROVAL' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
-
-type AdasByDateCharged = {
-  dateChargeProved: Date
-  charges: Ada[]
-  total: number
-  status: AdaStatus
-  adjustmentId: string
-}
-
-interface Ada extends ChargeDetails {
-  dateChargeProved: Date
-}
+import { AdasByDateCharged } from './adjustments/adjustmentsTypes'
 
 type AdasToReview = {
   awarded: AdasByDateCharged[]
@@ -54,15 +31,4 @@ type AdaIntercept = {
   number: number
   anyProspective: boolean
 }
-export {
-  ChargeDetails,
-  AdasByDateCharged,
-  Ada,
-  AdasToReview,
-  InterceptType,
-  AdaIntercept,
-  AdaStatus,
-  ChargeStatus,
-  PadasToReview,
-  AdasToView,
-}
+export { AdasByDateCharged, AdasToReview, InterceptType, AdaIntercept, PadasToReview, AdasToView }

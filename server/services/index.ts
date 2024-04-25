@@ -4,7 +4,6 @@ import AdjustmentsService from './adjustmentsService'
 import IdentifyRemandPeriodsService from './identifyRemandPeriodsService'
 import PrisonerService from './prisonerService'
 import UserService from './userService'
-import AdditionalDaysAwardedService from './additionalDaysAwardedService'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
 import UnusedDeductionsService from './unusedDeductionsService'
@@ -21,10 +20,6 @@ export const services = () => {
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()
   const adjustmentsStoreService = new AdjustmentsStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
-  const additionalDaysAwardedService = new AdditionalDaysAwardedService(
-    additionalDaysAwardedStoreService,
-    adjustmentsService,
-  )
   const calculateReleaseDatesService = new CalculateReleaseDatesService()
   const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, calculateReleaseDatesService)
   const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
@@ -41,7 +36,6 @@ export const services = () => {
     adjustmentsService,
     identifyRemandPeriodsService,
     adjustmentsStoreService,
-    additionalDaysAwardedService,
     additionalDaysAwardedStoreService,
     calculateReleaseDatesService,
     unusedDeductionsService,
