@@ -281,4 +281,35 @@ export default {
       },
     })
   },
+  subAdaDetailsNoIntercept: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/additional-days/A1234AB/adjudication-details.*',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          awaitingApproval: [],
+          suspended: [],
+          quashed: [],
+          awarded: [],
+          prospective: [],
+          totalProspective: 0,
+          totalAwarded: 0,
+          totalQuashed: 0,
+          totalAwaitingApproval: 0,
+          totalSuspended: 0,
+          intercept: {
+            number: 0,
+            type: 'NONE',
+            anyProspective: false,
+          },
+          showExistingAdaMessage: false,
+          totalExistingAdas: 0,
+        },
+      },
+    })
+  },
 }
