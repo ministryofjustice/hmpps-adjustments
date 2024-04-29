@@ -4,6 +4,7 @@ import {
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
+  ProspectiveAdaRejection,
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
@@ -61,5 +62,9 @@ export default class AdjustmentsService {
     selectedPadas: string[] = [],
   ): Promise<AdaAdjudicationDetails> {
     return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, selectedPadas)
+  }
+
+  public async rejectProspectiveAda(person: string, prospectiveAdaRejection: ProspectiveAdaRejection, token: string) {
+    return new AdjustmentsClient(token).rejectProspectiveAda(person, prospectiveAdaRejection)
   }
 }

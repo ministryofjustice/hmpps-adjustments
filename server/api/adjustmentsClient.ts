@@ -5,6 +5,7 @@ import {
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
+  ProspectiveAdaRejection,
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
@@ -58,5 +59,12 @@ export default class AdjustmentsClient {
     return this.restClient.get({
       path: `/adjustments/additional-days/${person}/adjudication-details?selectedProspectiveAdaDates=${selectedPadas.join(',')}`,
     }) as Promise<AdaAdjudicationDetails>
+  }
+
+  async rejectProspectiveAda(person: string, prospectiveAdaRejection: ProspectiveAdaRejection) {
+    return this.restClient.post({
+      path: `/adjustments/additional-days/${person}/reject-prospective-ada`,
+      data: prospectiveAdaRejection,
+    })
   }
 }
