@@ -94,6 +94,10 @@ export interface paths {
      */
     post: operations['restore']
   }
+  '/adjustments/additional-days/{person}/reject-prospective-ada': {
+    /** Reject prospective ADA. */
+    post: operations['rejectProspectiveAda']
+  }
   '/queue-admin/get-dlq-messages/{dlqName}': {
     get: operations['getDlqMessages']
   }
@@ -340,6 +344,21 @@ export interface components {
     RestoreAdjustmentsDto: {
       /** @description The IDs of the adjustments to restore */
       ids: string[]
+    }
+    /** @description The DTO representing the PADAs rejected */
+    ProspectiveAdaRejectionDto: {
+      /** @description The NOMIS ID of the person this pada is rejected applies to */
+      person: string
+      /**
+       * Format: int32
+       * @description The number of days that were rejected
+       */
+      days: number
+      /**
+       * Format: date
+       * @description The date of the charges proved that were rejected
+       */
+      dateChargeProved: string
     }
     GetDlqResult: {
       /** Format: int32 */
@@ -828,6 +847,37 @@ export interface operations {
       }
     }
   }
+  /** Reject prospective ADA. */
+  rejectProspectiveAda: {
+    parameters: {
+      path: {
+        /**
+         * @description The noms ID of the person
+         * @example AA1256A
+         */
+        person: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProspectiveAdaRejectionDto']
+      }
+    }
+    responses: {
+      /** @description Reject a prospective ADA */
+      200: {
+        content: never
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: never
+      }
+      /** @description Adjustment not found */
+      404: {
+        content: never
+      }
+    }
+  }
   getDlqMessages: {
     parameters: {
       query?: {
@@ -913,6 +963,13 @@ export interface operations {
   /** Get all details of adjudications and associated adjustments */
   getAdaAdjudicationDetails: {
     parameters: {
+      query?: {
+        /**
+         * @description The dates of selected prospective adas
+         * @example 2022-01-10,2022-02-11
+         */
+        selectedProspectiveAdaDates?: string[]
+      }
       path: {
         /**
          * @description The noms ID of the person

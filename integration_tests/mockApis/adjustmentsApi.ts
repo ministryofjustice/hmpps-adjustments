@@ -418,4 +418,17 @@ export default {
       },
     })
   },
+  stubRejectProspectiveAda: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'POST',
+        urlPattern: '/adjustments-api/adjustments/additional-days/A1234AB/reject-prospective-ada',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {},
+      },
+    })
+  },
 }
