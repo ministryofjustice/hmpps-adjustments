@@ -30,13 +30,11 @@ export default class AdjustmentsHubViewModel {
   }
 
   public deductions(): AdjustmentType[] {
-    return adjustmentTypes.filter(it =>
-      ['REMAND', 'TAGGED_BAIL', 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'].includes(it.value),
-    )
+    return adjustmentTypes.filter(it => it.deduction)
   }
 
   public additions(): AdjustmentType[] {
-    return adjustmentTypes.filter(it => ['UNLAWFULLY_AT_LARGE', 'ADDITIONAL_DAYS_AWARDED'].includes(it.value))
+    return adjustmentTypes.filter(it => !it.deduction)
   }
 
   public hasRemandToolRole(): boolean {
