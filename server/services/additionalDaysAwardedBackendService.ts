@@ -1,9 +1,9 @@
 import { Request } from 'express'
-import { AdaIntercept, AdasByDateCharged, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
+import { AdaIntercept, AdasToReview, AdasToView, PadasToReview } from '../@types/AdaTypes'
 import PadaForm from '../model/padaForm'
 import AdditionalDaysAwardedStoreService from './additionalDaysApprovalStoreService'
 import AdjustmentsService from './adjustmentsService'
-import { Adjustment, AdasByDateCharged as AdasByDateChargedBackend } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment, AdasByDateCharged } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 
@@ -17,7 +17,7 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
 
     return {
-      awarded: response.awarded as unknown as AdasByDateCharged[],
+      awarded: response.awarded,
       totalAwarded: response.totalAwarded,
     }
   }
@@ -27,13 +27,13 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, selected)
 
     return {
-      awarded: response.awarded as unknown as AdasByDateCharged[],
+      awarded: response.awarded,
       totalAwarded: response.totalAwarded,
-      awaitingApproval: response.awaitingApproval as unknown as AdasByDateCharged[],
+      awaitingApproval: response.awaitingApproval,
       totalAwaitingApproval: response.totalAwaitingApproval,
-      suspended: response.suspended as unknown as AdasByDateCharged[],
+      suspended: response.suspended,
       totalSuspended: response.totalSuspended,
-      quashed: response.quashed as unknown as AdasByDateCharged[],
+      quashed: response.quashed,
       totalQuashed: response.totalQuashed,
       intercept: response.intercept,
       totalExistingAdads: response.totalExistingAdas,
@@ -45,7 +45,7 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
 
     return {
-      prospective: response.prospective as unknown as AdasByDateCharged[],
+      prospective: response.prospective,
       totalProspective: response.totalProspective,
     }
   }
@@ -77,11 +77,8 @@ export default class AdditionalDaysAwardedBackendService {
   }
 
   public async submitAdjustments(req: Request, prisonerDetail: PrisonerSearchApiPrisoner, token: string) {
-    const { awarded, adjustmentsToCreate, allAdaAdjustments } = await this.getAdasToSubmitAndDelete(
-      req,
-      prisonerDetail,
-      token,
-    )
+    const { awarded, adjustmentsToCreate, allAdaAdjustments, prospectiveRejected } =
+      await this.getAdasToSubmitAndDelete(req, prisonerDetail, token)
 
     const awardedIds = awarded.map(it => it.adjustmentId)
     // Delete all ADAs which were not in the awarded table.
@@ -97,24 +94,37 @@ export default class AdditionalDaysAwardedBackendService {
       await this.adjustmentsService.create(adjustmentsToCreate, token)
     }
 
-    awarded
-      .filter(it => it.adjustmentId)
-      .map(it => {
-        return this.adjustmentsService.update(
-          it.adjustmentId,
+    await Promise.all(
+      awarded
+        .filter(it => it.adjustmentId)
+        .map(it => {
+          return this.adjustmentsService.update(
+            it.adjustmentId,
+            {
+              id: it.adjustmentId,
+              ...this.toAdjustment(prisonerDetail, it),
+            },
+            token,
+          )
+        }),
+    )
+
+    await Promise.all(
+      prospectiveRejected.map(it => {
+        return this.adjustmentsService.rejectProspectiveAda(
+          prisonerDetail.prisonerNumber,
           {
-            id: it.adjustmentId,
-            ...this.toAdjustment(prisonerDetail, it),
+            person: prisonerDetail.prisonerNumber,
+            days: it.total,
+            dateChargeProved: it.dateChargeProved,
           },
           token,
         )
-      })
-
-    this.additionalDaysAwardedStoreService.setLastApprovedDate(req, prisonerDetail.prisonerNumber)
-    this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.prisonerNumber)
+      }),
+    )
   }
 
-  private adjustmentMatchesAdjudication(adjudication: AdasByDateChargedBackend, adjustment: Adjustment): boolean {
+  private adjustmentMatchesAdjudication(adjudication: AdasByDateCharged, adjustment: Adjustment): boolean {
     return (
       adjudication.total === adjustment.days &&
       adjudication.dateChargeProved === adjustment.fromDate &&
@@ -129,9 +139,10 @@ export default class AdditionalDaysAwardedBackendService {
     token: string,
   ): Promise<{
     adjustmentsToCreate: Adjustment[]
-    awarded: AdasByDateChargedBackend[]
+    awarded: AdasByDateCharged[]
     allAdaAdjustments: Adjustment[]
-    quashed: AdasByDateChargedBackend[]
+    quashed: AdasByDateCharged[]
+    prospectiveRejected: AdasByDateCharged[]
   }> {
     const allAdaAdjustments = (
       await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(prisonerDetail.prisonerNumber, token)
@@ -144,15 +155,29 @@ export default class AdditionalDaysAwardedBackendService {
       selected,
     )
 
+    /* Rejected PADAs are not awarded or pending */
+    const prospectiveRejected = response.prospective.filter(it => {
+      const isAwarded = this.prospectiveAdjudicationMatches(it, response.awarded)
+      const isPending = this.prospectiveAdjudicationMatches(it, response.awaitingApproval)
+      return !isAwarded && !isPending
+    })
+
     return {
       awarded: response.awarded,
       allAdaAdjustments,
       adjustmentsToCreate: response.awaitingApproval.map(it => this.toAdjustment(prisonerDetail, it)),
       quashed: response.quashed,
+      prospectiveRejected,
     }
   }
 
-  private toAdjustment(prisonerDetail: PrisonerSearchApiPrisoner, it: AdasByDateChargedBackend) {
+  private prospectiveAdjudicationMatches(prospective: AdasByDateCharged, adas: AdasByDateCharged[]) {
+    return adas.some(
+      it => it.dateChargeProved === prospective.dateChargeProved && it.charges[0].status === 'PROSPECTIVE',
+    )
+  }
+
+  private toAdjustment(prisonerDetail: PrisonerSearchApiPrisoner, it: AdasByDateCharged) {
     return {
       person: prisonerDetail.prisonerNumber,
       bookingId: parseInt(prisonerDetail.bookingId, 10),

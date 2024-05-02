@@ -14,12 +14,12 @@ context('Enter an ADA', () => {
     cy.task('stubGetAdjustments')
     cy.task('stubGetRelevantRemand')
     cy.task('stubGetRemandDecision')
-    cy.task('stubSearchAdjudications')
-    cy.task('stubIndividualAdjudications')
+    cy.task('subAdaDetailsForIntercept')
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubDeleteAda')
     cy.task('stubCreateAdjustment')
     cy.task('stubComponents')
+    cy.task('stubRejectProspectiveAda')
   })
 
   it('Enter an AADA', () => {

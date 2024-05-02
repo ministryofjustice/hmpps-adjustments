@@ -158,4 +158,7 @@ export default {
   analytics: {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
   },
+  featureToggles: {
+    unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'false') === 'true',
+  },
 }

@@ -5,34 +5,34 @@ import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
+import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import { AdasToReview } from '../@types/AdaTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
-jest.mock('../services/additionalDaysAwardedService')
+jest.mock('../services/additionalDaysAwardedBackendService')
 
 const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
-const additionalDaysAwardedService = new AdditionalDaysAwardedService(
+const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(
   null,
   null,
-) as jest.Mocked<AdditionalDaysAwardedService>
+) as jest.Mocked<AdditionalDaysAwardedBackendService>
 
 const NOMS_ID = 'ABC123'
 
 const allPadas = {
   awaitingApproval: [
     {
-      dateChargeProved: new Date('2023-08-03'),
+      dateChargeProved: '2023-08-03',
       charges: [
         {
           chargeNumber: 1525916,
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           days: 5,
           heardAt: 'Moorland (HMP & YOI)',
           status: 'PROSPECTIVE',
@@ -41,7 +41,7 @@ const allPadas = {
         },
         {
           chargeNumber: 1525917,
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           days: 5,
           heardAt: 'Moorland (HMP & YOI)',
           status: 'PROSPECTIVE',
@@ -50,7 +50,7 @@ const allPadas = {
         },
       ],
       total: 5,
-      status: 'PENDING APPROVAL',
+      status: 'PENDING_APPROVAL',
     },
   ],
   suspended: [],
@@ -86,11 +86,11 @@ const noAwaitingApproval = {
 const padasAwaitingApprovalAndQuashed = {
   awaitingApproval: [
     {
-      dateChargeProved: new Date('2023-08-03'),
+      dateChargeProved: '2023-08-03',
       charges: [
         {
           chargeNumber: 1525916,
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           days: 5,
           heardAt: 'Moorland (HMP & YOI)',
           status: 'PROSPECTIVE',
@@ -99,7 +99,7 @@ const padasAwaitingApprovalAndQuashed = {
         },
         {
           chargeNumber: 1525917,
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           days: 5,
           heardAt: 'Moorland (HMP & YOI)',
           status: 'AWARDED_OR_PENDING',
@@ -108,17 +108,17 @@ const padasAwaitingApprovalAndQuashed = {
         },
       ],
       total: 5,
-      status: 'PENDING APPROVAL',
+      status: 'PENDING_APPROVAL',
     },
   ],
   suspended: [],
   awarded: [],
   quashed: [
     {
-      dateChargeProved: new Date('2023-08-03'),
+      dateChargeProved: '2023-08-03',
       charges: [
         {
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           chargeNumber: 1526230,
           heardAt: 'Kirkham (HMP)',
           status: 'QUASHED',
@@ -128,7 +128,7 @@ const padasAwaitingApprovalAndQuashed = {
         },
       ],
       total: 25,
-      status: 'PENDING APPROVAL',
+      status: 'PENDING_APPROVAL',
     },
   ],
   totalAwarded: 0,
@@ -145,11 +145,11 @@ const padasAwaitingApprovalAndQuashed = {
 const mixPadasAndPending = {
   awaitingApproval: [
     {
-      dateChargeProved: new Date('2023-08-03'),
+      dateChargeProved: '2023-08-03',
       charges: [
         {
           chargeNumber: 1525916,
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           days: 5,
           heardAt: 'Moorland (HMP & YOI)',
           status: 'PROSPECTIVE',
@@ -158,7 +158,7 @@ const mixPadasAndPending = {
         },
         {
           chargeNumber: 1525917,
-          dateChargeProved: new Date('2023-08-03'),
+          dateChargeProved: '2023-08-03',
           days: 5,
           heardAt: 'Moorland (HMP & YOI)',
           status: 'AWARDED_OR_PENDING',
@@ -167,7 +167,7 @@ const mixPadasAndPending = {
         },
       ],
       total: 5,
-      status: 'PENDING APPROVAL',
+      status: 'PENDING_APPROVAL',
     },
   ],
   suspended: [],
@@ -199,7 +199,7 @@ beforeEach(() => {
       adjustmentsService,
       identifyRemandPeriodsService,
       adjustmentsStoreService,
-      additionalDaysAwardedService,
+      additionalDaysAwardedBackendService,
     },
     userSupplier: () => userInTest,
   })
@@ -217,7 +217,7 @@ describe('Additional Days Awarded routes tests', () => {
         earliestSentence: new Date(),
         earliestExcludingRecalls: new Date(),
       })
-      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(allPadas)
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(allPadas)
 
       return request(app)
         .get(`/${NOMS_ID}/additional-days/review-and-approve`)
@@ -230,7 +230,7 @@ describe('Additional Days Awarded routes tests', () => {
         earliestSentence: new Date(),
         earliestExcludingRecalls: new Date(),
       })
-      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
@@ -240,7 +240,7 @@ describe('Additional Days Awarded routes tests', () => {
         earliestSentence: new Date(),
         earliestExcludingRecalls: new Date(),
       })
-      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
@@ -250,7 +250,7 @@ describe('Additional Days Awarded routes tests', () => {
         earliestSentence: new Date(),
         earliestExcludingRecalls: new Date(),
       })
-      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
@@ -260,7 +260,7 @@ describe('Additional Days Awarded routes tests', () => {
         earliestSentence: new Date(),
         earliestExcludingRecalls: new Date(),
       })
-      additionalDaysAwardedService.getAdasToApprove.mockResolvedValue({
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue({
         ...noAwaitingApproval,
         showExistingAdaMessage: true,
         totalExistingAdads: 10,
