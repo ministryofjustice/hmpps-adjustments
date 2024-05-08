@@ -157,6 +157,7 @@ export default {
   environmentName: get('ENVIRONMENT_NAME', ''),
   analytics: {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
+    appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
   },
   featureToggles: {
     unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'false') === 'true',
