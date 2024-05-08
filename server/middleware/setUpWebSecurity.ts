@@ -25,7 +25,13 @@ export default function setUpWebSecurity(): Router {
   const fontSrc = ["'self'"]
   const imgSrc = ["'self'", 'data:']
   const formAction = [`'self' ${config.apis.hmppsAuth.externalUrl}`]
-  const connectSrc = ["'self'", '*.googletagmanager.com', '*.google-analytics.com', '*.analytics.google.com']
+  const connectSrc = [
+    "'self'",
+    '*.googletagmanager.com',
+    '*.google-analytics.com',
+    '*.analytics.google.com',
+    'https://northeurope-0.in.applicationinsights.azure.com',
+  ]
 
   if (config.apis.frontendComponents.url) {
     scriptSrc.push(config.apis.frontendComponents.url)
