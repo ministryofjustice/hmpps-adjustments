@@ -12,12 +12,13 @@ export default class AdditionalDaysAwardedRoutes {
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { prisonerNumber } = res.locals.prisoner
     const intercept: AdaIntercept = await this.additionalDaysAwardedBackendService.shouldIntercept(
       prisonerNumber,
       token,
+      activeCaseLoadId,
     )
 
     if (intercept.type === 'NONE') {
@@ -32,7 +33,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { prisoner } = res.locals
 
@@ -40,11 +41,12 @@ export default class AdditionalDaysAwardedRoutes {
       req,
       nomsId,
       token,
+      activeCaseLoadId,
     )
 
     if (adasToReview.intercept.type === 'PADA' && !adasToReview.awaitingApproval.length) {
       // Intercepted for PADAs, none have been selected.
-      await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, token)
+      await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, token, activeCaseLoadId)
       return res.redirect(`/${nomsId}`)
     }
 
@@ -69,10 +71,14 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
 
-    const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(nomsId, token)
+    const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(
+      nomsId,
+      token,
+      activeCaseLoadId,
+    )
 
     return res.render('pages/adjustments/additional-days/review-prospective', {
       padasToReview,
@@ -80,7 +86,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
 
     const padaForm = new PadaForm(req.body)
@@ -91,6 +97,7 @@ export default class AdditionalDaysAwardedRoutes {
       const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(
         nomsId,
         token,
+        activeCaseLoadId,
       )
       return res.render('pages/adjustments/additional-days/review-prospective', {
         padasToReview,
@@ -110,12 +117,13 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { referrer } = req.query as Record<string, string>
     const model = await this.additionalDaysAwardedBackendService.getReviewAndSubmitModel(
       req,
       res.locals.prisoner,
       token,
+      activeCaseLoadId,
     )
     return res.render('pages/adjustments/additional-days/review-and-submit', {
       model,
@@ -124,10 +132,10 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submit: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
 
-    await this.additionalDaysAwardedBackendService.submitAdjustments(req, res.locals.prisoner, token)
+    await this.additionalDaysAwardedBackendService.submitAdjustments(req, res.locals.prisoner, token, activeCaseLoadId)
 
     const message = {
       type: 'ADDITIONAL_DAYS_AWARDED',
@@ -149,9 +157,9 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
-    const adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, token)
+    const adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, token, activeCaseLoadId)
 
     return res.render('pages/adjustments/additional-days/view', {
       model: {

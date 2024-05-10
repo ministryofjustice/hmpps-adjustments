@@ -8,6 +8,7 @@ import {
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
+import config from '../config'
 
 export default class AdjustmentsService {
   public async create(adjustments: Adjustment[], token: string): Promise<CreateResponse> {
@@ -59,10 +60,11 @@ export default class AdjustmentsService {
   public async getAdaAdjudicationDetails(
     person: string,
     token: string,
+    activeCaseLoadId: string,
     selectedPadas: string[] = [],
-    service: string = 'PRISON-API',
-    activeCaseLoadId: string = null,
+    overrideService: string = null,
   ): Promise<AdaAdjudicationDetails> {
+    const service = overrideService || config.featureToggles.defaultAdaApi
     return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, service, selectedPadas, activeCaseLoadId)
   }
 

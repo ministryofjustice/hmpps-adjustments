@@ -16,8 +16,8 @@ export default class AdditionalDaysAwardedBackendService {
     private readonly additionalDaysAwardedStoreService: AdditionalDaysAwardedStoreService,
   ) {}
 
-  public async viewAdjustments(nomsId: string, token: string): Promise<AdasToView> {
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
+  public async viewAdjustments(nomsId: string, token: string, activeCaseLoadId: string): Promise<AdasToView> {
+    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId)
 
     return {
       awarded: response.awarded,
@@ -25,9 +25,14 @@ export default class AdditionalDaysAwardedBackendService {
     }
   }
 
-  public async getAdasToApprove(req: Request, nomsId: string, token: string): Promise<AdasToReview> {
+  public async getAdasToApprove(
+    req: Request,
+    nomsId: string,
+    token: string,
+    activeCaseLoadId: string,
+  ): Promise<AdasToReview> {
     const selected = this.additionalDaysAwardedStoreService.getSelectedPadas(req, nomsId)
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, selected)
+    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId, selected)
 
     return {
       awarded: response.awarded,
@@ -44,8 +49,8 @@ export default class AdditionalDaysAwardedBackendService {
     }
   }
 
-  public async getPadasToApprove(nomsId: string, token: string): Promise<PadasToReview> {
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
+  public async getPadasToApprove(nomsId: string, token: string, activeCaseLoadId: string): Promise<PadasToReview> {
+    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId)
 
     return {
       prospective: response.prospective,
@@ -57,8 +62,8 @@ export default class AdditionalDaysAwardedBackendService {
     this.additionalDaysAwardedStoreService.storeSelectedPadas(req, nomsId, padaForm.getSelectedProspectiveAdas())
   }
 
-  public async shouldIntercept(nomsId: string, token: string): Promise<AdaIntercept> {
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
+  public async shouldIntercept(nomsId: string, token: string, activeCaseLoadId: string): Promise<AdaIntercept> {
+    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId)
     return response.intercept
   }
 
@@ -66,11 +71,13 @@ export default class AdditionalDaysAwardedBackendService {
     req: Request,
     prisonerDetail: PrisonerSearchApiPrisoner,
     token: string,
+    activeCaseLoadId: string,
   ): Promise<ReviewAndSubmitAdaViewModel> {
     const { adjustmentsToCreate, allAdaAdjustments, quashed } = await this.getAdasToSubmitAndDelete(
       req,
       prisonerDetail,
       token,
+      activeCaseLoadId,
     )
 
     const quashedAdjustments = quashed.map(it => {
@@ -79,9 +86,14 @@ export default class AdditionalDaysAwardedBackendService {
     return new ReviewAndSubmitAdaViewModel(adjustmentsToCreate, allAdaAdjustments, quashedAdjustments)
   }
 
-  public async submitAdjustments(req: Request, prisonerDetail: PrisonerSearchApiPrisoner, token: string) {
+  public async submitAdjustments(
+    req: Request,
+    prisonerDetail: PrisonerSearchApiPrisoner,
+    token: string,
+    activeCaseLoadId: string,
+  ) {
     const { awarded, adjustmentsToCreate, allAdaAdjustments, prospectiveRejected } =
-      await this.getAdasToSubmitAndDelete(req, prisonerDetail, token)
+      await this.getAdasToSubmitAndDelete(req, prisonerDetail, token, activeCaseLoadId)
 
     const awardedIds = awarded.map(it => it.adjustmentId)
     // Delete all ADAs which were not in the awarded table.
@@ -140,6 +152,7 @@ export default class AdditionalDaysAwardedBackendService {
     req: Request,
     prisonerDetail: PrisonerSearchApiPrisoner,
     token: string,
+    activeCaseLoadId: string,
   ): Promise<{
     adjustmentsToCreate: Adjustment[]
     awarded: AdasByDateCharged[]
@@ -155,6 +168,7 @@ export default class AdditionalDaysAwardedBackendService {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(
       prisonerDetail.prisonerNumber,
       token,
+      activeCaseLoadId,
       selected,
     )
 
@@ -202,15 +216,11 @@ export default class AdditionalDaysAwardedBackendService {
     token: string,
   ): Promise<AdaComparisonModel> {
     if (config.featureToggles.adaComparisonEnabled) {
-      const service = reqService || 'PRISON-API'
-      const prisonApiResponse = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
-      const adjudicationsApiResponse = await this.adjustmentsService.getAdaAdjudicationDetails(
-        nomsId,
-        token,
-        [],
-        'ADJUDICATIONS_API',
-        activeCaseLoadId,
-      )
+      const service = reqService || config.featureToggles.defaultAdaApi
+      const [prisonApiResponse, adjudicationsApiResponse] = await Promise.all([
+        this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId, [], 'PRISON-API'),
+        this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId, [], 'ADJUDICATIONS-API'),
+      ])
 
       return new AdaComparisonModel(prisonApiResponse, adjudicationsApiResponse, service)
     }

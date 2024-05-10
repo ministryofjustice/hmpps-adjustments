@@ -47,7 +47,7 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { token, roles } = res.locals.user
+    const { token, roles, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
@@ -71,7 +71,11 @@ export default class AdjustmentRoutes {
     )
 
     if (!messageExists) {
-      const intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(prisonerNumber, token)
+      const intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(
+        prisonerNumber,
+        token,
+        activeCaseLoadId,
+      )
 
       if (intercept.type !== 'NONE') {
         return res.redirect(`/${nomsId}/additional-days/intercept`)

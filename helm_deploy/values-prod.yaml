@@ -25,6 +25,7 @@ generic-service:
     COMMON_COMPONENTS_ENABLED: 'true'
     UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED: 'false'
     ADA_COMPARISON_ENABLED: 'false'
+    DEFAULT_ADA_API: 'PRISON-API'
 
 generic-prometheus-alerts:
   alertSeverity: legacy-replacement-alerts
