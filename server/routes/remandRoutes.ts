@@ -345,11 +345,16 @@ export default class RemandRoutes {
       unusedDeductions,
     )
 
+    const days =
+      !sessionAdjustment.fromDate && !sessionAdjustment.toDate
+        ? sessionAdjustment.days
+        : daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate))
+
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
         {
           ...sessionAdjustment,
-          days: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
+          days,
         },
         dbAdjustment,
         sentencesAndOffences,

@@ -99,6 +99,8 @@
     ]
   },
   "dependencies": {
+    "@microsoft/applicationinsights-clickanalytics-js": "^3.1.0",
+    "@microsoft/applicationinsights-web": "^3.1.0",
     "@ministryofjustice/frontend": "^2.1.2",
     "agentkeepalive": "^4.5.0",
     "applicationinsights": "^3.0.0",
