@@ -6,6 +6,9 @@ import AdjustmentsService from './adjustmentsService'
 import { Adjustment, AdasByDateCharged } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
+import AdaComparisonModel from '../model/adaComparisonModel'
+import config from '../config'
+import FullPageError from '../model/FullPageError'
 
 export default class AdditionalDaysAwardedBackendService {
   constructor(
@@ -190,5 +193,27 @@ export default class AdditionalDaysAwardedBackendService {
         prospective: it.charges.some(charge => charge.status === 'PROSPECTIVE'),
       },
     } as Adjustment
+  }
+
+  public async comparisonViewModel(
+    nomsId: string,
+    activeCaseLoadId: string,
+    reqService: string,
+    token: string,
+  ): Promise<AdaComparisonModel> {
+    if (config.featureToggles.adaComparisonEnabled) {
+      const service = reqService || 'PRISON-API'
+      const prisonApiResponse = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token)
+      const adjudicationsApiResponse = await this.adjustmentsService.getAdaAdjudicationDetails(
+        nomsId,
+        token,
+        [],
+        'ADJUDICATIONS_API',
+        activeCaseLoadId,
+      )
+
+      return new AdaComparisonModel(prisonApiResponse, adjudicationsApiResponse, service)
+    }
+    throw FullPageError.notFoundError()
   }
 }

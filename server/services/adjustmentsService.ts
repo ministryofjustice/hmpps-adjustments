@@ -60,8 +60,10 @@ export default class AdjustmentsService {
     person: string,
     token: string,
     selectedPadas: string[] = [],
+    service: string = 'PRISON-API',
+    activeCaseLoadId: string = null,
   ): Promise<AdaAdjudicationDetails> {
-    return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, selectedPadas)
+    return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, service, selectedPadas, activeCaseLoadId)
   }
 
   public async rejectProspectiveAda(person: string, prospectiveAdaRejection: ProspectiveAdaRejection, token: string) {

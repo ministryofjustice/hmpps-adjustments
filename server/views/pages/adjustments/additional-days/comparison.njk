@@ -1,0 +1,83 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "../../../macros/adaTable.njk" import adaTable %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% set pageTitle = applicationName + " - Compare API responses" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="govuk-form-group govuk-body">
+        <h1 class="govuk-heading-l">
+          <span class="govuk-caption-xl">Adjustments</span>
+          Comparing API responses
+        </h1>
+
+        <p>This page is intended to compare Prison API and Adjudication API.</p>
+
+
+        {% set html %}
+        <div>
+          <p>Prison API response</p>
+          <pre>{{model.prisonApiJSON()}}</pre>
+
+          <p>Adjudications response</p>
+          <pre>{{model.adjudicationJSON()}}</pre>
+        </div>
+        {% endset %}
+
+        {{ govukDetails({
+          summaryText: "API responses for dev",
+          html: html
+        }) }}
+
+
+        <p>This data is currently loaded from {{model.currentApi}}, <a href="/{{prisoner.prisonerNumber}}/additional-days/comparison?service={{model.otherApi()}}">load data from {{model.otherApi()}} instead</a></p>
+        {% set response = model.prisonApiDetails if model.currentApi == 'PRISON-API' else model.adjudicationApiDetails %}
+          {{ adaTable({
+            tableId: 'awarded',
+            adas: response.awarded,
+            total: response.totalAwarded,
+            totalText: 'Total ADAs taken into calculation',
+            mainTitle: 'These ADAs will be included in the calculation.',
+            emptyTitle: prisoner.firstName | title + ' ' + prisoner.lastName | title + ' has no ADAs that are applicable to the current sentences.'
+            }) }}
+
+             {{ adaTable({
+              tableId: 'suspended-adas',
+              adas: response.suspended,
+              total: response.totalSuspended,
+              totalText: 'Total suspended ADAs',
+              mainTitle: 'Suspended ADAs will not be included in the calculation.'
+              }) }}
+
+            {{ adaTable({
+              tableId: 'awaiting-approval-adas',
+              adas: response.awaitingApproval,
+              total: response.totalAwaitingApproval,
+              totalText: 'Total ADAs taken into calculation',
+              mainTitle: 'Once you have reviewed and approved the pending ADAs, they will be added to the sentence calculation.',
+              emptyTitle: 'No ADA records waiting for approval exist for this offender'
+              }) }}
+
+              {{ adaTable({
+            tableId: 'quashed-approval-adas',
+            adas: response.quashed,
+            total: response.totalQuashed,
+            totalText: 'Total days',
+            mainTitle: 'Once you have reviewed and approved the quashed ADAs, they will not be added to the sentence calculation.'
+            }) }}
+
+              {{ adaTable({
+            tableId: 'quashed-approval-adas',
+            adas: response.prospective,
+            total: response.totalProspective,
+            totalText: 'Total days',
+            mainTitle: 'Prospective'
+            }) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

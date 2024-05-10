@@ -159,4 +159,20 @@ export default class AdditionalDaysAwardedRoutes {
       },
     })
   }
+
+  public adaComparison: RequestHandler = async (req, res): Promise<void> => {
+    const { token, activeCaseLoadId } = res.locals.user
+    const { nomsId } = req.params
+    const { service } = req.query as Record<string, string>
+    const model = await this.additionalDaysAwardedBackendService.comparisonViewModel(
+      nomsId,
+      activeCaseLoadId,
+      service,
+      token,
+    )
+
+    return res.render('pages/adjustments/additional-days/comparison', {
+      model,
+    })
+  }
 }

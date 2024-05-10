@@ -160,5 +160,6 @@ export default {
   },
   featureToggles: {
     unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'false') === 'true',
+    adaComparisonEnabled: get('ADA_COMPARISON_ENABLED', 'false') === 'true',
   },
 }

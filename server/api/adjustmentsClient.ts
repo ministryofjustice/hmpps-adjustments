@@ -55,9 +55,19 @@ export default class AdjustmentsClient {
     return this.restClient.post({ path: `/adjustments/restore`, data: adjustment }) as Promise<void>
   }
 
-  async getAdaAdjudicationDetails(person: string, selectedPadas: string[]): Promise<AdaAdjudicationDetails> {
+  async getAdaAdjudicationDetails(
+    person: string,
+    service: string,
+    selectedPadas: string[],
+    activeCaseLoadId?: string,
+  ): Promise<AdaAdjudicationDetails> {
+    let headers = {}
+    if (activeCaseLoadId) {
+      headers = { 'Active-Caseload': activeCaseLoadId }
+    }
     return this.restClient.get({
-      path: `/adjustments/additional-days/${person}/adjudication-details?selectedProspectiveAdaDates=${selectedPadas.join(',')}`,
+      path: `/adjustments/additional-days/${person}/adjudication-details?service=${service}&selectedProspectiveAdaDates=${selectedPadas.join(',')}`,
+      headers,
     }) as Promise<AdaAdjudicationDetails>
   }
 
