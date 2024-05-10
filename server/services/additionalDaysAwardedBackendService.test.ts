@@ -19,6 +19,7 @@ const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsSe
 const adaService = new AdditionalDaysAwardedBackendService(adjustmentsService, storeService)
 
 const token = 'token'
+const activeCaseLoadId = 'activeCaseLoadId'
 
 const adjudicationOneAdjustment = {
   id: '8569b6d4-9c6f-48d2-83db-bb5091f1011e',
@@ -114,6 +115,7 @@ describe('ADA submit functionality', () => {
         bookingId,
       } as PrisonerSearchApiPrisoner,
       token,
+      activeCaseLoadId,
     )
     expect(adjustmentsService.delete).toHaveBeenCalledTimes(3)
     expect(adjustmentsService.create).toHaveBeenCalledTimes(1)
@@ -190,6 +192,7 @@ describe('ADA submit functionality', () => {
         bookingId,
       } as PrisonerSearchApiPrisoner,
       token,
+      activeCaseLoadId,
     )
 
     expect(adjustmentsService.rejectProspectiveAda).toHaveBeenCalledWith(
