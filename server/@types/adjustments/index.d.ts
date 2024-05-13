@@ -174,11 +174,13 @@ export interface components {
       active: boolean
       /** @description Has the prisoner been released from the NOMIS booking */
       bookingReleased: boolean
+      /** @description The ID of the agency the prisoner is located */
+      agencyId?: string
     }
     /** @description The details of an additional days awarded (ADA) adjustment */
     AdditionalDaysAwardedDto: {
       /** @description The id of the adjudication that resulted in the ADA */
-      adjudicationId: number[]
+      adjudicationId: string[]
       prospective: boolean
     }
     /** @description The adjustment and its identifier */
@@ -379,18 +381,15 @@ export interface components {
     Ada: {
       /** Format: date */
       dateChargeProved: string
-      /** Format: int64 */
-      chargeNumber: number
+      chargeNumber: string
       toBeServed?: string
       heardAt?: string
       /** @enum {string} */
       status: 'AWARDED_OR_PENDING' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
       /** Format: int32 */
       days: number
-      /** Format: int64 */
-      sequence?: number
-      /** Format: int64 */
-      consecutiveToSequence?: number
+      sequence?: string
+      consecutiveToSequence?: string
     }
     AdaAdjudicationDetails: {
       awarded: components['schemas']['AdasByDateCharged'][]
@@ -969,6 +968,11 @@ export interface operations {
          * @example 2022-01-10,2022-02-11
          */
         selectedProspectiveAdaDates?: string[]
+        /**
+         * @description Which service to look adas from, defaults to prison api.
+         * @example PRISON-API
+         */
+        service?: string
       }
       path: {
         /**
