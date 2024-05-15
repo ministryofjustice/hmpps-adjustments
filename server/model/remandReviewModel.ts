@@ -65,6 +65,8 @@ export default class RemandReviewModel {
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
     const offences = offencesForRemandAdjustment(adjustment, this.sentencesAndOffences)
+    const adjustmentFromDate = dayjs(adjustment.fromDate).format('DD MMM YYYY')
+    const adjustmentToDate = dayjs(adjustment.toDate).format('DD MMM YYYY')
     return {
       rows: [
         {
@@ -72,16 +74,14 @@ export default class RemandReviewModel {
             text: 'Remand period',
           },
           value: {
-            text: `${dayjs(adjustment.fromDate).format('DD MMM YYYY')} to ${dayjs(adjustment.toDate).format(
-              'DD MMM YYYY',
-            )}`,
+            text: `${adjustmentFromDate} to ${adjustmentToDate}`,
           },
           actions: {
             items: [
               {
                 href: `/${this.prisonerNumber}/remand/dates/add/${id}`,
                 text: 'Edit',
-                visuallyHiddenText: 'remand period',
+                visuallyHiddenText: `remand period from ${adjustmentFromDate} to ${adjustmentToDate}`,
               },
             ],
           },
@@ -107,7 +107,11 @@ export default class RemandReviewModel {
               {
                 href: `/${this.prisonerNumber}/remand/offences/add/${id}`,
                 text: 'Edit',
-                visuallyHiddenText: 'offences',
+                visuallyHiddenText: `offences. ${offences
+                  .map(it => {
+                    return `${it.offenceDescription} ${this.getCommittedText(it)}${it.recall ? '. This offence was recalled' : ''}`
+                  })
+                  .join('. ')}`,
               },
             ],
           },
