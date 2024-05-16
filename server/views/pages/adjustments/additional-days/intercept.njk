@@ -20,7 +20,6 @@
             Review ADA adjudication{{pluralisation}}
           {% elif model.intercept.type == 'PADA' %}
             Review PADA{{pluralisation}}
-            </h2>
           {% elif model.intercept.type == 'UPDATE' %}
             Review ADA updates
           {% else %}
@@ -30,7 +29,8 @@
 
       <p class="govuk-body">
         {% if model.intercept.type == 'FIRST_TIME' %}
-          The first time you use the adjustments service, you must check that the ADA (Additional days awarded) information is correct.
+          This service has identified ADA adjustments that were created in NOMIS.
+          You must review the adjudications with ADAs and approve them in this service.
         {% elif model.intercept.type == 'PADA' %}
           {% if model.intercept.number > 1 %}
             There are PADAs (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADAs and approve the ones that are relevant to the current sentence.
