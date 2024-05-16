@@ -57,17 +57,12 @@ export default class AdjustmentsClient {
 
   async getAdaAdjudicationDetails(
     person: string,
-    service: string,
     selectedPadas: string[],
-    activeCaseLoadId?: string,
+    activeCaseLoadId: string,
   ): Promise<AdaAdjudicationDetails> {
-    let headers = {}
-    if (activeCaseLoadId) {
-      headers = { 'Active-Caseload': activeCaseLoadId }
-    }
     return this.restClient.get({
-      path: `/adjustments/additional-days/${person}/adjudication-details?service=${service}&selectedProspectiveAdaDates=${selectedPadas.join(',')}`,
-      headers,
+      path: `/adjustments/additional-days/${person}/adjudication-details?selectedProspectiveAdaDates=${selectedPadas.join(',')}`,
+      headers: { 'Active-Caseload': activeCaseLoadId },
     }) as Promise<AdaAdjudicationDetails>
   }
 

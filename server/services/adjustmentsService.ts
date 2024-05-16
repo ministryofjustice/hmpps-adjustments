@@ -8,7 +8,6 @@ import {
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
-import config from '../config'
 
 export default class AdjustmentsService {
   public async create(adjustments: Adjustment[], token: string): Promise<CreateResponse> {
@@ -62,10 +61,8 @@ export default class AdjustmentsService {
     token: string,
     activeCaseLoadId: string,
     selectedPadas: string[] = [],
-    overrideService: string = null,
   ): Promise<AdaAdjudicationDetails> {
-    const service = overrideService || config.featureToggles.defaultAdaApi
-    return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, service, selectedPadas, activeCaseLoadId)
+    return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, selectedPadas, activeCaseLoadId)
   }
 
   public async rejectProspectiveAda(person: string, prospectiveAdaRejection: ProspectiveAdaRejection, token: string) {

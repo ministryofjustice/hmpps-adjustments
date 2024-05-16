@@ -62,7 +62,6 @@ describe('ADA submit functionality', () => {
               heardAt: 'Moorland (HMP & YOI)',
               status: 'AWARDED_OR_PENDING',
               toBeServed: 'Forthwith',
-              sequence: '15',
             },
             {
               chargeNumber: '1525917',
@@ -71,8 +70,7 @@ describe('ADA submit functionality', () => {
               heardAt: 'Moorland (HMP & YOI)',
               status: 'AWARDED_OR_PENDING',
               toBeServed: 'Consecutive to 1525916',
-              sequence: '16',
-              consecutiveToSequence: '15',
+              consecutiveToChargeNumber: '1525916',
             },
             {
               chargeNumber: '1525918',
@@ -81,7 +79,6 @@ describe('ADA submit functionality', () => {
               heardAt: 'Moorland (HMP & YOI)',
               status: 'AWARDED_OR_PENDING',
               toBeServed: 'Concurrent',
-              sequence: '17',
             },
           ],
           total: 10,
@@ -153,7 +150,6 @@ describe('ADA submit functionality', () => {
               heardAt: 'Moorland (HMP & YOI)',
               status: 'AWARDED_OR_PENDING',
               toBeServed: 'Forthwith',
-              sequence: '15',
             },
             {
               chargeNumber: '1525917',
@@ -162,8 +158,7 @@ describe('ADA submit functionality', () => {
               heardAt: 'Moorland (HMP & YOI)',
               status: 'AWARDED_OR_PENDING',
               toBeServed: 'Consecutive to 1525916',
-              sequence: '16',
-              consecutiveToSequence: '15',
+              consecutiveToChargeNumber: '1525916',
             },
             {
               chargeNumber: '1525918',
@@ -172,7 +167,6 @@ describe('ADA submit functionality', () => {
               heardAt: 'Moorland (HMP & YOI)',
               status: 'AWARDED_OR_PENDING',
               toBeServed: 'Concurrent',
-              sequence: '17',
             },
           ],
           total: 10,
