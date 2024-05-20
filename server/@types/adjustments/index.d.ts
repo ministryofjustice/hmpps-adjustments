@@ -101,14 +101,6 @@ export interface paths {
   '/queue-admin/get-dlq-messages/{dlqName}': {
     get: operations['getDlqMessages']
   }
-  '/adjustments/{person}/intercept': {
-    /** Determine if there needs to be an adjustment-interception for this person */
-    get: operations['determineAdaIntercept']
-  }
-  '/adjustments/additional-days/{person}/intercept': {
-    /** Determine if there needs to be an adjustment-interception for this person */
-    get: operations['determineAdaIntercept_1']
-  }
   '/adjustments/additional-days/{person}/adjudication-details': {
     /** Get all details of adjudications and associated adjustments */
     get: operations['getAdaAdjudicationDetails']
@@ -369,15 +361,6 @@ export interface components {
       messagesReturnedCount: number
       messages: components['schemas']['DlqMessage'][]
     }
-    AdaIntercept: {
-      /** @enum {string} */
-      type: 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'
-      /** Format: int32 */
-      number: number
-      anyProspective: boolean
-      messageArguments: string[]
-      message?: string
-    }
     Ada: {
       /** Format: date */
       dateChargeProved: string
@@ -388,8 +371,7 @@ export interface components {
       status: 'AWARDED_OR_PENDING' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
       /** Format: int32 */
       days: number
-      sequence?: string
-      consecutiveToSequence?: string
+      consecutiveToChargeNumber?: string
     }
     AdaAdjudicationDetails: {
       awarded: components['schemas']['AdasByDateCharged'][]
@@ -411,6 +393,15 @@ export interface components {
       /** Format: int32 */
       totalExistingAdas: number
       showExistingAdaMessage: boolean
+    }
+    AdaIntercept: {
+      /** @enum {string} */
+      type: 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'
+      /** Format: int32 */
+      number: number
+      anyProspective: boolean
+      messageArguments: string[]
+      message?: string
     }
     AdasByDateCharged: {
       /** Format: date */
@@ -895,70 +886,6 @@ export interface operations {
       }
     }
   }
-  /** Determine if there needs to be an adjustment-interception for this person */
-  determineAdaIntercept: {
-    parameters: {
-      path: {
-        /**
-         * @description The noms ID of the person
-         * @example AA1256A
-         */
-        person: string
-      }
-    }
-    responses: {
-      /** @description Intercept decision returned */
-      200: {
-        content: {
-          'application/json': components['schemas']['AdaIntercept']
-        }
-      }
-      /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: {
-          'application/json': components['schemas']['AdaIntercept']
-        }
-      }
-      /** @description Adjustment not found */
-      404: {
-        content: {
-          'application/json': components['schemas']['AdaIntercept']
-        }
-      }
-    }
-  }
-  /** Determine if there needs to be an adjustment-interception for this person */
-  determineAdaIntercept_1: {
-    parameters: {
-      path: {
-        /**
-         * @description The noms ID of the person
-         * @example AA1256A
-         */
-        person: string
-      }
-    }
-    responses: {
-      /** @description Intercept decision returned */
-      200: {
-        content: {
-          'application/json': components['schemas']['AdaIntercept']
-        }
-      }
-      /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        content: {
-          'application/json': components['schemas']['AdaIntercept']
-        }
-      }
-      /** @description Adjustment not found */
-      404: {
-        content: {
-          'application/json': components['schemas']['AdaIntercept']
-        }
-      }
-    }
-  }
   /** Get all details of adjudications and associated adjustments */
   getAdaAdjudicationDetails: {
     parameters: {
@@ -968,11 +895,6 @@ export interface operations {
          * @example 2022-01-10,2022-02-11
          */
         selectedProspectiveAdaDates?: string[]
-        /**
-         * @description Which service to look adas from, defaults to prison api.
-         * @example PRISON-API
-         */
-        service?: string
       }
       path: {
         /**

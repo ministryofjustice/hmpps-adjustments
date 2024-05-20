@@ -13,6 +13,7 @@ const stubUser = (name: string = 'john smith') =>
       },
       jsonBody: {
         username: 'USER1',
+        activeCaseLoadId: 'BRI',
         active: true,
         name,
       },

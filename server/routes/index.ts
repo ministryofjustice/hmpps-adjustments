@@ -67,7 +67,6 @@ export default function routes(service: Services): Router {
   post('/:nomsId/additional-days/review-and-submit', additionalDaysAwardedRoutes.submit)
   get('/:nomsId/additional-days/view', additionalDaysAwardedRoutes.view)
   get('/:nomsId/additional-days/add', additionalDaysAwardedRoutes.addWarning)
-  get('/:nomsId/additional-days/comparison', additionalDaysAwardedRoutes.adaComparison)
 
   get('/:nomsId/remand/add', remandRoutes.add)
   get('/:nomsId/remand/dates/:addOrEdit/:id', remandRoutes.dates)
