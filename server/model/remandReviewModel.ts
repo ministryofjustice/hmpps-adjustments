@@ -97,7 +97,9 @@ export default class RemandReviewModel {
                         return `<div>${it.offenceDescription}${it.recall ? getSentenceRecallTagHTML() : ''}<br>
                         <span class="govuk-hint">
                           ${this.getCommittedText(it)}
-                        </span></div>`
+                        </span><br>
+                          ${this.getHeardAtCourt(it)}
+                        </div>`
                       })
                       .join('')}
                   </div>`,
@@ -126,6 +128,10 @@ export default class RemandReviewModel {
         },
       ],
     }
+  }
+
+  public getHeardAtCourt(offence: PrisonApiOffence & { recall: boolean; courtDescription: string }): string {
+    return `Heard at ${offence.courtDescription}`
   }
 
   public getCommittedText(offence: PrisonApiOffence & { recall: boolean }): string {
