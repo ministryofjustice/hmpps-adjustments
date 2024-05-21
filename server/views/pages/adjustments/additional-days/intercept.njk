@@ -17,7 +17,11 @@
           {% endif %}
 
           {% if model.intercept.type == 'FIRST_TIME' %}
-            Review ADA adjudication{{pluralisation}}
+            {% if model.numOfAdaAdjudications === 0 %}
+              Review ADA adjustment{{pluralisation}}
+            {% else %}
+              Review ADA adjudication{{pluralisation}}
+            {% endif %}
           {% elif model.intercept.type == 'PADA' %}
             Review PADA{{pluralisation}}
           {% elif model.intercept.type == 'UPDATE' %}
@@ -29,8 +33,13 @@
 
       <p class="govuk-body">
         {% if model.intercept.type == 'FIRST_TIME' %}
-          This service has identified ADA adjustments that were created in NOMIS.
-          You must review the adjudications with ADAs and approve them in this service.
+          {% if model.numOfAdaAdjudications === 0 %}
+            This service has identified an ADA adjustment with no supporting ADA adjudication.
+            You must review the ADA adjustment and confirm whether it should be deleted.
+          {% else %}
+            This service has identified ADA adjustments that were created in NOMIS.
+            You must review the adjudications with ADAs and approve them in this service.
+          {% endif %}
         {% elif model.intercept.type == 'PADA' %}
           {% if model.intercept.number > 1 %}
             There are PADAs (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADAs and approve the ones that are relevant to the current sentence.
