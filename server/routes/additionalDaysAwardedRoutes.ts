@@ -24,12 +24,8 @@ export default class AdditionalDaysAwardedRoutes {
     }
 
     let numOfAdaAdjudications = 0
-    numOfAdaAdjudications += response.totalAwarded
-    numOfAdaAdjudications += response.totalSuspended
-    numOfAdaAdjudications += response.totalQuashed
     numOfAdaAdjudications += response.totalAwaitingApproval
     numOfAdaAdjudications += response.totalProspective
-    numOfAdaAdjudications += response.totalExistingAdas
 
     return res.render('pages/adjustments/additional-days/intercept', {
       model: {
