@@ -1,33 +1,36 @@
 import { RequestHandler } from 'express'
 import PrisonerService from '../services/prisonerService'
-import { AdaIntercept, AdasToReview, PadasToReview } from '../@types/AdaTypes'
+import { AdasToReview, PadasToReview } from '../@types/AdaTypes'
 import { Message } from '../model/adjustmentsHubViewModel'
 import PadaForm from '../model/padaForm'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
+import AdjustmentsService from '../services/adjustmentsService'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
+    private readonly adjustmentsService: AdjustmentsService,
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
     const { token, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { prisonerNumber } = res.locals.prisoner
-    const intercept: AdaIntercept = await this.additionalDaysAwardedBackendService.shouldIntercept(
-      prisonerNumber,
-      token,
-      activeCaseLoadId,
-    )
+    const response = await this.adjustmentsService.getAdaAdjudicationDetails(prisonerNumber, token, activeCaseLoadId)
 
-    if (intercept.type === 'NONE') {
+    if (response.intercept.type === 'NONE') {
       return res.redirect(`/${nomsId}`)
     }
 
+    let numOfAdaAdjudications = 0
+    numOfAdaAdjudications += response.totalAwaitingApproval
+    numOfAdaAdjudications += response.totalProspective
+
     return res.render('pages/adjustments/additional-days/intercept', {
       model: {
-        intercept,
+        intercept: response.intercept,
+        numOfAdaAdjudications,
       },
     })
   }
