@@ -32,6 +32,7 @@ export default function routes(service: Services): Router {
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
     service.prisonerService,
     service.additionalDaysAwardedBackendService,
+    service.adjustmentsService,
   )
 
   const taggedBailRoutes = new TaggedBailRoutes(

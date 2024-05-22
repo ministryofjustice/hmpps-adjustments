@@ -58,17 +58,13 @@ export default class AdjustmentRoutes {
       this.adjustmentsStoreService.clear(req, nomsId)
     }
 
-    const adjustments = await this.adjustmentsService.findByPerson(
-      nomsId,
-      startOfSentenceEnvelope.earliestSentence,
-      token,
-    )
-    const unusedDeductionMessage = await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessage(
-      nomsId,
-      adjustments,
-      !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
-      token,
-    )
+    const [unusedDeductionMessage, adjustments] =
+      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(
+        nomsId,
+        startOfSentenceEnvelope.earliestSentence,
+        !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
+        token,
+      )
 
     if (!messageExists) {
       const intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(

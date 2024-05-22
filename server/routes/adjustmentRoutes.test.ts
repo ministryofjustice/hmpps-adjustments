@@ -123,13 +123,11 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
-      remandAdjustment,
-      unusedDeductions,
-    ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NONE')
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }, remandAdjustment, unusedDeductions],
+    ])
     additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
@@ -152,9 +150,11 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('UNSUPPORTED')
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNSUPPORTED',
+      [remandAdjustment],
+    ])
     additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
@@ -174,9 +174,11 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('VALIDATION')
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'VALIDATION',
+      [remandAdjustment],
+    ])
     additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
@@ -196,9 +198,11 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NOMIS_ADJUSTMENT')
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [remandAdjustment],
+    ])
     additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
@@ -218,9 +222,11 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('UNKNOWN')
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNKNOWN',
+      [remandAdjustment],
+    ])
     additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
@@ -237,9 +243,6 @@ describe('Adjustment routes tests', () => {
   })
   it('GET /{nomsId} with remand role', () => {
     userInTest = userWithRemandRole
-    adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
-    ])
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
@@ -250,7 +253,10 @@ describe('Adjustment routes tests', () => {
       number: 0,
       anyProspective: false,
     })
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NONE')
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -263,8 +269,9 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNKNOWN',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
     ])
     additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'FIRST_TIME',
