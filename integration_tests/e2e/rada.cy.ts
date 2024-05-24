@@ -16,13 +16,13 @@ context('Enter a RADA', () => {
     cy.task('stubGetRelevantRemand')
     cy.task('stubValidateAdjustmentWithWarning')
     cy.task('stubCreateAdjustment')
-    cy.task('stubGetAdjustment')
+    cy.task('stubGetRadaAdjustment')
     cy.task('stubUpdateAdjustment')
     cy.task('stubDeleteRada')
     cy.task('stubGetRemandDecision')
-    cy.task('stubSearchAdjudicationsNoReview')
-    cy.task('stubIndividualAdjudicationsNoReview')
+    cy.task('subAdaDetailsNoIntercept')
     cy.task('stubGetSentencesAndOffences')
+    cy.task('stubComponents')
   })
 
   it('Add a RADA', () => {
@@ -39,12 +39,11 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('25 days of RADA have been added')
+    hub.successMessage().contains('25 days of RADA have been saved')
   })
 
   it('Add a RADA when no ADAs exist produces error message', () => {
     cy.task('stubGetAdjustmentsNoAdas')
-    cy.task('sstubSearchAdjudicationsNoResults')
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.addRadaLink().click()
@@ -60,7 +59,7 @@ context('Enter a RADA', () => {
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.viewRadaLink().click()
-    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA details')
+    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA overview')
     viewPage.table().contains('Leeds')
     const id = '4c3c057c-896d-4793-9022-f3001e209a36'
     viewPage.editLink(id).click()
@@ -73,19 +72,19 @@ context('Enter a RADA', () => {
     const review = ReviewPage.verifyOnPage(ReviewPage)
     review.submit().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('26 days of RADA have been update')
+    hub.successMessage().contains('RADA details have been updated')
   })
 
   it('View and remove a RADA', () => {
     cy.signIn()
     let hub = HubPage.goTo('A1234AB')
     hub.viewRadaLink().click()
-    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA details')
+    const viewPage = ViewPage.verifyOnPage<ViewPage>(ViewPage, 'RADA overview')
     const id = '4c3c057c-896d-4793-9022-f3001e209a36'
     viewPage.removeLink(id).click()
-    const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Are you sure you want to remove RADA')
+    const removePage = RemovePage.verifyOnPage<RemovePage>(RemovePage, 'Delete RADA')
     removePage.removeButton().click()
     hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('25 days of RADA have been removed')
+    hub.successMessage().contains('25 days of RADA have been deleted')
   })
 })

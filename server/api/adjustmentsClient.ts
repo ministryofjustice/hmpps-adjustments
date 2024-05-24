@@ -1,9 +1,11 @@
 import config, { ApiConfig } from '../config'
 import RestClient from '../data/restClient'
 import {
+  AdaAdjudicationDetails,
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
+  ProspectiveAdaRejection,
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
@@ -51,5 +53,23 @@ export default class AdjustmentsClient {
 
   async restore(adjustment: RestoreAdjustments): Promise<void> {
     return this.restClient.post({ path: `/adjustments/restore`, data: adjustment }) as Promise<void>
+  }
+
+  async getAdaAdjudicationDetails(
+    person: string,
+    selectedPadas: string[],
+    activeCaseLoadId: string,
+  ): Promise<AdaAdjudicationDetails> {
+    return this.restClient.get({
+      path: `/adjustments/additional-days/${person}/adjudication-details?selectedProspectiveAdaDates=${selectedPadas.join(',')}`,
+      headers: { 'Active-Caseload': activeCaseLoadId },
+    }) as Promise<AdaAdjudicationDetails>
+  }
+
+  async rejectProspectiveAda(person: string, prospectiveAdaRejection: ProspectiveAdaRejection) {
+    return this.restClient.post({
+      path: `/adjustments/additional-days/${person}/reject-prospective-ada`,
+      data: prospectiveAdaRejection,
+    })
   }
 }

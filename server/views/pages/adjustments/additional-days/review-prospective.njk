@@ -25,16 +25,15 @@
       <div class="govuk-form-group govuk-body">
 
         <h1 class="govuk-heading-l">
-          <span class="govuk-caption-xl">Adjust release dates</span>
-          Review PADAs
+          <span class="govuk-caption-xl">Adjustments</span>
+          Select all the relevant PADAs
         </h1>
 
         <p>
-          Select the PADA adjudications that apply to the prisoner's sentence calculation
+          Select all the PADAs that apply to the prisoner's sentence calculation.
         </p>
         <p>
-          The rules for PADAs can be found in the <a class="govuk-link" rel="noreferrer noopener" target="_blank"
-                                                     href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf#page=102">policy
+          The rules for PADAs can be found in the <a class="govuk-link" rel="noreferrer noopener" target="_blank" href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf#page=102">policy
             framework</a>.
         </p>
 
@@ -47,15 +46,22 @@
             checkboxes: true
           }) }}
 
-          {{ govukButton({
-            text: "Continue",
-            type: submit,
-            preventDoubleClick: true,
-            attributes: {'data-qa': 'continue-button'}
-          }) }}
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Continue",
+              type: submit,
+              preventDoubleClick: true,
+              attributes: {'data-qa': 'continue-button'}
+            }) }}
 
+            {{ govukButton({
+              text: "Cancel",
+              href: "../",
+              classes: "govuk-button--secondary",
+              attributes: {'data-qa': 'cancel-button'}
+            }) }}
+          </div>
         </form>
-        <a href="../">Cancel and return to dashboard</a>
       </div>
     </div>
   </div>

@@ -3,6 +3,8 @@ import { delay } from '../utils/utils'
 import AdjustmentsService from './adjustmentsService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
 
+export type UnusedDeductionMessageType = 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'UNKNOWN' | 'NONE'
+
 export default class UnusedDeductionsService {
   private maxTries = 6 // 3 seconds max wait
 
@@ -17,60 +19,20 @@ export default class UnusedDeductionsService {
     return deductions.some(it => !it.remand?.chargeId?.length && !it.taggedBail?.caseSequence)
   }
 
-  /* Wait until calclulated unused deductions matches with adjustments database. */
-  async waitUntilUnusedRemandCreated(nomsId: string, token: string): Promise<boolean> {
-    try {
-      let adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-
-      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      if (this.anyDeductionFromNomis(deductions)) {
-        // won't calculate unused deductions if adjusments are not from DPS.
-        return false
-      }
-
-      const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
-        nomsId,
-        adjustments,
-        token,
-      )
-
-      if (unusedDeductionsResponse.validationMessages?.length) {
-        return false
-      }
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
-
-      /* eslint-disable no-await-in-loop */
-      for (let i = 0; i < this.maxTries; i += 1) {
-        if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
-          const dbDeductions = this.getTotalUnusedRemand(adjustments)
-          if (calculatedUnusedDeducions === dbDeductions) {
-            return true
-          }
-          await delay(this.waitBetweenTries)
-          adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-          // Try again
-        } else {
-          // Unable to calculate unused deductions.
-          return false
-        }
-      }
-    } catch {
-      // Error couldn't calculate unused deductions.
-    }
-    return false
-    /* eslint-enable no-await-in-loop */
-  }
-
-  async serviceHasCalculatedUnusedDeductions(
+  async getCalculatedUnusedDeductionsMessageAndAdjustments(
     nomsId: string,
-    adjustments: Adjustment[],
+    startOfSentenceEnvelope: Date,
+    retry: boolean,
     token: string,
-  ): Promise<boolean> {
+  ): Promise<[UnusedDeductionMessageType, Adjustment[]]> {
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, token)
     try {
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      if (this.anyDeductionFromNomis(deductions)) {
-        return false
+      if (!deductions.length) {
+        // If there are no deductions then unused deductions doesn't need to be calculated
+        return ['NONE', adjustments]
       }
+
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
         adjustments,
@@ -78,19 +40,45 @@ export default class UnusedDeductionsService {
       )
 
       if (unusedDeductionsResponse.validationMessages?.length) {
-        return false
-      }
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
+        if (
+          unusedDeductionsResponse.validationMessages.find(
+            it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
+          )
+        ) {
+          return ['UNSUPPORTED', adjustments]
+        }
 
+        return ['VALIDATION', adjustments]
+      }
+
+      if (this.anyDeductionFromNomis(deductions)) {
+        return ['NOMIS_ADJUSTMENT', adjustments]
+      }
+
+      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
       if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
         const dbDeductions = this.getTotalUnusedRemand(adjustments)
         if (calculatedUnusedDeducions === dbDeductions) {
-          return true
+          return ['NONE', adjustments]
+        }
+        if (retry) {
+          /* eslint-disable no-await-in-loop */
+          for (let i = 0; i < this.maxTries; i += 1) {
+            await delay(this.waitBetweenTries)
+            const retryAdjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, token)
+            const retryDeductions = this.getTotalUnusedRemand(retryAdjustments)
+            if (calculatedUnusedDeducions === retryDeductions) {
+              return ['NONE', retryAdjustments]
+            }
+            // Try again
+          }
+          /* eslint-enable no-await-in-loop */
         }
       }
-      return false
+
+      return ['UNKNOWN', adjustments]
     } catch {
-      return false
+      return ['UNKNOWN', adjustments]
     }
   }
 

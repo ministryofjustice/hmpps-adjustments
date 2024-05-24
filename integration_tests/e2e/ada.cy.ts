@@ -14,11 +14,12 @@ context('Enter an ADA', () => {
     cy.task('stubGetAdjustments')
     cy.task('stubGetRelevantRemand')
     cy.task('stubGetRemandDecision')
-    cy.task('stubSearchAdjudications')
-    cy.task('stubIndividualAdjudications')
+    cy.task('subAdaDetailsForIntercept')
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubDeleteAda')
     cy.task('stubCreateAdjustment')
+    cy.task('stubComponents')
+    cy.task('stubRejectProspectiveAda')
   })
 
   it('Enter an AADA', () => {
@@ -48,6 +49,6 @@ context('Enter an ADA', () => {
     submit.submitButton().click()
 
     const hub = HubPage.verifyOnPage(HubPage)
-    hub.successMessage().contains('ADA updates have been saved')
+    hub.successMessage().contains('ADA details have been updated')
   })
 })

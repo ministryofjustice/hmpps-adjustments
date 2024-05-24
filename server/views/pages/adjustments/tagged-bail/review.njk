@@ -4,6 +4,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
 {% set pageTitle = applicationName + " - Enter tagged bail dates" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -21,56 +22,70 @@
 {% block content %}
 
   <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      {% if model.showUnusedMessage %}
+        {% set html %}
+          <p class="govuk-notification-banner__heading">
+            When you save this tagged bail, the unused deductions will be automatically be recorded. Check that the unused remand alert has been added.
+          </p>
+        {% endset %}
+
+        {{ govukNotificationBanner({
+          html: html
+        }) }}
+      {% endif %}
+    </div>
+  </div>
+  <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
-        <span class="govuk-caption-xl">Adjust release dates</span>
+        <span class="govuk-caption-xl">Adjustments</span>
         Confirm and save
       </h1>
     </div>
   </div>
 
   <h2 class="govuk-heading-m">Tagged bail details</h2>
-  <div class="govuk-grid-column-two-thirds-from-desktop govuk-!-padding-left-0">
+  <div class="govuk-grid-column-full govuk-!-padding-left-0">
 
     {{ govukSummaryList({
       rows: [
         {
           key: {
-          text: "Case details"
-        },
+            text: "Case details"
+          },
           value: {
-          html: model.getCaseDetails()
-        },
+            html: model.getCaseDetails()
+          },
           actions: {
-          items: [
-            {
-              href: "/" + prisoner.prisonerNumber + "/tagged-bail/select-case/add/" + model.id,
-              text: "Edit"
-            }
-          ]
-        }
+            items: [
+              {
+                href: "/" + prisoner.prisonerNumber + "/tagged-bail/select-case/add/" + model.id,
+                text: "Edit",
+                visuallyHiddenText: "case details"
+              }
+            ]
+          }
         },
         {
           key: {
-          text: "Days"
-        },
+            text: "Number of days"
+          },
           value: {
-          text: model.adjustment.days
-        },
+            text: model.adjustment.days
+          },
           actions: {
-          items: [
-            {
-              href: "/" + prisoner.prisonerNumber + "/tagged-bail/days/add/" + model.id,
-              text: "Edit"
-            }
-          ]
-        }
+            items: [
+              {
+                href: "/" + prisoner.prisonerNumber + "/tagged-bail/days/add/" + model.id,
+                text: "Edit",
+                visuallyHiddenText: "number of days"
+              }
+            ]
+          }
         }
       ]
     }) }}
-    {% if model.showUnusedMessage %}
-    <p>The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
-    {% endif %}
 
     <div class="govuk-button-group">
       <form class="form" method="post">

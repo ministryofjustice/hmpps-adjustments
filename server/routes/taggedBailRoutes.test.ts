@@ -175,8 +175,8 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Delete Tagged Bail details')
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Delete tagged bail')
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -189,8 +189,8 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Delete Tagged Bail details')
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Delete tagged bail')
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -208,11 +208,11 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Delete Tagged Bail details')
+        expect(res.text).toContain('Delete tagged bail')
         expect(res.text).toContain(
           'The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS',
         )
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -226,7 +226,7 @@ describe('Tagged bail routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Tagged bail details')
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })
   })
@@ -238,7 +238,10 @@ describe('Tagged bail routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/review/add/${SESSION_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22TAGGED_BAIL_UPDATED%22%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22CREATE%22,%22days%22:9955%7D`,
+      )
   })
 
   test.each`
@@ -304,8 +307,32 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}?caseReference=1`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain('Court 2<br>CASE001 19 Aug 2021')
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
+      })
+  })
+
+  it('POST /{nomsId}/tagged-bail/edit/:id dps adjustment', () => {
+    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+
+    return request(app)
+      .post(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22UPDATE%22%7D`)
+  })
+
+  it('POST /{nomsId}/tagged-bail/edit/:id nomis adjustment sets tagged bail case ids.', () => {
+    adjustmentsStoreService.getById.mockReturnValue(nomisAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+
+    return request(app)
+      .post(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22UPDATE%22%7D`)
+      .expect(() => {
+        const updateCall = adjustmentsService.update.mock.calls[0]
+        const updateAdjustment = updateCall[1] as Adjustment
+        expect(updateAdjustment.taggedBail.caseSequence).toEqual(1)
       })
   })
 })

@@ -13,13 +13,13 @@ import ViewModel from '../model/viewModel'
 import RemoveModel from '../model/removeModel'
 import AdjustmentsFormFactory from '../model/adjustmentFormFactory'
 import hubValidationMessages from '../model/hubValidationMessages'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
 import FullPageError from '../model/FullPageError'
 import { daysBetween } from '../utils/utils'
 import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -27,8 +27,8 @@ export default class AdjustmentRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
-    private readonly additionalDaysAwardedService: AdditionalDaysAwardedService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
+    private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -47,43 +47,30 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { token, roles } = res.locals.user
+    const { token, roles, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
 
     const message = req.flash('message')
     const messageExists = message && message[0]
-    let serviceHasCalculatedUnusedDeductions = true
     if (messageExists) {
       this.adjustmentsStoreService.clear(req, nomsId)
-
-      serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.waitUntilUnusedRemandCreated(
-        nomsId,
-        token,
-      )
     }
 
-    const adjustments = await this.adjustmentsService.findByPerson(
-      nomsId,
-      startOfSentenceEnvelope.earliestSentence,
-      token,
-    )
-
-    if (!messageExists) {
-      serviceHasCalculatedUnusedDeductions = await this.unusedDeductionsService.serviceHasCalculatedUnusedDeductions(
+    const [unusedDeductionMessage, adjustments] =
+      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(
         nomsId,
-        adjustments,
+        startOfSentenceEnvelope.earliestSentence,
+        !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
         token,
       )
-    }
+
     if (!messageExists) {
-      const intercept = await this.additionalDaysAwardedService.shouldIntercept(
-        req,
+      const intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(
         prisonerNumber,
-        adjustments,
-        startOfSentenceEnvelope.earliestExcludingRecalls,
         token,
+        activeCaseLoadId,
       )
 
       if (intercept.type !== 'NONE') {
@@ -107,7 +94,7 @@ export default class AdjustmentRoutes {
         remandDecision,
         roles,
         message && message[0] && (JSON.parse(message[0]) as Message),
-        serviceHasCalculatedUnusedDeductions,
+        unusedDeductionMessage,
       ),
     })
   }
@@ -227,6 +214,7 @@ export default class AdjustmentRoutes {
       } else {
         await this.adjustmentsService.create([adjustment], token)
       }
+
       const message = {
         type: adjustment.adjustmentType,
         days: adjustment.days || daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
@@ -322,19 +310,10 @@ export default class AdjustmentRoutes {
 
     const adjustment = await this.adjustmentsService.get(id, token)
     await this.adjustmentsService.delete(id, token)
-    let action
-    if (adjustment.adjustmentType === 'REMAND') {
-      action = 'REMAND_REMOVED'
-    } else if (adjustment.adjustmentType === 'TAGGED_BAIL') {
-      action = 'TAGGED_BAIL_REMOVED'
-    } else {
-      action = 'REMOVE'
-    }
-
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.days,
-      action,
+      action: 'REMOVE',
     } as Message)
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }
@@ -365,7 +344,8 @@ export default class AdjustmentRoutes {
     }
     await this.adjustmentsService.restore({ ids: recallForm.getSelectedAdjustments() }, token)
     const message = {
-      action: 'REMAND_UPDATED',
+      type: 'REMAND',
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

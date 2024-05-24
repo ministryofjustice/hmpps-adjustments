@@ -1,6 +1,6 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateToString } from '../utils/utils'
+import { dateToString, getSentenceRecallTagHTML, isSentenceRecalled } from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 
 export default class TaggedBailEditModel {
@@ -20,7 +20,7 @@ export default class TaggedBailEditModel {
             text: 'Case details',
           },
           value: {
-            html: `${this.getCourtName()}<br>${this.getCaseReference()} ${this.getSentenceDate()}`,
+            html: `${this.getCaseDetailsCell()}`,
           },
           actions: {
             items:
@@ -37,7 +37,7 @@ export default class TaggedBailEditModel {
         },
         {
           key: {
-            text: 'Days',
+            text: 'Number of days',
           },
           value: {
             text: `${this.getTaggedBailDays()}`,
@@ -54,6 +54,10 @@ export default class TaggedBailEditModel {
         },
       ],
     }
+  }
+
+  private getCaseDetailsCell(): string {
+    return `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`
   }
 
   private getCourtName(): string {

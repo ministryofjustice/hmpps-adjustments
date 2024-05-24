@@ -45,6 +45,18 @@ export default {
             days: 22,
             prisonName: 'Leeds',
           },
+          {
+            id: '4c3c057c-896d-4793-9022-f3001e209a36',
+            bookingId: 1204935,
+            sentenceSequence: 2,
+            person: 'A1234AB',
+            adjustmentType: 'TAGGED_BAIL',
+            toDate: null,
+            fromDate: '2023-03-30',
+            days: 22,
+            prisonName: 'Leeds',
+            taggedBail: { caseSequence: 2 },
+          },
         ],
       },
     })
@@ -129,7 +141,7 @@ export default {
       },
     })
   },
-  stubGetAdjustment: (): SuperAgentRequest => {
+  stubGetRadaAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'GET',
@@ -151,11 +163,93 @@ export default {
       },
     })
   },
+  stubGetTaggedBailAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        jsonBody: {
+          id: '4c3c057c-896d-4793-9022-f3001e209a36',
+          adjustmentType: 'TAGGED_BAIL',
+          bookingId: '1234',
+          fromDate: '2023-04-05',
+          toDate: null,
+          person: 'A1234AB',
+          days: 25,
+          sentenceSequence: 2,
+          taggedBail: { caseSequence: 2 },
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubGetRemandAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+      },
+      response: {
+        jsonBody: {
+          id: '5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+          bookingId: 1204935,
+          sentenceSequence: 1,
+          person: 'A1234AB',
+          adjustmentType: 'REMAND',
+          toDate: '2023-01-20',
+          fromDate: '2023-01-10',
+          days: 11,
+          prisonName: 'Leeds',
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
   stubUpdateAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'PUT',
         urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateRemandAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteTaggedBailAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteRemandAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
       },
       response: {
         status: 200,
@@ -184,6 +278,156 @@ export default {
       response: {
         status: 200,
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  subAdaDetailsNoIntercept: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/additional-days/A1234AB/adjudication-details.*',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          awaitingApproval: [],
+          suspended: [],
+          quashed: [],
+          awarded: [],
+          prospective: [],
+          totalProspective: 0,
+          totalAwarded: 0,
+          totalQuashed: 0,
+          totalAwaitingApproval: 0,
+          totalSuspended: 0,
+          intercept: {
+            number: 0,
+            type: 'NONE',
+            anyProspective: false,
+          },
+          showExistingAdaMessage: false,
+          totalExistingAdas: 0,
+        },
+      },
+    })
+  },
+  subAdaDetailsForIntercept: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/additional-days/A1234AB/adjudication-details.*',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          totalAwarded: 0,
+          awarded: [],
+          totalSuspended: 0,
+          suspended: [],
+          awaitingApproval: [
+            {
+              dateChargeProved: '2014-11-24',
+              charges: [
+                {
+                  dateChargeProved: '2014-11-24',
+                  chargeNumber: 998947,
+                  heardAt: 'Doncaster (HMP)',
+                  status: 'AWARDED_OR_PENDING',
+                  days: 21,
+                  sequence: 9,
+                  toBeServed: 'Concurrent',
+                },
+                {
+                  dateChargeProved: '2014-11-24',
+                  chargeNumber: 998946,
+                  heardAt: 'Doncaster (HMP)',
+                  status: 'AWARDED_OR_PENDING',
+                  days: 21,
+                  sequence: 8,
+                  toBeServed: 'Concurrent',
+                },
+              ],
+              total: 21,
+              status: 'PENDING APPROVAL',
+            },
+            {
+              dateChargeProved: '2017-01-19',
+              charges: [
+                {
+                  dateChargeProved: '2017-01-19',
+                  chargeNumber: 1468919,
+                  heardAt: 'Kirkham (HMP)',
+                  status: 'PROSPECTIVE',
+                  days: 10,
+                  sequence: 13,
+                  toBeServed: 'Forthwith',
+                },
+              ],
+              total: 10,
+              status: 'PENDING APPROVAL',
+            },
+          ],
+          totalAwaitingApproval: 31,
+          quashed: [],
+          totalQuashed: 0,
+          intercept: {
+            type: 'UPDATE',
+            number: 2,
+            anyProspective: true,
+          },
+          prospective: [
+            {
+              dateChargeProved: '2000-07-25',
+              charges: [
+                {
+                  dateChargeProved: '2000-07-25',
+                  chargeNumber: 104841,
+                  heardAt: 'Preston (HMP)',
+                  status: 'PROSPECTIVE',
+                  days: 7,
+                  sequence: 6,
+                  toBeServed: 'Forthwith',
+                },
+              ],
+              total: 7,
+              status: 'PENDING APPROVAL',
+            },
+            {
+              dateChargeProved: '2017-01-19',
+              charges: [
+                {
+                  dateChargeProved: '2017-01-19',
+                  chargeNumber: 1468919,
+                  heardAt: 'Kirkham (HMP)',
+                  status: 'PROSPECTIVE',
+                  days: 10,
+                  sequence: 13,
+                  toBeServed: 'Forthwith',
+                },
+              ],
+              total: 10,
+              status: 'PENDING APPROVAL',
+            },
+          ],
+          totalProspective: 17,
+          showExistingAdaMessage: false,
+          totalExistingAdads: 40,
+        },
+      },
+    })
+  },
+  stubRejectProspectiveAda: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'POST',
+        urlPattern: '/adjustments-api/adjustments/additional-days/A1234AB/reject-prospective-ada',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {},
       },
     })
   },

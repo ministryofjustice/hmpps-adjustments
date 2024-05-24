@@ -11,9 +11,8 @@ export default function populateCurrentPrisoner(prisonerSearchService: PrisonerS
     if (username && nomsId) {
       try {
         const prisoner = await prisonerSearchService.getPrisonerDetails(nomsId, caseloads, username)
-        if (caseloads.includes(prisoner.prisonId)) {
-          res.locals.prisoner = prisoner
-        } else {
+        res.locals.prisoner = prisoner
+        if (!caseloads.includes(prisoner.prisonId)) {
           throw FullPageError.notInCaseLoadError()
         }
       } catch (error) {

@@ -13,6 +13,7 @@ import {
   CalculateReleaseDatesValidationMessage,
   UnusedDeductionCalculationResponse,
 } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -91,6 +92,12 @@ const adjustmentWithDatesAndCharges = {
   },
   complete: true,
 } as SessionAdjustment
+
+const nomisAdjustment = {
+  ...adjustmentWithDatesAndCharges,
+  remand: null,
+  sentenceSequence: 1,
+} as Adjustment
 
 const remandOverlapWithSentenceMessage = {
   code: 'REMAND_OVERLAPS_WITH_SENTENCE',
@@ -454,9 +461,9 @@ describe('Remand routes tests', () => {
             'Court 1',
             'CASE001',
             'Doing a crime',
-            'Committed from 04 January 2021 to 05 January 2021',
+            'Committed from 04 Jan 2021 to 05 Jan 2021',
             'Doing a different crime',
-            'Committed on 06 March 2021',
+            'Committed on 06 Mar 2021',
           ])
         })
     })
@@ -523,11 +530,11 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
           'Remand period',
-          '01 January 2023 to 10 January 2023',
+          '01 Jan 2023 to 10 Jan 2023',
           'Offences',
           'Doing a crime',
           'Doing a different crime',
-          'Days spend on remand',
+          'Days spent on remand',
           '10',
         ])
       })
@@ -583,11 +590,11 @@ describe('Remand routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).toContain('Save remand details')
+        expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(
-          'Once the remand time has been saved, this service will record unused deductions. You may need to add the unused remand alert on NOMIS.',
+          'When you save this remand, the unused deductions will automatically be recorded. Check that the unused remand alert has been added.',
         )
-        expect(res.text).toContainInOrder(['Period of remand', 'Days spent on remand', '10', 'Total days', '10'])
+        expect(res.text).toContainInOrder(['Remand period', 'Days spent on remand', '10', 'Total days', '10'])
       })
   })
   it('GET /{nomsId}/remand/save error from deductions', () => {
@@ -612,7 +619,10 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/save`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22CREATE%22,%22days%22:10%7D`,
+      )
   })
 
   it('GET /{nomsId}/remand/remove', () => {
@@ -644,7 +654,7 @@ describe('Remand routes tests', () => {
     return request(app)
       .post(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMAND_REMOVED%22%7D`)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMOVE%22%7D`)
   })
 
   it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
@@ -685,6 +695,65 @@ describe('Remand routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/remand/edit without changes', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).not.toContain('Confirm and save')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit with changes', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit with different charges', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getById.mockReturnValue({ ...adjustmentWithDatesAndCharges, remand: { chargeId: [1] } })
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit with NOMIS adjustments', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(nomisAdjustment)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+      })
+  })
+
   it('GET /{nomsId}/remand/dates/edit', () => {
     const adjustments = {}
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
@@ -703,13 +772,67 @@ describe('Remand routes tests', () => {
       })
   })
 
-  it('POST /{nomsId}/remand/edit/:id', () => {
+  it('POST /{nomsId}/remand/edit/:id dps adjustment', () => {
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
 
     return request(app)
       .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/success?message=%7B%22action%22:%22REMAND_UPDATED%22%7D`)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22UPDATE%22%7D`)
+  })
+
+  it('POST /{nomsId}/remand/edit/:id nomis adjustment sets charge ids.', () => {
+    adjustmentsStoreService.getById.mockReturnValue(nomisAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+
+    return request(app)
+      .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22UPDATE%22%7D`)
+      .expect(() => {
+        const updateCall = adjustmentsService.update.mock.calls[0]
+        const updateAdjustment = updateCall[1] as Adjustment
+        expect(updateAdjustment.remand.chargeId).toEqual([1, 2])
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit/:id No save button because of no changes made', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).not.toContain('Confirm and save')
+        expect(res.text).toContain('Edit remand')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit/:id Save button visible because of changes made', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
+    const modifiedAdjustmentWithDatesAndCharges = { ...adjustmentWithDatesAndCharges }
+    modifiedAdjustmentWithDatesAndCharges.fromDate = '2023-01-07'
+    adjustmentsService.get.mockResolvedValue(modifiedAdjustmentWithDatesAndCharges)
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).not.toContain('Edit remand')
+      })
   })
 
   it('GET /{nomsId}/remand/edit with CRD error', () => {

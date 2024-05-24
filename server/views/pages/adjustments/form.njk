@@ -7,18 +7,18 @@
 
 {% set pageTitle = applicationName + " - " + model.addOrEdit + " " + model.form.adjustmentType().shortText %}
 {% set mainClasses = "app-container govuk-body" %}
+{% if model.addOrEdit == 'edit' and model.id %}
+  {% set backlink = "/" + prisoner.prisonerNumber + "/" + model
+  .form
+    .adjustmentType()
+  .url + "/view" %}
+{% else %}
+  {% set backlink = "/" + prisoner.prisonerNumber %}
+{% endif %}
 
 {% block beforeContent %}
   {{ super() }}
   <nav>
-    {% if model.addOrEdit == 'edit' and model.id %}
-      {% set backlink = "/" + prisoner.prisonerNumber + "/" + model
-      .form
-        .adjustmentType()
-      .url + "/view" %}
-    {% else %}
-      {% set backlink = "/" + prisoner.prisonerNumber %}
-    {% endif %}
     {{ govukBackLink({
       text: "Back",
       href: backlink
@@ -41,7 +41,7 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
-        <span class="govuk-caption-xl">Adjust release dates</span>
+        <span class="govuk-caption-xl">Adjustments</span>
         {{ 'Edit' if model.addOrEdit == 'edit' else 'Enter' }} {{ model.form.adjustmentType().shortText }} details
       </h1>
     </div>
@@ -55,12 +55,20 @@
           .form
           .fragment() %}
 
-        {{ govukButton({
-          text: "Continue",
-          type: submit,
-          preventDoubleClick: true,
-          attributes: { 'data-qa': 'submit-form' }
-        }) }}
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href:  backlink
+          }) }}
+        </div>
       </form>
     </div>
   </div>

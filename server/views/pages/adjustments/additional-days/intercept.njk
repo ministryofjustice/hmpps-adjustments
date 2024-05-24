@@ -8,48 +8,67 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-
       <h1 class="govuk-heading-l">
-        <span class="govuk-caption-xl">Adjust release dates</span>
-              Review adjustment information
-          </h1>
-
-      <p class="govuk-body">
-        {% if model.intercept.type == 'FIRST_TIME' %} 
-            The first time you use the adjustments service, you need to check if the existing adjustment information from NOMIS is correct.
-            {% elif model.intercept.type == 'PADA' %}
-            There is a prospective ADA recorded for {{ prisoner.firstName | title }}
-          {{ prisoner.lastName | title }}.
-            {% elif model.intercept.type == 'UPDATE' %}
-            Updates have been made to {{ prisoner.firstName | title }}
-          {{ prisoner.lastName | title }}'s adjustment information, which need to be approved.
-            {% endif %}
-      </p>
-      <article class="moj-ticket-panel govuk-!-margin-bottom-4 govuk-!-margin-left-2">
-        <section class="moj-ticket-panel__content moj-ticket-panel__content--blue moj-ticket-panel__content--inline">
+        <span class="govuk-caption-xl">Adjustments</span>
+          {% if model.intercept.number > 1 %}
+            {% set pluralisation = "s" %}
+          {% else %}
+            {% set pluralisation = "" %}
+          {% endif %}
 
           {% if model.intercept.type == 'FIRST_TIME' %}
-            <h2 class="govuk-heading-m">Review ADA adjudication{% if model.intercept.number > 1%}s{% endif %}
-            </h2>
-            <p class="govuk-body">Review and approve adjudications where additional days have been awarded.</p>
+            {% if model.numOfAdaAdjudications === 0 %}
+              Review ADA adjustment{{pluralisation}}
+            {% else %}
+              Review ADA adjudication{{pluralisation}}
+            {% endif %}
           {% elif model.intercept.type == 'PADA' %}
-            <h2 class="govuk-heading-m">Review PADA{% if model.intercept.number > 1%}s{% endif %}
-            </h2>
-            <p class="govuk-body">Review and approve the PADAs that are relevant to the current sentence.</p>
+            Review PADA{{pluralisation}}
           {% elif model.intercept.type == 'UPDATE' %}
-            <h2 class="govuk-heading-m">Review ADA updates</h2>
-            <p class="govuk-body">Review and approve the changes that have been made to the ADAs</p>
-          {% endif %}
-
-          {% if model.intercept.anyProspective %}
-            {% set url = "/" + prisoner.prisonerNumber + "/additional-days/review-prospective" %}
+            Review ADA updates
           {% else %}
-            {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
+            Review adjustment information
           {% endif %}
-          <a class="govuk-link" data-qa="review-link" href="{{url}}">Review</a>
+      </h1>
 
-        </section>
-      </article>
+      <p class="govuk-body">
+        {% if model.intercept.type == 'FIRST_TIME' %}
+          {% if model.numOfAdaAdjudications === 0 %}
+            This service has identified an ADA adjustment with no supporting ADA adjudication.
+            You must review the ADA adjustment and confirm whether it should be deleted.
+          {% else %}
+            This service has identified ADA adjustments that were created in NOMIS.
+            You must review the adjudications with ADAs and approve them in this service.
+          {% endif %}
+        {% elif model.intercept.type == 'PADA' %}
+          {% if model.intercept.number > 1 %}
+            There are PADAs (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADAs and approve the ones that are relevant to the current sentence.
+          {% else %}
+            There is a PADA (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADA and approve if it's relevant to the current sentence.
+          {% endif %}
+        {% elif model.intercept.type == 'UPDATE' %}
+          Updates have been made to ADA (Additional days awarded) information, which need to be approved.
+        {% endif %}
+      </p>
+
+      {% if model.intercept.anyProspective %}
+        {% set url = "/" + prisoner.prisonerNumber + "/additional-days/review-prospective" %}
+      {% else %}
+        {% set url =  "/" + prisoner.prisonerNumber + "/additional-days/review-and-approve" %}
+      {% endif %}
+
+      {% if model.intercept.type == 'PADA' %}
+        {% set interceptType = "PADA" %}
+      {% else %}
+        {% set interceptType = "ADA" %}
+      {% endif %}
+
+      {{ govukButton({
+        text: "Review " + interceptType + pluralisation,
+        href: url,
+        preventDoubleClick: true,
+        attributes: {'data-qa': 'review-link'}
+      }) }}
     </div>
   </div>
 

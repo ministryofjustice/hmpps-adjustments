@@ -3,6 +3,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { formatDate } from '../utils/utils'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
@@ -37,9 +38,9 @@ export default class ViewModel {
   public columnHeadings() {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
-        { text: 'Date the days were restored' },
+        { text: 'Date of days restored' },
         { text: 'Entered by' },
-        { text: 'Number of days restored', format: 'numeric' },
+        { text: 'Number of days', format: 'numeric' },
         { text: 'Actions' },
       ]
     }
@@ -122,33 +123,30 @@ export default class ViewModel {
     return [[{ html: '<b>Total days</b>' }, { html: `<b>${total}</b>`, format: 'numeric' }, { text: '' }, { html: '' }]]
   }
 
-  public showAddNewButton(): boolean {
-    return !this.viewingRemandThatIsIneditable()
-  }
-
-  private viewingRemandThatIsIneditable(): boolean {
-    return (
-      this.adjustmentType.value === 'REMAND' &&
-      (!this.remandDecision || this.remandDecision.accepted) &&
-      this.hasRemandToolRole()
-    )
-  }
-
-  public hasRemandToolRole(): boolean {
-    return this.roles.includes('REMAND_IDENTIFIER')
-  }
-
   private actionCell(adjustment: Adjustment) {
-    if (this.viewingRemandThatIsIneditable()) {
-      return {
-        html: `<a class="govuk-link" href="/${adjustment.person}/remand">Review</a><br />`,
-      }
-    }
     return {
       html: `
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
-      <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Remove</a><br />
+      <div class="govuk-grid-column-one-quarter govuk-!-margin-right-1 govuk-!-padding-0">
+        <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">
+          Edit<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
+        </a>
+      </div>
+      <div class="govuk-grid-column-one-quarter govuk-!-padding-0">
+        <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">
+          Delete<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
+        </a>
+      </div>
     `,
     }
+  }
+
+  private getVisuallyHiddenTagContent(adjustment: Adjustment): string {
+    if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
+      return `${adjustment.days} ${adjustment.days > 1 ? 'days' : 'day'} restored on ${formatDate(adjustment.fromDate)}`
+    }
+
+    return adjustment.toDate
+      ? `${this.adjustmentType.shortText} from ${formatDate(adjustment.fromDate)} to ${formatDate(adjustment.toDate)}`
+      : `${this.adjustmentType.shortText} on ${formatDate(adjustment.fromDate)}`
   }
 }

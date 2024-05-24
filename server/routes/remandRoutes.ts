@@ -10,7 +10,11 @@ import RemandReviewModel from '../model/remandReviewModel'
 import ReviewRemandForm from '../model/reviewRemandForm'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import RemandSaveModel from '../model/remandSaveModel'
-import { daysBetween, hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays } from '../utils/utils'
+import {
+  daysBetween,
+  hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays,
+  offencesForRemandAdjustment,
+} from '../utils/utils'
 import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
 import RemandViewModel from '../model/remandViewModel'
@@ -51,6 +55,9 @@ export default class RemandRoutes {
       throw FullPageError.notFoundError()
     }
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
     const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
 
     const form = RemandDatesForm.fromAdjustment(adjustment)
@@ -99,6 +106,9 @@ export default class RemandRoutes {
     }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const form = RemandOffencesForm.fromAdjustment(adjustment, sentencesAndOffences)
 
@@ -243,8 +253,15 @@ export default class RemandRoutes {
 
     await this.adjustmentsService.create(adjustments, token)
 
+    const days = adjustments.reduce(
+      (sum, current) => sum + daysBetween(new Date(current.fromDate), new Date(current.toDate)),
+      0,
+    )
+
     const message = {
-      action: 'REMAND_UPDATED',
+      type: 'REMAND',
+      action: 'CREATE',
+      days,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
@@ -297,7 +314,7 @@ export default class RemandRoutes {
     )
 
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandChangeModel(adjustment, sentencesAndOffences, unusedDeductions, showUnusedMessage),
+      model: new RemandChangeModel(adjustment, null, sentencesAndOffences, unusedDeductions, showUnusedMessage),
     })
   }
 
@@ -305,8 +322,8 @@ export default class RemandRoutes {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
-    let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
+    const dbAdjustment = await this.adjustmentsService.get(id, token)
+    const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id) || dbAdjustment
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
@@ -328,12 +345,18 @@ export default class RemandRoutes {
       unusedDeductions,
     )
 
+    const days =
+      !sessionAdjustment.fromDate && !sessionAdjustment.toDate
+        ? sessionAdjustment.days
+        : daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate))
+
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
         {
           ...sessionAdjustment,
-          days: daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate)),
+          days,
         },
+        dbAdjustment,
         sentencesAndOffences,
         unusedDeductions,
         showUnusedMessage,
@@ -344,13 +367,22 @@ export default class RemandRoutes {
   public submitEdit: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
+    const { bookingId } = res.locals.prisoner
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    if (!adjustment.remand?.chargeId?.length) {
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
+      adjustment.remand = {
+        chargeId: offencesForRemandAdjustment(adjustment, sentencesAndOffences).map(it => it.offenderChargeId),
+      }
+    }
 
     await this.adjustmentsService.update(id, adjustment, token)
 
     const message = {
-      action: 'REMAND_UPDATED',
+      type: 'REMAND',
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

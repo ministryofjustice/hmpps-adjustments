@@ -7,7 +7,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import AdditionalDaysAwardedService from '../services/additionalDaysAwardedService'
+import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import './testutils/toContainInOrder'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 
@@ -15,7 +15,7 @@ jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
-jest.mock('../services/additionalDaysAwardedService')
+jest.mock('../services/additionalDaysAwardedBackendService')
 jest.mock('../services/unusedDeductionsService')
 
 const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
@@ -23,10 +23,10 @@ const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsSe
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
-const additionalDaysAwardedService = new AdditionalDaysAwardedService(
+const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(
   null,
   null,
-) as jest.Mocked<AdditionalDaysAwardedService>
+) as jest.Mocked<AdditionalDaysAwardedBackendService>
 
 const NOMS_ID = 'ABC123'
 
@@ -105,7 +105,7 @@ beforeEach(() => {
       adjustmentsService,
       identifyRemandPeriodsService,
       adjustmentsStoreService,
-      additionalDaysAwardedService,
+      additionalDaysAwardedBackendService,
       unusedDeductionsService,
     },
     userSupplier: () => userInTest,
@@ -123,14 +123,12 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
-      remandAdjustment,
-      unusedDeductions,
-    ])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(true)
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }, remandAdjustment, unusedDeductions],
+    ])
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -143,19 +141,21 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).not.toContain('Nobody may have 20 days remand')
         expect(res.text).toContain('24')
-        expect(res.text).toContainInOrder(['Last update', 'on 05 April 2023', 'by Leeds'])
+        expect(res.text).toContainInOrder(['Last update', 'on 05 Apr 2023', 'by Leeds'])
         expect(res.text).toContain('including 10 days unused')
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated', () => {
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type', () => {
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([remandAdjustment])
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(false)
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNSUPPORTED',
+      [remandAdjustment],
+    ])
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'NONE',
       number: 0,
       anyProspective: false,
@@ -164,21 +164,99 @@ describe('Adjustment routes tests', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Unused deductions time cannot be calculated')
+        expect(res.text).toContain(
+          'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
+        )
       })
   })
-  it('GET /{nomsId} with remand role', () => {
-    userInTest = userWithRemandRole
-    adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
-    ])
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of validation error', () => {
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({ type: 'NONE', number: 0, anyProspective: false })
-    unusedDeductionsService.serviceHasCalculatedUnusedDeductions.mockResolvedValue(true)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'VALIDATION',
+      [remandAdjustment],
+    ])
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.',
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [remandAdjustment],
+    ])
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Existing deductions have been added on NOMIS. This means unused deductions cannot be automatically calculated. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of an exception', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNKNOWN',
+      [remandAdjustment],
+    ])
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.',
+        )
+      })
+  })
+  it('GET /{nomsId} with remand role', () => {
+    userInTest = userWithRemandRole
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
+      type: 'NONE',
+      number: 0,
+      anyProspective: false,
+    })
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -191,10 +269,11 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    adjustmentsService.findByPerson.mockResolvedValue([
-      { ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNKNOWN',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
     ])
-    additionalDaysAwardedService.shouldIntercept.mockResolvedValue({
+    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
       type: 'FIRST_TIME',
       number: 5,
       anyProspective: true,
@@ -260,7 +339,7 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('The number of days restored must be entered.')
+        expect(res.text).toContain('The number of additional days restored must be entered.')
         expect(res.text).toContain('This date must include a valid day, month and year.')
       })
   })
@@ -516,11 +595,11 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Date the days were restored')
+        expect(res.text).toContain('Date of days restored')
         expect(res.text).toContain('5 Apr 2023')
-        expect(res.text).toContain('Number of days restored')
+        expect(res.text).toContain('Number of days')
         expect(res.text).toContain('24')
-        expect(res.text).toContain('Submit')
+        expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/edit`)
       })
   })
@@ -534,9 +613,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI(
-          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"CREATE"}',
-        )}`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22CREATE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.create.mock.calls).toHaveLength(1)
@@ -551,9 +628,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI(
-          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"UPDATE"}',
-        )}`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22UPDATE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
@@ -594,7 +669,6 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('5 Apr 2023')
         expect(res.text).toContain('22')
-        expect(res.text).toContain('This will remove this record.')
       })
   })
 
@@ -606,9 +680,7 @@ describe('Adjustment routes tests', () => {
       .expect(302)
       .expect(
         'Location',
-        `/${NOMS_ID}/success?message=${encodeURI(
-          '{"type":"RESTORATION_OF_ADDITIONAL_DAYS_AWARDED","days":24,"action":"REMOVE"}',
-        )}`,
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22REMOVE%22%7D`,
       )
       .expect(res => {
         expect(adjustmentsService.delete.mock.calls).toHaveLength(1)

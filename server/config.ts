@@ -51,7 +51,7 @@ export default {
   },
   session: {
     secret: get('SESSION_SECRET', 'app-insecure-default-session', requiredInProduction),
-    expiryMinutes: Number(get('WEB_SESSION_TIMEOUT_IN_MINUTES', 120)),
+    expiryMinutes: Number(get('WEB_SESSION_TIMEOUT_IN_MINUTES', 20)),
   },
   apis: {
     hmppsAuth: {
@@ -132,6 +132,15 @@ export default {
       },
       agent: new AgentConfig(Number(get('PRISONER_SEARCH_API_TIMEOUT', 10000))),
     },
+    frontendComponents: {
+      url: get('COMPONENT_API_URL', 'http://localhost:8082', requiredInProduction),
+      timeout: {
+        response: Number(get('COMPONENT_API_TIMEOUT_SECONDS', 10000)),
+        deadline: Number(get('COMPONENT_API_TIMEOUT_SECONDS', 10000)),
+      },
+      agent: new AgentConfig(Number(get('COMPONENT_API_TIMEOUT_SECONDS', 10000))),
+      enabled: get('COMMON_COMPONENTS_ENABLED', 'false') === 'true',
+    },
   },
   services: {
     calculateReleaseDatesUI: {
@@ -148,5 +157,9 @@ export default {
   environmentName: get('ENVIRONMENT_NAME', ''),
   analytics: {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
+    appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
+  },
+  featureToggles: {
+    unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'false') === 'true',
   },
 }

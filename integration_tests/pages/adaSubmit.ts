@@ -3,7 +3,7 @@ import { PageElement } from './page'
 
 export default class AdaSubmitPage extends AdjustmentsPage {
   constructor() {
-    super('Review and submit ADAs')
+    super('Confirm and save')
   }
 
   public submitButton = (): PageElement => cy.get('[data-qa=submit-button]')

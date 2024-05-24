@@ -26,12 +26,9 @@
     <div class="govuk-grid-column-two-thirds">
       <div class="govuk-form-group govuk-body">
         <h1 class="govuk-heading-l">
-          <span class="govuk-caption-xl">Adjust release dates</span>
-              Review and submit ADAs
-            </h1>
-        <p>
-               Check that the ADA details are correct, then submit the adjustments.
-            </p>
+          <span class="govuk-caption-xl">Adjustments</span>
+          Confirm and save
+        </h1>
       </div>
 
       {% if model.createTable() %}
@@ -46,19 +43,24 @@
           ) }}
       {% endif %}
       <div class="govuk-!-margin-top-8">
-        <h2 class="govuk-heading-m">Submit adjustment details</h2>
-        <p class="govuk-body">Once submitted, the ADA adjustment details will be saved in NOMIS. You will then need to recalculate the release dates.</p>
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
-          {{ govukButton({
-                text: "Submit",
-                type: submit,
-                preventDoubleClick: true,
-                attributes: {'data-qa': 'submit-button'}
-              }) }}
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Confirm and save",
+              type: submit,
+              preventDoubleClick: true,
+              attributes: {'data-qa': 'submit-button'}
+            }) }}
+
+            {{ govukButton({
+              text: "Cancel",
+              classes: "govuk-button--secondary",
+              href: "../"
+            }) }}
+          </div>
         </form>
       </div>
-      <a href="../">Cancel</a>
     </div>
   </div>
 {% endblock %}

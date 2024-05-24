@@ -1,6 +1,6 @@
 generic-service:
   nameOverride: hmpps-adjustments
-  productId: "UNASSIGNED" # productId for the product that this belongs too, i.e. DPS001, see README.md for details
+  productId: "DPS014"
 
   replicaCount: 4
 
@@ -57,6 +57,9 @@ generic-service:
   allowlist:
     groups:
       - internal
+      - prisons
+      - private_prisons
+
 
 generic-prometheus-alerts:
   targetApplication: hmpps-adjustments

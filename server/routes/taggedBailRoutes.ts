@@ -46,6 +46,9 @@ export default class TaggedBailRoutes {
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
       model: new TaggedBailSelectCaseModel(prisonerNumber, sentencesAndOffences, addOrEdit, id, adjustment),
@@ -57,6 +60,9 @@ export default class TaggedBailRoutes {
     const { caseSequence } = req.query as Record<string, string>
     const { prisonerNumber } = res.locals.prisoner
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
     if (caseSequence) {
       this.adjustmentsStoreService.store(req, nomsId, id, {
         ...adjustment,
@@ -192,7 +198,9 @@ export default class TaggedBailRoutes {
     await this.adjustmentsService.create([adjustment], token)
 
     const message = {
-      action: 'TAGGED_BAIL_UPDATED',
+      type: 'TAGGED_BAIL',
+      action: 'CREATE',
+      days: adjustment.days,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
@@ -253,13 +261,28 @@ export default class TaggedBailRoutes {
   public submitEdit: RequestHandler = async (req, res): Promise<void> => {
     const { token } = res.locals.user
     const { nomsId, id } = req.params
+    const { bookingId } = res.locals.prisoner
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    if (!adjustment.taggedBail?.caseSequence) {
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
+
+      const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
+      const sentencesForCaseSequence = sentencesByCaseSequence.find(it =>
+        relevantSentenceForTaggedBailAdjustment(it, adjustment),
+      )
+
+      adjustment.taggedBail = {
+        caseSequence: sentencesForCaseSequence.caseSequence,
+      }
+    }
 
     await this.adjustmentsService.update(id, adjustment, token)
 
     const message = {
-      action: 'REMAND_UPDATED',
+      type: 'TAGGED_BAIL',
+      action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }

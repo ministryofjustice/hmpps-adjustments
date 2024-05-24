@@ -32,7 +32,7 @@ export default class ReviewAndSubmitAdaViewModel {
             ]
           }),
           [
-            { text: 'Total ADAs', colspan: 2 },
+            { html: '<strong>Total ADAs taken into calculation</strong>', colspan: 2 },
             {
               text: this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
               format: 'numeric',

@@ -5,74 +5,21 @@
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
+{% set showSubNav = true %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      {% if not model.serviceHasCalculatedUnusedDeductions %}
-        {% set html %}
-          <p class="govuk-notification-banner__heading">
-            Unused deductions time cannot be calculated.<br />
-            Any unused deductions must be entered in NOMIS.
-          </p>
-        {% endset %}
-
-        {{ govukNotificationBanner({
-          html: html,
-          titleId: 'unused-deductions-notification'
-        }) }}
-      {% endif %}
       {% if model.message %}
-        {% if model.message.action === 'CREATE' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
-              of {{ model.messageType.shortText }} have been added</h3>
-            <p class="govuk-body">These adjustments have been saved in NOMIS. You can continue to add adjustments on
-              this page.</p>
-            <p class="govuk-body">Once all adjustments have been applied, you must
-              <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-notification-banner__link">recalculate the
-                release dates.</a>
-            </p>
-          {% endset %}
-          {% elif model.message.action === 'REMOVE' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
-              of {{ model.messageType.shortText }} have been removed</h3>
-          {% endset %}
-          {% elif model.message.action === 'UPDATE' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days
-              of {{ model.messageType.shortText }} have been updated</h3>
-          {% endset %}
-          {% elif model.message.action === 'REJECTED' %}
+        {% if model.message.action === 'REJECTED' %}
           {% set html %}
             <h3 class="govuk-notification-banner__heading">{{ model.message.days }} days of suggested remand have been
               rejected</h3>
           {% endset %}
-          {% elif model.message.action === 'ADDITIONAL_DAYS_UPDATED' %}
+        {% elif model.isAddEditDelete() %}
           {% set html %}
-            <h3 class="govuk-notification-banner__heading">ADA updates have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_UPDATED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Remand details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'REMAND_REMOVED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Remand details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-        {% elif model.message.action === 'TAGGED_BAIL_UPDATED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Tagged bail details have been saved</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
-          {% endset %}
-          {% elif model.message.action === 'TAGGED_BAIL_REMOVED' %}
-          {% set html %}
-            <h3 class="govuk-notification-banner__heading">Tagged bail details have been deleted</h3>
-            {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
+          <h3 class="govuk-notification-banner__heading">{{ model.getNotificationBannerHeadingForAddEditDelete() }}</h3>
+          {{ calcReleaseDatesMessage(model.calculateReleaseDatesUrl(), prisoner) }}
           {% endset %}
         {% endif %}
 
@@ -105,9 +52,7 @@
       </div>
 
       <p class="govuk-body">
-        This page lists all the adjustments that have been recorded for {{ prisoner.firstName | title }}
-        {{ prisoner.lastName | title }}.
-        You can add new adjustments or review remand time that has been identified from court outcomes logged in NOMIS.
+        You can add new adjustments, or review and edit existing adjustments using this service. Make sure you calculate release dates after making any changes to this person's adjustment information.
       </p>
     </div>
   </div>
@@ -121,14 +66,41 @@
             NOMIS, {{ prisoner.firstName | title }}
             {{ prisoner.lastName | title }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
             Review the remand to make sure it is relevant.</p>
-          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button"
-             data-qa="relevant-remand">Review</a>
+          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button" data-qa="relevant-remand">Review</a>
         </div>
       {% endif %}
-     
+
       <h2 class="govuk-heading-m govuk-!-padding-left-4">
         Deductions
       </h2>
+
+      {% if model.unusedDeductionMessage != 'NONE' %}
+        <div class="govuk-inset-text govuk-!-margin-left-4">
+          {% if model.unusedDeductionMessage == 'UNSUPPORTED' %}
+            Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+          {% elif model.unusedDeductionMessage == 'VALIDATION' %}
+            Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.
+            <br />
+            To continue, you must:
+            <ol>
+              <li>
+                <a href="{{ model.checkInformationLink }}" target="_blank">Review the incorrect details</a>
+              </li>
+              <li>
+                Update these details
+              </li>
+              <li>
+                <a href="">Reload this page</a>
+              </li>
+            </ol>
+          {% elif model.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
+            Existing deductions have been added on NOMIS. This means unused deductions cannot be automatically calculated. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+          {% elif model.unusedDeductionMessage == 'UNKNOWN' %}
+            Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.
+          {% endif %}
+        </div>
+      {% endif %}
+
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.deductions() %}
           {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
@@ -149,7 +121,7 @@
   <div class="govuk-inset-text govuk-!-margin-left-2 govuk-!-margin-top-9">
     <h2 class="govuk-heading-m">Calculate release dates</h2>
     <p>Any changes you make to the adjustments could impact the release dates for {{ prisoner.firstName | title }}
-      {{ prisoner.lastName | title }}
+      {{ prisoner.lastName | title }}.
     </p>
     <a href="{{ model.calculateReleaseDatesUrl() }}" class="govuk-button">
       Calculate release dates
@@ -158,7 +130,7 @@
 {% endblock %}
 
 {% macro calcReleaseDatesMessage(calculateReleaseDatesdUrl, prisonerDetail) %}
-  <p class="govuk-body">Once all adjustments have been made, you will need to
-    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a> for {{ prisonerDetail.firstName | title }} {{ prisonerDetail.lastName | title }}.
+  <p class="govuk-body">Once all adjustments have been applied, you must
+    <a href="{{ calculateReleaseDatesdUrl }}" class="govuk-notification-banner__link">calculate release dates</a>.
   </p>
 {% endmacro %}

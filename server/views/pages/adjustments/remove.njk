@@ -4,7 +4,7 @@
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 
-{% set pageTitle = applicationName + " - Remove " +  model.adjustmentType.shortText %}
+{% set pageTitle = applicationName + " - Delete " +  model.adjustmentType.shortText %}
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block beforeContent %}
@@ -20,35 +20,37 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
-        <span class="govuk-caption-xl">Adjust release dates</span>
-        Are you sure you want to remove {{model.adjustmentType.shortText}}?
+        <span class="govuk-caption-xl">Adjustments</span>
+        Delete {{model.adjustmentType.shortText}}
       </h1>
     </div>
+  </div>
+  <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-m">
+            {{model.adjustmentType.shortText}} details
+          </h1>
+      </div>
   </div>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
       {{ govukSummaryList({
         rows: model.summaryRows()
       }) }}
-      {{ govukWarningText({
-        text: "This will remove this record.",
-        iconFallbackText: "Warning"
-      }) }}
       <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
         <div class="govuk-button-group">
           {{ govukButton({
-            text: "Remove " + model.adjustmentType.shortText,
-            classes: "govuk-button--warning",
+            text: "Delete",
             type: submit,
             preventDoubleClick: true,
             attributes: { 'data-qa': 'remove-button' } 
           }) }}
           {{ govukButton({
-          text: "Cancel",
-          classes: "govuk-button--secondary",
-          href: "/" + prisoner.prisonerNumber + "/" + model.adjustmentType.url + "/view"
-        }) }}
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: "/" + prisoner.prisonerNumber + "/" + model.adjustmentType.url + "/view"
+          }) }}
         </div>
       </form>
     </div>

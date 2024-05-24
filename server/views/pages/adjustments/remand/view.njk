@@ -20,12 +20,13 @@
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-three-quarters">
-      <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
-        Remand details for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}
+      <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
+        Remand overview
       </h1>
-      
 
-      {{remandTotals(model.remandTotals())}}
+      {% if model.adjustmentsWithOffences().length > 1 %}
+        {{remandTotals(model.remandTotals())}}
+      {% endif %}
 
       <div class="adjustment-card-container">
         {% for adjustment in model.adjustmentsWithOffences() %}

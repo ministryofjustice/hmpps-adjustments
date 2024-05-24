@@ -3,7 +3,11 @@ import path from 'path'
 import dayjs from 'dayjs'
 import nunjucks from 'nunjucks'
 import express from 'express'
-import { personDateOfBirth, personProfileName, personStatus } from 'hmpps-design-system-frontend/hmpps/utils/utils'
+import {
+  personDateOfBirth,
+  personProfileName,
+  personStatus,
+} from 'hmpps-court-cases-release-dates-design/hmpps/utils/utils'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
@@ -17,6 +21,9 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   app.locals.applicationName = 'Adjustments'
   app.locals.environmentName = config.environmentName
   app.locals.environmentNameColour = config.environmentName === 'PRE-PRODUCTION' ? 'govuk-tag--green' : ''
+  app.locals.appInsightsConnectionString = config.analytics.appInsightsConnectionString
+  app.locals.appInsightsApplicationName = applicationInfo.applicationName
+  app.locals.buildNumber = config.buildNumber
 
   if (config.environmentName === 'LOCAL') {
     app.locals.environment = 'local'
@@ -45,7 +52,7 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
       path.join(__dirname, '../../server/views'),
       'node_modules/govuk-frontend/dist/',
       'node_modules/@ministryofjustice/frontend/',
-      'node_modules/hmpps-design-system-frontend/',
+      'node_modules/hmpps-court-cases-release-dates-design/',
     ],
     {
       autoescape: true,

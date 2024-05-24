@@ -39,16 +39,19 @@ export const dateItems = (year: string, month: string, day: string, prefix: stri
       name: `day`,
       classes: `govuk-input--width-2${fieldHasErrors(errors, `${prefix}-day`) ? ' govuk-input--error' : ''}`,
       value: day,
+      attributes: { maxLength: 2 },
     },
     {
       name: `month`,
       classes: `govuk-input--width-2${fieldHasErrors(errors, `${prefix}-month`) ? ' govuk-input--error' : ''}`,
       value: month,
+      attributes: { maxLength: 2 },
     },
     {
       name: `year`,
       classes: `govuk-input--width-4${fieldHasErrors(errors, `${prefix}-year`) ? ' govuk-input--error' : ''}`,
       value: year,
+      attributes: { maxLength: 4 },
     },
   ]
 }
@@ -104,10 +107,10 @@ export const fieldsToDate = (day: string, month: string, year: string): Date =>
 
 export const dateToString = (date: Date): string => dayjs(date).format('DD MMM YYYY')
 
-export function offencesForAdjustment(
+export function offencesForRemandAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-): (PrisonApiOffence & { recall: boolean })[] {
+): (PrisonApiOffence & { recall: boolean; courtDescription: string })[] {
   return sentencesAndOffences.flatMap(so => {
     return so.offences
       .filter(off => {
@@ -117,7 +120,7 @@ export function offencesForAdjustment(
         return adjustment.sentenceSequence === so.sentenceSequence
       })
       .map(off => {
-        return { ...off, recall: PrisonerService.recallTypes.includes(so.sentenceCalculationType) }
+        return { ...off, recall: isSentenceRecalled(so.sentenceCalculationType), courtDescription: so.courtDescription }
       })
   })
 }
@@ -128,6 +131,22 @@ export function offencesForAdjustment(
 export type SentencesByCaseSequence = {
   caseSequence: number
   sentences: PrisonApiOffenderSentenceAndOffences[]
+}
+
+/**
+ * Used to determine if the given sentence calculation type is a recall type.
+ * @param sentenceCalculationType The calculation type to check.
+ * @returns true if the calculation type is a recall type.
+ */
+export function isSentenceRecalled(sentenceCalculationType: string): boolean {
+  return PrisonerService.recallTypes.includes(sentenceCalculationType)
+}
+
+/**
+ * Returns the HTML for the sentence recall tag.
+ */
+export function getSentenceRecallTagHTML(): string {
+  return '<span class="moj-badge moj-badge--grey moj-badge--recall">RECALL</span>'
 }
 
 /**
@@ -189,6 +208,10 @@ export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSeque
   return adjustment.taggedBail?.caseSequence
     ? it.caseSequence === adjustment.taggedBail?.caseSequence
     : it.sentences.some(sent => sent.sentenceSequence === adjustment.sentenceSequence)
+}
+
+export function formatDate(date: string | Date | number, format: string = 'D MMM YYYY'): string {
+  return dayjs(date).format(format)
 }
 
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {

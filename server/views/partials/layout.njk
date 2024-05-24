@@ -1,8 +1,42 @@
 {% extends "govuk/template.njk" %}
-{% from "hmpps/components/legal-information/service-header/macro.njk" import serviceHeader %}
-{% from "hmpps/components/legal-information/sub-navigation/macro.njk" import subNavigation %}
+{% from "hmpps/components/court-cases-release-dates/service-header/macro.njk" import serviceHeader %}
+{% from "hmpps/components/court-cases-release-dates/sub-navigation/macro.njk" import subNavigation %}
+{% from "hmpps/components/court-cases-release-dates/footer/macro.njk" import footer %}
 
 {% block head %}
+  {% if appInsightsConnectionString %}
+  <script type="text/javascript" src="/assets/applicationinsights-web.min.js"  nonce="{{ cspNonce }}"></script>
+  <script type="text/javascript" src="/assets/applicationinsights-clickanalytics-js.min.js"  nonce="{{ cspNonce }}"></script>
+  <script type="text/javascript" nonce="{{ cspNonce }}">
+    var clickPluginInstance = new Microsoft.ApplicationInsights.ClickAnalyticsPlugin();
+    // Click Analytics configuration
+    var clickPluginConfig = {
+      autoCapture : true,
+      dataTags: {
+        useDefaultContentNameOrId: true
+      }
+    }
+    var snippet = {
+      config: {
+        connectionString: "{{ appInsightsConnectionString }}",
+        extensions: [
+          clickPluginInstance
+        ],
+        extensionConfig: {
+          [clickPluginInstance.identifier] : clickPluginConfig
+        },
+        autoTrackPageVisitTime: true
+      }
+    }
+    var init = new Microsoft.ApplicationInsights.ApplicationInsights(snippet)
+    var appInsights = init.loadAppInsights();
+    appInsights.addTelemetryInitializer(function (envelope) {
+      envelope.tags["ai.cloud.role"] = "{{ appInsightsApplicationName }}"
+      envelope.tags["ai.application.ver"] = "{{ buildNumber }}"
+    });
+    appInsights.trackPageView();
+  </script>
+  {% endif %}
   {% if tagManagerContainerId %}
     <!-- Tag manager dataLayer -->
     <script nonce="{{ cspNonce }}">
@@ -46,12 +80,22 @@
   {% endif %}
 
   <link href="/assets/stylesheets/application.css?{{ version }}" rel="stylesheet"/>
+
+  {% if feComponents.cssIncludes %}
+    {% for css in feComponents.cssIncludes %}
+      <link href="{{ css }}" nonce="{{ cspNonce }}" rel="stylesheet" />
+    {% endfor %}
+  {% endif %}
 {% endblock %}
 
 {% block pageTitle %}{{pageTitle | default(applicationName)}}{% endblock %}
 
 {% block header %}
-  {% include "./header.njk" %}
+  {% if feComponents.header %}
+    {{ feComponents.header | safe }}
+  {% else %}
+    {% include "./header.njk" %}
+  {% endif %}
   {{ 
       serviceHeader({
       environment: environment,
@@ -65,11 +109,17 @@
       {% include "./prisonerProfileBanner.njk" %}
     </aside>
     {% block subNavigation %}
-        {% if prisoner.prisonerNumber !== undefined %}
+        {% if prisoner.prisonerNumber !== undefined and showSubNav %}
           {{ subNavigation(
             environment, 
             {
-              activeSubNav: 'adjustments'
+              activeSubNav: 'adjustments',
+              courtCases: {
+                  enabled: false
+              },
+              documents: {
+                  enabled: false
+              }
             }, 
             prisoner.prisonerNumber) 
           }}
@@ -81,8 +131,28 @@
 {% block bodyStart %}
 {% endblock %}
 
+{% block footer %}
+  {% if feComponents.enabled %}
+    {{ 
+      footer({ 
+        environment: environment, 
+        attributes: {
+          "data-qa": "ccrds-footer"
+        } 
+      }) 
+    }}
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block bodyEnd %}
   <script type="module" src="/assets/govukFrontendInit.js"></script>
   <script src="/assets/moj/all.js"></script>
   <script src="/assets/mojFrontendInit.js"></script>
+  {% if feComponents.jsIncludes %}
+    {% for js in feComponents.jsIncludes %}
+      <script src="{{ js }}" nonce="{{ cspNonce }}"></script>
+    {% endfor %}
+  {% endif %}
 {% endblock %}

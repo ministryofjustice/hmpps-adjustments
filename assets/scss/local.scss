@@ -1,5 +1,6 @@
 .govuk-main-wrapper {
-  min-height: 600px
+  min-height: 600px;
+  padding-top: 0px;
 }
 
 .table-thick-bottom-border {
@@ -23,7 +24,6 @@
   width: 80%
 }
 
-
 .shadow-card {
   border-left: 4px solid #ccc;
   border-bottom: 1px solid #ccc;
@@ -37,5 +37,51 @@ Removes the header from the govukNotificationBanner.
 .govuk-notification-banner__no-header {
   .govuk-notification-banner__header {
     display: none;
+  }
+}
+
+/**
+Custom style for the badges used on sentences that have a calculation type of recall.
+ */
+.moj-badge--recall {
+  margin: 0 0 0 10px;
+}
+
+/**
+Used to set equal padding on all sides of the card__content
+*/
+.govuk-summary-card__content {
+  &.equal-padding {
+    padding: 20px;
+  }
+}
+
+.checkbox-padding {
+  padding: 10px 20px;
+}
+
+/**
+Used in place of '|' so that screenreaders do not read it out.
+Example usage: Lorem ipsum <span class="vertical-bar"></span> Dolor sit amet.
+Example output: Lorem ipsum | Dolor sit amet.
+*/
+.vertical-bar {
+  height: 1rem;
+  margin: 0 5px -1px 5px;
+  width: 1.5px;
+  background-color: black;
+  display: inline-block;
+}
+
+/**
+Used for table columns containing statuses which use the govuk-tag.
+*/
+.status-cell {
+  width: 80%;
+  .status-tag-row {
+    min-height: 35px;
+    .govuk-tag {
+      white-space: nowrap;
+    }
   }
 }

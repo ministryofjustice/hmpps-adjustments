@@ -44,9 +44,21 @@
       </div>
     </div>
   {% endif %}
-  <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjust release dates</span>
-    Edit remand
+  <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
+    {% if model.isModified() %}
+      Confirm and save
+    {% else %}
+      Edit remand
+    {% endif %}
   </h1>
+
+  <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-m">
+              Remand details
+          </h1>
+      </div>
+  </div>
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
@@ -57,8 +69,6 @@
         isEdit: true
       }) }}
 
-      <h2 class="govuk-heading-m">Now save the remand time</h2>
-
       {% if model.showUnusedMessage %}
         <p class="govuk-body">The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS.</p>
       {% endif %}
@@ -66,11 +76,12 @@
       <form method="post">
         <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
         <div class="govuk-button-group">
-          {% if not model.remandRelatedValidationSummary().errorList.length %}
+          {% if not model.remandRelatedValidationSummary().errorList.length and model.isModified() %}
             {{ govukButton({
-              text: "Save",
+              text: "Confirm and save",
               type: submit,
-              preventDoubleClick: true
+              preventDoubleClick: true,
+              attributes: { 'data-qa': 'save-button' }
             }) }}
           {% endif %}
 

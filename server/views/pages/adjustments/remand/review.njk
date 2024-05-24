@@ -6,6 +6,7 @@
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "./partials/remandTotals.njk" import remandTotals %}
 
 {% set pageTitle = applicationName + " - Review remand details" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -63,7 +64,7 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">
-        <span class="govuk-caption-xl">Adjust release dates</span>
+        <span class="govuk-caption-xl">Adjustments</span>
         Review remand details
       </h1>
     </div>
@@ -87,7 +88,9 @@
                   <h2 class="govuk-summary-card__title"><span class="govuk-visually-hidden">Remand adjustment</span></h2>
                   <ul class="govuk-summary-card__actions">
                       <li class="govuk-summary-card__action">
-                          <a class="govuk-link" href="/{{prisoner.prisonerNumber}}/remand/session/remove/{{adjustmentId}}">Remove this period of remand</a>
+                          <a class="govuk-link" href="/{{prisoner.prisonerNumber}}/remand/session/remove/{{adjustmentId}}">
+                            Remove this period of remand<span class="govuk-visually-hidden">from {{ model.fromDate(adjustmentId) }} to {{ model.toDate(adjustmentId) }}</span>
+                          </a>
                       </li>
                   </ul>
               </div>
@@ -97,6 +100,10 @@
             </div>
           {% endfor %}
         </div>
+
+        {% if model.multipleRemandAdjustments() %}
+          {{remandTotals(model.remandTotals())}}
+        {% endif %}
 
         {% if not model
           .remandRelatedValidationSummary()

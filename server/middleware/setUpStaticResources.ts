@@ -21,8 +21,10 @@ export default function setUpStaticResources(): Router {
     '/node_modules/govuk-frontend/dist',
     '/node_modules/@ministryofjustice/frontend/moj/assets',
     '/node_modules/@ministryofjustice/frontend',
-    '/node_modules/hmpps-design-system-frontend/hmpps/assets',
-    '/node_modules/hmpps-design-system-frontend',
+    '/node_modules/hmpps-court-cases-release-dates-design/hmpps/assets',
+    '/node_modules/hmpps-court-cases-release-dates-design',
+    '/node_modules/@microsoft/applicationinsights-web/dist/es5',
+    '/node_modules/@microsoft/applicationinsights-clickanalytics-js/dist/es5',
   ).forEach(dir => {
     router.use('/assets', express.static(path.join(process.cwd(), dir), cacheControl))
   })

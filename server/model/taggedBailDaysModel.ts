@@ -4,7 +4,7 @@ import SessionAdjustment from '../@types/AdjustmentTypes'
 export default class TaggedBailDaysModel {
   constructor(
     public prisonerNumber: string,
-    private addOrEdit: string,
+    public addOrEdit: string,
     private id: string,
     public form: TaggedBailDaysForm,
     public adjustment: SessionAdjustment,
