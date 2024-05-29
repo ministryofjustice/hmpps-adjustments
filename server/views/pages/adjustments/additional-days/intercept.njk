@@ -33,7 +33,7 @@
 
       <p class="govuk-body">
         {% if model.intercept.type == 'FIRST_TIME' %}
-          {% if model.numOfAdaAdjudications === 0 %}
+          {% if model.showExistingAdaMessage %}
             This service has identified an ADA adjustment with no supporting ADA adjudication.
             You must review the ADA adjustment and confirm whether it should be deleted.
           {% else %}

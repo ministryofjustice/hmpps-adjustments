@@ -1,4 +1,4 @@
-import { AdasByDateCharged } from './adjustments/adjustmentsTypes'
+import { AdasByDateCharged, Adjustment } from './adjustments/adjustmentsTypes'
 
 type AdasToReview = {
   awarded: AdasByDateCharged[]
@@ -10,8 +10,9 @@ type AdasToReview = {
   awaitingApproval: AdasByDateCharged[]
   totalAwaitingApproval: number
   intercept: AdaIntercept
-  totalExistingAdads: number
+  totalExistingAdas: number
   showExistingAdaMessage: boolean
+  adjustmentsToRemove: Adjustment[]
 }
 
 type AdasToView = {

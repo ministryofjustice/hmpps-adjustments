@@ -10,7 +10,7 @@ export default class ReviewAndSubmitAdaViewModel {
 
   public displayBanner(): boolean {
     const anyUnlinkedAdas = this.existingAdjustments.some(it => !it.additionalDaysAwarded?.adjudicationId?.length)
-    if (anyUnlinkedAdas) {
+    if (anyUnlinkedAdas && this.adjustments.length) {
       const existingDays = this.existingAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       const newDays = this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       return existingDays !== newDays
@@ -58,9 +58,41 @@ export default class ReviewAndSubmitAdaViewModel {
             ]
           }),
           [
-            { text: 'Total Quashed ADAs', colspan: 2 },
+            { html: '<strong>Total Quashed ADAs</strong>', colspan: 2 },
             {
               text: this.quashedAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
+              format: 'numeric',
+            },
+          ],
+        ],
+      }
+    }
+    return null
+  }
+
+  public removeTable() {
+    if (!this.quashedTable() && !this.createTable()) {
+      return {
+        caption: 'ADA details',
+        head: [
+          { text: 'Last updated' },
+          { text: 'From date' },
+          { text: 'To date' },
+          { text: 'Days', format: 'numeric' },
+        ],
+        rows: [
+          ...this.existingAdjustments.map(it => {
+            return [
+              { text: dayjs(it.lastUpdatedDate).format('D MMM YYYY') },
+              { text: dayjs(it.fromDate).format('D MMM YYYY') },
+              { text: dayjs(it.toDate).format('D MMM YYYY') },
+              { text: it.days, format: 'numeric' },
+            ]
+          }),
+          [
+            { html: '<strong>Total ADAs removed from calculation</strong>', colspan: 3 },
+            {
+              text: this.existingAdjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
               format: 'numeric',
             },
           ],

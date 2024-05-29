@@ -29,30 +29,18 @@ export default class AdditionalDaysAwardedBackendService {
     activeCaseLoadId: string,
   ): Promise<AdasToReview> {
     const selected = this.additionalDaysAwardedStoreService.getSelectedPadas(req, nomsId)
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId, selected)
-
-    return {
-      awarded: response.awarded,
-      totalAwarded: response.totalAwarded,
-      awaitingApproval: response.awaitingApproval,
-      totalAwaitingApproval: response.totalAwaitingApproval,
-      suspended: response.suspended,
-      totalSuspended: response.totalSuspended,
-      quashed: response.quashed,
-      totalQuashed: response.totalQuashed,
-      intercept: response.intercept,
-      totalExistingAdads: response.totalExistingAdas,
-      showExistingAdaMessage: response.showExistingAdaMessage,
+    const details = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId, selected)
+    let adjustmentsToRemove: Adjustment[] = []
+    if (details.showExistingAdaMessage) {
+      adjustmentsToRemove = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(
+        it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
+      )
     }
+    return { ...details, adjustmentsToRemove }
   }
 
   public async getPadasToApprove(nomsId: string, token: string, activeCaseLoadId: string): Promise<PadasToReview> {
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId)
-
-    return {
-      prospective: response.prospective,
-      totalProspective: response.totalProspective,
-    }
+    return this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId)
   }
 
   public storeSelectedPadas(req: Request, nomsId: string, padaForm: PadaForm): void {

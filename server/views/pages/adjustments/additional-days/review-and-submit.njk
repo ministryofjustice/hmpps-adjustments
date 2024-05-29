@@ -42,6 +42,12 @@
               model.quashedTable()
           ) }}
       {% endif %}
+
+      {% if model.removeTable() %}
+        {{ govukTable(
+              model.removeTable()
+          ) }}
+      {% endif %}
       <div class="govuk-!-margin-top-8">
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
