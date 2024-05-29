@@ -7,6 +7,8 @@ import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsServi
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import { AdasToReview } from '../@types/AdaTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -176,7 +178,7 @@ const mixPadasAndPending = {
     anyProspective: false,
   },
   showExistingAdaMessage: false,
-  totalExistingAdads: null,
+  totalExistingAdas: null,
 } as AdasToReview
 
 let app: Express
@@ -247,7 +249,6 @@ describe('Additional Days Awarded routes tests', () => {
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
-
     it('GET /{nomsId}/additional-days/review-and-approve when no matching adjudication exists', () => {
       prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
         earliestSentence: new Date(),
@@ -256,7 +257,18 @@ describe('Additional Days Awarded routes tests', () => {
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue({
         ...noAwaitingApproval,
         showExistingAdaMessage: true,
-        totalExistingAdads: 10,
+        totalExistingAdas: 10,
+        adjustmentsToRemove: [
+          {
+            adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+            additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: false },
+            bookingId: 123,
+            days: 10,
+            fromDate: '2023-08-03',
+            person: NOMS_ID,
+            prisonId: undefined,
+          } as Adjustment,
+        ],
       })
 
       return request(app)
@@ -264,7 +276,44 @@ describe('Additional Days Awarded routes tests', () => {
         .expect(200)
         .expect('Content-Type', /html/)
         .expect(res => {
-          expect(res.text).toContain('10 ADA have been added in NOMIS but no adjudication record exists.')
+          expect(res.text).toContain('Review and delete ADAs')
+          expect(res.text).toContain('Pending deletion')
+          expect(res.text).toContain('03 Aug 2023')
+          expect(res.text).toContain('Total ADAs removed from calculation')
+          expect(res.text).toContain('10')
+        })
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-submit when no matching adjudication exists', () => {
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+        earliestSentence: new Date(),
+        earliestExcludingRecalls: new Date(),
+      })
+      additionalDaysAwardedBackendService.getReviewAndSubmitModel.mockResolvedValue(
+        new ReviewAndSubmitAdaViewModel(
+          [],
+          [
+            {
+              adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+              additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: false },
+              bookingId: 123,
+              days: 10,
+              fromDate: '2023-08-03',
+              person: NOMS_ID,
+              prisonId: undefined,
+            } as Adjustment,
+          ],
+          [],
+        ),
+      )
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/review-and-submit`)
+        .expect(200)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('Total ADAs removed from calculation')
+          expect(res.text).toContain('10')
         })
     })
   })

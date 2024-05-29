@@ -413,7 +413,7 @@ export default {
           ],
           totalProspective: 17,
           showExistingAdaMessage: false,
-          totalExistingAdads: 40,
+          totalExistingAdas: 40,
         },
       },
     })

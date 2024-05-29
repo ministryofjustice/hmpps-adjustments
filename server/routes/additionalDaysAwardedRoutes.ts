@@ -23,15 +23,8 @@ export default class AdditionalDaysAwardedRoutes {
       return res.redirect(`/${nomsId}`)
     }
 
-    let numOfAdaAdjudications = 0
-    numOfAdaAdjudications += response.totalAwaitingApproval
-    numOfAdaAdjudications += response.totalProspective
-
     return res.render('pages/adjustments/additional-days/intercept', {
-      model: {
-        intercept: response.intercept,
-        numOfAdaAdjudications,
-      },
+      model: { ...response },
     })
   }
 

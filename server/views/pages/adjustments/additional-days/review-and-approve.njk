@@ -2,6 +2,7 @@
 {% from "../../../macros/adaTable.njk" import adaTable %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
 
 {% set pageTitle = applicationName + " - Review and approve ADAs" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -20,92 +21,122 @@
       <div class="govuk-form-group govuk-body">
         <h1 class="govuk-heading-l">
           <span class="govuk-caption-xl">Adjustments</span>
-          Review and approve ADAs
+          Review and {% if adasToReview.showExistingAdaMessage %}delete{% else %}approve{% endif %} ADAs
         </h1>
 
         {% if adasToReview.showExistingAdaMessage %}
-          {% set html %}
-          <h3 class="govuk-notification-banner__heading">Missing adjudication record</h3>
-          <p class="govuk-body">{{adasToReview.totalExistingAdads}} ADA have been added in NOMIS but no adjudication record exists. To continue, you must either remove the ADA, or contact the team responsible for adding adjudications. <br/>
-Check the comment field in the adjudications DPS service for any missing information.</p>
-          {% endset %}
-
-          {{ govukNotificationBanner({
-            html: html
+          {% set adaRows = [] %}
+          {% set totalDays = 0 %}
+          {% for ada in adasToReview.adjustmentsToRemove %}
+            {% set adaRows = (adaRows.push([{
+              text: ada.lastUpdatedDate | date("DD MMM YYYY")
+            }, {
+              text: ada.fromDate | date("DD MMM YYYY")
+            }, {
+              text: ada.toDate | date("DD MMM YYYY")
+            }, {
+              html: '<strong class="govuk-tag govuk-tag--red">Pending deletion</strong>'
+            }, {
+              text: ada.days
+            }]), adaRows) %}
+            {% set totalDays = totalDays + ada.days %}
+          {% endfor %}
+           {% set adaRows = (adaRows.push([{
+              text: 'Total ADAs removed from calculation',
+              colspan: 4,
+              classes: 'govuk-!-text-align-right'
+            }, {
+              text: totalDays
+            }]), adaRows) %}
+          {{ govukTable({
+            caption: "Adas pending deletion",
+            captionClasses: "govuk-visually-hidden",
+            head: [{
+              text: "Last updated"
+            }, {
+              text: "From date"
+            }, {
+              text: "To date"
+            }, {
+              text: "Status"
+            }, {
+              text: "Days"
+            }],
+            rows: adaRows
           }) }}
-        {% endif %}
-        <p>
-          {% if adasToReview.intercept.type == 'FIRST_TIME'%}
-            ADA adjustments are based on adjudication records. To apply ADAs, you must confirm that the adjustment information below is correct.
-          {% else %}
-            Check that the existing ADAs are correct, then review and approve pending ADAs.
+        {% else %}
+          <p>
+            {% if adasToReview.intercept.type == 'FIRST_TIME'%}
+              ADA adjustments are based on adjudication records. To apply ADAs, you must confirm that the adjustment information below is correct.
+            {% else %}
+              Check that the existing ADAs are correct, then review and approve pending ADAs.
+            {% endif %}
+          </p>
+
+          {% if adasToReview.intercept.type != 'FIRST_TIME'%}
+            <h2 class="govuk-heading-m">Existing ADAs</h2>
+            {{ adaTable({
+              tableId: 'awarded-adas',
+              adas: adasToReview.awarded,
+              total: adasToReview.totalAwarded,
+              totalText: 'Total ADAs taken into calculation',
+              mainTitle: 'These ADAs will be included in the calculation.',
+              emptyTitle: prisoner.firstName | title + ' ' + prisoner.lastName | title + ' has no ADAs that are applicable to the current sentences.'
+              }) }}
           {% endif %}
-        </p>
 
-        {% if adasToReview.intercept.type != 'FIRST_TIME'%}
-          <h2 class="govuk-heading-m">Existing ADAs</h2>
+          {% if adasToReview.suspended | length %}
+            <h2 class="govuk-heading-m">Suspended ADAs</h2>
+            {{ adaTable({
+              tableId: 'suspended-adas',
+              adas: adasToReview.suspended,
+              total: adasToReview.totalSuspended,
+              totalText: 'Total suspended ADAs',
+              mainTitle: 'Suspended ADAs will not be included in the calculation.'
+              }) }}
+          {% endif %}
+
+          <h2 class="govuk-heading-m">ADAs to be approved</h2>
           {{ adaTable({
-            tableId: 'awarded-adas',
-            adas: adasToReview.awarded,
-            total: adasToReview.totalAwarded,
+            tableId: 'awaiting-approval-adas',
+            adas: adasToReview.awaitingApproval,
+            total: adasToReview.totalAwaitingApproval,
             totalText: 'Total ADAs taken into calculation',
-            mainTitle: 'These ADAs will be included in the calculation.',
-            emptyTitle: prisoner.firstName | title + ' ' + prisoner.lastName | title + ' has no ADAs that are applicable to the current sentences.'
+            mainTitle: 'Once you have reviewed and approved the pending ADAs, they will be added to the sentence calculation.',
+            emptyTitle: 'No ADA records waiting for approval exist for this offender'
             }) }}
-        {% endif %}
 
-        {% if adasToReview.suspended | length %}
-          <h2 class="govuk-heading-m">Suspended ADAs</h2>
-          {{ adaTable({
-            tableId: 'suspended-adas',
-            adas: adasToReview.suspended,
-            total: adasToReview.totalSuspended,
-            totalText: 'Total suspended ADAs',
-            mainTitle: 'Suspended ADAs will not be included in the calculation.'
-            }) }}
-        {% endif %}
+          {% if adasToReview.quashed | length %}
+            <h2 class="govuk-heading-m">Quashed ADAs</h2>
+            {{ adaTable({
+              tableId: 'quashed-approval-adas',
+              adas: adasToReview.quashed,
+              total: adasToReview.totalQuashed,
+              totalText: 'Total days',
+              mainTitle: 'Once you have reviewed and approved the quashed ADAs, they will not be added to the sentence calculation.'
+              }) }}
+          {% endif %}
 
-        <h2 class="govuk-heading-m">ADAs to be approved</h2>
-        {{ adaTable({
-          tableId: 'awaiting-approval-adas',
-          adas: adasToReview.awaitingApproval,
-          total: adasToReview.totalAwaitingApproval,
-          totalText: 'Total ADAs taken into calculation',
-          mainTitle: 'Once you have reviewed and approved the pending ADAs, they will be added to the sentence calculation.',
-          emptyTitle: 'No ADA records waiting for approval exist for this offender'
-          }) }}
+        </div>
 
-        {% if adasToReview.quashed | length %}
-          <h2 class="govuk-heading-m">Quashed ADAs</h2>
-          {{ adaTable({
-            tableId: 'quashed-approval-adas',
-            adas: adasToReview.quashed,
-            total: adasToReview.totalQuashed,
-            totalText: 'Total days',
-            mainTitle: 'Once you have reviewed and approved the quashed ADAs, they will not be added to the sentence calculation.'
-            }) }}
-        {% endif %}
-
-      </div>
-
+      {% endif %}
       <div class="govuk-inset-text">
             If you think some information is wrong, ask the team responsible for adjudications in your prison to correct it, then <a href="">reload this page.</a>
       </div>
       <div class="govuk-!-margin-top-8">
-        <h2 class="govuk-heading-m">Approve ADAs</h2>
-        <p class="govuk-body">If all the ADA information is correct, approve the pending ADAs.</p>
+        {% if not adasToReview.showExistingAdaMessage %}
+          <h2 class="govuk-heading-m">Approve ADAs</h2>
+          <p class="govuk-body">If all the ADA information is correct, approve the pending ADAs.</p>
+        {% endif %}
         <form class="form" method="post">
           <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
           <div class="govuk-button-group">
-            {% if not adasToReview.showExistingAdaMessage %}
             {{ govukButton({
-                  text: "Approve",
-                  type: submit,
-                  preventDoubleClick: true,
-                  attributes: {'data-qa': 'approve-button'}
-                }) }}
-            {% endif %}
-
+                text: "Approve",
+                type: submit,
+                preventDoubleClick: true,
+                attributes: {'data-qa': 'approve-button'}
+              }) }}
             {{ govukButton({
               text: "Cancel",
               href: "/" + prisoner.prisonerNumber,
