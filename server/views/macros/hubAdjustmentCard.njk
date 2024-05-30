@@ -38,6 +38,9 @@
           on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMM YYYY") }}
           by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</p>
       {% endif %}
+      {% if model.showProspectiveAdaLink(adjustmentType) %}
+        <a href="/{{ prisonerNumber }}/additional-days/review-prospective">Review PADAs</a>
+      {% endif %}
       {% if adjustmentType.value == 'REMAND' and model
       .remandDecision and model
       .hasRemandToolRole() %}

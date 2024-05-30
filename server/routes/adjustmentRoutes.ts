@@ -66,26 +66,26 @@ export default class AdjustmentRoutes {
         token,
       )
 
+    const adaAdjudicationDetails = await this.adjustmentsService.getAdaAdjudicationDetails(
+      nomsId,
+      token,
+      activeCaseLoadId,
+    )
     if (!messageExists) {
-      const intercept = await this.additionalDaysAwardedBackendService.shouldIntercept(
-        prisonerNumber,
-        token,
-        activeCaseLoadId,
-      )
-
-      if (intercept.type !== 'NONE') {
+      if (adaAdjudicationDetails.intercept.type !== 'NONE') {
         return res.redirect(`/${nomsId}/additional-days/intercept`)
       }
     }
     let remandDecision
     let relevantRemand
-    if (roles.includes('REMAND_IDENTIFIER'))
+    if (roles.includes('REMAND_IDENTIFIER')) {
       try {
         remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
         relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
       } catch {
         // Nothing to do, remand review won't be displayed.
       }
+    }
     return res.render('pages/adjustments/hub', {
       model: new AdjustmentsHubViewModel(
         prisonerNumber,
@@ -95,6 +95,7 @@ export default class AdjustmentRoutes {
         roles,
         message && message[0] && (JSON.parse(message[0]) as Message),
         unusedDeductionMessage,
+        adaAdjudicationDetails,
       ),
     })
   }
