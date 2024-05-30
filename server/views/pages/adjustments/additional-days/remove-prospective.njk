@@ -1,0 +1,78 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = applicationName + " - Confirm and save" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+
+  {% set backUrl = '/' + prisoner.prisonerNumber + '/additional-days/view' %}
+
+  <a href="{{ backUrl }}" class="govuk-back-link">Back</a>
+s
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-form-group govuk-body">
+        <h1 class="govuk-heading-l">
+          <span class="govuk-caption-xl">Adjustments</span>
+          Confirm and save
+        </h1>
+      </div>
+
+      {{ govukTable({
+        caption: "Removed ADA details",
+        head: [{
+          text: "Date charge proved"
+        }, {
+          text: "Charge number(s)"
+        }, {
+          text: "Days"
+        }],
+        rows: [
+          [
+            {
+              text: ada.fromDate | date("D MMM YYYY")
+            },
+            {
+              text: ada.additionalDaysAwarded.adjudicationId.join(', ')
+            },
+            {
+              text: ada.days
+            }
+          ],
+          [
+            {
+              html: '<strong>Total removed ADAs</strong>',
+              colspan: '2'
+            },
+            {
+              text: ada.days
+            }
+          ]
+        ]
+      }) }}
+
+
+      <div class="govuk-!-margin-top-8">
+        <form class="form" method="post">
+          <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+          <div class="govuk-button-group">
+            {{ govukButton({
+              text: "Confirm and save",
+              type: submit,
+              preventDoubleClick: true,
+              attributes: {'data-qa': 'submit-button'}
+            }) }}
+
+            {{ govukButton({
+              text: "Cancel",
+              classes: "govuk-button--secondary",
+              href: backUrl
+            }) }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

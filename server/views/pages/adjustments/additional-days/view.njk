@@ -1,6 +1,7 @@
 {% extends "../../../partials/layout.njk" %}
 {% from "../../../macros/adaTable.njk" import adaTable %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
 
 {% set pageTitle = applicationName + " - ADA details" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -11,15 +12,57 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      <div class="govuk-form-group govuk-body">
-        <h1 class="govuk-heading-l">
-          <span class="govuk-caption-xl">Adjustments</span>
-          ADA details
-        </h1>
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjustments</span>
+        ADA details
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% set adaRows = [] %}
+      {% set totalDays = 0 %}
+      {% for ada in model.adjustments %}
+        {% set removeHtml = '<a href="/' + prisoner.prisonerNumber + '/additional-days/remove-prospective/' + ada.fromDate + '">Remove PADA</a>' if ada.additionalDaysAwarded.prospective else '' %}
+        {% set adaRows = (adaRows.push([{
+          text: ada.fromDate | date("D MMM YYYY")
+        }, {
+          text: ada.days
+        }, {
+          html: removeHtml
+        }]), adaRows) %}
+        {% set totalDays = totalDays + ada.days %}
+      {% endfor %}
+      {% set adaRows = (adaRows.push([{
+        html: '<strong>Total ADAs removed from calculation</strong>',
+        classes: 'govuk-!-text-align-right'
+      }, {
+        text: totalDays,
+        colspan: 2
+      }]), adaRows) %}
+      {{ govukTable({
+        caption: "Adas pending deletion",
+        captionClasses: "govuk-visually-hidden",
+        head: [{
+          text: "Date charge proved"
+        }, {
+          text: "Days"
+        }, {
+          text: ""
+        }],
+        rows: adaRows
+      }) }}
+    </div>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+
+
         {{ adaTable({
           tableId:'awarded-adas',
-          adas: model.adas.awarded,
-          total: model.adas.totalAwarded,
+          adas: model.awarded,
+          total: model.totalAwarded,
           hideStatuses: true,
           totalText: 'Total ADAs taken into calculation',
           showTotalPerDateCharged: true

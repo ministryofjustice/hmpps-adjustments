@@ -158,9 +158,42 @@ export default class AdditionalDaysAwardedRoutes {
     const adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, token, activeCaseLoadId)
 
     return res.render('pages/adjustments/additional-days/view', {
-      model: {
-        adas,
-      },
+      model: { ...adas },
     })
+  }
+
+  public removeProspective: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, dateChargeProved } = req.params
+    const ada = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).find(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.fromDate === dateChargeProved,
+    )
+
+    return res.render('pages/adjustments/additional-days/remove-prospective', {
+      ada,
+    })
+  }
+
+  public submitRemoveProspective: RequestHandler = async (req, res): Promise<void> => {
+    const { token } = res.locals.user
+    const { nomsId, dateChargeProved } = req.params
+    const ada = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).find(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.fromDate === dateChargeProved,
+    )
+
+    await Promise.all([
+      this.adjustmentsService.rejectProspectiveAda(
+        nomsId,
+        { person: nomsId, days: ada.days, dateChargeProved: ada.fromDate },
+        token,
+      ),
+      this.adjustmentsService.delete(ada.id, token),
+    ])
+
+    const message = {
+      type: 'ADDITIONAL_DAYS_AWARDED',
+      action: 'UPDATE',
+    } as Message
+    return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
 }
