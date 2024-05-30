@@ -15,10 +15,12 @@ export default class AdditionalDaysAwardedBackendService {
 
   public async viewAdjustments(nomsId: string, token: string, activeCaseLoadId: string): Promise<AdasToView> {
     const response = await this.adjustmentsService.getAdaAdjudicationDetails(nomsId, token, activeCaseLoadId)
-
+    const adjustments = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(
+      it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED',
+    )
     return {
-      awarded: response.awarded,
-      totalAwarded: response.totalAwarded,
+      ...response,
+      adjustments,
     }
   }
 

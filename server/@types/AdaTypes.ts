@@ -18,6 +18,7 @@ type AdasToReview = {
 type AdasToView = {
   awarded: AdasByDateCharged[]
   totalAwarded: number
+  adjustments: Adjustment[]
 }
 
 type PadasToReview = {

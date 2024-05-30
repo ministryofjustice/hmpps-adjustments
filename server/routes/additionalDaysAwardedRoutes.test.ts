@@ -70,15 +70,39 @@ const allPadas = {
 const noAwaitingApproval = {
   awaitingApproval: [],
   suspended: [],
-  awarded: [],
+  awarded: [
+    {
+      dateChargeProved: '2023-08-03',
+      charges: [
+        {
+          chargeNumber: '1525916',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'PROSPECTIVE',
+          toBeServed: 'Concurrent',
+        },
+        {
+          chargeNumber: '1525917',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+        },
+      ],
+      total: 5,
+      status: 'PENDING_APPROVAL',
+    },
+  ],
   quashed: [],
-  totalAwarded: 0,
+  totalAwarded: 5,
   totalQuashed: 0,
-  totalAwaitingApproval: 104,
+  totalAwaitingApproval: 0,
   totalSuspended: 0,
   intercept: {
-    number: 2,
-    type: 'UPDATE',
+    number: 0,
+    type: 'NONE',
     anyProspective: false,
   },
 } as AdasToReview
@@ -316,5 +340,91 @@ describe('Additional Days Awarded routes tests', () => {
           expect(res.text).toContain('10')
         })
     })
+  })
+
+  it('GET /{nomsId}/additional-days/view', () => {
+    additionalDaysAwardedBackendService.viewAdjustments.mockResolvedValue({
+      ...noAwaitingApproval,
+      adjustments: [
+        {
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: true },
+          bookingId: 123,
+          days: 10,
+          fromDate: '2023-08-03',
+          person: NOMS_ID,
+          prisonId: undefined,
+        } as Adjustment,
+      ],
+    })
+
+    return request(app)
+      .get(`/${NOMS_ID}/additional-days/view`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/additional-days/remove-prospective/2023-08-03">Remove PADA</a>`,
+        )
+      })
+  })
+
+  it('GET /{nomsId}/additional-days/remove-prospective', () => {
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+      {
+        id: 'UUID',
+        adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+        additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: true },
+        bookingId: 123,
+        days: 10,
+        fromDate: '2023-08-03',
+        person: NOMS_ID,
+        prisonId: undefined,
+      } as Adjustment,
+    ])
+
+    return request(app)
+      .get(`/${NOMS_ID}/additional-days/remove-prospective/2023-08-03`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('Total removed ADA')
+      })
+  })
+
+  it('POST /{nomsId}/additional-days/remove-prospective', () => {
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+      {
+        id: 'UUID',
+        adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+        additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: true },
+        bookingId: 123,
+        days: 10,
+        fromDate: '2023-08-03',
+        person: NOMS_ID,
+        prisonId: undefined,
+      } as Adjustment,
+    ])
+
+    return request(app)
+      .post(`/${NOMS_ID}/additional-days/remove-prospective/2023-08-03`)
+      .expect(302)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22ADDITIONAL_DAYS_AWARDED%22,%22action%22:%22UPDATE%22%7D`,
+      )
+      .expect(() => {
+        expect(adjustmentsService.rejectProspectiveAda).toHaveBeenCalledWith(
+          NOMS_ID,
+          {
+            person: NOMS_ID,
+            days: 10,
+            dateChargeProved: '2023-08-03',
+          },
+          'token',
+        )
+        expect(adjustmentsService.delete).toHaveBeenCalledWith('UUID', 'token')
+      })
   })
 })
