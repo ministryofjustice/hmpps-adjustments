@@ -1,4 +1,4 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import config from '../config'
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
@@ -25,6 +25,7 @@ export default class AdjustmentsHubViewModel {
     public roles: string[],
     public message: Message,
     public unusedDeductionMessage: UnusedDeductionMessageType,
+    private adaAdjudicationDetails: AdaAdjudicationDetails,
   ) {
     this.checkInformationLink = `${config.services.calculateReleaseDatesUI.url}/calculation/${this.prisonerNumber}/check-information?hasErrors=true`
   }
@@ -39,6 +40,10 @@ export default class AdjustmentsHubViewModel {
 
   public hasRemandToolRole(): boolean {
     return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
+  }
+
+  public showProspectiveAdaLink(adjustmentType: AdjustmentType): boolean {
+    return adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED' && !!this.adaAdjudicationDetails?.prospective?.length
   }
 
   public displayReview(): boolean {

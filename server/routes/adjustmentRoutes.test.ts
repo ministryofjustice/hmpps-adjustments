@@ -3,7 +3,7 @@ import request from 'supertest'
 import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
@@ -91,6 +91,13 @@ const adaAdjustment = {
   days: 24,
 } as Adjustment
 
+const noInterceptAdjudication = {
+  intercept: {
+    type: 'NONE',
+    number: 1,
+  },
+} as AdaAdjudicationDetails
+
 let app: Express
 
 const defaultUser = user
@@ -128,11 +135,7 @@ describe('Adjustment routes tests', () => {
       'NONE',
       [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }, remandAdjustment, unusedDeductions],
     ])
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'NONE',
-      number: 0,
-      anyProspective: false,
-    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -155,11 +158,7 @@ describe('Adjustment routes tests', () => {
       'UNSUPPORTED',
       [remandAdjustment],
     ])
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'NONE',
-      number: 0,
-      anyProspective: false,
-    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -179,11 +178,7 @@ describe('Adjustment routes tests', () => {
       'VALIDATION',
       [remandAdjustment],
     ])
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'NONE',
-      number: 0,
-      anyProspective: false,
-    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -203,11 +198,7 @@ describe('Adjustment routes tests', () => {
       'NOMIS_ADJUSTMENT',
       [remandAdjustment],
     ])
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'NONE',
-      number: 0,
-      anyProspective: false,
-    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -227,11 +218,7 @@ describe('Adjustment routes tests', () => {
       'UNKNOWN',
       [remandAdjustment],
     ])
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'NONE',
-      number: 0,
-      anyProspective: false,
-    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -248,11 +235,7 @@ describe('Adjustment routes tests', () => {
       earliestSentence: new Date(),
     })
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'NONE',
-      number: 0,
-      anyProspective: false,
-    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NONE',
       [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
@@ -269,16 +252,55 @@ describe('Adjustment routes tests', () => {
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
     })
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'UNKNOWN',
-      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
-    ])
-    additionalDaysAwardedBackendService.shouldIntercept.mockResolvedValue({
-      type: 'FIRST_TIME',
-      number: 5,
-      anyProspective: true,
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      ...noInterceptAdjudication,
+      intercept: {
+        type: 'FIRST_TIME',
+        number: 5,
+        anyProspective: true,
+        messageArguments: [],
+      },
     })
     return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', `/${NOMS_ID}/additional-days/intercept`)
+  })
+  it('GET /{nomsId} hub has link to review PADAs', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNKNOWN',
+      [
+        {
+          ...adaAdjustment,
+          prisonName: 'Leeds',
+          lastUpdatedDate: '2023-04-05',
+          additionalDaysAwarded: { adjudicationId: [], prospective: true },
+        },
+      ],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      ...noInterceptAdjudication,
+      prospective: [
+        {
+          charges: [],
+          dateChargeProved: '2024-01-01',
+        },
+      ],
+      intercept: {
+        type: 'NONE',
+        number: 0,
+        anyProspective: true,
+        messageArguments: [],
+      },
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('<a href="/ABC123/additional-days/review-prospective">Review PADAs</a>')
+      })
   })
 
   it('GET /{nomsId} relevant remand throws error', () => {
