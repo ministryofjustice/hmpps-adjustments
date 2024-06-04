@@ -30,7 +30,7 @@ export default class UserService {
       caseloads: userCaseloads.map(uc => uc.caseLoadId),
       caseloadDescriptions: userCaseloads.map(uc => uc.description),
       caseloadMap: new Map(userCaseloads.map(uc => [uc.caseLoadId, uc.description])),
-      isSupportUser: roles.includes('COURT_CASES_AND_RELEASE_DATES_SUPPORT'),
+      isSupportUser: roles.includes('COURTCASE_RELEASEDATE_SUPPORT'),
     }
   }
 
