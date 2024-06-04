@@ -47,10 +47,10 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { token, roles, activeCaseLoadId } = res.locals.user
+    const { username, roles, activeCaseLoadId, isSupportUser } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
 
     const message = req.flash('message')
     const messageExists = message && message[0]
@@ -63,16 +63,16 @@ export default class AdjustmentRoutes {
         nomsId,
         startOfSentenceEnvelope.earliestSentence,
         !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
-        token,
+        username,
       )
 
     const adaAdjudicationDetails = await this.adjustmentsService.getAdaAdjudicationDetails(
       nomsId,
-      token,
+      username,
       activeCaseLoadId,
     )
     if (!messageExists) {
-      if (adaAdjudicationDetails.intercept.type !== 'NONE') {
+      if (!isSupportUser && adaAdjudicationDetails.intercept.type !== 'NONE') {
         return res.redirect(`/${nomsId}/additional-days/intercept`)
       }
     }
@@ -80,8 +80,8 @@ export default class AdjustmentRoutes {
     let relevantRemand
     if (roles.includes('REMAND_IDENTIFIER')) {
       try {
-        remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
-        relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, token)
+        remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
+        relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, username)
       } catch {
         // Nothing to do, remand review won't be displayed.
       }
@@ -106,7 +106,7 @@ export default class AdjustmentRoutes {
   }
 
   public form: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
     const { bookingId } = res.locals.prisoner
 
@@ -120,11 +120,11 @@ export default class AdjustmentRoutes {
     }
 
     if (adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
-      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
       const adjustments = await this.adjustmentsService.findByPerson(
         nomsId,
         startOfSentenceEnvelope.earliestSentence,
-        token,
+        username,
       )
       if (!adjustments.some(a => a.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')) {
         req.flash('message', JSON.stringify(hubValidationMessages.RADA_NO_ADAS_EXIST))
@@ -136,7 +136,7 @@ export default class AdjustmentRoutes {
     if (addOrEdit === 'edit') {
       const sessionAdjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
       if (id && sessionAdjustment?.id !== id) {
-        adjustment = await this.adjustmentsService.get(id, token)
+        adjustment = await this.adjustmentsService.get(id, username)
       } else {
         adjustment = sessionAdjustment
       }
@@ -151,7 +151,7 @@ export default class AdjustmentRoutes {
   }
 
   public submitForm: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, adjustmentTypeUrl, addOrEdit, id } = req.params
     const { bookingId } = res.locals.prisoner
 
@@ -162,7 +162,7 @@ export default class AdjustmentRoutes {
 
     const adjustmentForm = AdjustmentsFormFactory.fromRequest(req, adjustmentType)
 
-    await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(bookingId, token))
+    await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(bookingId, username))
 
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/form', {
@@ -172,7 +172,7 @@ export default class AdjustmentRoutes {
 
     const adjustment = adjustmentForm.toAdjustment(res.locals.prisoner, nomsId, id)
 
-    const messages = await this.adjustmentsService.validate(adjustment, token)
+    const messages = await this.adjustmentsService.validate(adjustment, username)
 
     const validationMessages = messages.filter(it => it.type === 'VALIDATION')
 
@@ -205,15 +205,15 @@ export default class AdjustmentRoutes {
   }
 
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId } = req.params
 
     const adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (adjustment) {
       if (adjustment.id) {
-        await this.adjustmentsService.update(adjustment.id, adjustment, token)
+        await this.adjustmentsService.update(adjustment.id, adjustment, username)
       } else {
-        await this.adjustmentsService.create([adjustment], token)
+        await this.adjustmentsService.create([adjustment], username)
       }
 
       const message = {
@@ -227,12 +227,12 @@ export default class AdjustmentRoutes {
   }
 
   public warning: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId } = req.params
 
     const adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (adjustment) {
-      const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
+      const warning = (await this.adjustmentsService.validate(adjustment, username)).find(it => it.type === 'WARNING')
       if (warning) {
         return res.render('pages/adjustments/warning', {
           model: new WarningModel(adjustment, warning, new WarningForm({})),
@@ -243,7 +243,7 @@ export default class AdjustmentRoutes {
   }
 
   public submitWarning: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId } = req.params
 
     const warningForm = new WarningForm(req.body)
@@ -254,7 +254,9 @@ export default class AdjustmentRoutes {
     if (adjustment) {
       if (warningForm.errors.length) {
         if (adjustment) {
-          const warning = (await this.adjustmentsService.validate(adjustment, token)).find(it => it.type === 'WARNING')
+          const warning = (await this.adjustmentsService.validate(adjustment, username)).find(
+            it => it.type === 'WARNING',
+          )
           return res.render('pages/adjustments/warning', {
             model: new WarningModel(adjustment, warning, warningForm),
           })
@@ -270,22 +272,22 @@ export default class AdjustmentRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { token, roles } = res.locals.user
+    const { username, roles } = res.locals.user
     const { nomsId, adjustmentTypeUrl } = req.params
     const { bookingId } = res.locals.prisoner
     const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
     if (!adjustmentType) {
       return res.redirect(`/${nomsId}`)
     }
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
     const adjustments = await this.adjustmentsService.findByPerson(
       nomsId,
       startOfSentenceEnvelope.earliestSentence,
-      token,
+      username,
     )
     const remandDecision =
       adjustmentType.value === 'REMAND' && roles.includes('REMAND_IDENTIFIER')
-        ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, token)
+        ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
         : null
     return res.render('pages/adjustments/view', {
       model: new ViewModel(adjustments, adjustmentType, remandDecision, roles),
@@ -293,24 +295,24 @@ export default class AdjustmentRoutes {
   }
 
   public remove: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, adjustmentTypeUrl, id } = req.params
     const adjustmentType = adjustmentTypes.find(it => it.url === adjustmentTypeUrl)
     if (!adjustmentType) {
       return res.redirect(`/${nomsId}`)
     }
-    const adjustment = await this.adjustmentsService.get(id, token)
+    const adjustment = await this.adjustmentsService.get(id, username)
     return res.render('pages/adjustments/remove', {
       model: new RemoveModel(adjustment, adjustmentType),
     })
   }
 
   public submitRemove: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, id } = req.params
 
-    const adjustment = await this.adjustmentsService.get(id, token)
-    await this.adjustmentsService.delete(id, token)
+    const adjustment = await this.adjustmentsService.get(id, username)
+    await this.adjustmentsService.delete(id, username)
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.days,
@@ -320,9 +322,9 @@ export default class AdjustmentRoutes {
   }
 
   public recall: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId } = req.params
-    const adjustments = await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', token)
+    const adjustments = await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
 
     return res.render('pages/adjustments/recall', {
       model: new RecallModel(adjustments, new RecallForm({})),
@@ -330,20 +332,20 @@ export default class AdjustmentRoutes {
   }
 
   public recallSubmit: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId } = req.params
 
     const recallForm = new RecallForm(req.body)
 
     await recallForm.validate()
     if (recallForm.errors.length) {
-      const adjustments = await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', token)
+      const adjustments = await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
 
       return res.render('pages/adjustments/recall', {
         model: new RecallModel(adjustments, recallForm),
       })
     }
-    await this.adjustmentsService.restore({ ids: recallForm.getSelectedAdjustments() }, token)
+    await this.adjustmentsService.restore({ ids: recallForm.getSelectedAdjustments() }, username)
     const message = {
       type: 'REMAND',
       action: 'UPDATE',

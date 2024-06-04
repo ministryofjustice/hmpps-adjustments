@@ -18,9 +18,9 @@ jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedBackendService')
 jest.mock('../services/unusedDeductionsService')
 
-const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
-const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
-const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
+const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
+const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(

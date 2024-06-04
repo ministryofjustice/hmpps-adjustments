@@ -16,9 +16,9 @@ jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedBackendService')
 
-const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
-const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
-const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
+const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
+const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(
   null,
@@ -422,9 +422,9 @@ describe('Additional Days Awarded routes tests', () => {
             days: 10,
             dateChargeProved: '2023-08-03',
           },
-          'token',
+          'user1',
         )
-        expect(adjustmentsService.delete).toHaveBeenCalledWith('UUID', 'token')
+        expect(adjustmentsService.delete).toHaveBeenCalledWith('UUID', 'user1')
       })
   })
 })
