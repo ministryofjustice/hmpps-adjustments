@@ -8,64 +8,89 @@ import {
   RestoreAdjustments,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
+import { HmppsAuthClient } from '../data'
 
 export default class AdjustmentsService {
-  public async create(adjustments: Adjustment[], token: string): Promise<CreateResponse> {
-    return new AdjustmentsClient(token).create(adjustments)
+  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+
+  public async create(adjustments: Adjustment[], username: string): Promise<CreateResponse> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).create(adjustments)
   }
 
-  public async get(adjustmentId: string, token: string): Promise<Adjustment> {
-    return new AdjustmentsClient(token).get(adjustmentId)
+  public async get(adjustmentId: string, username: string): Promise<Adjustment> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).get(adjustmentId)
   }
 
-  public async findByPerson(person: string, earliestSentenceDate: Date, token: string): Promise<Adjustment[]> {
-    return new AdjustmentsClient(token).findByPerson(person, earliestSentenceDate.toISOString().substring(0, 10))
+  public async findByPerson(person: string, earliestSentenceDate: Date, username: string): Promise<Adjustment[]> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).findByPerson(
+      person,
+      earliestSentenceDate.toISOString().substring(0, 10),
+    )
   }
 
-  public async findByPersonOutsideSentenceEnvelope(person: string, token: string): Promise<Adjustment[]> {
-    return new AdjustmentsClient(token).findByPerson(person)
+  public async findByPersonOutsideSentenceEnvelope(person: string, username: string): Promise<Adjustment[]> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).findByPerson(person)
   }
 
-  public async findByPersonAndStatus(person: string, status: AdjustmentStatus, token: string): Promise<Adjustment[]> {
-    return new AdjustmentsClient(token).findByPersonAndStatus(person, status)
+  public async findByPersonAndStatus(
+    person: string,
+    status: AdjustmentStatus,
+    username: string,
+  ): Promise<Adjustment[]> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).findByPersonAndStatus(person, status)
   }
 
-  public async update(adjustmentId: string, adjustment: Adjustment, token: string): Promise<void> {
-    return new AdjustmentsClient(token).update(adjustmentId, adjustment)
+  public async update(adjustmentId: string, adjustment: Adjustment, username: string): Promise<void> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).update(adjustmentId, adjustment)
   }
 
-  public async delete(adjustmentId: string, token: string): Promise<void> {
-    return new AdjustmentsClient(token).delete(adjustmentId)
+  public async delete(adjustmentId: string, username: string): Promise<void> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).delete(adjustmentId)
   }
 
-  public async validate(adjustment: Adjustment, token: string): Promise<ValidationMessage[]> {
-    return new AdjustmentsClient(token).validate(adjustment)
+  public async validate(adjustment: Adjustment, username: string): Promise<ValidationMessage[]> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).validate(adjustment)
   }
 
-  public async restore(restore: RestoreAdjustments, token: string): Promise<void> {
-    return new AdjustmentsClient(token).restore(restore)
+  public async restore(restore: RestoreAdjustments, username: string): Promise<void> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).restore(restore)
   }
 
   public async getAdjustmentsExceptOneBeingEdited(
     sessionAdjustment: Record<string, Adjustment>,
     nomsId: string,
-    token: string,
+    username: string,
   ) {
     // When editing there is only one session adjustment
     const id = Object.keys(sessionAdjustment)[0]
-    return (await this.findByPersonOutsideSentenceEnvelope(nomsId, token)).filter(it => it.id !== id)
+    return (await this.findByPersonOutsideSentenceEnvelope(nomsId, username)).filter(it => it.id !== id)
   }
 
   public async getAdaAdjudicationDetails(
     person: string,
-    token: string,
+    username: string,
     activeCaseLoadId: string,
     selectedPadas: string[] = [],
   ): Promise<AdaAdjudicationDetails> {
-    return new AdjustmentsClient(token).getAdaAdjudicationDetails(person, selectedPadas, activeCaseLoadId)
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).getAdaAdjudicationDetails(
+      person,
+      selectedPadas,
+      activeCaseLoadId,
+    )
   }
 
-  public async rejectProspectiveAda(person: string, prospectiveAdaRejection: ProspectiveAdaRejection, token: string) {
-    return new AdjustmentsClient(token).rejectProspectiveAda(person, prospectiveAdaRejection)
+  public async rejectProspectiveAda(
+    person: string,
+    prospectiveAdaRejection: ProspectiveAdaRejection,
+    username: string,
+  ) {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).rejectProspectiveAda(
+      person,
+      prospectiveAdaRejection,
+    )
+  }
+
+  private async getSystemClientToken(username: string): Promise<string> {
+    return this.hmppsAuthClient.getSystemClientToken(username)
   }
 }

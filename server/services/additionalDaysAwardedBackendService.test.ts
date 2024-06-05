@@ -15,10 +15,10 @@ jest.mock('./additionalDaysApprovalStoreService')
 jest.mock('./adjustmentsService')
 
 const storeService = new AdditionalDaysAwardedStoreService() as jest.Mocked<AdditionalDaysAwardedStoreService>
-const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
+const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const adaService = new AdditionalDaysAwardedBackendService(adjustmentsService, storeService)
 
-const token = 'token'
+const username = 'username'
 const activeCaseLoadId = 'activeCaseLoadId'
 
 const adjudicationOneAdjustment = {
@@ -111,7 +111,7 @@ describe('ADA submit functionality', () => {
         prisonerNumber: nomsId,
         bookingId: `${bookingId}`,
       } as PrisonerSearchApiPrisoner,
-      token,
+      username,
       activeCaseLoadId,
     )
     expect(adjustmentsService.delete).toHaveBeenCalledTimes(3)
@@ -128,7 +128,7 @@ describe('ADA submit functionality', () => {
           prisonId: undefined,
         } as Adjustment,
       ],
-      token,
+      username,
     )
   })
 
@@ -199,7 +199,7 @@ describe('ADA submit functionality', () => {
         prisonerNumber: nomsId,
         bookingId,
       } as PrisonerSearchApiPrisoner,
-      token,
+      username,
       activeCaseLoadId,
     )
 
@@ -210,7 +210,7 @@ describe('ADA submit functionality', () => {
         person: nomsId,
         days: 10,
       } as ProspectiveAdaRejection,
-      token,
+      username,
     )
   })
 })
