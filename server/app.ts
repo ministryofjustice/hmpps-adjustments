@@ -42,7 +42,7 @@ export default function createApp(services: Services): express.Application {
   app.use(setUpCurrentUser(services))
   app.get('*', getFrontendComponents(services))
   app.use('/:nomsId', populateCurrentPrisoner(services.prisonerSearchService))
-  app.use('*', supportUserReadonlyMiddleware())
+  app.post('*', supportUserReadonlyMiddleware())
 
   app.use(routes(services))
 
