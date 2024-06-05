@@ -85,3 +85,11 @@ Used for table columns containing statuses which use the govuk-tag.
     }
   }
 }
+
+/**
+Used for govuk-tag to allow longer width tags to prevent line breaks
+ */
+.single-line-tag {
+  white-space: nowrap;
+  max-width: unset;
+}
