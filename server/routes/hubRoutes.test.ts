@@ -7,8 +7,8 @@ import AdjustmentsService from '../services/adjustmentsService'
 jest.mock('../services/prisonerService')
 jest.mock('../services/adjustmentsService')
 
-const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
-const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
+const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 
 let app: Express
 

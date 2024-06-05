@@ -10,6 +10,7 @@ export interface UserDetails extends User {
   caseloads: string[]
   caseloadDescriptions: string[]
   caseloadMap: Map<string, string>
+  isSupportUser: boolean
 }
 
 export default class UserService {
@@ -18,21 +19,23 @@ export default class UserService {
     private readonly prisonerService: PrisonerService,
   ) {}
 
-  async getUser(token: string): Promise<UserDetails> {
-    const user = await this.manageUsersApiClient.getUser(token)
-    const userCaseloads = await this.prisonerService.getUsersCaseloads(token)
+  async getUser(userToken: string): Promise<UserDetails> {
+    const user = await this.manageUsersApiClient.getUser(userToken)
+    const userCaseloads = await this.prisonerService.getUsersCaseloads(userToken)
+    const roles = this.getUserRoles(userToken)
     return {
       ...user,
-      roles: this.getUserRoles(token),
+      roles,
       ...(user.name && { displayName: convertToTitleCase(user.name) }),
       caseloads: userCaseloads.map(uc => uc.caseLoadId),
       caseloadDescriptions: userCaseloads.map(uc => uc.description),
       caseloadMap: new Map(userCaseloads.map(uc => [uc.caseLoadId, uc.description])),
+      isSupportUser: roles.includes('COURTCASE_RELEASEDATE_SUPPORT'),
     }
   }
 
-  getUserRoles(token: string): string[] {
-    const { authorities: roles = [] } = jwtDecode(token) as { authorities?: string[] }
+  getUserRoles(userToken: string): string[] {
+    const { authorities: roles = [] } = jwtDecode(userToken) as { authorities?: string[] }
     return roles.map(role => role.substring(role.indexOf('_') + 1))
   }
 }

@@ -4,18 +4,23 @@ import CalculateReleaseDatesApiClient from '../api/calculateReleaseDatesApiClien
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { daysBetween } from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { HmppsAuthClient } from '../data'
 
 const expectedUnusedDeductionsValidations = [
   'CUSTODIAL_PERIOD_EXTINGUISHED_TAGGED_BAIL',
   'CUSTODIAL_PERIOD_EXTINGUISHED_REMAND',
 ]
 export default class CalculateReleaseDatesService {
+  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+
   async calculateUnusedDeductions(
     prisonerId: string,
     adjustments: Adjustment[],
-    token: string,
+    username: string,
   ): Promise<UnusedDeductionCalculationResponse> {
-    const result = await new CalculateReleaseDatesApiClient(token).calculateUnusedDeductions(prisonerId, adjustments)
+    const result = await new CalculateReleaseDatesApiClient(
+      await this.getSystemClientToken(username),
+    ).calculateUnusedDeductions(prisonerId, adjustments)
     return {
       ...result,
       validationMessages: result.validationMessages.filter(
@@ -29,13 +34,13 @@ export default class CalculateReleaseDatesService {
     adjustments: Adjustment[],
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
     nomsId: string,
-    token: string,
+    username: string,
   ): Promise<UnusedDeductionCalculationResponse> {
     try {
       return await this.calculateUnusedDeductions(
         nomsId,
         [...this.makeSessionAdjustmentsReadyForCalculation(sessionAdjustments, sentencesAndOffence), ...adjustments],
-        token,
+        username,
       )
     } catch (error) {
       // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
@@ -64,5 +69,9 @@ export default class CalculateReleaseDatesService {
         sentenceSequence: sentence.sentenceSequence,
       }
     })
+  }
+
+  private async getSystemClientToken(username: string): Promise<string> {
+    return this.hmppsAuthClient.getSystemClientToken(username)
   }
 }

@@ -18,7 +18,7 @@ describe('User service', () => {
     } as PrisonApiUserCaseloads
     beforeEach(() => {
       manageUsersApiClient = new ManageUsersApiClient() as jest.Mocked<ManageUsersApiClient>
-      prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
+      prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
       userService = new UserService(manageUsersApiClient, prisonerService)
     })
 

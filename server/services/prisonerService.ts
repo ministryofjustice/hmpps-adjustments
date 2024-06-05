@@ -8,15 +8,16 @@ import {
   PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
 import FullPageError from '../model/FullPageError'
+import { HmppsAuthClient } from '../data'
 
 export default class PrisonerService {
-  constructor() {}
+  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
 
   async getSentencesAndOffencesFilteredForRemand(
     bookingId: string,
-    token: string,
+    username: string,
   ): Promise<PrisonApiOffenderSentenceAndOffences[]> {
-    return (await this.getSentencesAndOffences(bookingId, token))
+    return (await this.getSentencesAndOffences(bookingId, username))
       .map(it => {
         return { ...it, offences: it.offences.filter(off => !this.aFineCantHaveRemand(it, off)) }
       })
@@ -29,36 +30,36 @@ export default class PrisonerService {
       })
   }
 
-  async getSentencesAndOffences(bookingId: string, token: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
-    const sentencesAndOffences = (await new PrisonApiClient(token).getSentencesAndOffences(bookingId)).filter(
-      it => it.sentenceStatus === 'A',
-    )
+  async getSentencesAndOffences(bookingId: string, username: string): Promise<PrisonApiOffenderSentenceAndOffences[]> {
+    const sentencesAndOffences = (
+      await new PrisonApiClient(await this.getSystemClientToken(username)).getSentencesAndOffences(bookingId)
+    ).filter(it => it.sentenceStatus === 'A')
     if (sentencesAndOffences.length === 0) {
       throw FullPageError.noSentences()
     }
     return sentencesAndOffences
   }
 
-  public async getCourtDateResults(nomsId: string, token: string): Promise<PrisonApiCourtDateResult[]> {
-    return new PrisonApiClient(token).getCourtDateResults(nomsId)
+  public async getCourtDateResults(nomsId: string, username: string): Promise<PrisonApiCourtDateResult[]> {
+    return new PrisonApiClient(await this.getSystemClientToken(username)).getCourtDateResults(nomsId)
   }
 
-  async getUsersCaseloads(token: string): Promise<PrisonApiUserCaseloads[]> {
-    return new PrisonApiClient(token).getUsersCaseloads()
+  async getUsersCaseloads(userToken: string): Promise<PrisonApiUserCaseloads[]> {
+    return new PrisonApiClient(userToken).getUsersCaseloads()
   }
 
   async getBookingAndSentenceAdjustments(
     bookingId: number,
-    token: string,
+    username: string,
   ): Promise<PrisonApiBookingAndSentenceAdjustments> {
-    return new PrisonApiClient(token).getBookingAndSentenceAdjustments(bookingId)
+    return new PrisonApiClient(await this.getSystemClientToken(username)).getBookingAndSentenceAdjustments(bookingId)
   }
 
   async getStartOfSentenceEnvelope(
     bookingId: string,
-    token: string,
+    username: string,
   ): Promise<{ earliestExcludingRecalls: Date; earliestSentence: Date }> {
-    const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, token)
+    const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, username)
     return {
       earliestExcludingRecalls: this.findStartOfSentenceEvelope(
         sentencesAndOffences.filter(it => !PrisonerService.recallTypes.includes(it.sentenceCalculationType)),
@@ -67,8 +68,8 @@ export default class PrisonerService {
     }
   }
 
-  async getPrisonerImage(token: string, prisonerNumber: string): Promise<Readable> {
-    return new PrisonApiClient(token).getPrisonerImage(prisonerNumber)
+  async getPrisonerImage(username: string, prisonerNumber: string): Promise<Readable> {
+    return new PrisonApiClient(await this.getSystemClientToken(username)).getPrisonerImage(prisonerNumber)
   }
 
   private findStartOfSentenceEvelope(sentences: PrisonApiOffenderSentenceAndOffences[]): Date {
@@ -122,4 +123,8 @@ export default class PrisonerService {
     '14FTRHDC_ORA',
     'FTR_HDC_ORA',
   ]
+
+  private async getSystemClientToken(username: string): Promise<string> {
+    return this.hmppsAuthClient.getSystemClientToken(username)
+  }
 }

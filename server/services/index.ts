@@ -14,13 +14,13 @@ import AdditionalDaysAwardedBackendService from './additionalDaysAwardedBackendS
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient, feComponentsClient } = dataAccess()
 
-  const prisonerService = new PrisonerService()
+  const prisonerService = new PrisonerService(hmppsAuthClient)
   const userService = new UserService(manageUsersApiClient, prisonerService)
-  const adjustmentsService = new AdjustmentsService()
-  const identifyRemandPeriodsService = new IdentifyRemandPeriodsService()
+  const adjustmentsService = new AdjustmentsService(hmppsAuthClient)
+  const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(hmppsAuthClient)
   const adjustmentsStoreService = new AdjustmentsStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
-  const calculateReleaseDatesService = new CalculateReleaseDatesService()
+  const calculateReleaseDatesService = new CalculateReleaseDatesService(hmppsAuthClient)
   const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, calculateReleaseDatesService)
   const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
   const feComponentsService = new FeComponentsService(feComponentsClient)
