@@ -23,9 +23,9 @@ export default class UnusedDeductionsService {
     nomsId: string,
     startOfSentenceEnvelope: Date,
     retry: boolean,
-    token: string,
+    username: string,
   ): Promise<[UnusedDeductionMessageType, Adjustment[]]> {
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, token)
+    const adjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, username)
     try {
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       if (!deductions.length) {
@@ -36,7 +36,7 @@ export default class UnusedDeductionsService {
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
         adjustments,
-        token,
+        username,
       )
 
       if (unusedDeductionsResponse.validationMessages?.length) {
@@ -65,7 +65,11 @@ export default class UnusedDeductionsService {
           /* eslint-disable no-await-in-loop */
           for (let i = 0; i < this.maxTries; i += 1) {
             await delay(this.waitBetweenTries)
-            const retryAdjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, token)
+            const retryAdjustments = await this.adjustmentsService.findByPerson(
+              nomsId,
+              startOfSentenceEnvelope,
+              username,
+            )
             const retryDeductions = this.getTotalUnusedRemand(retryAdjustments)
             if (calculatedUnusedDeducions === retryDeductions) {
               return ['NONE', retryAdjustments]

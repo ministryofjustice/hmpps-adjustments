@@ -18,9 +18,9 @@ jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedBackendService')
 jest.mock('../services/unusedDeductionsService')
 
-const prisonerService = new PrisonerService() as jest.Mocked<PrisonerService>
-const adjustmentsService = new AdjustmentsService() as jest.Mocked<AdjustmentsService>
-const identifyRemandPeriodsService = new IdentifyRemandPeriodsService() as jest.Mocked<IdentifyRemandPeriodsService>
+const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
+const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(
@@ -102,6 +102,7 @@ let app: Express
 
 const defaultUser = user
 const userWithRemandRole = { ...user, roles: ['REMAND_IDENTIFIER'] }
+const userWithSupportRole = { ...user, roles: ['COURTCASE_RELEASEDATE_SUPPORT'], isSupportUser: true }
 
 let userInTest = defaultUser
 
@@ -263,6 +264,30 @@ describe('Adjustment routes tests', () => {
       },
     })
     return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', `/${NOMS_ID}/additional-days/intercept`)
+  })
+  it('GET /{nomsId} is not intercepted if its a support user', () => {
+    userInTest = userWithSupportRole
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      ...noInterceptAdjudication,
+      intercept: {
+        type: 'FIRST_TIME',
+        number: 5,
+        anyProspective: true,
+        messageArguments: [],
+      },
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+      })
   })
   it('GET /{nomsId} hub has link to review PADAs', () => {
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({

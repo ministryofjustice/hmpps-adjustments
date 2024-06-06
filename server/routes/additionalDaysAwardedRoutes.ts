@@ -14,10 +14,10 @@ export default class AdditionalDaysAwardedRoutes {
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { prisonerNumber } = res.locals.prisoner
-    const response = await this.adjustmentsService.getAdaAdjudicationDetails(prisonerNumber, token, activeCaseLoadId)
+    const response = await this.adjustmentsService.getAdaAdjudicationDetails(prisonerNumber, username, activeCaseLoadId)
 
     if (response.intercept.type === 'NONE') {
       return res.redirect(`/${nomsId}`)
@@ -29,20 +29,20 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
     const { prisoner } = res.locals
 
     const adasToReview: AdasToReview = await this.additionalDaysAwardedBackendService.getAdasToApprove(
       req,
       nomsId,
-      token,
+      username,
       activeCaseLoadId,
     )
 
     if (adasToReview.intercept.type === 'PADA' && !adasToReview.awaitingApproval.length) {
       // Intercepted for PADAs, none have been selected.
-      await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, token, activeCaseLoadId)
+      await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, username, activeCaseLoadId)
       return res.redirect(`/${nomsId}`)
     }
 
@@ -67,12 +67,12 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
 
     const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(
       nomsId,
-      token,
+      username,
       activeCaseLoadId,
     )
 
@@ -82,7 +82,7 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
 
     const padaForm = new PadaForm(req.body)
@@ -92,7 +92,7 @@ export default class AdditionalDaysAwardedRoutes {
     if (padaForm.errors.length) {
       const padasToReview: PadasToReview = await this.additionalDaysAwardedBackendService.getPadasToApprove(
         nomsId,
-        token,
+        username,
         activeCaseLoadId,
       )
       return res.render('pages/adjustments/additional-days/review-prospective', {
@@ -113,12 +113,12 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public reviewAndSubmit: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { referrer } = req.query as Record<string, string>
     const model = await this.additionalDaysAwardedBackendService.getReviewAndSubmitModel(
       req,
       res.locals.prisoner,
-      token,
+      username,
       activeCaseLoadId,
     )
     return res.render('pages/adjustments/additional-days/review-and-submit', {
@@ -128,10 +128,15 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submit: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
 
-    await this.additionalDaysAwardedBackendService.submitAdjustments(req, res.locals.prisoner, token, activeCaseLoadId)
+    await this.additionalDaysAwardedBackendService.submitAdjustments(
+      req,
+      res.locals.prisoner,
+      username,
+      activeCaseLoadId,
+    )
 
     const message = {
       type: 'ADDITIONAL_DAYS_AWARDED',
@@ -141,9 +146,9 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public addWarning: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { bookingId } = res.locals.prisoner
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, token)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
 
     return res.render('pages/adjustments/additional-days/add-warning', {
       model: {
@@ -153,9 +158,9 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { token, activeCaseLoadId } = res.locals.user
+    const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
-    const adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, token, activeCaseLoadId)
+    const adas = await this.additionalDaysAwardedBackendService.viewAdjustments(nomsId, username, activeCaseLoadId)
 
     return res.render('pages/adjustments/additional-days/view', {
       model: { ...adas },
@@ -163,9 +168,9 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public removeProspective: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, dateChargeProved } = req.params
-    const ada = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).find(
+    const ada = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username)).find(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.fromDate === dateChargeProved,
     )
 
@@ -175,9 +180,9 @@ export default class AdditionalDaysAwardedRoutes {
   }
 
   public submitRemoveProspective: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, dateChargeProved } = req.params
-    const ada = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)).find(
+    const ada = (await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username)).find(
       it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED' && it.fromDate === dateChargeProved,
     )
 
@@ -185,9 +190,9 @@ export default class AdditionalDaysAwardedRoutes {
       this.adjustmentsService.rejectProspectiveAda(
         nomsId,
         { person: nomsId, days: ada.days, dateChargeProved: ada.fromDate },
-        token,
+        username,
       ),
-      this.adjustmentsService.delete(ada.id, token),
+      this.adjustmentsService.delete(ada.id, username),
     ])
 
     const message = {

@@ -2,16 +2,20 @@ import nock from 'nock'
 import config from '../config'
 import PrisonerService from './prisonerService'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import HmppsAuthClient from '../data/hmppsAuthClient'
 
-const token = 'token'
+jest.mock('../data/hmppsAuthClient')
 
 describe('Prisoner service related tests', () => {
+  let hmppsAuthClient: jest.Mocked<HmppsAuthClient>
   let prisonerService: PrisonerService
   let fakeApi: nock.Scope
   beforeEach(() => {
     config.apis.prisonApi.url = 'http://localhost:8100'
     fakeApi = nock(config.apis.prisonApi.url)
-    prisonerService = new PrisonerService()
+    hmppsAuthClient = new HmppsAuthClient(null) as jest.Mocked<HmppsAuthClient>
+    hmppsAuthClient.getSystemClientToken.mockResolvedValue('token')
+    prisonerService = new PrisonerService(hmppsAuthClient)
   })
   afterEach(() => {
     nock.cleanAll()
@@ -31,7 +35,7 @@ describe('Prisoner service related tests', () => {
           } as PrisonApiOffenderSentenceAndOffences,
         ])
 
-        const result = await prisonerService.getStartOfSentenceEnvelope('9991', token)
+        const result = await prisonerService.getStartOfSentenceEnvelope('9991', 'username')
 
         expect(result.earliestExcludingRecalls.toISOString().substring(0, 10)).toBe('2023-02-01')
         expect(result.earliestSentence.toISOString().substring(0, 10)).toBe('2023-01-01')

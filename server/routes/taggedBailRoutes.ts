@@ -41,10 +41,10 @@ export default class TaggedBailRoutes {
   }
 
   public selectCase: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
@@ -96,16 +96,16 @@ export default class TaggedBailRoutes {
   }
 
   public view: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
+    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username)
     const taggedBailAdjustments = adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
     if (!taggedBailAdjustments.length) {
       return res.redirect(`/${nomsId}`)
     }
 
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
 
     return res.render('pages/adjustments/tagged-bail/view', {
       model: new TaggedBailViewModel(prisonerNumber, taggedBailAdjustments, sentencesAndOffences),
@@ -113,15 +113,15 @@ export default class TaggedBailRoutes {
   }
 
   public remove: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const adjustment = await this.adjustmentsService.get(id, token)
+    const adjustment = await this.adjustmentsService.get(id, username)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
     }
 
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
     const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
     const sentencesForCaseSequence = sentencesByCaseSequence.find(it =>
       relevantSentenceForTaggedBailAdjustment(it, adjustment),
@@ -132,7 +132,7 @@ export default class TaggedBailRoutes {
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
       { [id]: adjustment },
       nomsId,
-      token,
+      username,
     )
 
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
@@ -140,7 +140,7 @@ export default class TaggedBailRoutes {
       adjustments,
       sentencesAndOffences,
       nomsId,
-      token,
+      username,
     )
 
     const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
@@ -154,7 +154,7 @@ export default class TaggedBailRoutes {
   }
 
   public review: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, addOrEdit, id } = req.params
     const { caseSequence } = req.query as Record<string, string>
     const { bookingId, prisonerNumber } = res.locals.prisoner
@@ -166,15 +166,15 @@ export default class TaggedBailRoutes {
     }
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     const sessionAdjustments = this.adjustmentsStoreService.getAll(req, nomsId)
-    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, token)
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
+    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
 
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustments,
       adjustments,
       sentencesAndOffences,
       nomsId,
-      token,
+      username,
     )
 
     return res.render('pages/adjustments/tagged-bail/review', {
@@ -190,12 +190,12 @@ export default class TaggedBailRoutes {
   }
 
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, id } = req.params
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
-    await this.adjustmentsService.create([adjustment], token)
+    await this.adjustmentsService.create([adjustment], username)
 
     const message = {
       type: 'TAGGED_BAIL',
@@ -206,12 +206,12 @@ export default class TaggedBailRoutes {
   }
 
   public edit: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const { caseSequence } = req.query as Record<string, string>
     let sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, token))
+    sessionAdjustment = sessionAdjustment || (await this.adjustmentsService.get(id, username))
     if (caseSequence) {
       sessionAdjustment = {
         ...sessionAdjustment,
@@ -221,11 +221,11 @@ export default class TaggedBailRoutes {
 
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
 
-    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, token)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
       { [id]: sessionAdjustment },
       nomsId,
-      token,
+      username,
     )
 
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
@@ -233,7 +233,7 @@ export default class TaggedBailRoutes {
       adjustments,
       sentencesAndOffences,
       nomsId,
-      token,
+      username,
     )
 
     const showUnusedMessage = hasCalculatedUnusedDeductionDaysChangedFromUnusedDeductionAdjustmentDays(
@@ -259,14 +259,17 @@ export default class TaggedBailRoutes {
   }
 
   public submitEdit: RequestHandler = async (req, res): Promise<void> => {
-    const { token } = res.locals.user
+    const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
     if (!adjustment.taggedBail?.caseSequence) {
-      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(bookingId, token)
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+        bookingId,
+        username,
+      )
 
       const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffences)
       const sentencesForCaseSequence = sentencesByCaseSequence.find(it =>
@@ -278,7 +281,7 @@ export default class TaggedBailRoutes {
       }
     }
 
-    await this.adjustmentsService.update(id, adjustment, token)
+    await this.adjustmentsService.update(id, adjustment, username)
 
     const message = {
       type: 'TAGGED_BAIL',
