@@ -56,7 +56,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
       {% endif %}
       {% set html %}
         <table id="{{ params.tableId }}"
-              class="govuk-table {{ 'govuk-!-margin-bottom-8' if not params.checkboxes else 'govuk-!-margin-bottom-2' }}">
+              class="govuk-table govuk-!-margin-bottom-2">
           <thead class="govuk-table__head">
             <tr>
               <th class="govuk-table__header"
@@ -125,18 +125,20 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
       {% else %}
         <div class="govuk-grid-row">
           <div class="govuk-grid-column-three-quarters">
-            <div class="govuk-!-margin-bottom-6">
-              <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }} at {{ ada.charges[0].heardAt }}</h3>
-              {% if not params.hideStatuses %}
-              <div class="status-tag-row">
-                {{ pendingApprovalStatus | safe }}
-                {{ awardedStatus | safe }}
-                {{ quashedStatus | safe }}
-                {{ prospectiveStatus | safe }}
-                {{ suspendedStatus | safe }}
+            <div class="govuk-summary-card govuk-!-margin-bottom-4">
+              <div class="govuk-summary-card__content equal-padding">
+                <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }} at {{ ada.charges[0].heardAt }}</h3>
+                {% if not params.hideStatuses %}
+                <div class="status-tag-row">
+                  {{ pendingApprovalStatus | safe }}
+                  {{ awardedStatus | safe }}
+                  {{ quashedStatus | safe }}
+                  {{ prospectiveStatus | safe }}
+                  {{ suspendedStatus | safe }}
+                </div>
+                {% endif %}
+                {{ html | safe }}
               </div>
-              {% endif %}
-              {{ html | safe }}
             </div>
           </div>
         </div>
