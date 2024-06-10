@@ -15,6 +15,10 @@ const ualType = [
     value: 'RELEASE_IN_ERROR',
     text: 'Release in error',
   },
+  {
+    value: 'IMMIGRATION_DETENTION',
+    text: 'Immigration detention',
+  },
 ]
 
 export default ualType
