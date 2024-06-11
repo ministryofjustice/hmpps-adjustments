@@ -118,19 +118,8 @@ export default class AdjustmentsHubViewModel {
     return calculateReleaseDatesCheckInformationUrl(this.prisonerNumber)
   }
 
-  private allDeductionsOnDps() {
-    const anyDeductionFromNomis = this.allDeductions().some(
-      it => !it.remand?.chargeId?.length && !it.taggedBail?.caseSequence,
-    )
-    return !anyDeductionFromNomis
-  }
-
-  private allDeductions() {
-    return this.adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-  }
-
   public getUnused(adjustmentType: AdjustmentType): number {
-    if (this.allDeductionsOnDps()) {
+    if (this.unusedDeductionMessage === 'NONE') {
       const adjustments = this.adjustments.filter(it => it.adjustmentType === adjustmentType.value)
       const total = adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)

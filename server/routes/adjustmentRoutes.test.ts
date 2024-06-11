@@ -225,7 +225,7 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          'Unused remand/tagged bail time cannot be calculated. Any unused deductions must be entered in NOMIS.',
+          'Unused remand/tagged bail time cannot be calculated. There may be some present. Any unused deductions must be entered or viewed in NOMIS.',
         )
       })
   })

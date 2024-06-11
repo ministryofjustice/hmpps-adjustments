@@ -16,7 +16,7 @@ export default class UnusedDeductionsService {
   ) {}
 
   private anyDeductionFromNomis(deductions: Adjustment[]) {
-    return deductions.some(it => !it.remand?.chargeId?.length && !it.taggedBail?.caseSequence)
+    return deductions.some(it => it.source === 'NOMIS')
   }
 
   async getCalculatedUnusedDeductionsMessageAndAdjustments(
@@ -55,10 +55,10 @@ export default class UnusedDeductionsService {
         return ['NOMIS_ADJUSTMENT', adjustments]
       }
 
-      const calculatedUnusedDeducions = unusedDeductionsResponse.unusedDeductions
-      if (calculatedUnusedDeducions || calculatedUnusedDeducions === 0) {
+      const calculatedUnusedDeductions = unusedDeductionsResponse.unusedDeductions
+      if (calculatedUnusedDeductions || calculatedUnusedDeductions === 0) {
         const dbDeductions = this.getTotalUnusedRemand(adjustments)
-        if (calculatedUnusedDeducions === dbDeductions) {
+        if (calculatedUnusedDeductions === dbDeductions) {
           return ['NONE', adjustments]
         }
         if (retry) {
@@ -71,7 +71,7 @@ export default class UnusedDeductionsService {
               username,
             )
             const retryDeductions = this.getTotalUnusedRemand(retryAdjustments)
-            if (calculatedUnusedDeducions === retryDeductions) {
+            if (calculatedUnusedDeductions === retryDeductions) {
               return ['NONE', retryAdjustments]
             }
             // Try again
