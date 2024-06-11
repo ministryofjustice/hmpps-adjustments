@@ -6,7 +6,10 @@
 {% set mainClasses = "app-container govuk-body" %}
 
 {% block content %}
-  <a href="/{{ prisoner.prisonerNumber }}" class="govuk-back-link">Back</a>
+
+  {% set backUrl = '/' + prisoner.prisonerNumber %}
+
+  <a href="{{ backUrl }}" class="govuk-back-link">Back</a>
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
