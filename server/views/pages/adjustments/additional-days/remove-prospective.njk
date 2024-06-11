@@ -7,7 +7,7 @@
 
 {% block content %}
 
-  {% set backUrl = '/' + prisoner.prisonerNumber %}
+  {% set backUrl = '/' + prisoner.prisonerNumber + '/additional-days/view' %}
 
   <a href="{{ backUrl }}" class="govuk-back-link">Back</a>
 
@@ -68,7 +68,7 @@
             {{ govukButton({
               text: "Cancel",
               classes: "govuk-button--secondary",
-              href: backUrl
+              href: "/" + prisoner.prisonerNumber,
             }) }}
           </div>
         </form>
