@@ -94,6 +94,13 @@ export interface paths {
      */
     post: operations['restore']
   }
+  '/adjustments/person/{person}/manual-unused-deductions': {
+    /**
+     * Update the unused deduction days for a person
+     * @description Update the unused deduction days for a person
+     */
+    post: operations['setUnusedDaysManually']
+  }
   '/adjustments/additional-days/{person}/reject-prospective-ada': {
     /** Reject prospective ADA. */
     post: operations['rejectProspectiveAda']
@@ -265,6 +272,11 @@ export interface components {
        * @description The number of days effective in a calculation. (for example remand minus any unused deductions)
        */
       effectiveDays?: number
+      /**
+       * @description Where was the adjustment last changed
+       * @enum {string}
+       */
+      source?: 'NOMIS' | 'DPS'
     }
     /** @description The details of remand adjustment */
     RemandDto: {
@@ -338,6 +350,14 @@ export interface components {
     RestoreAdjustmentsDto: {
       /** @description The IDs of the adjustments to restore */
       ids: string[]
+    }
+    /** @description Details of the number of unused days */
+    ManualUnusedDeductionsDto: {
+      /**
+       * Format: int32
+       * @description The number of unused days
+       */
+      days: number
     }
     /** @description The DTO representing the PADAs rejected */
     ProspectiveAdaRejectionDto: {
@@ -824,6 +844,37 @@ export interface operations {
     }
     responses: {
       /** @description Adjustment restored */
+      200: {
+        content: never
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: never
+      }
+      /** @description Adjustment not found */
+      404: {
+        content: never
+      }
+    }
+  }
+  /**
+   * Update the unused deduction days for a person
+   * @description Update the unused deduction days for a person
+   */
+  setUnusedDaysManually: {
+    parameters: {
+      path: {
+        /** @description The person */
+        person: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ManualUnusedDeductionsDto']
+      }
+    }
+    responses: {
+      /** @description Adjustment update */
       200: {
         content: never
       }
