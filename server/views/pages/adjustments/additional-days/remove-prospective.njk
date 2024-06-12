@@ -10,7 +10,7 @@
   {% set backUrl = '/' + prisoner.prisonerNumber + '/additional-days/view' %}
 
   <a href="{{ backUrl }}" class="govuk-back-link">Back</a>
-s
+
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <div class="govuk-form-group govuk-body">
@@ -68,7 +68,7 @@ s
             {{ govukButton({
               text: "Cancel",
               classes: "govuk-button--secondary",
-              href: backUrl
+              href: "/" + prisoner.prisonerNumber
             }) }}
           </div>
         </form>
