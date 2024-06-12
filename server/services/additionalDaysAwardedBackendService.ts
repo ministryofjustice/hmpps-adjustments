@@ -129,6 +129,8 @@ export default class AdditionalDaysAwardedBackendService {
         )
       }),
     )
+
+    this.additionalDaysAwardedStoreService.clearSelectedPadas(req, prisonerDetail.prisonerNumber)
   }
 
   private adjustmentMatchesAdjudication(adjudication: AdasByDateCharged, adjustment: Adjustment): boolean {

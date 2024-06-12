@@ -31,7 +31,6 @@ export default class AdditionalDaysAwardedRoutes {
   public reviewAndApprove: RequestHandler = async (req, res): Promise<void> => {
     const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
-    const { prisoner } = res.locals
 
     const adasToReview: AdasToReview = await this.additionalDaysAwardedBackendService.getAdasToApprove(
       req,
@@ -39,12 +38,6 @@ export default class AdditionalDaysAwardedRoutes {
       username,
       activeCaseLoadId,
     )
-
-    if (adasToReview.intercept.type === 'PADA' && !adasToReview.awaitingApproval.length) {
-      // Intercepted for PADAs, none have been selected.
-      await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, username, activeCaseLoadId)
-      return res.redirect(`/${nomsId}`)
-    }
 
     // If all awaiting approval are PADA's then redirect to the submit screen (skip approve step)
     if (this.onlyPadasExist(adasToReview)) {
@@ -84,6 +77,7 @@ export default class AdditionalDaysAwardedRoutes {
   public submitPadas: RequestHandler = async (req, res): Promise<void> => {
     const { username, activeCaseLoadId } = res.locals.user
     const { nomsId } = req.params
+    const { prisoner } = res.locals
 
     const padaForm = new PadaForm(req.body)
 
@@ -102,6 +96,21 @@ export default class AdditionalDaysAwardedRoutes {
     }
 
     this.additionalDaysAwardedBackendService.storeSelectedPadas(req, nomsId, padaForm)
+
+    if (padaForm.none) {
+      const adasToReview: AdasToReview = await this.additionalDaysAwardedBackendService.getAdasToApprove(
+        req,
+        nomsId,
+        username,
+        activeCaseLoadId,
+      )
+
+      if (!adasToReview.awaitingApproval.length) {
+        // Intercepted for PADAs, none have been selected, nothing else to review
+        await this.additionalDaysAwardedBackendService.submitAdjustments(req, prisoner, username, activeCaseLoadId)
+        return res.redirect(`/${nomsId}`)
+      }
+    }
 
     return res.redirect(`/${nomsId}/additional-days/review-and-approve`)
   }
