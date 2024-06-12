@@ -6,7 +6,7 @@ import AdjustmentsService from '../services/adjustmentsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
-import { AdasToReview } from '../@types/AdaTypes'
+import { AdasToReview, PadasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
 
@@ -205,6 +205,35 @@ const mixPadasAndPending = {
   totalExistingAdas: null,
 } as AdasToReview
 
+const prospectiveToReview = {
+  prospective: [
+    {
+      dateChargeProved: '2023-08-03',
+      charges: [
+        {
+          chargeNumber: '1525916',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'PROSPECTIVE',
+          toBeServed: 'Concurrent',
+        },
+        {
+          chargeNumber: '1525917',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+        },
+      ],
+      total: 5,
+      status: 'PENDING_APPROVAL',
+    },
+  ],
+  totalProspective: 104,
+} as PadasToReview
+
 let app: Express
 
 const defaultUser = user
@@ -232,10 +261,6 @@ afterEach(() => {
 describe('Additional Days Awarded routes tests', () => {
   describe('Review and approve tests', () => {
     it('GET /{nomsId}/additional-days/review-and-approve when only PADAs exist redirects to review and submit', () => {
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-        earliestSentence: new Date(),
-        earliestExcludingRecalls: new Date(),
-      })
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(allPadas)
 
       return request(app)
@@ -245,39 +270,23 @@ describe('Additional Days Awarded routes tests', () => {
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when no awaiting approval records exist does not redirect', () => {
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-        earliestSentence: new Date(),
-        earliestExcludingRecalls: new Date(),
-      })
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when quashed records exist does not redirect', () => {
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-        earliestSentence: new Date(),
-        earliestExcludingRecalls: new Date(),
-      })
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when mix of PADAs and others exist does not redirect', () => {
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-        earliestSentence: new Date(),
-        earliestExcludingRecalls: new Date(),
-      })
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
     })
     it('GET /{nomsId}/additional-days/review-and-approve when no matching adjudication exists', () => {
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-        earliestSentence: new Date(),
-        earliestExcludingRecalls: new Date(),
-      })
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue({
         ...noAwaitingApproval,
         showExistingAdaMessage: true,
@@ -309,10 +318,6 @@ describe('Additional Days Awarded routes tests', () => {
     })
 
     it('GET /{nomsId}/additional-days/review-and-submit when no matching adjudication exists', () => {
-      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-        earliestSentence: new Date(),
-        earliestExcludingRecalls: new Date(),
-      })
       additionalDaysAwardedBackendService.getReviewAndSubmitModel.mockResolvedValue(
         new ReviewAndSubmitAdaViewModel(
           [],
@@ -340,6 +345,72 @@ describe('Additional Days Awarded routes tests', () => {
           expect(res.text).toContain('10')
         })
     })
+  })
+
+  it('GET /{nomsId}/additional-days/review-prospective', () => {
+    additionalDaysAwardedBackendService.getPadasToApprove.mockResolvedValue(prospectiveToReview)
+
+    return request(app)
+      .get(`/${NOMS_ID}/additional-days/review-prospective`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Select all the relevant PADAs')
+        expect(res.text).toContain('Date charge proved 03 Aug 2023 at Moorland')
+      })
+  })
+
+  it('POST /{nomsId}/additional-days/review-prospective validation error', () => {
+    additionalDaysAwardedBackendService.getPadasToApprove.mockResolvedValue(prospectiveToReview)
+
+    // .send({ 'from-day': '6', 'from-month': '3', 'from-year': '23', days: -1 })
+    return request(app)
+      .post(`/${NOMS_ID}/additional-days/review-prospective`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Select the PADAs that apply, or select &#39;None of these PADAs apply&#39;')
+      })
+  })
+
+  it('POST /{nomsId}/additional-days/review-prospective select pada', () => {
+    additionalDaysAwardedBackendService.getPadasToApprove.mockResolvedValue(prospectiveToReview)
+
+    return request(app)
+      .post(`/${NOMS_ID}/additional-days/review-prospective`)
+      .send({ prospective: '2023-08-03' })
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/additional-days/review-and-approve`)
+      .expect(() => {
+        expect(additionalDaysAwardedBackendService.storeSelectedPadas.mock.calls).toHaveLength(1)
+      })
+  })
+
+  it('POST /{nomsId}/additional-days/review-prospective none apply with some pending approval', () => {
+    additionalDaysAwardedBackendService.getPadasToApprove.mockResolvedValue(prospectiveToReview)
+    additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(mixPadasAndPending)
+    return request(app)
+      .post(`/${NOMS_ID}/additional-days/review-prospective`)
+      .send({ none: 'none' })
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}/additional-days/review-and-approve`)
+      .expect(() => {
+        expect(additionalDaysAwardedBackendService.storeSelectedPadas.mock.calls).toHaveLength(1)
+      })
+  })
+
+  it('POST /{nomsId}/additional-days/review-prospective none apply with nothing pending approval', () => {
+    additionalDaysAwardedBackendService.getPadasToApprove.mockResolvedValue(prospectiveToReview)
+    additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
+    return request(app)
+      .post(`/${NOMS_ID}/additional-days/review-prospective`)
+      .send({ none: 'none' })
+      .expect(302)
+      .expect('Location', `/${NOMS_ID}`)
+      .expect(() => {
+        expect(additionalDaysAwardedBackendService.submitAdjustments.mock.calls).toHaveLength(1)
+        expect(additionalDaysAwardedBackendService.storeSelectedPadas.mock.calls).toHaveLength(1)
+      })
   })
 
   it('GET /{nomsId}/additional-days/view', () => {
