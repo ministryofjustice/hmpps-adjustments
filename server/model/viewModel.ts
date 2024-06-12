@@ -126,7 +126,7 @@ export default class ViewModel {
   private actionCell(adjustment: Adjustment) {
     return {
       html: `
-      <div class="govuk-grid-column-one-quarter govuk-!-margin-right-1 govuk-!-padding-0">
+      <div class="govuk-grid-column-one-quarter govuk-!-margin-right-2 govuk-!-padding-0">
         <a class="govuk-link" href="/${adjustment.person}/${this.adjustmentType.url}/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">
           Edit<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
         </a>
