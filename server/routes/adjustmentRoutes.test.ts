@@ -10,6 +10,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import './testutils/toContainInOrder'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import config from '../config'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -160,13 +161,14 @@ describe('Adjustment routes tests', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    const expectedBannerMessage = config.featureToggles.manualUnusedDeductions
+      ? 'Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="#">add any unused deductions here.</a>'
+      : 'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.'
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain(
-          'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
-        )
+        expect(res.text).toContain(expectedBannerMessage)
       })
   })
   it('GET /{nomsId} hub unused deductions cannot be calculated because of validation error', () => {

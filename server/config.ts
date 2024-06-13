@@ -161,5 +161,6 @@ export default {
   },
   featureToggles: {
     unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'false') === 'true',
+    manualUnusedDeductions: get('MANUAL_UNUSED_DEDUCTIONS', 'true') === 'true',
   },
 }

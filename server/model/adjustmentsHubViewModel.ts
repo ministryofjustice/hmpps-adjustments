@@ -34,8 +34,19 @@ export default class AdjustmentsHubViewModel {
     return adjustmentTypes.filter(it => it.deduction)
   }
 
+  public manualUnusedDeductions(): boolean {
+    return config.featureToggles.manualUnusedDeductions
+  }
+
   public additions(): AdjustmentType[] {
     return adjustmentTypes.filter(it => !it.deduction)
+  }
+
+  public hasNonNomisUnusedDeductions(): boolean {
+    return (
+      this.adjustments.filter(it => it.source !== 'NOMIS').find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+        ?.effectiveDays > 0 || false
+    )
   }
 
   public hasRemandToolRole(): boolean {
