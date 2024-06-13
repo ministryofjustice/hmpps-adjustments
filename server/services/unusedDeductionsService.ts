@@ -3,7 +3,14 @@ import { delay } from '../utils/utils'
 import AdjustmentsService from './adjustmentsService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
 
-export type UnusedDeductionMessageType = 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'UNKNOWN' | 'NONE'
+export type UnusedDeductionMessageType =
+  | 'NOMIS_ADJUSTMENT'
+  | 'VALIDATION'
+  | 'UNSUPPORTED'
+  | 'UNKNOWN'
+  | 'CRDS_CALL_FAILED'
+  | 'CRDS_CALL_FAILED_NONE'
+  | 'NONE'
 
 export default class UnusedDeductionsService {
   private maxTries = 6 // 3 seconds max wait
@@ -82,7 +89,11 @@ export default class UnusedDeductionsService {
 
       return ['UNKNOWN', adjustments]
     } catch {
-      return ['UNKNOWN', adjustments]
+      if (this.getTotalUnusedRemand(adjustments) > 0) {
+        return ['CRDS_CALL_FAILED', adjustments]
+      }
+
+      return ['CRDS_CALL_FAILED_NONE', adjustments]
     }
   }
 
