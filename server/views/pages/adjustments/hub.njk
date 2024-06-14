@@ -77,7 +77,15 @@
       {% if model.unusedDeductionMessage != 'NONE' %}
         <div class="govuk-inset-text govuk-!-margin-left-4">
           {% if model.unusedDeductionMessage == 'UNSUPPORTED' %}
-            Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+            {% if model.manualUnusedDeductions() %}
+              {% if model.hasNonNomisUnusedDeductions() %}
+                Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="#">edit or delete the unused deductions here.</a>
+              {% else %}
+                Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="#">add any unused deductions here.</a>
+              {% endif %}
+            {% else %}
+              Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
+            {% endif %}
           {% elif model.unusedDeductionMessage == 'VALIDATION' %}
             Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.
             <br />

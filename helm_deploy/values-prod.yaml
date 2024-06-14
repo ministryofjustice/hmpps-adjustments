@@ -24,6 +24,7 @@ generic-service:
     COMPONENT_API_URL: "https://frontend-components.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
     UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED: 'false'
+    MANUAL_UNUSED_DEDUCTIONS: 'false'
 
 generic-prometheus-alerts:
   alertSeverity: legacy-replacement-alerts

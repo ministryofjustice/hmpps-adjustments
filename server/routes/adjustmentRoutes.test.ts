@@ -10,6 +10,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import './testutils/toContainInOrder'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import config from '../config'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -149,7 +150,8 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('including 10 days unused')
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type', () => {
+
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - With manual unused deductions enabled', () => {
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),
       earliestSentence: new Date(),
@@ -160,6 +162,28 @@ describe('Adjustment routes tests', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    config.featureToggles.manualUnusedDeductions = true
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="#">add any unused deductions here.</a>',
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - With manual unused deductions disabled', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNSUPPORTED',
+      [remandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    config.featureToggles.manualUnusedDeductions = false
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
