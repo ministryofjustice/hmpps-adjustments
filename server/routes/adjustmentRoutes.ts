@@ -20,8 +20,6 @@ import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
-import TaggedBailDaysForm from '../model/taggedBailDaysForm'
-import TaggedBailDaysModel from '../model/taggedBailDaysModel'
 import UnusedDeductionsDaysModel from '../model/unusedDeductionsDaysModel'
 import UnusedDeductionsDaysForm from '../model/unusedDeductionsDaysForm'
 
