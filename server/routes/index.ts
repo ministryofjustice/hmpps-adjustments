@@ -108,6 +108,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/:adjustmentTypeUrl/:addOrEdit', adjustmentRoutes.submitForm)
   get('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.form)
   post('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.submitForm)
+  get('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.unusedDeductionDays)
+  post('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.submitUnusedDeductionDays)
 
   get('/:nomsId/recall', adjustmentRoutes.recall)
   post('/:nomsId/recall', adjustmentRoutes.recallSubmit)

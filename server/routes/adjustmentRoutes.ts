@@ -20,6 +20,10 @@ import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
+import TaggedBailDaysForm from '../model/taggedBailDaysForm'
+import TaggedBailDaysModel from '../model/taggedBailDaysModel'
+import UnusedDeductionsDaysModel from '../model/unusedDeductionsDaysModel'
+import UnusedDeductionsDaysForm from '../model/unusedDeductionsDaysForm'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -329,6 +333,30 @@ export default class AdjustmentRoutes {
     return res.render('pages/adjustments/recall', {
       model: new RecallModel(adjustments, new RecallForm({})),
     })
+  }
+
+  public unusedDeductionDays: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId, addOrEdit } = req.params
+    const { prisonerNumber } = res.locals.prisoner
+
+    return res.render('pages/adjustments/unused-deductions/days', {
+      model: new UnusedDeductionsDaysModel(prisonerNumber, addOrEdit, UnusedDeductionsDaysForm.fromDays(0)),
+    })
+  }
+
+  public submitUnusedDeductionDays: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId, addOrEdit } = req.params
+    const { prisonerNumber } = res.locals.prisoner
+    const unusedDeductionsDaysForm = new UnusedDeductionsDaysForm({ ...req.body, isEdit: addOrEdit === 'edit' })
+    await unusedDeductionsDaysForm.validate()
+    if (unusedDeductionsDaysForm.errors.length) {
+      return res.render('pages/adjustments/unused-deductions/days', {
+        model: new UnusedDeductionsDaysModel(prisonerNumber, addOrEdit, unusedDeductionsDaysForm),
+      })
+    }
+
+    // TODO: Submit to backend
+    return res.redirect(`/${nomsId}/unused-deductions/review/`)
   }
 
   public recallSubmit: RequestHandler = async (req, res): Promise<void> => {
