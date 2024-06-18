@@ -213,6 +213,33 @@ describe('Adjustment routes tests', () => {
         )
       })
   })
+  it('GET /{nomsId}/unused-deductions/days/add Manual unused deductions - add', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([])
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/days/add`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Enter the number of unused deductions')
+      })
+  })
+  it('GET /{nomsId}/unused-deductions/days/edit Manual unused deductions - edit', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/days/edit`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Edit the number of unused deductions')
+        expect(res.text).toContain('10')
+      })
+  })
   it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment', () => {
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
       earliestExcludingRecalls: new Date(),

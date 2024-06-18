@@ -100,6 +100,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.submitReview)
   get('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.edit)
   post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
+  get('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.unusedDeductionDays)
+  post('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.submitUnusedDeductionDays)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
@@ -108,8 +110,6 @@ export default function routes(service: Services): Router {
   post('/:nomsId/:adjustmentTypeUrl/:addOrEdit', adjustmentRoutes.submitForm)
   get('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.form)
   post('/:nomsId/:adjustmentTypeUrl/:addOrEdit/:id', adjustmentRoutes.submitForm)
-  get('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.unusedDeductionDays)
-  post('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.submitUnusedDeductionDays)
 
   get('/:nomsId/recall', adjustmentRoutes.recall)
   post('/:nomsId/recall', adjustmentRoutes.recallSubmit)

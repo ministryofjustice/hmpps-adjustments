@@ -338,9 +338,24 @@ export default class AdjustmentRoutes {
   public unusedDeductionDays: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit } = req.params
     const { prisonerNumber } = res.locals.prisoner
+    const { username } = res.locals.user
+    const { bookingId } = res.locals.prisoner
+
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
+    const adjustments = await this.adjustmentsService.findByPerson(
+      nomsId,
+      startOfSentenceEnvelope.earliestSentence,
+      username,
+    )
+
+    const days =
+      addOrEdit === 'edit'
+        ? adjustments.filter(it => it.source !== 'NOMIS').find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+            ?.effectiveDays || 0
+        : 0
 
     return res.render('pages/adjustments/unused-deductions/days', {
-      model: new UnusedDeductionsDaysModel(prisonerNumber, addOrEdit, UnusedDeductionsDaysForm.fromDays(0)),
+      model: new UnusedDeductionsDaysModel(prisonerNumber, addOrEdit, UnusedDeductionsDaysForm.fromDays(days)),
     })
   }
 
