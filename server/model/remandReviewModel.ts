@@ -137,16 +137,20 @@ export default class RemandReviewModel {
   public getCommittedText(offence: PrisonApiOffence & { recall: boolean }): string {
     let committedText
     if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
-      committedText = `Committed from ${dayjs(offence.offenceStartDate).format('DD MMM YYYY')} to ${dayjs(offence.offenceEndDate).format('DD MMM YYYY')}`
+      committedText = `Committed from ${this.nowrapDate(offence.offenceStartDate)} to ${this.nowrapDate(offence.offenceEndDate)}`
     } else if (offence.offenceStartDate) {
-      committedText = `Committed on ${dayjs(offence.offenceStartDate).format('DD MMM YYYY')}`
+      committedText = `Committed on ${this.nowrapDate(offence.offenceStartDate)}`
     } else if (offence.offenceEndDate) {
-      committedText = `Committed on ${dayjs(offence.offenceEndDate).format('DD MMM YYYY')}`
+      committedText = `Committed on ${this.nowrapDate(offence.offenceEndDate)}`
     } else {
       committedText = 'Offence date not entered'
     }
 
     return committedText
+  }
+
+  private nowrapDate(date: string) {
+    return `<span class="govuk-!-white-space-nowrap">${dayjs(date).format('DD MMM YYYY')}</span> `
   }
 
   public totalDaysSummary() {
