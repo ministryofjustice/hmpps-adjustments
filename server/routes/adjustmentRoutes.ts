@@ -19,7 +19,6 @@ import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import UnusedDeductionsDaysModel from '../model/unusedDeductionsDaysModel'
 import UnusedDeductionsDaysForm from '../model/unusedDeductionsDaysForm'
 
@@ -30,7 +29,6 @@ export default class AdjustmentRoutes {
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
-    private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -352,15 +350,27 @@ export default class AdjustmentRoutes {
             ?.effectiveDays || 0
         : 0
 
+    const totalRemandAndTaggedBailDays =
+      adjustments
+        .filter(it => it.adjustmentType === 'TAGGED_BAIL' || it.adjustmentType === 'REMAND')
+        ?.map(it => it.effectiveDays)
+        .reduce((acc, cur) => {
+          return acc + cur
+        }, 0) || 0
+
     return res.render('pages/adjustments/unused-deductions/days', {
-      model: new UnusedDeductionsDaysModel(prisonerNumber, addOrEdit, UnusedDeductionsDaysForm.fromDays(days)),
+      model: new UnusedDeductionsDaysModel(
+        prisonerNumber,
+        addOrEdit,
+        UnusedDeductionsDaysForm.fromDays(days, totalRemandAndTaggedBailDays, addOrEdit),
+      ),
     })
   }
 
   public submitUnusedDeductionDays: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit } = req.params
     const { prisonerNumber } = res.locals.prisoner
-    const unusedDeductionsDaysForm = new UnusedDeductionsDaysForm({ ...req.body, isEdit: addOrEdit === 'edit' })
+    const unusedDeductionsDaysForm = new UnusedDeductionsDaysForm({ ...req.body })
     await unusedDeductionsDaysForm.validate()
     if (unusedDeductionsDaysForm.errors.length) {
       return res.render('pages/adjustments/unused-deductions/days', {

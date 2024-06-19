@@ -59,6 +59,17 @@
     },
     spellcheck: false
   }) }}
+  {{ govukInput({
+    label: {
+      html: ""
+    },
+    classes: "hidden",
+    id: "totalRemandAndTaggedBailDays",
+    name: "totalRemandAndTaggedBailDays",
+    inputmode: "numeric",
+    value: model.form.totalRemandAndTaggedBailDays,
+    spellcheck: false
+  }) }}
 
   <div class="govuk-button-group">
     {{ govukButton({

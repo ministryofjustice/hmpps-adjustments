@@ -4,6 +4,8 @@ import ValidationError from './validationError'
 export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeductionsDaysForm> {
   days: string
 
+  totalRemandAndTaggedBailDays: number
+
   isEdit: boolean
 
   async validation(): Promise<ValidationError[]> {
@@ -23,12 +25,22 @@ export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeducti
         },
       ]
     }
+    if (Number(this.days) > this.totalRemandAndTaggedBailDays) {
+      return [
+        {
+          text: `The number of days cannot exceed the total number of deductions, which is ${this.totalRemandAndTaggedBailDays}`,
+          fields: ['days'],
+        },
+      ]
+    }
     return []
   }
 
-  static fromDays(days: number): UnusedDeductionsDaysForm {
+  static fromDays(days: number, totalRemandAndTaggedBailDays: number, addOrEdit: string): UnusedDeductionsDaysForm {
     return new UnusedDeductionsDaysForm({
       days: days.toString() || '0',
+      totalRemandAndTaggedBailDays,
+      isEdit: addOrEdit === 'edit',
     })
   }
 }
