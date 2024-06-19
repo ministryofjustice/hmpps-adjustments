@@ -50,7 +50,6 @@ export default class AdjustmentRoutes {
     const { username, roles, activeCaseLoadId, isSupportUser } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
 
     const message = req.flash('message')
     const messageExists = message && message[0]
@@ -61,7 +60,7 @@ export default class AdjustmentRoutes {
     const [unusedDeductionMessage, adjustments] =
       await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(
         nomsId,
-        startOfSentenceEnvelope.earliestSentence,
+        bookingId,
         !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
         username,
       )

@@ -86,6 +86,8 @@
             {% else %}
               Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
             {% endif %}
+          {% elif model.unusedDeductionMessage == 'RECALL' %}
+          	Unused deductions cannot be calculated for recall sentences. To view or add unused deductions, go to the sentence adjustments screen in NOMIS.
           {% elif model.unusedDeductionMessage == 'VALIDATION' %}
             Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.
             <br />
