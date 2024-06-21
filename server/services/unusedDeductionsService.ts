@@ -47,6 +47,20 @@ export default class UnusedDeductionsService {
         return ['NONE', adjustments]
       }
 
+      const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
+        nomsId,
+        adjustments,
+        username,
+      )
+
+      if (
+        unusedDeductionsResponse.validationMessages?.find(
+          it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
+        )
+      ) {
+        return ['UNSUPPORTED', adjustments]
+      }
+
       const anyRecalls = startOfSentenceEnvelope.sentencesAndOffences.some(it =>
         PrisonerService.recallTypes.includes(it.sentenceCalculationType),
       )
@@ -55,21 +69,7 @@ export default class UnusedDeductionsService {
         return ['RECALL', adjustments]
       }
 
-      const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
-        nomsId,
-        adjustments,
-        username,
-      )
-
       if (unusedDeductionsResponse.validationMessages?.length) {
-        if (
-          unusedDeductionsResponse.validationMessages.find(
-            it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
-          )
-        ) {
-          return ['UNSUPPORTED', adjustments]
-        }
-
         return ['VALIDATION', adjustments]
       }
 
