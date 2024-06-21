@@ -32,14 +32,14 @@
           including {{model.getUnused(adjustmentType)}} days unused
         {% endif %}
       </span>
-      {% if model.showDetails(adjustmentType) %}
         <br />
+      {% if model.showDetails(adjustmentType) %}
         <p class="govuk-hint govuk-!-font-size-14">Last update
           on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMM YYYY") }}
           by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</p>
       {% endif %}
       {% if model.showProspectiveAdaLink(adjustmentType) %}
-        <a href="/{{ prisonerNumber }}/additional-days/review-prospective">Review PADAs</a>
+        <a href="/{{ prisonerNumber }}/additional-days/review-prospective">Review unapplied PADAs</a>
       {% endif %}
       {% if adjustmentType.value == 'REMAND' and model
       .remandDecision and model
