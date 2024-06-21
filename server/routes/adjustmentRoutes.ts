@@ -388,7 +388,7 @@ export default class AdjustmentRoutes {
       })
     }
 
-    // TODO: Submit to backend
+    // TODO: Submit to backend. Will be done in ADJST-656
     return res.redirect(`/${nomsId}/unused-deductions/review/`)
   }
 
