@@ -350,19 +350,11 @@ export default class AdjustmentRoutes {
             ?.effectiveDays || 0
         : 0
 
-    const totalRemandAndTaggedBailDays =
-      adjustments
-        .filter(it => it.adjustmentType === 'TAGGED_BAIL' || it.adjustmentType === 'REMAND')
-        ?.map(it => it.effectiveDays)
-        .reduce((acc, cur) => {
-          return acc + cur
-        }, 0) || 0
-
     return res.render('pages/adjustments/unused-deductions/days', {
       model: new UnusedDeductionsDaysModel(
         prisonerNumber,
         addOrEdit,
-        UnusedDeductionsDaysForm.fromDays(days, totalRemandAndTaggedBailDays, addOrEdit),
+        UnusedDeductionsDaysForm.fromDays(days, addOrEdit),
       ),
     })
   }
@@ -370,7 +362,25 @@ export default class AdjustmentRoutes {
   public submitUnusedDeductionDays: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit } = req.params
     const { prisonerNumber } = res.locals.prisoner
-    const unusedDeductionsDaysForm = new UnusedDeductionsDaysForm({ ...req.body })
+    const { username } = res.locals.user
+    const { bookingId } = res.locals.prisoner
+
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
+    const adjustments = await this.adjustmentsService.findByPerson(
+      nomsId,
+      startOfSentenceEnvelope.earliestSentence,
+      username,
+    )
+
+    const totalRemandAndTaggedBailDays =
+      adjustments
+        .filter(it => it.adjustmentType === 'TAGGED_BAIL' || it.adjustmentType === 'REMAND')
+        ?.map(it => it.days)
+        .reduce((acc, cur) => {
+          return acc + cur
+        }, 0) || 0
+
+    const unusedDeductionsDaysForm = new UnusedDeductionsDaysForm({ ...req.body, totalRemandAndTaggedBailDays })
     await unusedDeductionsDaysForm.validate()
     if (unusedDeductionsDaysForm.errors.length) {
       return res.render('pages/adjustments/unused-deductions/days', {

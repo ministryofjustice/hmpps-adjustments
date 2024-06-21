@@ -36,10 +36,9 @@ export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeducti
     return []
   }
 
-  static fromDays(days: number, totalRemandAndTaggedBailDays: number, addOrEdit: string): UnusedDeductionsDaysForm {
+  static fromDays(days: number, addOrEdit: string): UnusedDeductionsDaysForm {
     return new UnusedDeductionsDaysForm({
       days: days.toString() || '0',
-      totalRemandAndTaggedBailDays,
       isEdit: addOrEdit === 'edit',
     })
   }
