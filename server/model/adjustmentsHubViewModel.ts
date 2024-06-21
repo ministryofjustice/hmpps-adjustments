@@ -49,6 +49,10 @@ export default class AdjustmentsHubViewModel {
     )
   }
 
+  public hasUnusedDeductions(): boolean {
+    return this.adjustments.find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')?.days > 0 || false
+  }
+
   public hasRemandToolRole(): boolean {
     return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }

@@ -79,6 +79,7 @@ const unusedDeductions = {
   sentenceSequence: null,
   prisonId: 'LDS',
   days: 10,
+  effectiveDays: 10,
 } as Adjustment
 
 const noInterceptAdjudication = {
@@ -206,7 +207,23 @@ describe('GET /:nomsId', () => {
         )
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment', () => {
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - with existing unused', () => {
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [remandAdjustment, unusedDeductions],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'Unused remand/tagged bail time cannot be calculated. There is unused remand in NOMIS. Go to the sentence adjustments screen on NOMIS to view it.',
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused', () => {
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NOMIS_ADJUSTMENT',
@@ -218,7 +235,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          'Existing deductions have been added on NOMIS. This means unused deductions cannot be automatically calculated. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
+          'Unused remand/tagged bail time cannot be calculated. Go to the sentence adjustments screen on NOMIS to view or add any unused deductions.',
         )
       })
   })
@@ -317,7 +334,7 @@ describe('GET /:nomsId', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('<a href="/ABC123/additional-days/review-prospective">Review PADAs</a>')
+        expect(res.text).toContain('<a href="/ABC123/additional-days/review-prospective">Review unapplied PADAs</a>')
       })
   })
 
