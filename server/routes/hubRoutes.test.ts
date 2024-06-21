@@ -334,7 +334,7 @@ describe('GET /:nomsId', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('<a href="/ABC123/additional-days/review-prospective">Review PADAs</a>')
+        expect(res.text).toContain('<a href="/ABC123/additional-days/review-prospective">Review unapplied PADAs</a>')
       })
   })
 
