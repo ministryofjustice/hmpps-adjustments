@@ -96,3 +96,10 @@ Used for govuk-tag to allow longer width tags to prevent line breaks
   white-space: nowrap;
   max-width: unset;
 }
+
+/**
+Used for hidden fields
+ */
+.hidden {
+  display: none;
+}
