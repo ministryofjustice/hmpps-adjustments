@@ -58,13 +58,18 @@ export default class PrisonerService {
   async getStartOfSentenceEnvelope(
     bookingId: string,
     username: string,
-  ): Promise<{ earliestExcludingRecalls: Date; earliestSentence: Date }> {
+  ): Promise<{
+    earliestExcludingRecalls: Date
+    earliestSentence: Date
+    sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[]
+  }> {
     const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, username)
     return {
       earliestExcludingRecalls: this.findStartOfSentenceEvelope(
         sentencesAndOffences.filter(it => !PrisonerService.recallTypes.includes(it.sentenceCalculationType)),
       ),
       earliestSentence: this.findStartOfSentenceEvelope(sentencesAndOffences),
+      sentencesAndOffences,
     }
   }
 

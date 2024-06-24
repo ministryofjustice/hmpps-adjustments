@@ -461,9 +461,13 @@ describe('Remand routes tests', () => {
             'Court 1',
             'CASE001',
             'Doing a crime',
-            'Committed from 04 Jan 2021 to 05 Jan 2021',
+            'Committed from',
+            '04 Jan 2021',
+            'to',
+            '05 Jan 2021',
             'Doing a different crime',
-            'Committed on 06 Mar 2021',
+            'Committed on',
+            '06 Mar 2021',
           ])
         })
     })
@@ -642,7 +646,7 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Delete remand')
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
-        expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
+        expect(res.text).toContainInOrder(['Committed from', '04 Jan 2021', 'to', '05 Jan 2021'])
         expect(res.text).toContain('Doing a crime')
       })
   })
@@ -674,7 +678,7 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Edit remand')
         expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
-        expect(res.text).toContain('Committed from 04 Jan 2021 to 05 Jan 2021')
+        expect(res.text).toContainInOrder(['Committed from', '04 Jan 2021', 'to', '05 Jan 2021'])
         expect(res.text).toContain('Doing a crime')
       })
   })
