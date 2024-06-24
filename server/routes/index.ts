@@ -20,7 +20,6 @@ export default function routes(service: Services): Router {
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
     service.unusedDeductionsService,
-    service.additionalDaysAwardedBackendService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,
@@ -100,6 +99,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.submitReview)
   get('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.edit)
   post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
+  get('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.unusedDeductionDays)
+  post('/:nomsId/unused-deductions/days/:addOrEdit', adjustmentRoutes.submitUnusedDeductionDays)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
