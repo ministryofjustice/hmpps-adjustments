@@ -21,6 +21,10 @@ export default class AdjustmentsService {
     return new AdjustmentsClient(await this.getSystemClientToken(username)).get(adjustmentId)
   }
 
+  public async setUnusedDaysManually(person: string, days: number, username: string) {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).setUnusedDaysManually(person, { days })
+  }
+
   public async findByPerson(person: string, earliestSentenceDate: Date, username: string): Promise<Adjustment[]> {
     return new AdjustmentsClient(await this.getSystemClientToken(username)).findByPerson(
       person,
