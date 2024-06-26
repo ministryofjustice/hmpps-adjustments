@@ -97,12 +97,13 @@ export default class UnusedDeductionsReviewModel {
   }
 
   private getFooterRow() {
+    const unusedDeductionDays = this.adjustment.days
     return {
       key: {
         text: 'Total',
       },
       value: {
-        html: this.getTotalDays().toString(),
+        html: `${this.getTotalDays()} <span class="govuk-hint">including ${unusedDeductionDays} days unused</span>`,
         classes: 'govuk-!-text-align-right',
       },
     }
