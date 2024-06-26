@@ -1,5 +1,7 @@
+import SessionAdjustment from '../@types/AdjustmentTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeductionsDaysForm> {
   days: string
@@ -7,6 +9,10 @@ export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeducti
   totalRemandAndTaggedBailDays: number
 
   isEdit: boolean
+
+  bookingId: number
+
+  offenderId: string
 
   async validation(): Promise<ValidationError[]> {
     if (!this.days) {
@@ -36,10 +42,29 @@ export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeducti
     return []
   }
 
-  static fromDays(days: number, addOrEdit: string): UnusedDeductionsDaysForm {
+  static toAdjustment(form: UnusedDeductionsDaysForm): SessionAdjustment {
+    return {
+      adjustmentType: 'UNUSED_DEDUCTIONS',
+      bookingId: form.bookingId,
+      person: form.offenderId,
+      days: Number(form.days),
+    }
+  }
+
+  static fromAdjustment(adjustment: Adjustment): UnusedDeductionsDaysForm {
     return new UnusedDeductionsDaysForm({
-      days: days.toString() || '0',
-      isEdit: addOrEdit === 'edit',
+      days: adjustment.effectiveDays.toString() || '0',
+      isEdit: true,
+      bookingId: adjustment.bookingId,
+    })
+  }
+
+  static fromOffenderId(offenderId: string): UnusedDeductionsDaysForm {
+    return new UnusedDeductionsDaysForm({
+      days: '0',
+      isEdit: false,
+      bookingId: 0,
+      offenderId,
     })
   }
 }
