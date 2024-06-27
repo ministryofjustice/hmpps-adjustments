@@ -31,7 +31,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public deductions(): AdjustmentType[] {
-    return adjustmentTypes.filter(it => it.deduction)
+    return adjustmentTypes.filter(it => it.deduction && it.value !== 'UNUSED_DEDUCTIONS')
   }
 
   public manualUnusedDeductions(): boolean {

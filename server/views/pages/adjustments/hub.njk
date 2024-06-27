@@ -117,9 +117,7 @@
 
       <div class="adjustment-card-container govuk-body">
         {% for adjustmentType in model.deductions() %}
-          {% if adjustmentType.value != "UNUSED_DEDUCTIONS" %}
-            {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
-          {% endif %}
+          {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
         {% endfor %}
       </div>
 

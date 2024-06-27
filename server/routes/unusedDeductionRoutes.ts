@@ -7,6 +7,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import UnusedDeductionsReviewModel from '../model/unusedDeductionsReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class UnusedDeductionRoutes {
   constructor(
@@ -20,18 +21,10 @@ export default class UnusedDeductionRoutes {
     const { prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
     const { bookingId } = res.locals.prisoner
-
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
-    const adjustments = await this.adjustmentsService.findByPerson(
-      nomsId,
-      startOfSentenceEnvelope.earliestSentence,
-      username,
-    )
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
     const sessionAdjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
     if (addOrEdit === 'edit') {
-      const unusedDeductionAdjustment = adjustments
-        .filter(it => it.source !== 'NOMIS')
-        .find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+      const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
       return res.render('pages/adjustments/unused-deductions/days', {
         model: new UnusedDeductionsDaysModel(
           prisonerNumber,
@@ -55,13 +48,7 @@ export default class UnusedDeductionRoutes {
     const { prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
     const { bookingId } = res.locals.prisoner
-
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
-    const adjustments = await this.adjustmentsService.findByPerson(
-      nomsId,
-      startOfSentenceEnvelope.earliestSentence,
-      username,
-    )
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
 
     const totalRemandAndTaggedBailDays =
       adjustments
@@ -80,28 +67,20 @@ export default class UnusedDeductionRoutes {
     }
 
     this.adjustmentsStoreService.storeOnly(req, nomsId, UnusedDeductionsDaysForm.toAdjustment(unusedDeductionsDaysForm))
-    return res.redirect(`/${nomsId}/unused-deductions/review/`)
+    return res.redirect(`/${nomsId}/unused-deductions/review/save`)
   }
 
   public review: RequestHandler = async (req, res): Promise<void> => {
-    const { nomsId } = req.params
+    const { nomsId, saveOrDelete } = req.params
     const { prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
     const { bookingId } = res.locals.prisoner
-
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
-    const adjustments = await this.adjustmentsService.findByPerson(
-      nomsId,
-      startOfSentenceEnvelope.earliestSentence,
-      username,
-    )
-
-    const unusedDeductionAdjustment = adjustments
-      .filter(it => it.source !== 'NOMIS')
-      .find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+    const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
     const sessionAdjustment =
-      this.adjustmentsStoreService.getOnly(req, nomsId) ||
-      ({ adjustmentType: 'UNUSED_DEDUCTIONS', days: 0 } as SessionAdjustment)
+      saveOrDelete === 'save'
+        ? this.adjustmentsStoreService.getOnly(req, nomsId)
+        : ({ adjustmentType: 'UNUSED_DEDUCTIONS', days: 0 } as SessionAdjustment)
     return res.render('pages/adjustments/unused-deductions/review', {
       model: new UnusedDeductionsReviewModel(
         prisonerNumber,
@@ -113,30 +92,25 @@ export default class UnusedDeductionRoutes {
   }
 
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
-    const { nomsId, addOrEdit } = req.params
-    const { prisonerNumber } = res.locals.prisoner
+    const { nomsId, saveOrDelete } = req.params
+    const { bookingId, prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
-    const { bookingId } = res.locals.prisoner
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
-    const adjustments = await this.adjustmentsService.findByPerson(
-      nomsId,
-      startOfSentenceEnvelope.earliestSentence,
-      username,
-    )
-
-    const unusedDeductionAdjustment = adjustments
-      .filter(it => it.source !== 'NOMIS')
-      .find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
-
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+    const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
     const sessionAdjustment =
-      this.adjustmentsStoreService.getOnly(req, nomsId) ||
-      ({ adjustmentType: 'UNUSED_DEDUCTIONS', days: 0 } as SessionAdjustment)
-    let messageDays = sessionAdjustment.days
+      saveOrDelete === 'save'
+        ? this.adjustmentsStoreService.getOnly(req, nomsId)
+        : ({ adjustmentType: 'UNUSED_DEDUCTIONS', days: 0 } as SessionAdjustment)
     await this.adjustmentsService.setUnusedDaysManually(prisonerNumber, sessionAdjustment.days, username)
-    let messageAction = addOrEdit === 'edit' ? 'UPDATE' : 'CREATE'
-    if (sessionAdjustment.days === 0) {
-      messageAction = 'REMOVE'
+
+    let messageDays: number
+    let messageAction: string
+    if (saveOrDelete === 'save') {
+      messageDays = sessionAdjustment.days
+      messageAction = unusedDeductionAdjustment ? 'UPDATE' : 'CREATE'
+    } else {
       messageDays = unusedDeductionAdjustment.effectiveDays
+      messageAction = 'REMOVE'
     }
 
     const message = {
@@ -145,5 +119,14 @@ export default class UnusedDeductionRoutes {
       action: messageAction,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  private async getAdjustments(bookingId: string, username: string, nomsId: string): Promise<Adjustment[]> {
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
+    return this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope.earliestSentence, username)
+  }
+
+  private getUnusedDeduction(adjustments: Adjustment[]): Adjustment {
+    return adjustments.filter(it => it.source !== 'NOMIS').find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
   }
 }
