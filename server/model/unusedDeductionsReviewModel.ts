@@ -15,7 +15,7 @@ export default class UnusedDeductionsReviewModel {
   ) {}
 
   backlink(): string {
-    return `/${this.prisonerNumber}/unused-deduction/days/${this.addOrEdit}`
+    return `/${this.prisonerNumber}/unused-deductions/days/${this.addOrEdit}`
   }
 
   getRows() {

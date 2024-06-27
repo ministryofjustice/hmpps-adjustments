@@ -51,17 +51,17 @@ export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeducti
     }
   }
 
-  static fromAdjustment(adjustment: Adjustment): UnusedDeductionsDaysForm {
+  static fromAdjustment(adjustment: Adjustment, days?: number): UnusedDeductionsDaysForm {
     return new UnusedDeductionsDaysForm({
-      days: adjustment.effectiveDays.toString() || '0',
+      days: days ? days.toString() : adjustment.effectiveDays.toString() || '0',
       isEdit: true,
       bookingId: adjustment.bookingId,
     })
   }
 
-  static fromOffenderId(offenderId: string): UnusedDeductionsDaysForm {
+  static fromOffenderId(offenderId: string, days?: number): UnusedDeductionsDaysForm {
     return new UnusedDeductionsDaysForm({
-      days: '0',
+      days: days ? days.toString() : '0',
       isEdit: false,
       bookingId: 0,
       offenderId,

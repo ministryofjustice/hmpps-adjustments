@@ -15,7 +15,7 @@ let types: AdjustmentType[] = [
     value: 'UNUSED_DEDUCTIONS',
     text: 'Unused deductions',
     shortText: 'unused deductions',
-    url: 'unused-deduction',
+    url: 'unused-deductions',
     deduction: true,
   } as AdjustmentType,
   {

@@ -108,8 +108,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
   get('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.days)
   post('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.submitDays)
-  get('/:nomsId/unused-deductions/review', unusedDeductionRoutes.review)
-  post('/:nomsId/unused-deductions/review', unusedDeductionRoutes.submitReview)
+  get('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.review)
+  post('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.submitReview)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

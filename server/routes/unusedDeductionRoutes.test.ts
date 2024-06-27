@@ -9,6 +9,7 @@ import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRe
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import './testutils/toContainInOrder'
 import config from '../config'
+import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -19,6 +20,7 @@ const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null, null) as jest.Mocked<UnusedDeductionsService>
+const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 
 const remandResult = {
   chargeRemand: [],
@@ -87,7 +89,13 @@ let app: Express
 beforeEach(() => {
   userInTest = defaultUser
   app = appWithAllRoutes({
-    services: { prisonerService, adjustmentsService, identifyRemandPeriodsService, unusedDeductionsService },
+    services: {
+      prisonerService,
+      adjustmentsService,
+      identifyRemandPeriodsService,
+      unusedDeductionsService,
+      adjustmentsStoreService,
+    },
     userSupplier: () => userInTest,
   })
 })
