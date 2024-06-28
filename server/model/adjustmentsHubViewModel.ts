@@ -140,6 +140,31 @@ export default class AdjustmentsHubViewModel {
       const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
       return total - effective
     }
+
+    if (this.unusedDeductionMessage === 'UNSUPPORTED') {
+      const unusedDeductionAdjustmentDays =
+        this.adjustments.filter(it => it.source !== 'NOMIS').find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+          ?.effectiveDays || 0
+      const remandAdjustmentDays =
+        this.adjustments
+          .filter(it => it.adjustmentType === 'REMAND')
+          ?.map(it => it.days)
+          .reduce((acc, cur) => {
+            return acc + cur
+          }, 0) || 0
+      if (adjustmentType.value === 'REMAND') {
+        return unusedDeductionAdjustmentDays > remandAdjustmentDays
+          ? remandAdjustmentDays
+          : unusedDeductionAdjustmentDays
+      }
+
+      if (adjustmentType.value === 'TAGGED_BAIL') {
+        return unusedDeductionAdjustmentDays > remandAdjustmentDays
+          ? unusedDeductionAdjustmentDays - remandAdjustmentDays
+          : 0
+      }
+    }
+
     return 0
   }
 }
