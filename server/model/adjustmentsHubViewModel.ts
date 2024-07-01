@@ -134,7 +134,13 @@ export default class AdjustmentsHubViewModel {
   }
 
   public getUnused(adjustmentType: AdjustmentType): number {
-    if (this.unusedDeductionMessage === 'NONE' || this.unusedDeductionMessage === 'UNSUPPORTED') {
+    const unusedDeductionAdjustment = this.adjustments
+      .filter(it => it.source !== 'NOMIS')
+      .find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+    if (
+      this.unusedDeductionMessage === 'NONE' ||
+      (this.unusedDeductionMessage === 'UNSUPPORTED' && unusedDeductionAdjustment)
+    ) {
       const adjustments = this.adjustments.filter(it => it.adjustmentType === adjustmentType.value)
       const total = adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
