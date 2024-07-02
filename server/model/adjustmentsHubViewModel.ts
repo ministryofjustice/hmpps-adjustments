@@ -142,4 +142,8 @@ export default class AdjustmentsHubViewModel {
     }
     return 0
   }
+
+  public showMissingRecallOutcomeMessage(): boolean {
+    return this.adaAdjudicationDetails.recallWithMissingOutcome
+  }
 }

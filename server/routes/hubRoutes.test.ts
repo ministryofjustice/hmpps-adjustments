@@ -173,6 +173,19 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('<a href="/ABC123/additional-days/review-prospective">Review unapplied PADAs</a>')
       })
   })
+  it('GET /{nomsId} hub shows error from missing recall court event', () => {
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['NONE', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      ...noInterceptAdjudication,
+      recallWithMissingOutcome: true,
+    })
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('An active recall sentence is present with no associated court event.')
+      })
+  })
 
   it('GET /{nomsId} relevant remand throws error', () => {
     adjustmentsService.findByPerson.mockResolvedValue([radaAdjustment])

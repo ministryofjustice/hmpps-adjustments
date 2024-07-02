@@ -297,7 +297,7 @@ export interface components {
        * @description The type of UAL
        * @enum {string}
        */
-      type?: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR'
+      type?: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR' | 'IMMIGRATION_DETENTION'
     }
     LegacyAdjustmentCreatedResponse: {
       /** Format: uuid */
@@ -413,6 +413,11 @@ export interface components {
       /** Format: int32 */
       totalExistingAdas: number
       showExistingAdaMessage: boolean
+      recallWithMissingOutcome: boolean
+      /** Format: date */
+      earliestNonRecallSentenceDate?: string
+      /** Format: date */
+      earliestRecallDate?: string
     }
     AdaIntercept: {
       /** @enum {string} */
