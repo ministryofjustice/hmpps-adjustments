@@ -197,8 +197,9 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('including 10 days unused')
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - manual unused deductions disabled', () => {
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - manual and review unused deductions disabled', () => {
     config.featureToggles.manualUnusedDeductions = false
+    config.featureToggles.reviewUnusedDeductions = false
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'UNSUPPORTED',
@@ -263,7 +264,48 @@ describe('GET /:nomsId', () => {
         )
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - with existing unused', () => {
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - with existing unused - Review unused deductions enabled', () => {
+    config.featureToggles.reviewUnusedDeductions = true
+    const nomisRemandAdjustment = { ...remandAdjustment }
+    nomisRemandAdjustment.source = 'NOMIS'
+    const nomisUnusedDeduction = { ...unusedDeductions }
+    nomisUnusedDeduction.source = 'NOMIS'
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [nomisRemandAdjustment, nomisUnusedDeduction],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          `Unused deductions have not been calculated as there are deductions in NOMIS - <a href="/ABC123/review-unused-deductions">review remand to calculate</a>`,
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused - Review unused deductions enabled', () => {
+    config.featureToggles.reviewUnusedDeductions = true
+    const nomisRemandAdjustment = { ...remandAdjustment }
+    nomisRemandAdjustment.source = 'NOMIS'
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [nomisRemandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          `Unused deductions have not been calculated - <a href="/ABC123/review-unused-deductions">review remand to calculate</a>`,
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - with existing unused - Review unused deductions disabled', () => {
+    config.featureToggles.reviewUnusedDeductions = false
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NOMIS_ADJUSTMENT',
@@ -279,7 +321,8 @@ describe('GET /:nomsId', () => {
         )
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused', () => {
+  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused - Review unused deductions disabled', () => {
+    config.featureToggles.reviewUnusedDeductions = false
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NOMIS_ADJUSTMENT',

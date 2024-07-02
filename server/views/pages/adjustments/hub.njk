@@ -86,42 +86,7 @@
 
       {% if model.unusedDeductionMessage != 'NONE' %}
         <div class="govuk-inset-text govuk-!-margin-left-4">
-          {% if model.unusedDeductionMessage == 'UNSUPPORTED' %}
-            {% if model.manualUnusedDeductions() %}
-              {% if model.hasNonNomisUnusedDeductions() %}
-                Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/{{ prisoner.prisonerNumber }}/unused-deductions/days/edit">edit or delete the unused deductions here.</a>
-              {% else %}
-                Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/{{ prisoner.prisonerNumber }}/unused-deductions/days/add">add any unused deductions here.</a>
-              {% endif %}
-            {% else %}
-              Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
-            {% endif %}
-          {% elif model.unusedDeductionMessage == 'RECALL' %}
-          	Unused deductions cannot be calculated for recall sentences. To view or add unused deductions, go to the sentence adjustments screen in NOMIS.
-          {% elif model.unusedDeductionMessage == 'VALIDATION' %}
-            Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.
-            <br />
-            To continue, you must:
-            <ol>
-              <li>
-                <a href="{{ model.checkInformationLink }}" target="_blank">Review the incorrect details</a>
-              </li>
-              <li>
-                Update these details
-              </li>
-              <li>
-                <a href="">Reload this page</a>
-              </li>
-            </ol>
-          {% elif model.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
-            {% if model.hasUnusedDeductions() %}
-              Unused remand/tagged bail time cannot be calculated. There is unused remand in NOMIS. Go to the sentence adjustments screen on NOMIS to view it.
-            {% else %}
-              Unused remand/tagged bail time cannot be calculated. Go to the sentence adjustments screen on NOMIS to view or add any unused deductions.
-            {% endif %}
-          {% elif model.unusedDeductionMessage == 'UNKNOWN' %}
-            Unused remand/tagged bail time cannot be calculated. There may be some present. Any unused deductions must be entered or viewed in NOMIS.
-          {% endif %}
+          {{ model.getUnusedDeductionMessage() | safe }}
         </div>
       {% endif %}
 
