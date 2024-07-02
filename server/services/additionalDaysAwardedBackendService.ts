@@ -43,7 +43,17 @@ export default class AdditionalDaysAwardedBackendService {
         await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username)
       ).filter(it => it.adjustmentType === 'ADDITIONAL_DAYS_AWARDED')
     }
-    return { ...details, adjustmentsToRemove }
+    let showRecallMessage = false
+    if (details.earliestRecallDate) {
+      showRecallMessage = details.awaitingApproval.some(it => {
+        const isBeforeStandardSentence =
+          !details.earliestNonRecallSentenceDate ||
+          new Date(it.dateChargeProved) < new Date(details.earliestNonRecallSentenceDate)
+        const isAfterRecallDate = new Date(it.dateChargeProved) > new Date(details.earliestRecallDate)
+        return isBeforeStandardSentence && isAfterRecallDate
+      })
+    }
+    return { ...details, showRecallMessage, adjustmentsToRemove }
   }
 
   public async getPadasToApprove(nomsId: string, username: string, activeCaseLoadId: string): Promise<PadasToReview> {
