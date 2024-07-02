@@ -97,6 +97,11 @@
           {% endif %}
 
           <h2 class="govuk-heading-m">ADAs to be approved</h2>
+          {% if adasToReview.showRecallMessage %}
+          <p class="govuk-body">Some ADAs pending approval may or may not apply, as they were awarded when this person was in custody on a licence recall.</p>
+          <p class="govuk-body">Once you have reviewed and approved them, decide whether they should be added to the manual sentence calculation - 
+            <a href="https://www.gov.uk/government/publications/sentence-calculation-policy-framework-determinate-sentenced-prisoners">read the operational guidance for sentence calculation</a> to check.</p>
+          {% endif %}
           {{ adaTable({
             tableId: 'awaiting-approval-adas',
             adas: adasToReview.awaitingApproval,
