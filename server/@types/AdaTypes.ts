@@ -13,6 +13,7 @@ type AdasToReview = {
   totalExistingAdas: number
   showExistingAdaMessage: boolean
   adjustmentsToRemove: Adjustment[]
+  showRecallMessage: boolean
 }
 
 type AdasToView = {

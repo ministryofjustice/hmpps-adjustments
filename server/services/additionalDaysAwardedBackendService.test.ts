@@ -213,4 +213,101 @@ describe('ADA submit functionality', () => {
       username,
     )
   })
+
+  it('Get ADAs to approve where ADAs are within recall period', async () => {
+    const nomsId = 'AA1234A'
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      awaitingApproval: [
+        {
+          dateChargeProved: '2023-08-03',
+          charges: [
+            {
+              chargeNumber: '1525916',
+              dateChargeProved: '2023-08-03',
+              days: 10,
+              heardAt: 'Moorland (HMP & YOI)',
+              status: 'AWARDED_OR_PENDING',
+              toBeServed: 'Forthwith',
+            },
+          ],
+          total: 10,
+          status: 'PENDING_APPROVAL',
+          adjustmentId: null,
+        },
+      ] as AdasByDateCharged[],
+      suspended: [] as AdasByDateCharged[],
+      quashed: [] as AdasByDateCharged[],
+      awarded: [] as AdasByDateCharged[],
+      prospective: [] as AdasByDateCharged[],
+      totalProspective: 10,
+      totalAwarded: 0,
+      totalQuashed: 0,
+      totalAwaitingApproval: 0,
+      totalSuspended: 0,
+      intercept: {
+        number: 1,
+        type: 'PADA',
+        anyProspective: true,
+      },
+      showExistingAdaMessage: false,
+      totalExistingAdas: 10,
+      earliestNonRecallSentenceDate: '2024-01-01',
+      earliestRecallDate: '2023-07-01',
+    } as AdaAdjudicationDetails)
+
+    const request = {} as jest.Mocked<Request>
+    const adasToApprove = await adaService.getAdasToApprove(request, nomsId, username, activeCaseLoadId)
+
+    expect(adasToApprove.showRecallMessage).toBe(true)
+  })
+
+  it('Get ADAs to approve where ADAs are within parallel standard sentence and recall period', async () => {
+    const nomsId = 'AA1234A'
+
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue(adjustmentResponsesWithChargeNumber)
+
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      awaitingApproval: [
+        {
+          dateChargeProved: '2024-02-03',
+          charges: [
+            {
+              chargeNumber: '1525916',
+              dateChargeProved: '2024-02-03',
+              days: 10,
+              heardAt: 'Moorland (HMP & YOI)',
+              status: 'AWARDED_OR_PENDING',
+              toBeServed: 'Forthwith',
+            },
+          ],
+          total: 10,
+          status: 'PENDING_APPROVAL',
+          adjustmentId: null,
+        },
+      ] as AdasByDateCharged[],
+      suspended: [] as AdasByDateCharged[],
+      quashed: [] as AdasByDateCharged[],
+      awarded: [] as AdasByDateCharged[],
+      prospective: [] as AdasByDateCharged[],
+      totalProspective: 10,
+      totalAwarded: 0,
+      totalQuashed: 0,
+      totalAwaitingApproval: 0,
+      totalSuspended: 0,
+      intercept: {
+        number: 1,
+        type: 'PADA',
+        anyProspective: true,
+      },
+      showExistingAdaMessage: false,
+      totalExistingAdas: 10,
+      earliestNonRecallSentenceDate: '2024-01-01',
+      earliestRecallDate: '2023-07-01',
+    } as AdaAdjudicationDetails)
+
+    const request = {} as jest.Mocked<Request>
+    const adasToApprove = await adaService.getAdasToApprove(request, nomsId, username, activeCaseLoadId)
+
+    expect(adasToApprove.showRecallMessage).toBe(false)
+  })
 })
