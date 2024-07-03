@@ -100,14 +100,14 @@
           {% if adasToReview.showRecallMessage %}
           <p class="govuk-body">Some ADAs pending approval may or may not apply, as they were awarded when this person was in custody on a licence recall.</p>
           <p class="govuk-body">Once you have reviewed and approved them, decide whether they should be added to the manual sentence calculation - 
-            <a href="https://www.gov.uk/government/publications/sentence-calculation-policy-framework-determinate-sentenced-prisoners">read the operational guidance for sentence calculation</a> to check.</p>
+            <a href="https://www.gov.uk/government/publications/sentence-calculation-policy-framework-determinate-sentenced-prisoners" target="_blank">read the operational guidance for sentence calculation (opens in new tab)</a> to check.</p>
           {% endif %}
           {{ adaTable({
             tableId: 'awaiting-approval-adas',
             adas: adasToReview.awaitingApproval,
             total: adasToReview.totalAwaitingApproval,
             totalText: 'Total ADAs taken into calculation',
-            mainTitle: 'Once you have reviewed and approved the pending ADAs, they will be added to the sentence calculation.',
+            mainTitle: '' if adasToReview.showRecallMessage else 'Once you have reviewed and approved the pending ADAs, they will be added to the sentence calculation.',
             emptyTitle: 'No ADA records waiting for approval exist for this offender'
             }) }}
 
