@@ -2,6 +2,7 @@ import { components } from './index'
 
 export type AdjustmentTypes = components['schemas']['AdjustmentDto']['adjustmentType']
 export type Adjustment = components['schemas']['AdjustmentDto']
+export type ManualUnusedDeduction = components['schemas']['ManualUnusedDeductionsDto']
 export type CreateResponse = components['schemas']['CreateResponseDto']
 export type ValidationMessage = components['schemas']['ValidationMessage']
 export type AdjustmentStatus = components['schemas']['AdjustmentDto']['status']

@@ -1,0 +1,64 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set pageTitle = applicationName + " - Confirm and save unused deduction" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+{{ super() }}
+<nav>
+  {{ govukBackLink({
+    text: "Back",
+    href: model.backlink()
+  }) }}
+</nav>
+{% endblock %}
+
+{% if model.form.errors.length %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    {{ govukErrorSummary({
+    titleText: "There is a problem",
+    errorList: model.errors
+    }) }}
+  </div>
+</div>
+{% endif %}
+
+{% block content %}
+<div class="govuk-!-width-two-thirds">
+  <div class="govuk-grid-row">
+    <h1 class="govuk-heading-l">
+      <span class="govuk-caption-xl">Adjustments</span>
+      Confirm and save
+    </h1>
+
+  </div>
+  <h2 class="govuk-heading-m">Deduction summary</h2>
+  <div class="govuk-grid-column-full govuk-!-padding-left-0">
+    {{ govukSummaryList(model.getRows()) }}
+
+    <div class="govuk-button-group">
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+        {{ govukButton({
+        text: "Confirm and save",
+        type: submit,
+        preventDoubleClick: true,
+        attributes: { 'data-qa': 'submit-form' }
+        }) }}
+        {{ govukButton({
+        text: "Cancel",
+        classes: "govuk-button--secondary",
+        href: "/" + prisoner.prisonerNumber
+        }) }}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -15,11 +15,11 @@
 
 {% macro offenceCommittedText(offence) %}
   {% if (offence.offenceEndDate and offence.offenceStartDate and offence.offenceEndDate !== offence.offenceStartDate) %}
-    Committed from {{ offence.offenceStartDate | date("DD MMM YYYY") }} to {{ offence.offenceEndDate | date("DD MMM YYYY") }}
+    Committed from <span class="govuk-!-white-space-nowrap">{{ offence.offenceStartDate | date("DD MMM YYYY") }}</span> to <span class="govuk-!-white-space-nowrap">{{ offence.offenceEndDate | date("DD MMM YYYY") }}</span>
     {% elif offence.offenceStartDate %}
-    Committed on {{ offence.offenceStartDate | date("DD MMM YYYY") }}
+    Committed on <span class="govuk-!-white-space-nowrap">{{ offence.offenceStartDate | date("DD MMM YYYY") }}</span>
     {% elif offence.offenceEndDate %}
-    Committed on {{ offence.offenceEndDate | date("DD MMM YYYY") }}
+    Committed on <span class="govuk-!-white-space-nowrap">{{ offence.offenceEndDate | date("DD MMM YYYY") }}</span>
   {% else %}
     Offence date not entered
   {% endif %}

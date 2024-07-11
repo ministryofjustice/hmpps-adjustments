@@ -41,6 +41,16 @@
             classes: 'govuk-notification-banner__no-header'
           }) }}
         {% endif %}
+        {% elif model.showMissingRecallOutcomeMessage() %}
+          {{ govukErrorSummary({
+            titleText: "Served ADAs cannot be identified",
+            errorList: [
+              {
+                text: 'An active recall sentence is present with no associated court event.  To enable served ADAs to be identified add a "Recall to prison" court outcome on NOMIS.'
+              }
+            ],
+            attributes: {'data-qa': 'error-message'}
+          }) }}
       {% endif %}
 
       <div class="moj-page-header-actions">
@@ -76,36 +86,7 @@
 
       {% if model.unusedDeductionMessage != 'NONE' %}
         <div class="govuk-inset-text govuk-!-margin-left-4">
-          {% if model.unusedDeductionMessage == 'UNSUPPORTED' %}
-            {% if model.manualUnusedDeductions() %}
-              {% if model.hasNonNomisUnusedDeductions() %}
-                Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="#">edit or delete the unused deductions here.</a>
-              {% else %}
-                Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="#">add any unused deductions here.</a>
-              {% endif %}
-            {% else %}
-              Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.
-            {% endif %}
-          {% elif model.unusedDeductionMessage == 'VALIDATION' %}
-            Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.
-            <br />
-            To continue, you must:
-            <ol>
-              <li>
-                <a href="{{ model.checkInformationLink }}" target="_blank">Review the incorrect details</a>
-              </li>
-              <li>
-                Update these details
-              </li>
-              <li>
-                <a href="">Reload this page</a>
-              </li>
-            </ol>
-          {% elif model.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
-            Existing deductions have been added on NOMIS. This means unused deductions cannot be automatically calculated. To add any unused remand, go to the sentence adjustments screen in NOMIS.
-          {% elif model.unusedDeductionMessage == 'UNKNOWN' %}
-            Unused remand/tagged bail time cannot be calculated. There may be some present. Any unused deductions must be entered or viewed in NOMIS.
-          {% endif %}
+          {{ model.getUnusedDeductionMessage() | safe }}
         </div>
       {% endif %}
 
