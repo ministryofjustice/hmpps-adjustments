@@ -2,8 +2,15 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { delay } from '../utils/utils'
 import AdjustmentsService from './adjustmentsService'
 import CalculateReleaseDatesService from './calculateReleaseDatesService'
+import PrisonerService from './prisonerService'
 
-export type UnusedDeductionMessageType = 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'UNKNOWN' | 'NONE'
+export type UnusedDeductionMessageType =
+  | 'NOMIS_ADJUSTMENT'
+  | 'VALIDATION'
+  | 'UNSUPPORTED'
+  | 'RECALL'
+  | 'UNKNOWN'
+  | 'NONE'
 
 export default class UnusedDeductionsService {
   private maxTries = 6 // 3 seconds max wait
@@ -13,6 +20,7 @@ export default class UnusedDeductionsService {
   constructor(
     private readonly adjustmentsService: AdjustmentsService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
+    private readonly prisonerService: PrisonerService,
   ) {}
 
   private anyDeductionFromNomis(deductions: Adjustment[]) {
@@ -21,11 +29,17 @@ export default class UnusedDeductionsService {
 
   async getCalculatedUnusedDeductionsMessageAndAdjustments(
     nomsId: string,
-    startOfSentenceEnvelope: Date,
+    bookingId: string,
     retry: boolean,
     username: string,
   ): Promise<[UnusedDeductionMessageType, Adjustment[]]> {
-    const adjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, username)
+    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
+
+    const adjustments = await this.adjustmentsService.findByPerson(
+      nomsId,
+      startOfSentenceEnvelope.earliestSentence,
+      username,
+    )
     try {
       const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
       if (!deductions.length) {
@@ -39,15 +53,23 @@ export default class UnusedDeductionsService {
         username,
       )
 
-      if (unusedDeductionsResponse.validationMessages?.length) {
-        if (
-          unusedDeductionsResponse.validationMessages.find(
-            it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
-          )
-        ) {
-          return ['UNSUPPORTED', adjustments]
-        }
+      if (
+        unusedDeductionsResponse.validationMessages?.find(
+          it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
+        )
+      ) {
+        return ['UNSUPPORTED', adjustments]
+      }
 
+      const anyRecalls = startOfSentenceEnvelope.sentencesAndOffences.some(it =>
+        PrisonerService.recallTypes.includes(it.sentenceCalculationType),
+      )
+      if (anyRecalls) {
+        // Currently we don't support unused deductions calculation if there is an active recall sentence.
+        return ['RECALL', adjustments]
+      }
+
+      if (unusedDeductionsResponse.validationMessages?.length) {
         return ['VALIDATION', adjustments]
       }
 
@@ -67,7 +89,7 @@ export default class UnusedDeductionsService {
             await delay(this.waitBetweenTries)
             const retryAdjustments = await this.adjustmentsService.findByPerson(
               nomsId,
-              startOfSentenceEnvelope,
+              startOfSentenceEnvelope.earliestSentence,
               username,
             )
             const retryDeductions = this.getTotalUnusedRemand(retryAdjustments)

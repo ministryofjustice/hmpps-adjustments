@@ -5,6 +5,7 @@ import {
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
+  ManualUnusedDeduction,
   ProspectiveAdaRejection,
   RestoreAdjustments,
   ValidationMessage,
@@ -19,6 +20,13 @@ export default class AdjustmentsClient {
 
   async get(adjustmentsId: string): Promise<Adjustment> {
     return this.restClient.get({ path: `/adjustments/${adjustmentsId}` }) as Promise<Adjustment>
+  }
+
+  async setUnusedDaysManually(person: string, manualUnusedDeduction: ManualUnusedDeduction) {
+    return this.restClient.post({
+      path: `/adjustments/person/${person}/manual-unused-deductions`,
+      data: manualUnusedDeduction,
+    })
   }
 
   async findByPerson(person: string, earliestSentenceDate?: string): Promise<Adjustment[]> {

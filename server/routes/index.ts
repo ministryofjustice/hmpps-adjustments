@@ -7,6 +7,7 @@ import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
 import RemandRoutes from './remandRoutes'
 import TaggedBailRoutes from './taggedBailRoutes'
 import PrisonerImageRoutes from './prisonerImageRoutes'
+import UnusedDeductionRoutes from './unusedDeductionRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -20,7 +21,6 @@ export default function routes(service: Services): Router {
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
     service.unusedDeductionsService,
-    service.additionalDaysAwardedBackendService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,
@@ -40,6 +40,12 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
+  )
+
+  const unusedDeductionRoutes = new UnusedDeductionRoutes(
+    service.prisonerService,
+    service.adjustmentsService,
+    service.adjustmentsStoreService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)
@@ -100,6 +106,10 @@ export default function routes(service: Services): Router {
   post('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.submitReview)
   get('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.edit)
   post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
+  get('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.days)
+  post('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.submitDays)
+  get('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.review)
+  post('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.submitReview)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

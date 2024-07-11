@@ -12,6 +12,13 @@ export type AdjustmentType = {
 
 let types: AdjustmentType[] = [
   {
+    value: 'UNUSED_DEDUCTIONS',
+    text: 'Unused deductions',
+    shortText: 'unused deductions',
+    url: 'unused-deductions',
+    deduction: true,
+  } as AdjustmentType,
+  {
     value: 'REMAND',
     text: 'Remand',
     shortText: 'remand',

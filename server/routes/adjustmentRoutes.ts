@@ -19,7 +19,6 @@ import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -28,7 +27,6 @@ export default class AdjustmentRoutes {
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
-    private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -50,7 +48,6 @@ export default class AdjustmentRoutes {
     const { username, roles, activeCaseLoadId, isSupportUser } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
 
     const message = req.flash('message')
     const messageExists = message && message[0]
@@ -61,7 +58,7 @@ export default class AdjustmentRoutes {
     const [unusedDeductionMessage, adjustments] =
       await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(
         nomsId,
-        startOfSentenceEnvelope.earliestSentence,
+        bookingId,
         !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
         username,
       )
