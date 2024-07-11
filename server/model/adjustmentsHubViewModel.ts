@@ -101,7 +101,7 @@ export default class AdjustmentsHubViewModel {
         reviewMessage = 'review tagged bail to calculate'
       }
 
-      return `Unused deductions have not been calculated${hasUnusedRemand ? ' as there are deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/review-unused-deductions">${reviewMessage}</a>`
+      return `Unused deductions have not been calculated${hasUnusedRemand ? ' as there are deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/unused-deductions/review-deductions">${reviewMessage}</a>`
     }
 
     return this.hasUnusedDeductions()

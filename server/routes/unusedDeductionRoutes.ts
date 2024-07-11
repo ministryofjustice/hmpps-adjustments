@@ -8,6 +8,7 @@ import UnusedDeductionsReviewModel from '../model/unusedDeductionsReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import ReviewDeductionsModel from '../model/reviewDeductionsModel'
 
 export default class UnusedDeductionRoutes {
   constructor(
@@ -119,6 +120,29 @@ export default class UnusedDeductionRoutes {
       action: messageAction,
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  public reviewDeductions: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    const { prisonerNumber } = res.locals.prisoner
+    const { username } = res.locals.user
+    const { bookingId } = res.locals.prisoner
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
+    return res.render('pages/adjustments/unused-deductions/review-deductions', {
+      model: new ReviewDeductionsModel(
+        prisonerNumber,
+        adjustments.filter(it => it.source === 'NOMIS'),
+        sentencesAndOffences,
+      ),
+    })
+  }
+
+  public submitReviewDeductions: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    // TODO: to be completed during ADJST-720
+
+    return res.redirect(`/${nomsId}`)
   }
 
   private async getAdjustments(bookingId: string, username: string, nomsId: string): Promise<Adjustment[]> {
