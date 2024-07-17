@@ -99,7 +99,7 @@ export default class AdjustmentRoutes {
 
   public remand: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    return res.redirect(`${config.services.identifyRemandPeriods.url}/${nomsId}`)
+    return res.redirect(`${config.services.identifyRemandPeriods.url}/prisoner/${nomsId}`)
   }
 
   public form: RequestHandler = async (req, res): Promise<void> => {
