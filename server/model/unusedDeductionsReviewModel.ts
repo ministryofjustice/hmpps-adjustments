@@ -4,7 +4,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 export default class UnusedDeductionsReviewModel {
   constructor(
     public prisonerNumber: string,
-    public addOrEdit: string,
+    public addEditOrReview: string,
     public adjustment: SessionAdjustment,
     public remandAndTaggedBailAdjustments: Adjustment[],
     public error?: {
@@ -15,7 +15,11 @@ export default class UnusedDeductionsReviewModel {
   ) {}
 
   backlink(): string {
-    return `/${this.prisonerNumber}/unused-deductions/days/${this.addOrEdit}`
+    if (this.addEditOrReview === 'review') {
+      return `/${this.prisonerNumber}/unused-deductions/review-deductions`
+    }
+
+    return `/${this.prisonerNumber}/unused-deductions/days/${this.addEditOrReview}`
   }
 
   getRows() {

@@ -10,6 +10,7 @@ export default class RemandChangeModel {
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculatedUnusedDeductions: UnusedDeductionCalculationResponse,
     public showUnusedMessage: boolean,
+    public reviewDeductions: boolean = false,
   ) {}
 
   public listOffences() {

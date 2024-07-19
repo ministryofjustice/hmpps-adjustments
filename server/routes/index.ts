@@ -27,6 +27,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
+    service.paramStoreService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -40,12 +41,14 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
+    service.paramStoreService,
   )
 
   const unusedDeductionRoutes = new UnusedDeductionRoutes(
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
+    service.paramStoreService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)

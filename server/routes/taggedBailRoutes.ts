@@ -17,6 +17,7 @@ import {
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailChangeModel from '../model/taggedBailEditModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
+import ParamStoreService from '../services/paramStoreService'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -24,6 +25,7 @@ export default class TaggedBailRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
+    private readonly paramStoreService: ParamStoreService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -89,6 +91,12 @@ export default class TaggedBailRoutes {
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      this.paramStoreService.clear(req, 'returnToReviewDeductions')
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     if (addOrEdit === 'edit') {
       return res.redirect(`/${nomsId}/tagged-bail/${addOrEdit}/${id}`)
     }
@@ -279,6 +287,12 @@ export default class TaggedBailRoutes {
       adjustment.taggedBail = {
         caseSequence: sentencesForCaseSequence.caseSequence,
       }
+    }
+
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      this.paramStoreService.clear(req, 'returnToReviewDeductions')
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
     await this.adjustmentsService.update(id, adjustment, username)

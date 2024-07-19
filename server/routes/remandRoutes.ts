@@ -19,6 +19,7 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
 import RemandViewModel from '../model/remandViewModel'
 import RemandChangeModel from '../model/remandChangeModel'
+import ParamStoreService from '../services/paramStoreService'
 
 export default class RemandRoutes {
   constructor(
@@ -26,6 +27,7 @@ export default class RemandRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
+    private readonly paramStoreService: ParamStoreService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -95,6 +97,11 @@ export default class RemandRoutes {
     }
 
     if (adjustment.complete) {
+      const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+      if (returnToReviewDeductions) {
+        this.paramStoreService.clear(req, 'returnToReviewDeductions')
+        return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      }
       return res.redirect(`/${nomsId}/remand/review`)
     }
     return res.redirect(`/${nomsId}/remand/offences/${addOrEdit}/${id}`)
@@ -158,6 +165,12 @@ export default class RemandRoutes {
 
     if (addOrEdit === 'edit') {
       return res.redirect(`/${nomsId}/remand/edit/${id}`)
+    }
+
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      this.paramStoreService.clear(req, 'returnToReviewDeductions')
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
     return res.redirect(`/${nomsId}/remand/review`)
@@ -387,6 +400,7 @@ export default class RemandRoutes {
         sentencesAndOffences,
         unusedDeductions,
         showUnusedMessage,
+        this.paramStoreService.get(req, 'reviewDeductions'),
       ),
     })
   }
@@ -395,6 +409,12 @@ export default class RemandRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
+
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      this.paramStoreService.clear(req, 'returnToReviewDeductions')
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 

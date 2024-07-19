@@ -9,12 +9,14 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ReviewDeductionsModel from '../model/reviewDeductionsModel'
+import ParamStoreService from '../services/paramStoreService'
 
 export default class UnusedDeductionRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
+    private readonly paramStoreService: ParamStoreService,
   ) {}
 
   public days: RequestHandler = async (req, res): Promise<void> => {
@@ -76,6 +78,20 @@ export default class UnusedDeductionRoutes {
     const { prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
     const { bookingId } = res.locals.prisoner
+    const reviewDeductions = this.paramStoreService.get(req, 'reviewDeductions')
+    if (reviewDeductions) {
+      const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+      const unusedDeductionAdjustment = this.getNomisUnusedDeduction(adjustments)
+      return res.render('pages/adjustments/unused-deductions/review', {
+        model: new UnusedDeductionsReviewModel(
+          prisonerNumber,
+          unusedDeductionAdjustment ? 'edit' : 'add',
+          sessionAdjustment,
+          adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL' || it.adjustmentType === 'REMAND'),
+        ),
+      })
+    }
+
     const adjustments = await this.getAdjustments(bookingId, username, nomsId)
     const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
     const sessionAdjustment =
@@ -124,25 +140,33 @@ export default class UnusedDeductionRoutes {
 
   public reviewDeductions: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    const { prisonerNumber } = res.locals.prisoner
+    const { prisonerNumber, bookingId } = res.locals.prisoner
     const { username } = res.locals.user
-    const { bookingId } = res.locals.prisoner
     const adjustments = await this.getAdjustments(bookingId, username, nomsId)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
+    this.paramStoreService.store(req, 'returnToReviewDeductions', true)
+    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+    const sessionAdjustments: { id: string; adjustment: SessionAdjustment }[] = Object.keys(
+      sessionAdjustmentRecords,
+    ).map(key => ({
+      id: key,
+      adjustment: sessionAdjustmentRecords[key],
+    }))
+    console.log(JSON.stringify(sessionAdjustments))
     return res.render('pages/adjustments/unused-deductions/review-deductions', {
       model: new ReviewDeductionsModel(
         prisonerNumber,
         adjustments.filter(it => it.source === 'NOMIS'),
         sentencesAndOffences,
+        sessionAdjustments,
       ),
     })
   }
 
   public submitReviewDeductions: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    // TODO: to be completed during ADJST-720
-
-    return res.redirect(`/${nomsId}`)
+    this.paramStoreService.store(req, 'reviewDeductions', true)
+    return res.redirect(`/${nomsId}/unused-deductions/review/save`)
   }
 
   private async getAdjustments(bookingId: string, username: string, nomsId: string): Promise<Adjustment[]> {
@@ -152,5 +176,9 @@ export default class UnusedDeductionRoutes {
 
   private getUnusedDeduction(adjustments: Adjustment[]): Adjustment {
     return adjustments.filter(it => it.source !== 'NOMIS').find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+  }
+
+  private getNomisUnusedDeduction(adjustments: Adjustment[]): Adjustment {
+    return adjustments.filter(it => it.source === 'NOMIS').find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
   }
 }
