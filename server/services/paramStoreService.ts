@@ -2,6 +2,10 @@ import { Request } from 'express'
 
 export default class ParamStoreService {
   public get(req: Request, key: string): boolean {
+    if (!req.session.params) {
+      return null
+    }
+
     return req.session.params[key]
   }
 
@@ -14,7 +18,7 @@ export default class ParamStoreService {
   }
 
   public clear(req: Request, key: string) {
-    delete req.session.params[key]
+    req.session.params[key] = null
   }
 
   public clearAll(req: Request) {

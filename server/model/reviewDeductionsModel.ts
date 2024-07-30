@@ -58,7 +58,8 @@ export default class ReviewDeductionsModel {
     if (this.hasAdjustmentTypeInSession('REMAND')) {
       return (
         this.adjustments.filter(it => it.adjustmentType === 'REMAND').length > 0 ||
-        this.sessionAdjustments.filter(it => it.adjustment.adjustmentType === 'REMAND').length > 0
+        this.sessionAdjustments.filter(it => it.adjustment.adjustmentType === 'REMAND' && !it.adjustment.delete)
+          .length > 0
       )
     }
 
@@ -68,7 +69,7 @@ export default class ReviewDeductionsModel {
   public remand() {
     if (this.hasAdjustmentTypeInSession('REMAND')) {
       const remandAdjustments = this.sessionAdjustments
-        .filter(it => it.adjustment.adjustmentType === 'REMAND')
+        .filter(it => it.adjustment.adjustmentType === 'REMAND' && !it.adjustment.delete)
         .map(it => {
           return {
             ...it.adjustment,
@@ -107,7 +108,8 @@ export default class ReviewDeductionsModel {
     if (this.hasAdjustmentTypeInSession('TAGGED_BAIL')) {
       return (
         this.adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0 ||
-        this.sessionAdjustments.filter(it => it.adjustment.adjustmentType === 'TAGGED_BAIL').length > 0
+        this.sessionAdjustments.filter(it => it.adjustment.adjustmentType === 'TAGGED_BAIL' && !it.adjustment.delete)
+          .length > 0
       )
     }
 
@@ -117,7 +119,7 @@ export default class ReviewDeductionsModel {
   public taggedBail(): Adjustment[] {
     if (this.hasAdjustmentTypeInSession('TAGGED_BAIL')) {
       const taggedBailAdjustments = this.sessionAdjustments
-        .filter(it => it.adjustment.adjustmentType === 'TAGGED_BAIL')
+        .filter(it => it.adjustment.adjustmentType === 'TAGGED_BAIL' && !it.adjustment.delete)
         .map(it => {
           return {
             ...it.adjustment,
