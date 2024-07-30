@@ -1,25 +1,49 @@
-import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class UnusedDeductionsReviewModel {
   constructor(
     public prisonerNumber: string,
-    public addEditOrReview: string,
-    public adjustment: SessionAdjustment,
+    public addOrEdit: string,
+    public unusedDeductionDays: number,
     public remandAndTaggedBailAdjustments: Adjustment[],
     public error?: {
       text: string
       html: string
       href: string
     }[],
+    public reviewDeductions?: boolean,
   ) {}
 
   backlink(): string {
-    if (this.addEditOrReview === 'review') {
+    if (this.reviewDeductions) {
       return `/${this.prisonerNumber}/unused-deductions/review-deductions`
     }
 
-    return `/${this.prisonerNumber}/unused-deductions/days/${this.addEditOrReview}`
+    return `/${this.prisonerNumber}/unused-deductions/days/${this.addOrEdit}`
+  }
+
+  public descriptionTextContext(): string {
+    if (this.hasRemand() && this.hasTaggedBail()) {
+      return 'remand and tagged bail'
+    }
+
+    if (this.hasRemand()) {
+      return 'remand'
+    }
+
+    if (this.hasTaggedBail()) {
+      return 'tagged bail'
+    }
+
+    return ''
+  }
+
+  public hasRemand(): boolean {
+    return this.remandAndTaggedBailAdjustments.filter(it => it.adjustmentType === 'REMAND').length > 0
+  }
+
+  public hasTaggedBail(): boolean {
+    return this.remandAndTaggedBailAdjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0
   }
 
   getRows() {
@@ -63,13 +87,12 @@ export default class UnusedDeductionsReviewModel {
   private getRemandRow() {
     const remandDays = this.getAdjustmentDays('REMAND')
     if (remandDays > 0) {
-      const unusedDeductionDays = this.adjustment.days
       return {
         key: {
           text: 'Remand',
         },
         value: {
-          html: `${remandDays} <span class="govuk-hint">including ${unusedDeductionDays > remandDays ? remandDays : unusedDeductionDays} days unused</span>`,
+          html: `${remandDays} <span class="govuk-hint">including ${this.unusedDeductionDays > remandDays ? remandDays : this.unusedDeductionDays} days unused</span>`,
           classes: 'govuk-!-text-align-right',
         },
       }
@@ -81,7 +104,6 @@ export default class UnusedDeductionsReviewModel {
   private getTaggedBailRow() {
     const taggedBailDays = this.getAdjustmentDays('TAGGED_BAIL')
     if (taggedBailDays > 0) {
-      const unusedDeductionDays = this.adjustment.days
       const remandDays = this.getAdjustmentDays('REMAND')
       return {
         key: {
@@ -89,8 +111,8 @@ export default class UnusedDeductionsReviewModel {
         },
         value: {
           html:
-            unusedDeductionDays > remandDays
-              ? `${taggedBailDays} <span class="govuk-hint">including ${unusedDeductionDays - remandDays} days unused</span>`
+            this.unusedDeductionDays > remandDays
+              ? `${taggedBailDays} <span class="govuk-hint">including ${this.unusedDeductionDays - remandDays} days unused</span>`
               : this.getAdjustmentDays('TAGGED_BAIL').toString(),
           classes: 'govuk-!-text-align-right',
         },
@@ -101,13 +123,12 @@ export default class UnusedDeductionsReviewModel {
   }
 
   private getFooterRow() {
-    const unusedDeductionDays = this.adjustment.days
     return {
       key: {
         text: 'Total',
       },
       value: {
-        html: `${this.getTotalDays()} <span class="govuk-hint">including ${unusedDeductionDays} days unused</span>`,
+        html: `${this.getTotalDays()} <span class="govuk-hint">including ${this.unusedDeductionDays} days unused</span>`,
         classes: 'govuk-!-text-align-right',
       },
     }

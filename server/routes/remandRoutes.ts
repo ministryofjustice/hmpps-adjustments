@@ -400,7 +400,7 @@ export default class RemandRoutes {
         sentencesAndOffences,
         unusedDeductions,
         showUnusedMessage,
-        this.paramStoreService.get(req, 'reviewDeductions'),
+        this.paramStoreService.get(req, 'returnToReviewDeductions'),
       ),
     })
   }

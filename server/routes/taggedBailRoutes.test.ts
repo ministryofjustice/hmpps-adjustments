@@ -9,16 +9,19 @@ import CalculateReleaseDatesService from '../services/calculateReleaseDatesServi
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import ParamStoreService from '../services/paramStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/paramStoreService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -99,6 +102,7 @@ beforeEach(() => {
       adjustmentsService,
       adjustmentsStoreService,
       calculateReleaseDatesService,
+      paramStoreService,
     },
   })
 })
@@ -344,6 +348,7 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
   `('POST of days when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     adjustmentsService.validate.mockResolvedValue([])
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/days/${addOrEdit}/${SESSION_ID}`)
       .send({ days: 1 })

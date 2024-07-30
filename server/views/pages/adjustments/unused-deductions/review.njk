@@ -31,6 +31,17 @@
 {% endif %}
 
 {% block content %}
+{% if model.reviewDeductions %}
+  {% set html %}
+    <p class="govuk-notification-banner__heading">
+      When you save this {{ model.descriptionTextContext() }}. The unused deductions will automatically be recorded. Check that the unused remand alert has been added.
+    </p>
+  {% endset %}
+
+  {{ govukNotificationBanner({
+    html: html
+  }) }}
+{% endif %}
 <div class="govuk-!-width-two-thirds">
   <div class="govuk-grid-row">
     <h1 class="govuk-heading-l">

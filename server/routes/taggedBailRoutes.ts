@@ -156,8 +156,16 @@ export default class TaggedBailRoutes {
       unusedDeductions,
     )
 
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+
     return res.render('pages/adjustments/tagged-bail/remove', {
-      model: new TaggedBailRemoveModel(prisonerNumber, adjustment, sentenceAndOffence, showUnusedMessage),
+      model: new TaggedBailRemoveModel(
+        prisonerNumber,
+        adjustment,
+        sentenceAndOffence,
+        showUnusedMessage,
+        reviewDeductions,
+      ),
     })
   }
 

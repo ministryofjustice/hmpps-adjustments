@@ -14,16 +14,19 @@ import {
   UnusedDeductionCalculationResponse,
 } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import ParamStoreService from '../services/paramStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/paramStoreService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -118,6 +121,7 @@ beforeEach(() => {
       adjustmentsService,
       adjustmentsStoreService,
       calculateReleaseDatesService,
+      paramStoreService,
     },
   })
 })
@@ -845,6 +849,7 @@ describe('Remand routes tests', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    paramStoreService.get.mockReturnValue(false)
     calculateReleaseDatesService.calculateUnusedDeductions.mockResolvedValue({
       unusedDeductions: 50,
       validationMessages: [remandOverlapWithSentenceMessage],

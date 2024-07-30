@@ -21,6 +21,7 @@ export default function routes(service: Services): Router {
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
     service.unusedDeductionsService,
+    service.paramStoreService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,
@@ -49,6 +50,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.adjustmentsStoreService,
     service.paramStoreService,
+    service.calculateReleaseDatesService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)

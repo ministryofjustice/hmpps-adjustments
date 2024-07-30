@@ -10,17 +10,20 @@ import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjust
 import './testutils/toContainInOrder'
 import config from '../config'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
+import ParamStoreService from '../services/paramStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/paramStoreService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null, null) as jest.Mocked<UnusedDeductionsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 
 const remandResult = {
   chargeRemand: [],
@@ -95,6 +98,7 @@ beforeEach(() => {
       identifyRemandPeriodsService,
       unusedDeductionsService,
       adjustmentsStoreService,
+      paramStoreService,
     },
     userSupplier: () => userInTest,
   })
@@ -281,7 +285,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Unused deductions have not been calculated as there are deductions in NOMIS - <a href="/ABC123/review-unused-deductions">review remand to calculate</a>`,
+          `Unused deductions have not been calculated as there are deductions in NOMIS - <a href="/ABC123/unused-deductions/review-deductions">review remand to calculate</a>`,
         )
       })
   })
@@ -295,12 +299,13 @@ describe('GET /:nomsId', () => {
       [nomisRemandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Unused deductions have not been calculated - <a href="/ABC123/review-unused-deductions">review remand to calculate</a>`,
+          `Unused deductions have not been calculated - <a href="/ABC123/unused-deductions/review-deductions">review remand to calculate</a>`,
         )
       })
   })
@@ -329,6 +334,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -345,6 +351,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
