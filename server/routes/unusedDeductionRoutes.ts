@@ -169,6 +169,7 @@ export default class UnusedDeductionRoutes {
       })
 
       await Promise.all(observables)
+      return res.redirect(`/${nomsId}/success`)
     }
 
     const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
