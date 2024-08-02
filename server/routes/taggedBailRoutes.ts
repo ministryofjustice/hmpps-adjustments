@@ -18,6 +18,7 @@ import CalculateReleaseDatesService from '../services/calculateReleaseDatesServi
 import TaggedBailChangeModel from '../model/taggedBailEditModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
 import ParamStoreService from '../services/paramStoreService'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -31,8 +32,10 @@ export default class TaggedBailRoutes {
   public add: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
     const { bookingId, prisonId } = res.locals.prisoner
-
-    const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    const reqId = reviewDeductions ? this.generateTempId() : null
+    const sessionId = this.adjustmentsStoreService.store(req, nomsId, reqId, {
+      id: reqId,
       adjustmentType: 'TAGGED_BAIL',
       bookingId: parseInt(bookingId, 10),
       person: nomsId,
@@ -124,6 +127,12 @@ export default class TaggedBailRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
+
+    if (id.indexOf('temp') > -1) {
+      this.adjustmentsStoreService.remove(req, nomsId, id)
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     const adjustment = await this.adjustmentsService.get(id, username)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
@@ -236,13 +245,22 @@ export default class TaggedBailRoutes {
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
-
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
-    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
-      { [id]: sessionAdjustment },
-      nomsId,
-      username,
-    )
+    let adjustments: Adjustment[]
+    if (id.indexOf('temp') > -1) {
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
+      adjustments = await this.adjustmentsService.findByPerson(
+        nomsId,
+        startOfSentenceEnvelope.earliestSentence,
+        username,
+      )
+    } else {
+      adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
+        { [id]: sessionAdjustment },
+        nomsId,
+        username,
+      )
+    }
 
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       { [id]: sessionAdjustment },
@@ -310,5 +328,9 @@ export default class TaggedBailRoutes {
       action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
+  }
+
+  private generateTempId(): string {
+    return `temp${Date.now()}`
   }
 }

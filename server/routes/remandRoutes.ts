@@ -43,7 +43,11 @@ export default class RemandRoutes {
       return res.redirect(`/${nomsId}/remand/no-applicable-sentences`)
     }
 
-    const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    const reqId = reviewDeductions ? this.generateTempId() : null
+
+    const sessionId = this.adjustmentsStoreService.store(req, nomsId, reqId, {
+      id: reqId,
       adjustmentType: 'REMAND',
       bookingId: parseInt(bookingId, 10),
       person: nomsId,
@@ -99,7 +103,6 @@ export default class RemandRoutes {
     if (adjustment.complete) {
       const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
       if (returnToReviewDeductions) {
-        this.paramStoreService.clear(req, 'returnToReviewDeductions')
         return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
       }
       return res.redirect(`/${nomsId}/remand/review`)
@@ -325,6 +328,12 @@ export default class RemandRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
+
+    if (id.indexOf('temp') > -1) {
+      this.adjustmentsStoreService.remove(req, nomsId, id)
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     const adjustment = await this.adjustmentsService.get(id, username)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
       bookingId,
@@ -359,7 +368,13 @@ export default class RemandRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
-    const dbAdjustment = await this.adjustmentsService.get(id, username)
+    let dbAdjustment
+    if (id.indexOf('temp') > -1) {
+      dbAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    } else {
+      dbAdjustment = await this.adjustmentsService.get(id, username)
+    }
+
     const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id) || dbAdjustment
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
@@ -439,5 +454,9 @@ export default class RemandRoutes {
 
   public noApplicableSentences: RequestHandler = async (req, res): Promise<void> => {
     return res.render('pages/adjustments/remand/no-applicable-sentence')
+  }
+
+  private generateTempId(): string {
+    return `temp${Date.now()}`
   }
 }

@@ -26,6 +26,10 @@ export default class RemandChangeModel {
       return false
     }
 
+    if (this.reviewDeductions) {
+      return true
+    }
+
     const sessionCharges = this.adjustment?.remand?.chargeId || []
     const dbCharges = this.dbAdjustment?.remand?.chargeId || []
 

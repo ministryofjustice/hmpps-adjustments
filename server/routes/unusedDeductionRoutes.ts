@@ -161,10 +161,10 @@ export default class UnusedDeductionRoutes {
       sessionAdjustments.forEach(it => {
         if (it.delete) {
           observables.push(this.adjustmentsService.delete(it.id, username))
-        } else if (it.id) {
-          observables.push(this.adjustmentsService.update(it.id, it, username))
-        } else {
+        } else if (it.id.indexOf('temp') > -1) {
           observables.push(this.adjustmentsService.create([it], username))
+        } else {
+          observables.push(this.adjustmentsService.update(it.id, it, username))
         }
       })
 
@@ -201,23 +201,26 @@ export default class UnusedDeductionRoutes {
     const { nomsId } = req.params
     const { prisonerNumber, bookingId } = res.locals.prisoner
     const { username } = res.locals.user
-    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+    const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(key => ({
+      ...sessionAdjustmentRecords[key],
+    }))
+
+    if (!sessionAdjustments || sessionAdjustments.length === 0) {
+      const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+      adjustments
+        .filter(it => (it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL') && it.source === 'NOMIS')
+        .forEach(it => {
+          sessionAdjustments.push(it)
+          this.adjustmentsStoreService.store(req, nomsId, it.id, it)
+        })
+    }
+
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
     this.paramStoreService.store(req, 'returnToReviewDeductions', true)
-    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
-    const sessionAdjustments: { id: string; adjustment: SessionAdjustment }[] = Object.keys(
-      sessionAdjustmentRecords,
-    ).map(key => ({
-      id: key,
-      adjustment: sessionAdjustmentRecords[key],
-    }))
+
     return res.render('pages/adjustments/unused-deductions/review-deductions', {
-      model: new ReviewDeductionsModel(
-        prisonerNumber,
-        adjustments.filter(it => it.source === 'NOMIS'),
-        sentencesAndOffences,
-        sessionAdjustments.filter(it => !it.adjustment.delete),
-      ),
+      model: new ReviewDeductionsModel(prisonerNumber, sessionAdjustments, sentencesAndOffences),
     })
   }
 
