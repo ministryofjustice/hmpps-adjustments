@@ -117,35 +117,12 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    config.featureToggles.manualUnusedDeductions = true
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
           `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${NOMS_ID}/unused-deductions/days/add">add any unused deductions here.</a>`,
-        )
-      })
-  })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - With manual unused deductions disabled', () => {
-    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-      earliestExcludingRecalls: new Date(),
-      earliestSentence: new Date(),
-      sentencesAndOffences: [],
-    })
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'UNSUPPORTED',
-      [remandAdjustment],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    config.featureToggles.manualUnusedDeductions = false
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
         )
       })
   })
@@ -197,26 +174,7 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('including 10 days unused')
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - manual and review unused deductions disabled', () => {
-    config.featureToggles.manualUnusedDeductions = false
-    config.featureToggles.reviewUnusedDeductions = false
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'UNSUPPORTED',
-      [remandAdjustment],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
-        )
-      })
-  })
   it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type  - manual unused deductions enabled', () => {
-    config.featureToggles.manualUnusedDeductions = true
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'UNSUPPORTED',
