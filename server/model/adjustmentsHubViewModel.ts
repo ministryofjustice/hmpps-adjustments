@@ -56,13 +56,9 @@ export default class AdjustmentsHubViewModel {
   }
 
   private getUnusedDeductionMessageForUnsupported(): string {
-    if (config.featureToggles.manualUnusedDeductions) {
-      return this.hasNonNomisUnusedDeductions()
-        ? `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
-        : `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/add">add any unused deductions here.</a>`
-    }
-
-    return 'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.'
+    return this.hasNonNomisUnusedDeductions()
+      ? `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
+      : `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/add">add any unused deductions here.</a>`
   }
 
   private getUnusedDeductionMessageForRecall(): string {
@@ -111,10 +107,6 @@ export default class AdjustmentsHubViewModel {
 
   private getUnusedDeductionMessageForUnknown(): string {
     return 'Unused remand/tagged bail time cannot be calculated. There may be some present. Any unused deductions must be entered or viewed in NOMIS.'
-  }
-
-  public manualUnusedDeductions(): boolean {
-    return config.featureToggles.manualUnusedDeductions
   }
 
   public reviewUnusedDeductions(): boolean {
