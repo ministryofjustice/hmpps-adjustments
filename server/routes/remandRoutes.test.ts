@@ -780,6 +780,27 @@ describe('Remand routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/remand/dates/edit Review deductions journey', () => {
+    const adjustments = {}
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
+    paramStoreService.get.mockReturnValue(true)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/dates/edit/${ADJUSTMENT_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
+        )
+        expect(res.text).toContain('Remand start date')
+        expect(res.text).toContain('Remand end date')
+        expect(res.text).toContain('Continue')
+      })
+  })
+
   it('POST /{nomsId}/remand/edit/:id dps adjustment', () => {
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
 

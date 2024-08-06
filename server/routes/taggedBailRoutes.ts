@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express'
+import { randomUUID } from 'crypto'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
@@ -33,7 +34,11 @@ export default class TaggedBailRoutes {
     const { nomsId } = req.params
     const { bookingId, prisonId } = res.locals.prisoner
     const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
-    const reqId = reviewDeductions ? this.generateTempId() : null
+    const reqId = reviewDeductions ? randomUUID() : null
+    if (reviewDeductions) {
+      this.paramStoreService.store(req, reqId, true)
+    }
+
     const sessionId = this.adjustmentsStoreService.store(req, nomsId, reqId, {
       id: reqId,
       adjustmentType: 'TAGGED_BAIL',
@@ -96,7 +101,6 @@ export default class TaggedBailRoutes {
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      this.paramStoreService.clear(req, 'returnToReviewDeductions')
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
@@ -128,7 +132,7 @@ export default class TaggedBailRoutes {
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
 
-    if (id.indexOf('temp') > -1) {
+    if (this.paramStoreService.get(req, id)) {
       this.adjustmentsStoreService.remove(req, nomsId, id)
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
@@ -247,7 +251,7 @@ export default class TaggedBailRoutes {
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
     let adjustments: Adjustment[]
-    if (id.indexOf('temp') > -1) {
+    if (this.paramStoreService.get(req, id)) {
       const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
       adjustments = await this.adjustmentsService.findByPerson(
         nomsId,
@@ -317,7 +321,6 @@ export default class TaggedBailRoutes {
 
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      this.paramStoreService.clear(req, 'returnToReviewDeductions')
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
@@ -328,9 +331,5 @@ export default class TaggedBailRoutes {
       action: 'UPDATE',
     } as Message
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
-  }
-
-  private generateTempId(): string {
-    return `temp${Date.now()}`
   }
 }

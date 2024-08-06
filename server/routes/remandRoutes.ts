@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express'
+import { randomUUID } from 'crypto'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
@@ -44,7 +45,10 @@ export default class RemandRoutes {
     }
 
     const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
-    const reqId = reviewDeductions ? this.generateTempId() : null
+    const reqId = reviewDeductions ? randomUUID() : null
+    if (reviewDeductions) {
+      this.paramStoreService.store(req, reqId, true)
+    }
 
     const sessionId = this.adjustmentsStoreService.store(req, nomsId, reqId, {
       id: reqId,
@@ -172,7 +176,6 @@ export default class RemandRoutes {
 
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      this.paramStoreService.clear(req, 'returnToReviewDeductions')
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
@@ -329,7 +332,7 @@ export default class RemandRoutes {
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
 
-    if (id.indexOf('temp') > -1) {
+    if (this.paramStoreService.get(req, id)) {
       this.adjustmentsStoreService.remove(req, nomsId, id)
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
@@ -369,7 +372,7 @@ export default class RemandRoutes {
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
     let dbAdjustment
-    if (id.indexOf('temp') > -1) {
+    if (this.paramStoreService.get(req, id)) {
       dbAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     } else {
       dbAdjustment = await this.adjustmentsService.get(id, username)
@@ -405,6 +408,8 @@ export default class RemandRoutes {
         ? sessionAdjustment.days
         : daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate))
 
+    console.log('Review deductions param store service', this.paramStoreService.get(req, 'returnToReviewDeductions'))
+
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
         {
@@ -427,7 +432,6 @@ export default class RemandRoutes {
 
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      this.paramStoreService.clear(req, 'returnToReviewDeductions')
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
@@ -454,9 +458,5 @@ export default class RemandRoutes {
 
   public noApplicableSentences: RequestHandler = async (req, res): Promise<void> => {
     return res.render('pages/adjustments/remand/no-applicable-sentence')
-  }
-
-  private generateTempId(): string {
-    return `temp${Date.now()}`
   }
 }

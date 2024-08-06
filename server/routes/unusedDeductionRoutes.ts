@@ -161,7 +161,7 @@ export default class UnusedDeductionRoutes {
       sessionAdjustments.forEach(it => {
         if (it.delete) {
           observables.push(this.adjustmentsService.delete(it.id, username))
-        } else if (it.id.indexOf('temp') > -1) {
+        } else if (this.paramStoreService.get(req, it.id)) {
           observables.push(this.adjustmentsService.create([it], username))
         } else {
           observables.push(this.adjustmentsService.update(it.id, it, username))
@@ -201,6 +201,13 @@ export default class UnusedDeductionRoutes {
     const { nomsId } = req.params
     const { prisonerNumber, bookingId } = res.locals.prisoner
     const { username } = res.locals.user
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (!reviewDeductions) {
+      // First entry to review deductions, clear the session.
+      this.paramStoreService.store(req, 'returnToReviewDeductions', true)
+      this.adjustmentsStoreService.clear(req, nomsId)
+    }
+
     const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
     const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(key => ({
       ...sessionAdjustmentRecords[key],
@@ -217,7 +224,6 @@ export default class UnusedDeductionRoutes {
     }
 
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
-    this.paramStoreService.store(req, 'returnToReviewDeductions', true)
 
     return res.render('pages/adjustments/unused-deductions/review-deductions', {
       model: new ReviewDeductionsModel(prisonerNumber, sessionAdjustments, sentencesAndOffences),

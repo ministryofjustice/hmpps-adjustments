@@ -318,7 +318,6 @@ export default class AdjustmentRoutes {
     const adjustment = await this.adjustmentsService.get(id, username)
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      this.paramStoreService.clear(req, 'returnToReviewDeductions')
       this.adjustmentsStoreService.store(req, nomsId, id, { ...adjustment, delete: true })
       return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
