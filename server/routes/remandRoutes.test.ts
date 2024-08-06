@@ -780,27 +780,6 @@ describe('Remand routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/remand/dates/edit Review deductions journey', () => {
-    const adjustments = {}
-    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
-    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
-    paramStoreService.get.mockReturnValue(true)
-    return request(app)
-      .get(`/${NOMS_ID}/remand/dates/edit/${ADJUSTMENT_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Nobody')
-        expect(res.text).toContain(
-          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
-        )
-        expect(res.text).toContain('Remand start date')
-        expect(res.text).toContain('Remand end date')
-        expect(res.text).toContain('Continue')
-      })
-  })
-
   it('POST /{nomsId}/remand/edit/:id dps adjustment', () => {
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
 
@@ -840,6 +819,27 @@ describe('Remand routes tests', () => {
       .expect(res => {
         expect(res.text).not.toContain('Confirm and save')
         expect(res.text).toContain('Edit remand')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit/:id Review deductions journey', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[SESSION_ID] = adjustmentWithDatesAndCharges
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
+    paramStoreService.get.mockReturnValue(true)
+
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
+        )
+        expect(res.text).toContain('Confirm and save')
       })
   })
 

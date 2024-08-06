@@ -408,8 +408,6 @@ export default class RemandRoutes {
         ? sessionAdjustment.days
         : daysBetween(new Date(sessionAdjustment.fromDate), new Date(sessionAdjustment.toDate))
 
-    console.log('Review deductions param store service', this.paramStoreService.get(req, 'returnToReviewDeductions'))
-
     return res.render('pages/adjustments/remand/edit', {
       model: new RemandChangeModel(
         {

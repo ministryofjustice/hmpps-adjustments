@@ -63,6 +63,12 @@ const stubbedSentencesAndOffences = [
   },
 ]
 
+const stubbedStartOfSentenceEnvelope = {
+  earliestExcludingRecalls: new Date(),
+  earliestSentence: new Date(),
+  sentencesAndOffences: stubbedSentencesAndOffences,
+}
+
 const stubbedSentencesAndOffencesWithSelected = [
   sentenceAndOffenceBaseRecord,
   { ...sentenceAndOffenceBaseRecord, sentenceDate: '2021-08-19', courtDescription: 'Court 2', selected: true },
@@ -311,6 +317,24 @@ describe('Tagged bail routes tests', () => {
       .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}?caseReference=1`)
       .expect(200)
       .expect(res => {
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/edit/{id} Review deductions', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(stubbedStartOfSentenceEnvelope)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+    paramStoreService.get.mockReturnValue(true)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
+        )
         expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
         expect(res.text).toContain('9955')
       })

@@ -292,6 +292,7 @@ export default class TaggedBailRoutes {
         sentenceAndOffence,
         sentencesByCaseSequence.length,
         showUnusedMessage,
+        this.paramStoreService.get(req, 'returnToReviewDeductions'),
       ),
     })
   }

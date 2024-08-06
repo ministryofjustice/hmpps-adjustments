@@ -11,12 +11,16 @@ import './testutils/toContainInOrder'
 import config from '../config'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import ParamStoreService from '../services/paramStoreService'
+import SessionAdjustment from '../@types/AdjustmentTypes'
+import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
+jest.mock('../services/calculateReleaseDatesService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
@@ -24,6 +28,7 @@ const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as j
 const unusedDeductionsService = new UnusedDeductionsService(null, null, null) as jest.Mocked<UnusedDeductionsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
+const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 
 const remandResult = {
   chargeRemand: [],
@@ -99,6 +104,7 @@ beforeEach(() => {
       unusedDeductionsService,
       adjustmentsStoreService,
       paramStoreService,
+      calculateReleaseDatesService,
     },
     userSupplier: () => userInTest,
   })
@@ -179,6 +185,70 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Edit the number of unused deductions')
+        expect(res.text).toContain('10')
+      })
+  })
+  it('GET /{nomsId}/unused-deductions/review/save Manual unused deductions - review - save', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    adjustmentsStoreService.getOnly.mockReturnValue({
+      adjustmentType: 'UNUSED_DEDUCTIONS',
+      days: 10,
+    } as SessionAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/review/save`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('10')
+      })
+  })
+  it('GET /{nomsId}/unused-deductions/review/delete Manual unused deductions - review - delete', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    adjustmentsStoreService.getOnly.mockReturnValue({
+      adjustmentType: 'UNUSED_DEDUCTIONS',
+      days: 10,
+    } as SessionAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/review/delete`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('10')
+      })
+  })
+  it('GET /{nomsId}/unused-deductions/review/delete Review deductions - review', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments['85'] = remandAdjustment
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 10,
+      validationMessages: [],
+    })
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    paramStoreService.get.mockReturnValue(true)
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/review/save`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'When you save this remand. The unused deductions will automatically be recorded. Check that the unused remand alert has been added.',
+        )
+        expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain('10')
       })
   })
