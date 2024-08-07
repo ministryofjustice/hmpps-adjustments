@@ -1,0 +1,79 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "../remand/partials/remandCard.njk" import remandCard %}
+{% from "../tagged-bail/partials/taggedBailCard.njk" import taggedBailCard %}
+
+{% set pageTitle = applicationName + " - Review and approve deductions" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+{{ super() }}
+<nav>
+  {{ govukBackLink({
+    text: "Back",
+    href: "/" + prisoner.prisonerNumber
+  }) }}
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-!-width-two-thirds">
+  <div class="govuk-grid-row">
+    <h1 class="govuk-heading-l">
+      <span class="govuk-caption-xl">Adjustments</span>
+      {{ model.pageHeading() }}
+    </h1>
+
+  </div>
+  {% if model.hasRemand() %}
+    <h2 class="govuk-heading-m">Check the remand dates match the warrant</h2>
+    <div class="govuk-grid-column-full govuk-!-padding-left-0 govuk-!-margin-bottom-6">
+      {% for remand in model.remand() %}
+        <div class="adjustment-card-container">
+          {{ remandCard(remand, prisoner.prisonerNumber, true) }}
+        </div>
+      {% endfor %}
+      <a href="/{{prisoner.prisonerNumber}}/remand/add">Add remand period</a>
+    </div>
+  {% endif %}
+  {% if model.hasTaggedBail() %}
+    <h2 class="govuk-heading-m">Check the tagged bail days match the warrant</h2>
+    <div class="govuk-grid-column-full govuk-!-padding-left-0 govuk-!-margin-bottom-6">
+      {% for taggedBail in model.taggedBail() %}
+        <div class="adjustment-card-container">
+          {{ taggedBailCard(taggedBail, model.getSentenceAndOffence(taggedBail), prisoner.prisonerNumber, true) }}
+        </div>
+      {% endfor %}
+      <a href="/{{prisoner.prisonerNumber}}/tagged-bail/add">Add tagged bail</a>
+    </div>
+  {% endif %}
+
+
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Approve deductions</h2>
+  <p class="govuk-body">
+    If all the {{ model.descriptionTextContext() }} details match the warrant, approve the deductions. If they do not match, the calculation will be incorrect.
+  </p>
+
+  <div class="govuk-button-group">
+    <form class="form" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+      {{ govukButton({
+        text: "Approve",
+        type: submit,
+        preventDoubleClick: true,
+        attributes: { 'data-qa': 'submit-form' }
+      }) }}
+      {{ govukButton({
+        text: "Cancel",
+        classes: "govuk-button--secondary",
+        href: "/" + prisoner.prisonerNumber
+      }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

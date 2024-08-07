@@ -10,6 +10,7 @@ export default class RemandChangeModel {
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculatedUnusedDeductions: UnusedDeductionCalculationResponse,
     public showUnusedMessage: boolean,
+    public reviewDeductions: boolean = false,
   ) {}
 
   public listOffences() {
@@ -23,6 +24,10 @@ export default class RemandChangeModel {
   public isModified(): boolean {
     if (!this.dbAdjustment) {
       return false
+    }
+
+    if (this.reviewDeductions) {
+      return true
     }
 
     const sessionCharges = this.adjustment?.remand?.chargeId || []

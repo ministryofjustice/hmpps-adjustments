@@ -7,12 +7,18 @@
 {% set pageTitle = applicationName + " - View remand details" %}
 {% set mainClasses = "app-container govuk-body" %}
 
+{% if model.reviewDeductions %}
+  {% set backlink = "/" + prisoner.prisonerNumber + "/unused-deductions/review-deductions"  %}
+{% else %}
+  {% set backlink = "/" + prisoner.prisonerNumber + "/remand/view"  %}
+{% endif %}
+
 {% block beforeContent %}
   {{ super() }}
   <nav>
     {{ govukBackLink({
       text: "Back",
-      href: "/" + prisoner.prisonerNumber + "/remand/view"
+      href: backlink
     }) }}
   </nav>
 {% endblock %}

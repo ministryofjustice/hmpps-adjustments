@@ -8,9 +8,14 @@ export default class TaggedBailRemoveModel {
     public adjustment: Adjustment,
     public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
     public showUnusedMessage: boolean,
+    public reviewDeductions?: boolean,
   ) {}
 
   public backlink(): string {
+    if (this.reviewDeductions) {
+      return `/${this.prisonerNumber}/unused-deductions/review-deductions`
+    }
+
     return `/${this.prisonerNumber}`
   }
 

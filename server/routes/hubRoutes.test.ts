@@ -8,16 +8,19 @@ import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import './testutils/toContainInOrder'
+import ParamStoreService from '../services/paramStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/paramStoreService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null, null) as jest.Mocked<UnusedDeductionsService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 
 const remandResult = {
   chargeRemand: [],
@@ -71,7 +74,13 @@ let app: Express
 beforeEach(() => {
   userInTest = defaultUser
   app = appWithAllRoutes({
-    services: { prisonerService, adjustmentsService, identifyRemandPeriodsService, unusedDeductionsService },
+    services: {
+      prisonerService,
+      adjustmentsService,
+      identifyRemandPeriodsService,
+      unusedDeductionsService,
+      paramStoreService,
+    },
     userSupplier: () => userInTest,
   })
 })
@@ -179,6 +188,7 @@ describe('GET /:nomsId', () => {
       ...noInterceptAdjudication,
       recallWithMissingOutcome: true,
     })
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)

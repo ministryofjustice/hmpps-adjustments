@@ -9,16 +9,19 @@ import CalculateReleaseDatesService from '../services/calculateReleaseDatesServi
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import ParamStoreService from '../services/paramStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/paramStoreService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -60,6 +63,12 @@ const stubbedSentencesAndOffences = [
   },
 ]
 
+const stubbedStartOfSentenceEnvelope = {
+  earliestExcludingRecalls: new Date(),
+  earliestSentence: new Date(),
+  sentencesAndOffences: stubbedSentencesAndOffences,
+}
+
 const stubbedSentencesAndOffencesWithSelected = [
   sentenceAndOffenceBaseRecord,
   { ...sentenceAndOffenceBaseRecord, sentenceDate: '2021-08-19', courtDescription: 'Court 2', selected: true },
@@ -99,6 +108,7 @@ beforeEach(() => {
       adjustmentsService,
       adjustmentsStoreService,
       calculateReleaseDatesService,
+      paramStoreService,
     },
   })
 })
@@ -312,6 +322,24 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/tagged-bail/edit/{id} Review deductions', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(stubbedStartOfSentenceEnvelope)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
+    paramStoreService.get.mockReturnValue(true)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain(
+          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
+        )
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 Aug 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
   it('POST /{nomsId}/tagged-bail/edit/:id dps adjustment', () => {
     adjustmentsStoreService.getById.mockReturnValue(populatedAdjustment)
 
@@ -344,6 +372,7 @@ describe('POST /{nomsId}/tagged-bail/days/:addOrEdit validation tests', () => {
   `('POST of days when content is valid redirects correctly', async ({ addOrEdit, redirectLocation }) => {
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     adjustmentsService.validate.mockResolvedValue([])
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .post(`/${NOMS_ID}/tagged-bail/days/${addOrEdit}/${SESSION_ID}`)
       .send({ days: 1 })

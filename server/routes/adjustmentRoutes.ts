@@ -19,6 +19,7 @@ import RecallModel from '../model/recallModel'
 import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import ParamStoreService from '../services/paramStoreService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -27,6 +28,7 @@ export default class AdjustmentRoutes {
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
+    private readonly paramStoreService: ParamStoreService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -51,7 +53,12 @@ export default class AdjustmentRoutes {
 
     const message = req.flash('message')
     const messageExists = message && message[0]
-    if (messageExists) {
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (reviewDeductions) {
+      this.paramStoreService.clear(req, 'returnToReviewDeductions')
+    }
+
+    if (messageExists || reviewDeductions) {
       this.adjustmentsStoreService.clear(req, nomsId)
     }
 
@@ -309,6 +316,12 @@ export default class AdjustmentRoutes {
     const { nomsId, id } = req.params
 
     const adjustment = await this.adjustmentsService.get(id, username)
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      this.adjustmentsStoreService.store(req, nomsId, id, { ...adjustment, delete: true })
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     await this.adjustmentsService.delete(id, username)
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
