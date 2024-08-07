@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express'
+import { randomUUID } from 'crypto'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
@@ -19,6 +20,7 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import RemandDatesModel from '../model/remandDatesModel'
 import RemandViewModel from '../model/remandViewModel'
 import RemandChangeModel from '../model/remandChangeModel'
+import ParamStoreService from '../services/paramStoreService'
 
 export default class RemandRoutes {
   constructor(
@@ -26,6 +28,7 @@ export default class RemandRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
+    private readonly paramStoreService: ParamStoreService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -41,7 +44,14 @@ export default class RemandRoutes {
       return res.redirect(`/${nomsId}/remand/no-applicable-sentences`)
     }
 
-    const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    const reqId = reviewDeductions ? randomUUID() : null
+    if (reviewDeductions) {
+      this.paramStoreService.store(req, reqId, true)
+    }
+
+    const sessionId = this.adjustmentsStoreService.store(req, nomsId, reqId, {
+      id: reqId,
       adjustmentType: 'REMAND',
       bookingId: parseInt(bookingId, 10),
       person: nomsId,
@@ -95,6 +105,10 @@ export default class RemandRoutes {
     }
 
     if (adjustment.complete) {
+      const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+      if (returnToReviewDeductions) {
+        return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      }
       return res.redirect(`/${nomsId}/remand/review`)
     }
     return res.redirect(`/${nomsId}/remand/offences/${addOrEdit}/${id}`)
@@ -158,6 +172,11 @@ export default class RemandRoutes {
 
     if (addOrEdit === 'edit') {
       return res.redirect(`/${nomsId}/remand/edit/${id}`)
+    }
+
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
     return res.redirect(`/${nomsId}/remand/review`)
@@ -312,6 +331,12 @@ export default class RemandRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
+
+    if (this.paramStoreService.get(req, id)) {
+      this.adjustmentsStoreService.remove(req, nomsId, id)
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     const adjustment = await this.adjustmentsService.get(id, username)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
       bookingId,
@@ -346,7 +371,13 @@ export default class RemandRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
-    const dbAdjustment = await this.adjustmentsService.get(id, username)
+    let dbAdjustment
+    if (this.paramStoreService.get(req, id)) {
+      dbAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    } else {
+      dbAdjustment = await this.adjustmentsService.get(id, username)
+    }
+
     const sessionAdjustment = this.adjustmentsStoreService.getById(req, nomsId, id) || dbAdjustment
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
@@ -387,6 +418,7 @@ export default class RemandRoutes {
         sentencesAndOffences,
         unusedDeductions,
         showUnusedMessage,
+        this.paramStoreService.get(req, 'returnToReviewDeductions'),
       ),
     })
   }
@@ -395,6 +427,11 @@ export default class RemandRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
+
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 

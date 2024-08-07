@@ -10,6 +10,7 @@ import UnusedDeductionsService from './unusedDeductionsService'
 import PrisonerSearchService from './prisonerSearchService'
 import FeComponentsService from './feComponentsService'
 import AdditionalDaysAwardedBackendService from './additionalDaysAwardedBackendService'
+import ParamStoreService from './paramStoreService'
 
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient, feComponentsClient } = dataAccess()
@@ -19,6 +20,7 @@ export const services = () => {
   const adjustmentsService = new AdjustmentsService(hmppsAuthClient)
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(hmppsAuthClient)
   const adjustmentsStoreService = new AdjustmentsStoreService()
+  const paramStoreService = new ParamStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
   const calculateReleaseDatesService = new CalculateReleaseDatesService(hmppsAuthClient)
   const unusedDeductionsService = new UnusedDeductionsService(
@@ -46,6 +48,7 @@ export const services = () => {
     prisonerSearchService,
     feComponentsService,
     additionalDaysAwardedBackendService,
+    paramStoreService,
   }
 }
 

@@ -10,17 +10,25 @@ import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjust
 import './testutils/toContainInOrder'
 import config from '../config'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
+import ParamStoreService from '../services/paramStoreService'
+import SessionAdjustment from '../@types/AdjustmentTypes'
+import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/paramStoreService')
+jest.mock('../services/calculateReleaseDatesService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null, null) as jest.Mocked<UnusedDeductionsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
+const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 
 const remandResult = {
   chargeRemand: [],
@@ -95,6 +103,8 @@ beforeEach(() => {
       identifyRemandPeriodsService,
       unusedDeductionsService,
       adjustmentsStoreService,
+      paramStoreService,
+      calculateReleaseDatesService,
     },
     userSupplier: () => userInTest,
   })
@@ -117,35 +127,12 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    config.featureToggles.manualUnusedDeductions = true
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
           `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${NOMS_ID}/unused-deductions/days/add">add any unused deductions here.</a>`,
-        )
-      })
-  })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - With manual unused deductions disabled', () => {
-    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
-      earliestExcludingRecalls: new Date(),
-      earliestSentence: new Date(),
-      sentencesAndOffences: [],
-    })
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'UNSUPPORTED',
-      [remandAdjustment],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    config.featureToggles.manualUnusedDeductions = false
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
         )
       })
   })
@@ -178,6 +165,70 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('10')
       })
   })
+  it('GET /{nomsId}/unused-deductions/review/save Manual unused deductions - review - save', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    adjustmentsStoreService.getOnly.mockReturnValue({
+      adjustmentType: 'UNUSED_DEDUCTIONS',
+      days: 10,
+    } as SessionAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/review/save`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('10')
+      })
+  })
+  it('GET /{nomsId}/unused-deductions/review/delete Manual unused deductions - review - delete', () => {
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    adjustmentsStoreService.getOnly.mockReturnValue({
+      adjustmentType: 'UNUSED_DEDUCTIONS',
+      days: 10,
+    } as SessionAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/review/delete`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('10')
+      })
+  })
+  it('GET /{nomsId}/unused-deductions/review/delete Review deductions - review', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments['85'] = remandAdjustment
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    adjustmentsService.findByPerson.mockResolvedValue([unusedDeductions])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 10,
+      validationMessages: [],
+    })
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    paramStoreService.get.mockReturnValue(true)
+    return request(app)
+      .get(`/${NOMS_ID}/unused-deductions/review/save`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'When you save this remand. The unused deductions will automatically be recorded. Check that the unused remand alert has been added.',
+        )
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('10')
+      })
+  })
   it('GET /{nomsId} hub with unused deductions', () => {
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
@@ -197,26 +248,7 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('including 10 days unused')
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type - manual and review unused deductions disabled', () => {
-    config.featureToggles.manualUnusedDeductions = false
-    config.featureToggles.reviewUnusedDeductions = false
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'UNSUPPORTED',
-      [remandAdjustment],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          'Some of the details recorded in NOMIS cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. To add any unused remand, go to the sentence adjustments screen in NOMIS.',
-        )
-      })
-  })
   it('GET /{nomsId} hub unused deductions cannot be calculated because of unsupported sentence type  - manual unused deductions enabled', () => {
-    config.featureToggles.manualUnusedDeductions = true
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'UNSUPPORTED',
@@ -281,7 +313,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Unused deductions have not been calculated as there are deductions in NOMIS - <a href="/ABC123/review-unused-deductions">review remand to calculate</a>`,
+          `Unused deductions have not been calculated as there are deductions in NOMIS - <a href="/ABC123/unused-deductions/review-deductions">review remand to calculate</a>`,
         )
       })
   })
@@ -295,12 +327,13 @@ describe('GET /:nomsId', () => {
       [nomisRemandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Unused deductions have not been calculated - <a href="/ABC123/review-unused-deductions">review remand to calculate</a>`,
+          `Unused deductions have not been calculated - <a href="/ABC123/unused-deductions/review-deductions">review remand to calculate</a>`,
         )
       })
   })
@@ -329,6 +362,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -345,6 +379,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)

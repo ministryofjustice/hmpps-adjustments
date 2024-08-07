@@ -9,6 +9,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import './testutils/toContainInOrder'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import ParamStoreService from '../services/paramStoreService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -16,6 +17,7 @@ jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedBackendService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/paramStoreService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
@@ -26,6 +28,7 @@ const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendServ
   null,
   null,
 ) as jest.Mocked<AdditionalDaysAwardedBackendService>
+const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 
 const NOMS_ID = 'ABC123'
 
@@ -64,6 +67,7 @@ beforeEach(() => {
       adjustmentsStoreService,
       additionalDaysAwardedBackendService,
       unusedDeductionsService,
+      paramStoreService,
     },
   })
 })
@@ -443,7 +447,7 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/{adjustmentType}/remove/{id}', () => {
     adjustmentsService.get.mockResolvedValue(radaAdjustment)
-
+    paramStoreService.get.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
       .expect('Content-Type', /html/)

@@ -3,7 +3,7 @@ import { areIntervalsOverlapping } from 'date-fns'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
-import { dateItems, dateToString, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
+import { dateItems, dateToString, daysBetween, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
@@ -26,7 +26,12 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
   toAdjustment(adjustment: Adjustment): Adjustment {
     const fromDate = dayjs(`${this['from-year']}-${this['from-month']}-${this['from-day']}`).format('YYYY-MM-DD')
     const toDate = dayjs(`${this['to-year']}-${this['to-month']}-${this['to-day']}`).format('YYYY-MM-DD')
-    return { ...adjustment, fromDate, toDate, days: null }
+    return {
+      ...adjustment,
+      fromDate,
+      toDate,
+      days: daysBetween(new Date(fromDate), new Date(toDate)),
+    }
   }
 
   fromItems() {
