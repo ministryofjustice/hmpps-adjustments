@@ -96,3 +96,13 @@ Used for govuk-tag to allow longer width tags to prevent line breaks
   white-space: nowrap;
   max-width: unset;
 }
+
+/**
+Removes the final divider line and margin-bottom from a govuk summary list
+ */
+.no-footer-summary-list {
+  margin-bottom: 0px;
+  .govuk-summary-list__row:last-child {
+    border-bottom: 0px solid transparent;
+  }
+}

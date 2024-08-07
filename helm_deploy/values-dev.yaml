@@ -25,7 +25,6 @@ generic-service:
     COMPONENT_API_URL: "https://frontend-components-dev.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
     UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED: 'true'
-    MANUAL_UNUSED_DEDUCTIONS: 'true'
     REVIEW_UNUSED_DEDUCTIONS: 'true'
 
   # Switches off the allow list in the DEV env only.

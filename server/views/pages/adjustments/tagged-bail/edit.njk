@@ -6,12 +6,18 @@
 {% set pageTitle = applicationName + " - Edit tagged bail" %}
 {% set mainClasses = "app-container govuk-body" %}
 
+{% if model.reviewDeductions %}
+    {% set backlink = "/" + prisoner.prisonerNumber + "/unused-deductions/review-deductions"  %}
+{% else %}
+    {% set backlink = "/" + prisoner.prisonerNumber + "/tagged-bail/view"  %}
+{% endif %}
+
 {% block beforeContent %}
 {{ super() }}
 <nav>
     {{ govukBackLink({
     text: "Back",
-    href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
+    href: backlink
     }) }}
 </nav>
 {% endblock %}

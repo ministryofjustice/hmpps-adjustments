@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express'
+import { randomUUID } from 'crypto'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
@@ -17,6 +18,8 @@ import {
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import TaggedBailChangeModel from '../model/taggedBailEditModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
+import ParamStoreService from '../services/paramStoreService'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -24,13 +27,20 @@ export default class TaggedBailRoutes {
     private readonly adjustmentsService: AdjustmentsService,
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
+    private readonly paramStoreService: ParamStoreService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
     const { bookingId, prisonId } = res.locals.prisoner
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    const reqId = reviewDeductions ? randomUUID() : null
+    if (reviewDeductions) {
+      this.paramStoreService.store(req, reqId, true)
+    }
 
-    const sessionId = this.adjustmentsStoreService.store(req, nomsId, null, {
+    const sessionId = this.adjustmentsStoreService.store(req, nomsId, reqId, {
+      id: reqId,
       adjustmentType: 'TAGGED_BAIL',
       bookingId: parseInt(bookingId, 10),
       person: nomsId,
@@ -89,6 +99,11 @@ export default class TaggedBailRoutes {
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     if (addOrEdit === 'edit') {
       return res.redirect(`/${nomsId}/tagged-bail/${addOrEdit}/${id}`)
     }
@@ -116,6 +131,12 @@ export default class TaggedBailRoutes {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
+
+    if (this.paramStoreService.get(req, id)) {
+      this.adjustmentsStoreService.remove(req, nomsId, id)
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
+
     const adjustment = await this.adjustmentsService.get(id, username)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
@@ -148,8 +169,16 @@ export default class TaggedBailRoutes {
       unusedDeductions,
     )
 
+    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+
     return res.render('pages/adjustments/tagged-bail/remove', {
-      model: new TaggedBailRemoveModel(prisonerNumber, adjustment, sentenceAndOffence, showUnusedMessage),
+      model: new TaggedBailRemoveModel(
+        prisonerNumber,
+        adjustment,
+        sentenceAndOffence,
+        showUnusedMessage,
+        reviewDeductions,
+      ),
     })
   }
 
@@ -220,13 +249,22 @@ export default class TaggedBailRoutes {
     }
 
     this.adjustmentsStoreService.store(req, nomsId, id, sessionAdjustment)
-
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
-    const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
-      { [id]: sessionAdjustment },
-      nomsId,
-      username,
-    )
+    let adjustments: Adjustment[]
+    if (this.paramStoreService.get(req, id)) {
+      const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
+      adjustments = await this.adjustmentsService.findByPerson(
+        nomsId,
+        startOfSentenceEnvelope.earliestSentence,
+        username,
+      )
+    } else {
+      adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
+        { [id]: sessionAdjustment },
+        nomsId,
+        username,
+      )
+    }
 
     const unusedDeductions = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       { [id]: sessionAdjustment },
@@ -254,6 +292,7 @@ export default class TaggedBailRoutes {
         sentenceAndOffence,
         sentencesByCaseSequence.length,
         showUnusedMessage,
+        this.paramStoreService.get(req, 'returnToReviewDeductions'),
       ),
     })
   }
@@ -279,6 +318,11 @@ export default class TaggedBailRoutes {
       adjustment.taggedBail = {
         caseSequence: sentencesForCaseSequence.caseSequence,
       }
+    }
+
+    const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
+    if (returnToReviewDeductions) {
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
     }
 
     await this.adjustmentsService.update(id, adjustment, username)

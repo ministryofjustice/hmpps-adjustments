@@ -21,12 +21,14 @@ export default function routes(service: Services): Router {
     service.identifyRemandPeriodsService,
     service.adjustmentsStoreService,
     service.unusedDeductionsService,
+    service.paramStoreService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
+    service.paramStoreService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -40,12 +42,15 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
+    service.paramStoreService,
   )
 
   const unusedDeductionRoutes = new UnusedDeductionRoutes(
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
+    service.paramStoreService,
+    service.calculateReleaseDatesService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)
@@ -110,6 +115,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.submitDays)
   get('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.review)
   post('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.submitReview)
+  get('/:nomsId/unused-deductions/review-deductions', unusedDeductionRoutes.reviewDeductions)
+  post('/:nomsId/unused-deductions/review-deductions', unusedDeductionRoutes.submitReviewDeductions)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

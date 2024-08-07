@@ -12,6 +12,7 @@ declare module 'express-session' {
     adjustments?: Record<string, Record<string, SessionAdjustment>>
     additionalDayApprovals?: Record<string, Date>
     additionalDayPadas?: Record<string, string[]>
+    params?: Record<string, boolean>
   }
 }
 

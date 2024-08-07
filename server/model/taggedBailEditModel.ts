@@ -10,6 +10,7 @@ export default class TaggedBailEditModel {
     public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
     public numberOfCases: number,
     public showUnusedMessage: boolean,
+    public reviewDeductions: boolean = false,
   ) {}
 
   public summary() {
