@@ -104,10 +104,10 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
 
     if (sentencesWithOffenceDates.length) {
       const fromDate = fieldsToDate(this['from-day'], this['from-month'], this['from-year'])
-      const minOffenceDate = this.getMinOffenceDate(sentencesWithOffenceDates)
-      if (fromDate < minOffenceDate) {
+      const minSentenceDate = this.getMinSentenceDate(sentencesWithOffenceDates)
+      if (fromDate < minSentenceDate) {
         errors.push({
-          text: `The UAL period cannot start before the earliest offence date, on ${dayjs(minOffenceDate).format(
+          text: `The UAL period cannot start before the earliest sentence date, on ${dayjs(minSentenceDate).format(
             'DD MMM YYYY',
           )}`,
           fields: ['from-day', 'from-month', 'from-year'],
@@ -155,17 +155,12 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
     return errors
   }
 
-  private getMinOffenceDate(sentencesWithOffenceDates: PrisonApiOffenderSentenceAndOffences[]) {
-    return sentencesWithOffenceDates
-      .map(
-        it =>
-          new Date(
-            it.offences
-              .filter(o => o.offenceStartDate)
-              .reduce((a, b) => (new Date(a.offenceStartDate) < new Date(b.offenceStartDate) ? a : b)).offenceStartDate,
-          ),
-      )
-      .reduce((a, b) => (a < b ? a : b))
+  private getMinSentenceDate(sentencesWithOffenceDates: PrisonApiOffenderSentenceAndOffences[]) {
+    return new Date(
+      sentencesWithOffenceDates.reduce((a, b) =>
+        new Date(a.sentenceDate) < new Date(b.sentenceDate) ? a : b,
+      ).sentenceDate,
+    )
   }
 
   adjustmentType(): AdjustmentType {
