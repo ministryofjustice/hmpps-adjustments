@@ -1,10 +1,13 @@
 import dayjs from 'dayjs'
+import { areIntervalsOverlapping } from 'date-fns'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateItems, isDateInFuture } from '../utils/utils'
+import { dateItems, dateToString, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
 import AdjustmentsForm from './adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import ValidationError from './validationError'
 
 export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtLargeForm> {
   'from-day': string
@@ -18,6 +21,10 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
   'to-month': string
 
   'to-year': string
+
+  isEdit: boolean
+
+  adjustmentId?: string
 
   type: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR' | 'IMMIGRATION_DETENTION'
 
@@ -50,7 +57,10 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
     })
   }
 
-  async validation() {
+  async validation(
+    getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>,
+    getAdjustments?: () => Promise<Adjustment[]>,
+  ): Promise<ValidationError[]> {
     const errors = []
     const fromDateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
     if (fromDateError) {
@@ -73,6 +83,43 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
         fields: ['to-day', 'to-month', 'to-year'],
       })
 
+    if (
+      isFromAfterTo(
+        this['from-year'],
+        this['from-month'],
+        this['from-day'],
+        this['to-year'],
+        this['to-month'],
+        this['to-day'],
+      )
+    ) {
+      errors.push({
+        text: 'The first day of UAL must be before the last day of UAL.',
+        fields: ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year'],
+      })
+    }
+
+    const activeSentences = await getSentences()
+    const sentencesWithOffenceDates = activeSentences.filter(it => it.offences.filter(o => o.offenceStartDate).length)
+
+    if (sentencesWithOffenceDates.length) {
+      const fromDate = fieldsToDate(this['from-day'], this['from-month'], this['from-year'])
+      const minOffenceDate = this.getMinOffenceDate(sentencesWithOffenceDates)
+      if (fromDate < minOffenceDate) {
+        errors.push({
+          text: `The UAL period cannot start before the earliest offence date, on ${dayjs(minOffenceDate).format(
+            'DD MMM YYYY',
+          )}`,
+          fields: ['from-day', 'from-month', 'from-year'],
+        })
+      }
+    }
+
+    // Edit specific validation
+    if (this.isEdit) {
+      errors.push(...(await this.validationForEdit(getAdjustments)))
+    }
+
     if (!this.type)
       errors.push({
         text: 'You must select the type of UAL',
@@ -80,6 +127,45 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       })
 
     return errors
+  }
+
+  private async validationForEdit(getAdjustments?: () => Promise<Adjustment[]>): Promise<ValidationError[]> {
+    const errors = []
+    const fromDate = fieldsToDate(this['from-day'], this['from-month'], this['from-year'])
+    const toDate = fieldsToDate(this['to-day'], this['to-month'], this['to-year'])
+    const adjustments = (await getAdjustments()).filter(
+      it => it.adjustmentType === 'UNLAWFULLY_AT_LARGE' && it.id !== this.adjustmentId,
+    )
+    const overlappingAdjustment = adjustments.find(a =>
+      areIntervalsOverlapping(
+        { start: new Date(a.fromDate), end: new Date(a.toDate) },
+        { start: fromDate, end: toDate },
+        { inclusive: true },
+      ),
+    )
+
+    if (overlappingAdjustment) {
+      errors.push({
+        text: `The UAL dates overlap with another UAL period ${dateToString(
+          new Date(overlappingAdjustment.fromDate),
+        )} to ${dateToString(new Date(overlappingAdjustment.toDate))}`,
+        fields: ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year'],
+      })
+    }
+    return errors
+  }
+
+  private getMinOffenceDate(sentencesWithOffenceDates: PrisonApiOffenderSentenceAndOffences[]) {
+    return sentencesWithOffenceDates
+      .map(
+        it =>
+          new Date(
+            it.offences
+              .filter(o => o.offenceStartDate)
+              .reduce((a, b) => (new Date(a.offenceStartDate) < new Date(b.offenceStartDate) ? a : b)).offenceStartDate,
+          ),
+      )
+      .reduce((a, b) => (a < b ? a : b))
   }
 
   adjustmentType(): AdjustmentType {
