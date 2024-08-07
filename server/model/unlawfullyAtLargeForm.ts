@@ -94,7 +94,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       )
     ) {
       errors.push({
-        text: 'The first day of UAL must be before the last day of UAL.',
+        text: 'The first day of unlawfully at large must be before the last day of unlawfully at large.',
         fields: ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year'],
       })
     }
@@ -107,9 +107,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       const minSentenceDate = this.getMinSentenceDate(sentencesWithOffenceDates)
       if (fromDate < minSentenceDate) {
         errors.push({
-          text: `The UAL period cannot start before the earliest sentence date, on ${dayjs(minSentenceDate).format(
-            'DD MMM YYYY',
-          )}`,
+          text: `The unlawfully at large period cannot start before the earliest sentence date, on ${dayjs(minSentenceDate).format('DD MMM YYYY')}`,
           fields: ['from-day', 'from-month', 'from-year'],
         })
       }
@@ -122,7 +120,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
 
     if (!this.type)
       errors.push({
-        text: 'You must select the type of UAL',
+        text: 'You must select the type of unlawfully at large',
         fields: ['type'],
       })
 
@@ -146,7 +144,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
 
     if (overlappingAdjustment) {
       errors.push({
-        text: `The UAL dates overlap with another UAL period ${dateToString(
+        text: `The unlawfully at large dates overlap with another unlawfully at large period ${dateToString(
           new Date(overlappingAdjustment.fromDate),
         )} to ${dateToString(new Date(overlappingAdjustment.toDate))}`,
         fields: ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year'],

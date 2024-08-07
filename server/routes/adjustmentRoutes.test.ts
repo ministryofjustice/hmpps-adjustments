@@ -10,6 +10,8 @@ import AdditionalDaysAwardedBackendService from '../services/additionalDaysAward
 import './testutils/toContainInOrder'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import ParamStoreService from '../services/paramStoreService'
+import SessionAdjustment from '../@types/AdjustmentTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -55,6 +57,44 @@ const adaAdjustment = {
   prisonId: 'LDS',
   days: 24,
 } as Adjustment
+
+const unlawfullyAtLargeAdjustment = {
+  id: '1',
+  adjustmentType: 'UNLAWFULLY_AT_LARGE',
+  toDate: '2023-06-05',
+  fromDate: '2023-04-05',
+  person: 'ABC123',
+  bookingId: 12345,
+  sentenceSequence: null,
+  prisonId: 'LDS',
+} as Adjustment
+
+const sentenceAndOffenceBaseRecord = {
+  terms: [
+    {
+      years: 3,
+    },
+  ],
+  sentenceTypeDescription: 'SDS Standard Sentence',
+  caseSequence: 1,
+  lineSequence: 1,
+  caseReference: 'CASE001',
+  courtDescription: 'Court 1',
+  sentenceSequence: 1,
+  sentenceStatus: 'A',
+  sentenceDate: '2023-05-06',
+  offences: [
+    {
+      offenderChargeId: 1,
+      offenceDescription: 'Doing a crime',
+      offenceStartDate: '2021-01-04',
+      offenceEndDate: '2021-01-05',
+    },
+    { offenderChargeId: 2, offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
+  ],
+} as PrisonApiOffenderSentenceAndOffences
+
+const stubbedSentencesAndOffences = [sentenceAndOffenceBaseRecord]
 
 let app: Express
 
@@ -470,6 +510,114 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
         expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/add', () => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/add`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Enter UAL details')
+        expect(res.text).toContain(`The rules for UAL (Unlawfully at large) can be found in
+    <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf#page=87"
+       class="govuk-link" rel="noreferrer noopener"
+       target="_blank">the policy framework</a>.`)
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit fromDate before earliest sentence date', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2000',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2023',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'The unlawfully at large period cannot start before the earliest sentence date, on 06 May 2023',
+        )
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit No UAL type selected', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '10',
+        'from-month': '5',
+        'from-year': '2023',
+        'to-day': '20',
+        'to-month': '6',
+        'to-year': '2023',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('You must select the type of unlawfully at large')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit toDate in the future', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2900',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2900',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('The first day of unlawfully at large date must not be in the future')
+        expect(res.text).toContain('The last day of unlawfully at large date must not be in the future')
       })
   })
 })
