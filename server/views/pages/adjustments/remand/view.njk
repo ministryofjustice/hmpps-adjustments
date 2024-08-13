@@ -23,6 +23,15 @@
       <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
         Remand overview
       </h1>
+      {% if model.unusedDeductionMessage %}
+        <h2 class="govuk-heading-m govuk-!-padding-left-4">
+          Deductions
+        </h2>
+
+        <div class="govuk-inset-text govuk-!-margin-left-4">
+          {{ model.unusedDeductionMessage | safe }}
+        </div>
+      {% endif %}
 
       {% if model.adjustmentsWithOffences().length > 1 %}
         {{remandTotals(model.remandTotals())}}

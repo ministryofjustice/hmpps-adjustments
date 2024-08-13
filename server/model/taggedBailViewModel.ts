@@ -16,6 +16,7 @@ export default class TaggedBailViewModel {
     public prisonerNumber: string,
     public adjustments: Adjustment[],
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+    public unusedDeductionMessage: string = null,
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
   }

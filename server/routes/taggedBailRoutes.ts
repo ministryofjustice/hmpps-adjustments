@@ -20,6 +20,8 @@ import TaggedBailChangeModel from '../model/taggedBailEditModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
 import ParamStoreService from '../services/paramStoreService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import UnusedDeductionsService from '../services/unusedDeductionsService'
+import config from '../config'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -28,6 +30,7 @@ export default class TaggedBailRoutes {
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
     private readonly paramStoreService: ParamStoreService,
+    private readonly unusedDeductionsService: UnusedDeductionsService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -122,8 +125,38 @@ export default class TaggedBailRoutes {
 
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
 
+    const unusedDeductionType = await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessage(
+      nomsId,
+      bookingId,
+      false,
+      username,
+    )
+
+    let unusedDeductionMessage = null
+    if (unusedDeductionType === 'NOMIS_ADJUSTMENT' && config.featureToggles.reviewUnusedDeductions) {
+      const nomisAdjustments = adjustments.filter(it => it.source === 'NOMIS')
+      const hasTaggedBail = nomisAdjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0
+      const hasRemand = nomisAdjustments.filter(it => it.adjustmentType === 'REMAND').length > 0
+      const hasUnusedRemand = nomisAdjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS').length > 0
+      let reviewMessage: string
+      if (hasRemand && hasTaggedBail) {
+        reviewMessage = 'review remand and tagged bail to calculate'
+      } else if (hasRemand) {
+        reviewMessage = 'review remand to calculate'
+      } else if (hasTaggedBail) {
+        reviewMessage = 'review tagged bail to calculate'
+      }
+
+      unusedDeductionMessage = `Unused deductions have not been calculated${hasUnusedRemand ? ' as there are deductions in NOMIS' : ''} - <a href="/${nomsId}/unused-deductions/review-deductions">${reviewMessage}</a>`
+    }
+
     return res.render('pages/adjustments/tagged-bail/view', {
-      model: new TaggedBailViewModel(prisonerNumber, taggedBailAdjustments, sentencesAndOffences),
+      model: new TaggedBailViewModel(
+        prisonerNumber,
+        taggedBailAdjustments,
+        sentencesAndOffences,
+        unusedDeductionMessage,
+      ),
     })
   }
 

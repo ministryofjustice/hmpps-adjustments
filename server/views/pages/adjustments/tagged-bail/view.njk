@@ -5,6 +5,7 @@
 
 {% set pageTitle = applicationName + " - View tagged bail" %}
 {% set mainClasses = "app-container govuk-body" %}
+{% set reviewDeductionsLink = "/" + prisoner.prisonerNumber + "/unused-deductions/review-deductions" %}
 
 {% block beforeContent %}
 {{ super() }}
@@ -25,6 +26,19 @@
         </h1>
     </div>
 </div>
+{% if model.unusedDeductionMessage %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h2 class="govuk-heading-m govuk-!-padding-left-4">
+            Deductions
+        </h2>
+
+        <div class="govuk-inset-text govuk-!-margin-left-4">
+            {{ model.unusedDeductionMessage | safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
         <h1 class="govuk-heading-m">
