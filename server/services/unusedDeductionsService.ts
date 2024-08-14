@@ -47,6 +47,14 @@ export default class UnusedDeductionsService {
         return ['NONE', adjustments]
       }
 
+      if (!retry) {
+        const lookup = await this.adjustmentsService.getUnusedDeductionsCalculationResult(nomsId, username)
+        if (lookup.status !== 'UNKNOWN') {
+          const status = lookup.status === 'CALCULATED' ? 'NONE' : lookup.status
+          return [status, adjustments]
+        }
+      }
+
       const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
         nomsId,
         adjustments,
