@@ -7,7 +7,6 @@ export default class RemandViewModel {
   constructor(
     public adjustments: Adjustment[],
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-    public unusedDeductionMessage: string = null,
   ) {}
 
   public remandTotals() {

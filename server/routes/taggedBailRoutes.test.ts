@@ -10,26 +10,18 @@ import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prison
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
-import UnusedDeductionsService from '../services/unusedDeductionsService'
-import config from '../config'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
-jest.mock('../services/unusedDeductionsService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
-const unusedDeductionsService = new UnusedDeductionsService(
-  adjustmentsService,
-  calculateReleaseDatesService,
-  prisonerService,
-) as jest.Mocked<UnusedDeductionsService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -117,7 +109,6 @@ beforeEach(() => {
       adjustmentsStoreService,
       calculateReleaseDatesService,
       paramStoreService,
-      unusedDeductionsService,
     },
   })
 })
@@ -163,32 +154,11 @@ describe('Tagged bail routes tests', () => {
   it('GET /{nomsId}/tagged-bail/view DPS adjustment shows correct information', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([populatedAdjustment])
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NONE')
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/view`)
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Tagged bail overview')
-        expect(res.text).toContain('Court 2')
-        expect(res.text).toContain('CASE001')
-      })
-  })
-
-  it('GET /{nomsId}/tagged-bail/view DPS adjustment shows correct information and review deductions banner', () => {
-    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
-    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
-      populatedAdjustment,
-      { ...populatedAdjustment, source: 'NOMIS' },
-    ])
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NOMIS_ADJUSTMENT')
-    config.featureToggles.reviewUnusedDeductions = true
-    return request(app)
-      .get(`/${NOMS_ID}/tagged-bail/view`)
-      .expect(200)
-      .expect(res => {
-        expect(res.text).toContain('Tagged bail overview')
-        expect(res.text).toContain('Unused deductions have not been calculated')
-        expect(res.text).toContain('review tagged bail to calculate')
         expect(res.text).toContain('Court 2')
         expect(res.text).toContain('CASE001')
       })
@@ -197,7 +167,6 @@ describe('Tagged bail routes tests', () => {
   it('GET /{nomsId}/tagged-bail/view NOMIS adjustment shows correct information', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([nomisAdjustment])
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessage.mockResolvedValue('NONE')
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/view`)
       .expect(200)
