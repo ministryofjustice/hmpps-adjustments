@@ -145,6 +145,10 @@ workflows:
       #       - build_docker
       #     helm_timeout: 5m
       - request-preprod-approval:
+          filters:
+            branches:
+              only:
+                - main
           type: approval
           requires:
             # - deploy_dev
