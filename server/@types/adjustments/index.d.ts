@@ -392,7 +392,7 @@ export interface components {
       /** Format: date-time */
       calculationAt: string
       /** @enum {string} */
-      status: 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'RECALL' | 'UNKNOWN' | 'CALCULATED'
+      status: 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'RECALL' | 'UNKNOWN' | 'CALCULATED' | 'IN_PROGRESS'
     }
     Ada: {
       /** Format: date */

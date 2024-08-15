@@ -1,7 +1,6 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { delay } from '../utils/utils'
 import AdjustmentsService from './adjustmentsService'
-import CalculateReleaseDatesService from './calculateReleaseDatesService'
 import PrisonerService from './prisonerService'
 
 export type UnusedDeductionMessageType =
@@ -19,18 +18,12 @@ export default class UnusedDeductionsService {
 
   constructor(
     private readonly adjustmentsService: AdjustmentsService,
-    private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
     private readonly prisonerService: PrisonerService,
   ) {}
-
-  private anyDeductionFromNomis(deductions: Adjustment[]) {
-    return deductions.some(it => it.source === 'NOMIS')
-  }
 
   async getCalculatedUnusedDeductionsMessageAndAdjustments(
     nomsId: string,
     bookingId: string,
-    retry: boolean,
     username: string,
   ): Promise<[UnusedDeductionMessageType, Adjustment[]]> {
     const startOfSentenceEnvelope = await this.prisonerService.getStartOfSentenceEnvelope(bookingId, username)
@@ -40,83 +33,41 @@ export default class UnusedDeductionsService {
       startOfSentenceEnvelope.earliestSentence,
       username,
     )
-    try {
-      const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-      if (!deductions.length) {
-        // If there are no deductions then unused deductions doesn't need to be calculated
-        return ['NONE', adjustments]
-      }
 
-      if (!retry) {
-        const lookup = await this.adjustmentsService.getUnusedDeductionsCalculationResult(nomsId, username)
-        if (lookup.status !== 'UNKNOWN') {
-          const status = lookup.status === 'CALCULATED' ? 'NONE' : lookup.status
-          return [status, adjustments]
-        }
-      }
-
-      const unusedDeductionsResponse = await this.calculateReleaseDatesService.calculateUnusedDeductions(
-        nomsId,
-        adjustments,
-        username,
-      )
-
-      if (
-        unusedDeductionsResponse.validationMessages?.find(
-          it => it.type === 'UNSUPPORTED_CALCULATION' || it.type === 'UNSUPPORTED_SENTENCE',
-        )
-      ) {
-        return ['UNSUPPORTED', adjustments]
-      }
-
-      const anyRecalls = startOfSentenceEnvelope.sentencesAndOffences.some(it =>
-        PrisonerService.recallTypes.includes(it.sentenceCalculationType),
-      )
-      if (anyRecalls) {
-        // Currently we don't support unused deductions calculation if there is an active recall sentence.
-        return ['RECALL', adjustments]
-      }
-
-      if (unusedDeductionsResponse.validationMessages?.length) {
-        return ['VALIDATION', adjustments]
-      }
-
-      if (this.anyDeductionFromNomis(deductions)) {
-        return ['NOMIS_ADJUSTMENT', adjustments]
-      }
-
-      const calculatedUnusedDeductions = unusedDeductionsResponse.unusedDeductions
-      if (calculatedUnusedDeductions || calculatedUnusedDeductions === 0) {
-        const dbDeductions = this.getTotalUnusedRemand(adjustments)
-        if (calculatedUnusedDeductions === dbDeductions) {
-          return ['NONE', adjustments]
-        }
-        if (retry) {
-          /* eslint-disable no-await-in-loop */
-          for (let i = 0; i < this.maxTries; i += 1) {
-            await delay(this.waitBetweenTries)
-            const retryAdjustments = await this.adjustmentsService.findByPerson(
-              nomsId,
-              startOfSentenceEnvelope.earliestSentence,
-              username,
-            )
-            const retryDeductions = this.getTotalUnusedRemand(retryAdjustments)
-            if (calculatedUnusedDeductions === retryDeductions) {
-              return ['NONE', retryAdjustments]
-            }
-            // Try again
-          }
-          /* eslint-enable no-await-in-loop */
-        }
-      }
-
-      return ['UNKNOWN', adjustments]
-    } catch {
-      return ['UNKNOWN', adjustments]
+    const deductions = adjustments.filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+    if (!deductions.length) {
+      // If there are no deductions then unused deductions doesn't need to be calculated
+      return ['NONE', adjustments]
     }
+
+    const lookup = await this.adjustmentsService.getUnusedDeductionsCalculationResult(nomsId, username)
+    if (lookup.status !== 'UNKNOWN') {
+      if (lookup.status === 'IN_PROGRESS') {
+        return this.waitForCalculationToFinish(nomsId, startOfSentenceEnvelope.earliestSentence, username)
+      }
+      const status = lookup.status === 'CALCULATED' ? 'NONE' : lookup.status
+      return [status, adjustments]
+    }
+    return ['NOMIS_ADJUSTMENT', adjustments]
   }
 
-  private getTotalUnusedRemand(adjustments: Adjustment[]): number {
-    return adjustments.find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')?.effectiveDays || 0
+  private async waitForCalculationToFinish(
+    nomsId: string,
+    startOfSentenceEnvelope: Date,
+    username: string,
+  ): Promise<[UnusedDeductionMessageType, Adjustment[]]> {
+    let adjustments: Adjustment[]
+    /* eslint-disable no-await-in-loop */
+    for (let i = 0; i < this.maxTries; i += 1) {
+      await delay(this.waitBetweenTries)
+      const lookup = await this.adjustmentsService.getUnusedDeductionsCalculationResult(nomsId, username)
+      if (lookup.status !== 'IN_PROGRESS') {
+        const status = lookup.status === 'CALCULATED' ? 'NONE' : lookup.status
+        adjustments = await this.adjustmentsService.findByPerson(nomsId, startOfSentenceEnvelope, username)
+        return [status, adjustments]
+      }
+    }
+    /* eslint-enable no-await-in-loop */
+    return ['NOMIS_ADJUSTMENT', adjustments]
   }
 }
