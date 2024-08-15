@@ -126,27 +126,32 @@ workflows:
             branches:
               only:
                 - main
-      - hmpps/deploy_env:
-          name: deploy_dev
-          env: "dev"
-          jira_update: true
-          pipeline_id: <<pipeline.id>>
-          pipeline_number: <<pipeline.number>>
-          context: hmpps-common-vars
-          filters:
-            branches:
-              only:
-                - main
+      # TEMPORARY UNTIL EOD 16/08/2024. Accessibilty testing blocking deploying to dev.
+      # - hmpps/deploy_env:
+      #     name: deploy_dev
+      #     env: "dev"
+      #     jira_update: true
+      #     pipeline_id: <<pipeline.id>>
+      #     pipeline_number: <<pipeline.number>>
+      #     context: hmpps-common-vars
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
+      #     requires:
+      #       - helm_lint
+      #       - unit_test
+      #       - integration_test
+      #       - build_docker
+      #     helm_timeout: 5m
+      - request-preprod-approval:
+          type: approval
           requires:
+            # - deploy_dev
             - helm_lint
             - unit_test
             - integration_test
             - build_docker
-          helm_timeout: 5m
-      - request-preprod-approval:
-          type: approval
-          requires:
-            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
