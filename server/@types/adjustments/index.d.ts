@@ -108,6 +108,13 @@ export interface paths {
   '/queue-admin/get-dlq-messages/{dlqName}': {
     get: operations['getDlqMessages']
   }
+  '/adjustments/person/{person}/unused-deductions-result': {
+    /**
+     * Get the unused deductions result
+     * @description Get the unused deductions result
+     */
+    get: operations['getUnusedDeductionsResult']
+  }
   '/adjustments/additional-days/{person}/adjudication-details': {
     /** Get all details of adjudications and associated adjustments */
     get: operations['getAdaAdjudicationDetails']
@@ -118,16 +125,9 @@ export type webhooks = Record<string, never>
 
 export interface components {
   schemas: {
-    DlqMessage: {
-      body: {
-        [key: string]: Record<string, never>
-      }
-      messageId: string
-    }
     RetryDlqResult: {
       /** Format: int32 */
       messagesFoundCount: number
-      messages: components['schemas']['DlqMessage'][]
     }
     PurgeQueueResult: {
       /** Format: int32 */
@@ -374,12 +374,25 @@ export interface components {
        */
       dateChargeProved: string
     }
+    DlqMessage: {
+      body: {
+        [key: string]: Record<string, never>
+      }
+      messageId: string
+    }
     GetDlqResult: {
       /** Format: int32 */
       messagesFoundCount: number
       /** Format: int32 */
       messagesReturnedCount: number
       messages: components['schemas']['DlqMessage'][]
+    }
+    UnusedDeductionsCalculationResultDto: {
+      person: string
+      /** Format: date-time */
+      calculationAt: string
+      /** @enum {string} */
+      status: 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'RECALL' | 'UNKNOWN' | 'CALCULATED' | 'IN_PROGRESS'
     }
     Ada: {
       /** Format: date */
@@ -938,6 +951,38 @@ export interface operations {
       200: {
         content: {
           '*/*': components['schemas']['GetDlqResult']
+        }
+      }
+    }
+  }
+  /**
+   * Get the unused deductions result
+   * @description Get the unused deductions result
+   */
+  getUnusedDeductionsResult: {
+    parameters: {
+      path: {
+        /** @description The person */
+        person: string
+      }
+    }
+    responses: {
+      /** @description Returns result */
+      200: {
+        content: {
+          'application/json': components['schemas']['UnusedDeductionsCalculationResultDto']
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        content: {
+          'application/json': components['schemas']['UnusedDeductionsCalculationResultDto']
+        }
+      }
+      /** @description Person not found */
+      404: {
+        content: {
+          'application/json': components['schemas']['UnusedDeductionsCalculationResultDto']
         }
       }
     }
