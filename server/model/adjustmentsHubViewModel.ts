@@ -57,8 +57,8 @@ export default class AdjustmentsHubViewModel {
 
   private getUnusedDeductionMessageForUnsupported(): string {
     return this.hasNonNomisUnusedDeductions()
-      ? `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
-      : `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/add">add any unused deductions here.</a>`
+      ? `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a data-qa="manual-unused-deductions" href="/${this.prisonerNumber}/unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
+      : `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a data-qa="manual-unused-deductions" href="/${this.prisonerNumber}/unused-deductions/days/add">add any unused deductions here.</a>`
   }
 
   private getUnusedDeductionMessageForRecall(): string {
