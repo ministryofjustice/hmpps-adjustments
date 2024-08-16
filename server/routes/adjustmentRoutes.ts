@@ -63,12 +63,7 @@ export default class AdjustmentRoutes {
     }
 
     const [unusedDeductionMessage, adjustments] =
-      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(
-        nomsId,
-        bookingId,
-        !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
-        username,
-      )
+      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username)
 
     const adaAdjudicationDetails = await this.adjustmentsService.getAdaAdjudicationDetails(
       nomsId,

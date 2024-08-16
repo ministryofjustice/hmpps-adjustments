@@ -6,6 +6,7 @@ import {
   CreateResponse,
   ProspectiveAdaRejection,
   RestoreAdjustments,
+  UnusedDeductionsCalculationResult,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
 import { HmppsAuthClient } from '../data'
@@ -23,6 +24,13 @@ export default class AdjustmentsService {
 
   public async setUnusedDaysManually(person: string, days: number, username: string) {
     return new AdjustmentsClient(await this.getSystemClientToken(username)).setUnusedDaysManually(person, { days })
+  }
+
+  public async getUnusedDeductionsCalculationResult(
+    person: string,
+    username: string,
+  ): Promise<UnusedDeductionsCalculationResult> {
+    return new AdjustmentsClient(await this.getSystemClientToken(username)).getUnusedDeductionsCalculationResult(person)
   }
 
   public async findByPerson(person: string, earliestSentenceDate: Date, username: string): Promise<Adjustment[]> {

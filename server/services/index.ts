@@ -23,11 +23,7 @@ export const services = () => {
   const paramStoreService = new ParamStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
   const calculateReleaseDatesService = new CalculateReleaseDatesService(hmppsAuthClient)
-  const unusedDeductionsService = new UnusedDeductionsService(
-    adjustmentsService,
-    calculateReleaseDatesService,
-    prisonerService,
-  )
+  const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, prisonerService)
   const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
   const feComponentsService = new FeComponentsService(feComponentsClient)
   const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendService(

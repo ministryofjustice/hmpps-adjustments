@@ -21,6 +21,7 @@ context('Enter Tagged Bail', () => {
     cy.task('stubUpdateAdjustment')
     cy.task('stubDeleteTaggedBailAdjustment')
     cy.task('stubComponents')
+    cy.task('stubGetUnusedDeductionsCalculationResult')
   })
 
   it('Add Tagged Bail', () => {
