@@ -132,12 +132,13 @@ export default class TaggedBailRoutes {
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
 
+    let adjustment
     if (this.paramStoreService.get(req, id)) {
-      this.adjustmentsStoreService.remove(req, nomsId, id)
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      adjustment = this.adjustmentsStoreService.getById(req, nomsId, id) as Adjustment
+    } else {
+      adjustment = await this.adjustmentsService.get(id, username)
     }
 
-    const adjustment = await this.adjustmentsService.get(id, username)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
     }

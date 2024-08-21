@@ -110,6 +110,7 @@ export default class UnusedDeductionRoutes {
     )
 
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
+
     const unusedDeductionsResponse = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
       sessionAdjustmentRecords,
       adjustments,
@@ -214,10 +215,25 @@ export default class UnusedDeductionRoutes {
       this.adjustmentsStoreService.clear(req, nomsId)
     }
 
-    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
-    const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(key => ({
+    let sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+    let sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(key => ({
       ...sessionAdjustmentRecords[key],
     }))
+
+    // Remove invalid adjustments from the session storage.
+    // Invalid adjustments are created when the use clicks 'back' when on the 'add' page for remand and tagged bail.
+    if (sessionAdjustments.some(it => !it.source && !it.complete)) {
+      sessionAdjustments.forEach(it => {
+        if (!it.source && !it.complete) {
+          this.adjustmentsStoreService.remove(req, nomsId, it.id)
+        }
+      })
+
+      sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+      sessionAdjustments = Object.keys(sessionAdjustmentRecords).map(key => ({
+        ...sessionAdjustmentRecords[key],
+      }))
+    }
 
     if (!sessionAdjustments || sessionAdjustments.length === 0) {
       const adjustments = await this.getAdjustments(bookingId, username, nomsId)
