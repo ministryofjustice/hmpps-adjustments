@@ -24,6 +24,11 @@
             <span class="govuk-caption-xl">Adjustments</span>
             Tagged bail overview
         </h1>
+      {% if model.unusedDeductionMessage.unusedDeductionMessage == 'UNSUPPORTED' or  model.unusedDeductionMessage.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
+        <div class="govuk-inset-text govuk-!-margin-left-4">
+          {{ model.unusedDeductionMessage.getUnusedDeductionMessage() | safe }}
+        </div>
+      {% endif %}
     </div>
 </div>
 <div class="govuk-grid-row">
