@@ -142,8 +142,11 @@ afterEach(() => {
 
 describe('Remand routes tests', () => {
   it('GET /{nomsId}/remand/view Shows correct information', () => {
-    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([remandAdjustment])
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([sentenceAndOffenceBaseRecord])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [remandAdjustment],
+    ])
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
