@@ -105,6 +105,12 @@ const nomisAdjustment = {
   sentenceSequence: 1,
 } as Adjustment
 
+const remandAdjustment = {
+  ...adjustmentWithDatesAndCharges,
+  remand: null,
+  sentenceSequence: 1,
+} as Adjustment
+
 const remandOverlapWithSentenceMessage = {
   code: 'REMAND_OVERLAPS_WITH_SENTENCE',
   arguments: ['2021-01-01', '2021-02-01', '2021-01-02', '2021-02-02'],
@@ -135,6 +141,23 @@ afterEach(() => {
 })
 
 describe('Remand routes tests', () => {
+  it('GET /{nomsId}/remand/view Shows correct information', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([sentenceAndOffenceBaseRecord])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [remandAdjustment],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}/remand/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Remand overview')
+        expect(res.text).toContain('From 01 Jan 2023 to 10 Jan 2023')
+        expect(res.text).toContain('Doing a crime')
+        expect(res.text).toContain('Heard at Court 1')
+      })
+  })
+
   it('GET /{nomsId}/remand/add okay', () => {
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)

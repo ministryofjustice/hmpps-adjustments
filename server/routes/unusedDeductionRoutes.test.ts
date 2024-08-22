@@ -203,7 +203,7 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('10')
       })
   })
-  it('GET /{nomsId}/unused-deductions/review/delete Review deductions - review', () => {
+  it('GET /{nomsId}/unused-deductions/review-deductions/save Review deductions - review', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments['85'] = remandAdjustment
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
@@ -219,7 +219,7 @@ describe('GET /:nomsId', () => {
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     paramStoreService.get.mockReturnValue(true)
     return request(app)
-      .get(`/${NOMS_ID}/unused-deductions/review/save`)
+      .get(`/${NOMS_ID}/unused-deductions/review-deductions/save`)
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(

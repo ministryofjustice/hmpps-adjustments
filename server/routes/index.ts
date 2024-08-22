@@ -119,6 +119,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.submitReview)
   get('/:nomsId/unused-deductions/review-deductions', unusedDeductionRoutes.reviewDeductions)
   post('/:nomsId/unused-deductions/review-deductions', unusedDeductionRoutes.submitReviewDeductions)
+  get('/:nomsId/unused-deductions/review-deductions/save', unusedDeductionRoutes.reviewReviewDeductions)
+  post('/:nomsId/unused-deductions/review-deductions/save', unusedDeductionRoutes.submitReviewReviewDeductions)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)

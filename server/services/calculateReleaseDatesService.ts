@@ -2,7 +2,12 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import CalculateReleaseDatesApiClient from '../api/calculateReleaseDatesApiClient'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { daysBetween } from '../utils/utils'
+import {
+  daysBetween,
+  getActiveSentencesByCaseSequence,
+  offencesForRemandAdjustment,
+  relevantSentenceForTaggedBailAdjustment,
+} from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { HmppsAuthClient } from '../data'
 
@@ -37,11 +42,15 @@ export default class CalculateReleaseDatesService {
     username: string,
   ): Promise<UnusedDeductionCalculationResponse> {
     try {
-      return await this.calculateUnusedDeductions(
-        nomsId,
-        [...this.makeSessionAdjustmentsReadyForCalculation(sessionAdjustments, sentencesAndOffence), ...adjustments],
-        username,
-      )
+      const adjustmentsReadyForCalculation = [
+        ...this.makeSessionAdjustmentsReadyForCalculation(sessionAdjustments, sentencesAndOffence),
+        ...adjustments,
+      ]
+
+      // Remove duplicates
+      const allAdjustments = Array.from(new Map(adjustmentsReadyForCalculation.map(it => [it.id, it])).values())
+
+      return await this.calculateUnusedDeductions(nomsId, allAdjustments, username)
     } catch (error) {
       // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
       return null
@@ -53,17 +62,46 @@ export default class CalculateReleaseDatesService {
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
   ): Adjustment[] {
     return Object.values(sessionAdjustments).map(it => {
-      let sentence
       if (it.adjustmentType === 'REMAND') {
-        sentence = sentencesAndOffence.find(sent =>
-          sent.offences.some(off => it.remand.chargeId.includes(off.offenderChargeId)),
+        let chargeId
+        if (!it.remand?.chargeId?.length) {
+          chargeId = offencesForRemandAdjustment(it, sentencesAndOffence).map(off => off.offenderChargeId)
+        } else {
+          chargeId = it.remand.chargeId
+        }
+
+        const sentence = sentencesAndOffence.find(sent =>
+          sent.offences.some(off => chargeId.includes(off.offenderChargeId)),
         )
-      } else {
-        sentence = sentencesAndOffence.find(sent => it.taggedBail.caseSequence === sent.caseSequence)
+
+        const days = it.fromDate && it.toDate ? daysBetween(new Date(it.fromDate), new Date(it.toDate)) : it.days
+        return {
+          ...it,
+          remand: { chargeId },
+          days,
+          effectiveDays: days,
+          sentenceSequence: sentence.sentenceSequence,
+        }
       }
+
+      let caseSequence
+      if (!it.taggedBail?.caseSequence) {
+        const sentencesByCaseSequence = getActiveSentencesByCaseSequence(sentencesAndOffence)
+        const sentencesForCaseSequence = sentencesByCaseSequence.find(sent =>
+          relevantSentenceForTaggedBailAdjustment(sent, it),
+        )
+
+        caseSequence = sentencesForCaseSequence.caseSequence
+      } else {
+        caseSequence = it.taggedBail.caseSequence
+      }
+
+      const sentence = sentencesAndOffence.find(sent => caseSequence === sent.caseSequence)
+
       const days = it.fromDate && it.toDate ? daysBetween(new Date(it.fromDate), new Date(it.toDate)) : it.days
       return {
         ...it,
+        taggedBail: { caseSequence },
         days,
         effectiveDays: days,
         sentenceSequence: sentence.sentenceSequence,

@@ -80,44 +80,6 @@ export default class UnusedDeductionRoutes {
     const { prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
     const { bookingId } = res.locals.prisoner
-    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
-    if (reviewDeductions) {
-      const adjustments = await this.getAdjustments(bookingId, username, nomsId)
-      const unusedDeductionAdjustment =
-        this.getNomisUnusedDeduction(adjustments) || this.getUnusedDeduction(adjustments)
-      const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
-      const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(
-        key => ({ ...sessionAdjustmentRecords[key] }) as SessionAdjustment,
-      )
-
-      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
-      const unusedDeductionsResponse = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
-        sessionAdjustmentRecords,
-        adjustments,
-        sentencesAndOffences,
-        nomsId,
-        username,
-      )
-
-      adjustments
-        .filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
-        .forEach(it => {
-          if (!sessionAdjustments.find(adj => adj.id === it.id)) {
-            sessionAdjustments.push(it)
-          }
-        })
-
-      return res.render('pages/adjustments/unused-deductions/review', {
-        model: new UnusedDeductionsReviewModel(
-          prisonerNumber,
-          unusedDeductionAdjustment ? 'edit' : 'add',
-          unusedDeductionsResponse.unusedDeductions || 0,
-          sessionAdjustments.filter(it => !it.delete),
-          [],
-          reviewDeductions,
-        ),
-      })
-    }
 
     const adjustments = await this.getAdjustments(bookingId, username, nomsId)
     const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
@@ -135,43 +97,53 @@ export default class UnusedDeductionRoutes {
     })
   }
 
+  public reviewReviewDeductions: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    const { prisonerNumber } = res.locals.prisoner
+    const { username } = res.locals.user
+    const { bookingId } = res.locals.prisoner
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+    const unusedDeductionAdjustment = this.getNomisUnusedDeduction(adjustments) || this.getUnusedDeduction(adjustments)
+    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+    const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(
+      key => ({ ...sessionAdjustmentRecords[key] }) as SessionAdjustment,
+    )
+
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
+
+    const unusedDeductionsResponse = await this.calculateReleaseDatesService.unusedDeductionsHandlingCRDError(
+      sessionAdjustmentRecords,
+      adjustments,
+      sentencesAndOffences,
+      nomsId,
+      username,
+    )
+
+    adjustments
+      .filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
+      .forEach(it => {
+        if (!sessionAdjustments.find(adj => adj.id === it.id)) {
+          sessionAdjustments.push(it)
+        }
+      })
+
+    return res.render('pages/adjustments/unused-deductions/review', {
+      model: new UnusedDeductionsReviewModel(
+        prisonerNumber,
+        unusedDeductionAdjustment ? 'edit' : 'add',
+        unusedDeductionsResponse?.unusedDeductions || 0,
+        sessionAdjustments.filter(it => !it.delete),
+        [],
+        true,
+      ),
+    })
+  }
+
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, saveOrDelete } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const { username } = res.locals.user
     const adjustments = await this.getAdjustments(bookingId, username, nomsId)
-    const reviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
-    if (reviewDeductions) {
-      const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
-      const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(
-        key => ({ ...sessionAdjustmentRecords[key] }) as SessionAdjustment,
-      )
-
-      adjustments
-        .filter(it => (it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL') && it.source === 'NOMIS')
-        .forEach(it => {
-          if (!sessionAdjustments.find(adj => adj.id === it.id)) {
-            sessionAdjustments.push(it)
-          }
-        })
-
-      const observables: Promise<void | {
-        adjustmentIds: string[]
-      }>[] = []
-      sessionAdjustments.forEach(it => {
-        if (it.delete) {
-          observables.push(this.adjustmentsService.delete(it.id, username))
-        } else if (this.paramStoreService.get(req, it.id)) {
-          observables.push(this.adjustmentsService.create([it], username))
-        } else {
-          observables.push(this.adjustmentsService.update(it.id, it, username))
-        }
-      })
-
-      await Promise.all(observables)
-      return res.redirect(`/${nomsId}/success`)
-    }
-
     const unusedDeductionAdjustment = this.getUnusedDeduction(adjustments)
     const sessionAdjustment =
       saveOrDelete === 'save'
@@ -197,6 +169,41 @@ export default class UnusedDeductionRoutes {
     return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
   }
 
+  public submitReviewReviewDeductions: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId } = req.params
+    const { bookingId } = res.locals.prisoner
+    const { username } = res.locals.user
+    const adjustments = await this.getAdjustments(bookingId, username, nomsId)
+    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+    const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(
+      key => ({ ...sessionAdjustmentRecords[key] }) as SessionAdjustment,
+    )
+
+    adjustments
+      .filter(it => (it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL') && it.source === 'NOMIS')
+      .forEach(it => {
+        if (!sessionAdjustments.find(adj => adj.id === it.id)) {
+          sessionAdjustments.push(it)
+        }
+      })
+
+    await Promise.all(
+      sessionAdjustments.map(it => {
+        if (it.delete) {
+          return this.adjustmentsService.delete(it.id, username)
+        }
+
+        if (this.paramStoreService.get(req, it.id)) {
+          return this.adjustmentsService.create([it], username)
+        }
+
+        return this.adjustmentsService.update(it.id, it, username)
+      }),
+    )
+
+    return res.redirect(`/${nomsId}/success`)
+  }
+
   public reviewDeductions: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
     const { prisonerNumber, bookingId } = res.locals.prisoner
@@ -208,15 +215,30 @@ export default class UnusedDeductionRoutes {
       this.adjustmentsStoreService.clear(req, nomsId)
     }
 
-    const sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
-    const sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(key => ({
+    let sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+    let sessionAdjustments: SessionAdjustment[] = Object.keys(sessionAdjustmentRecords).map(key => ({
       ...sessionAdjustmentRecords[key],
     }))
+
+    // Remove invalid adjustments from the session storage.
+    // Invalid adjustments are created when the use clicks 'back' when on the 'add' page for remand and tagged bail.
+    if (sessionAdjustments.some(it => !it.source && !it.complete)) {
+      sessionAdjustments.forEach(it => {
+        if (!it.source && !it.complete) {
+          this.adjustmentsStoreService.remove(req, nomsId, it.id)
+        }
+      })
+
+      sessionAdjustmentRecords = this.adjustmentsStoreService.getAll(req, nomsId)
+      sessionAdjustments = Object.keys(sessionAdjustmentRecords).map(key => ({
+        ...sessionAdjustmentRecords[key],
+      }))
+    }
 
     if (!sessionAdjustments || sessionAdjustments.length === 0) {
       const adjustments = await this.getAdjustments(bookingId, username, nomsId)
       adjustments
-        .filter(it => (it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL') && it.source === 'NOMIS')
+        .filter(it => it.adjustmentType === 'REMAND' || it.adjustmentType === 'TAGGED_BAIL')
         .forEach(it => {
           sessionAdjustments.push(it)
           this.adjustmentsStoreService.store(req, nomsId, it.id, it)
@@ -233,7 +255,7 @@ export default class UnusedDeductionRoutes {
   public submitReviewDeductions: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
     this.paramStoreService.store(req, 'returnToReviewDeductions', true)
-    return res.redirect(`/${nomsId}/unused-deductions/review/save`)
+    return res.redirect(`/${nomsId}/unused-deductions/review-deductions/save`)
   }
 
   private async getAdjustments(bookingId: string, username: string, nomsId: string): Promise<Adjustment[]> {
