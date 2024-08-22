@@ -8,6 +8,7 @@ import {
   ManualUnusedDeduction,
   ProspectiveAdaRejection,
   RestoreAdjustments,
+  UnusedDeductionsCalculationResult,
   ValidationMessage,
 } from '../@types/adjustments/adjustmentsTypes'
 
@@ -27,6 +28,12 @@ export default class AdjustmentsClient {
       path: `/adjustments/person/${person}/manual-unused-deductions`,
       data: manualUnusedDeduction,
     })
+  }
+
+  async getUnusedDeductionsCalculationResult(person: string): Promise<UnusedDeductionsCalculationResult> {
+    return this.restClient.get({
+      path: `/adjustments/person/${person}/unused-deductions-result`,
+    }) as Promise<UnusedDeductionsCalculationResult>
   }
 
   async findByPerson(person: string, earliestSentenceDate?: string): Promise<Adjustment[]> {

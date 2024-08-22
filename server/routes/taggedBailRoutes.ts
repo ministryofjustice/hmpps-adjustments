@@ -20,6 +20,7 @@ import TaggedBailChangeModel from '../model/taggedBailEditModel'
 import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
 import ParamStoreService from '../services/paramStoreService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import UnusedDeductionsService from '../services/unusedDeductionsService'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -28,6 +29,7 @@ export default class TaggedBailRoutes {
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
     private readonly paramStoreService: ParamStoreService,
+    private readonly unusedDeductionsService: UnusedDeductionsService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -114,16 +116,16 @@ export default class TaggedBailRoutes {
     const { username } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
-    const adjustments = await this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username)
+    const [unusedDeductionMessage, adjustments] =
+      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username)
     const taggedBailAdjustments = adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
     if (!taggedBailAdjustments.length) {
       return res.redirect(`/${nomsId}`)
     }
-
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
 
     return res.render('pages/adjustments/tagged-bail/view', {
-      model: new TaggedBailViewModel(prisonerNumber, taggedBailAdjustments, sentencesAndOffences),
+      model: new TaggedBailViewModel(prisonerNumber, adjustments, sentencesAndOffences, unusedDeductionMessage),
     })
   }
 
@@ -132,12 +134,13 @@ export default class TaggedBailRoutes {
     const { nomsId, id } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
 
+    let adjustment
     if (this.paramStoreService.get(req, id)) {
-      this.adjustmentsStoreService.remove(req, nomsId, id)
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      adjustment = this.adjustmentsStoreService.getById(req, nomsId, id) as Adjustment
+    } else {
+      adjustment = await this.adjustmentsService.get(id, username)
     }
 
-    const adjustment = await this.adjustmentsService.get(id, username)
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
     }

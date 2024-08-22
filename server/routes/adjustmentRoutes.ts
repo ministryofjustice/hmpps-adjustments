@@ -63,12 +63,7 @@ export default class AdjustmentRoutes {
     }
 
     const [unusedDeductionMessage, adjustments] =
-      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(
-        nomsId,
-        bookingId,
-        !!messageExists, // retry if this page is loaded as a result of adjustment change. Wait for unused deductions to match.
-        username,
-      )
+      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username)
 
     const adaAdjudicationDetails = await this.adjustmentsService.getAdaAdjudicationDetails(
       nomsId,
@@ -314,6 +309,11 @@ export default class AdjustmentRoutes {
   public submitRemove: RequestHandler = async (req, res): Promise<void> => {
     const { username } = res.locals.user
     const { nomsId, id } = req.params
+
+    if (this.paramStoreService.get(req, id)) {
+      this.adjustmentsStoreService.remove(req, nomsId, id)
+      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+    }
 
     const adjustment = await this.adjustmentsService.get(id, username)
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')

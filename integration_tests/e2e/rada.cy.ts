@@ -23,6 +23,7 @@ context('Enter a RADA', () => {
     cy.task('subAdaDetailsNoIntercept')
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubComponents')
+    cy.task('stubGetUnusedDeductionsCalculationResult')
   })
 
   it('Add a RADA', () => {

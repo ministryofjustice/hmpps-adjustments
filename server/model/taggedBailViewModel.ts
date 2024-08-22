@@ -8,16 +8,29 @@ import {
   relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
 } from '../utils/utils'
+import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
+import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 
 export default class TaggedBailViewModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]
 
+  public adjustments: Adjustment[]
+
+  public unusedDeductionMessage: UnusedDeductionsMessageViewModel
+
   constructor(
     public prisonerNumber: string,
-    public adjustments: Adjustment[],
+    public allAdjustments: Adjustment[],
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+    unusedDeductionsMessageType: UnusedDeductionMessageType,
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
+    this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
+    this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
+      prisonerNumber,
+      allAdjustments,
+      unusedDeductionsMessageType,
+    )
   }
 
   public backlink(): string {

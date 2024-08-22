@@ -492,4 +492,20 @@ export default {
       },
     })
   },
+  stubGetUnusedDeductionsCalculationResult: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/person/A1234AB/unused-deductions-result',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          calculatedAt: '2024-01-01',
+          status: 'CALCULATED',
+        },
+      },
+    })
+  },
 }
