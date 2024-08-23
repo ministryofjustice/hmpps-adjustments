@@ -61,7 +61,7 @@ export default {
       },
     })
   },
-  stubGetNOMISCreatedAdjustments: (): SuperAgentRequest => {
+  stubGetAdjustmentsWithUnused: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'GET',
@@ -77,7 +77,17 @@ export default {
             sentenceSequence: 1,
             person: 'A1234AB',
             adjustmentType: 'REMAND',
-            source: 'NOMIS',
+            toDate: '2023-01-20',
+            fromDate: '2023-01-10',
+            days: 11,
+            prisonName: 'Leeds',
+          },
+          {
+            id: '5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+            bookingId: 1204935,
+            sentenceSequence: 1,
+            person: 'A1234AB',
+            adjustmentType: 'UNUSED_DEDUCTIONS',
             toDate: '2023-01-20',
             fromDate: '2023-01-10',
             days: 11,
@@ -111,7 +121,6 @@ export default {
             sentenceSequence: 2,
             person: 'A1234AB',
             adjustmentType: 'TAGGED_BAIL',
-            source: 'NOMIS',
             toDate: null,
             fromDate: '2023-03-30',
             days: 22,
@@ -505,6 +514,56 @@ export default {
           calculatedAt: '2024-01-01',
           status: 'CALCULATED',
         },
+      },
+    })
+  },
+  stubGetUnusedDeductionsCalculationResultUnsupported: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/person/A1234AB/unused-deductions-result',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          calculatedAt: '2024-01-01',
+          status: 'UNSUPPORTED',
+        },
+      },
+    })
+  },
+  stubGetUnusedDeductionsCalculationResultUnsupportedEdit: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/person/A1234AB/unused-deductions-result',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: {
+          calculatedAt: '2024-01-01',
+          days: 11,
+          status: 'UNSUPPORTED',
+        },
+      },
+    })
+  },
+  stubSetUnusedDaysManually: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'POST',
+        urlPattern: '/adjustments-api/adjustments/person/A1234AB/manual-unused-deductions',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: [
+          {
+            days: 10,
+          },
+        ],
       },
     })
   },
