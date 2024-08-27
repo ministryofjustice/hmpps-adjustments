@@ -21,6 +21,7 @@ import RemandDatesModel from '../model/remandDatesModel'
 import RemandViewModel from '../model/remandViewModel'
 import RemandChangeModel from '../model/remandChangeModel'
 import ParamStoreService from '../services/paramStoreService'
+import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 
 export default class RemandRoutes {
@@ -326,7 +327,6 @@ export default class RemandRoutes {
       username,
     )
     this.adjustmentsStoreService.clear(req, nomsId)
-
     return res.render('pages/adjustments/remand/view', {
       model: new RemandViewModel(prisonerNumber, adjustments, sentencesAndOffences, unusedDeductionMessage),
     })
@@ -337,12 +337,13 @@ export default class RemandRoutes {
     const { nomsId, id } = req.params
     const { bookingId } = res.locals.prisoner
 
+    let adjustment
     if (this.paramStoreService.get(req, id)) {
-      this.adjustmentsStoreService.remove(req, nomsId, id)
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      adjustment = this.adjustmentsStoreService.getById(req, nomsId, id) as Adjustment
+    } else {
+      adjustment = await this.adjustmentsService.get(id, username)
     }
 
-    const adjustment = await this.adjustmentsService.get(id, username)
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
       bookingId,
       username,
