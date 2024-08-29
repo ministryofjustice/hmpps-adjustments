@@ -14,12 +14,16 @@ export default class UnusedDeductionsConfirmModel {
     public reviewDeductions?: boolean,
   ) {}
 
-  backlink(): string {
+  public backlink(): string {
     if (this.reviewDeductions) {
       return `/${this.prisonerNumber}/review-deductions`
     }
 
     return `/${this.prisonerNumber}/manual-unused-deductions/days/${this.addOrEdit}`
+  }
+
+  public showUnusedDeductionsBanner(): boolean {
+    return this.reviewDeductions && this.unusedDeductionDays !== 0
   }
 
   public descriptionTextContext(): string {
@@ -87,12 +91,13 @@ export default class UnusedDeductionsConfirmModel {
   private getRemandRow() {
     const remandDays = this.getAdjustmentDays('REMAND')
     if (remandDays > 0) {
+      const unusedRemandDays = Math.min(this.unusedDeductionDays, remandDays)
       return {
         key: {
           text: 'Remand',
         },
         value: {
-          html: `${remandDays} <span class="govuk-hint">including ${this.unusedDeductionDays > remandDays ? remandDays : this.unusedDeductionDays} days unused</span>`,
+          html: this.includingHint(remandDays, unusedRemandDays),
           classes: 'govuk-!-text-align-right',
         },
       }
@@ -105,15 +110,13 @@ export default class UnusedDeductionsConfirmModel {
     const taggedBailDays = this.getAdjustmentDays('TAGGED_BAIL')
     if (taggedBailDays > 0) {
       const remandDays = this.getAdjustmentDays('REMAND')
+      const unusedTaggedBailDays = this.unusedDeductionDays - remandDays
       return {
         key: {
           text: 'Tagged bail',
         },
         value: {
-          html:
-            this.unusedDeductionDays > remandDays
-              ? `${taggedBailDays} <span class="govuk-hint">including ${this.unusedDeductionDays - remandDays} days unused</span>`
-              : this.getAdjustmentDays('TAGGED_BAIL').toString(),
+          html: this.includingHint(taggedBailDays, unusedTaggedBailDays),
           classes: 'govuk-!-text-align-right',
         },
       }
@@ -128,10 +131,18 @@ export default class UnusedDeductionsConfirmModel {
         text: 'Total',
       },
       value: {
-        html: `${this.getTotalDays()} <span class="govuk-hint">including ${this.unusedDeductionDays} days unused</span>`,
+        html: this.includingHint(this.getTotalDays(), this.unusedDeductionDays),
         classes: 'govuk-!-text-align-right',
       },
     }
+  }
+
+  private includingHint(total: number, unused: number): string {
+    let html = `${total}`
+    if (unused > 0) {
+      html += ` <span class="govuk-hint">including ${unused} days unused</span>`
+    }
+    return html
   }
 
   private getAdjustmentDays(adjustmentType: string): number {
