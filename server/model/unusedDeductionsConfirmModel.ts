@@ -1,6 +1,6 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
-export default class UnusedDeductionsReviewModel {
+export default class UnusedDeductionsConfirmModel {
   constructor(
     public prisonerNumber: string,
     public addOrEdit: string,
@@ -16,10 +16,10 @@ export default class UnusedDeductionsReviewModel {
 
   backlink(): string {
     if (this.reviewDeductions) {
-      return `/${this.prisonerNumber}/unused-deductions/review-deductions`
+      return `/${this.prisonerNumber}/review-deductions`
     }
 
-    return `/${this.prisonerNumber}/unused-deductions/days/${this.addOrEdit}`
+    return `/${this.prisonerNumber}/manual-unused-deductions/days/${this.addOrEdit}`
   }
 
   public descriptionTextContext(): string {
