@@ -41,8 +41,8 @@ export default class UnusedDeductionsMessageViewModel {
 
   private getUnusedDeductionMessageForUnsupported(): string {
     return this.hasNonNomisUnusedDeductions()
-      ? `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
-      : `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/unused-deductions/days/add">add any unused deductions here.</a>`
+      ? `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/manual-unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
+      : `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${this.prisonerNumber}/manual-unused-deductions/days/add">add any unused deductions here.</a>`
   }
 
   private getUnusedDeductionMessageForRecall(): string {
@@ -81,7 +81,7 @@ export default class UnusedDeductionsMessageViewModel {
         reviewMessage = 'review tagged bail to calculate'
       }
 
-      return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/unused-deductions/review-deductions">${reviewMessage}</a>`
+      return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
     }
 
     return this.hasUnusedDeductions()

@@ -110,7 +110,7 @@ export default class RemandRoutes {
     if (adjustment.complete) {
       const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
       if (returnToReviewDeductions) {
-        return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+        return res.redirect(`/${nomsId}/review-deductions`)
       }
       return res.redirect(`/${nomsId}/remand/review`)
     }
@@ -179,7 +179,7 @@ export default class RemandRoutes {
 
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      return res.redirect(`/${nomsId}/review-deductions`)
     }
 
     return res.redirect(`/${nomsId}/remand/review`)
@@ -436,7 +436,7 @@ export default class RemandRoutes {
 
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      return res.redirect(`/${nomsId}/review-deductions`)
     }
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)

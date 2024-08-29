@@ -13,7 +13,7 @@ export default class TaggedBailRemoveModel {
 
   public backlink(): string {
     if (this.reviewDeductions) {
-      return `/${this.prisonerNumber}/unused-deductions/review-deductions`
+      return `/${this.prisonerNumber}/review-deductions`
     }
 
     return `/${this.prisonerNumber}`
