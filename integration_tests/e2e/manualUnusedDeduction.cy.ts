@@ -70,6 +70,6 @@ context('Edit Unused Deductions', () => {
       ReviewManualUnusedDeductionsPage,
     )
     reviewManualUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('20 days of unused deductions have been saved')
+    hub.successMessage().contains('Unused deductions details have been updated')
   })
 })

@@ -91,6 +91,7 @@ export default {
             toDate: '2023-01-20',
             fromDate: '2023-01-10',
             days: 11,
+            effectiveDays: 11,
             prisonName: 'Leeds',
           },
           {
