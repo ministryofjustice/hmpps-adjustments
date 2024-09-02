@@ -2,12 +2,27 @@ import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { offencesForRemandAdjustment } from '../utils/utils'
+import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
+import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 
 export default class RemandViewModel {
+  public adjustments: Adjustment[]
+
+  public unusedDeductionMessage: UnusedDeductionsMessageViewModel
+
   constructor(
-    public adjustments: Adjustment[],
+    prisonerNumber: string,
+    allAdjustments: Adjustment[],
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-  ) {}
+    unusedDeductionsMessageType: UnusedDeductionMessageType,
+  ) {
+    this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'REMAND')
+    this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
+      prisonerNumber,
+      allAdjustments,
+      unusedDeductionsMessageType,
+    )
+  }
 
   public remandTotals() {
     return [

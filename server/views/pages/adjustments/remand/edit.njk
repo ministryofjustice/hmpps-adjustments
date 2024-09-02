@@ -8,7 +8,7 @@
 {% set mainClasses = "app-container govuk-body" %}
 
 {% if model.reviewDeductions %}
-  {% set backlink = "/" + prisoner.prisonerNumber + "/unused-deductions/review-deductions"  %}
+  {% set backlink = "/" + prisoner.prisonerNumber + "/review-deductions"  %}
 {% else %}
   {% set backlink = "/" + prisoner.prisonerNumber + "/remand/view"  %}
 {% endif %}
@@ -93,7 +93,7 @@
 
           {{ govukButton({
             text: "Cancel",
-            href: "/" + prisoner.prisonerNumber + "/remand/view",
+            href: backlink,
             classes: "govuk-button--secondary"
           }) }}
         </div>

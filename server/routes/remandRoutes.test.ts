@@ -15,18 +15,21 @@ import {
 } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
+import UnusedDeductionsService from '../services/unusedDeductionsService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
+jest.mock('../services/unusedDeductionsService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
+const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -102,6 +105,12 @@ const nomisAdjustment = {
   sentenceSequence: 1,
 } as Adjustment
 
+const remandAdjustment = {
+  ...adjustmentWithDatesAndCharges,
+  remand: null,
+  sentenceSequence: 1,
+} as Adjustment
+
 const remandOverlapWithSentenceMessage = {
   code: 'REMAND_OVERLAPS_WITH_SENTENCE',
   arguments: ['2021-01-01', '2021-02-01', '2021-01-02', '2021-02-02'],
@@ -122,6 +131,7 @@ beforeEach(() => {
       adjustmentsStoreService,
       calculateReleaseDatesService,
       paramStoreService,
+      unusedDeductionsService,
     },
   })
 })
@@ -131,6 +141,23 @@ afterEach(() => {
 })
 
 describe('Remand routes tests', () => {
+  it('GET /{nomsId}/remand/view Shows correct information', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([sentenceAndOffenceBaseRecord])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [remandAdjustment],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}/remand/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Remand overview')
+        expect(res.text).toContain('From 01 Jan 2023 to 10 Jan 2023')
+        expect(res.text).toContain('Doing a crime')
+        expect(res.text).toContain('Heard at Court 1')
+      })
+  })
+
   it('GET /{nomsId}/remand/add okay', () => {
     adjustmentsStoreService.store.mockReturnValue(SESSION_ID)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
@@ -836,9 +863,7 @@ describe('Remand routes tests', () => {
       .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain(
-          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
-        )
+        expect(res.text).toContain(`<a href="/${NOMS_ID}/review-deductions" class="govuk-back-link">Back</a>`)
         expect(res.text).toContain('Confirm and save')
       })
   })
@@ -889,6 +914,26 @@ describe('Remand routes tests', () => {
           'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with the sentence starting on 01 Jan 2021 with a release date of the 01 Feb 2021',
           'Update the remand dates to continue.',
         ])
+      })
+  })
+
+  it('GET /{nomsId}/remand/view DPS adjustment shows correct information', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'UNSUPPORTED',
+      [adjustmentWithDatesAndCharges],
+    ])
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Remand overview')
+        expect(res.text).toContain(
+          'Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service',
+        )
+        expect(res.text).toContain('From 01 Jan 2023 to 10 Jan 2023')
+        expect(res.text).toContain('Doing a crime')
       })
   })
 })

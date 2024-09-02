@@ -7,7 +7,8 @@ import AdditionalDaysAwardedRoutes from './additionalDaysAwardedRoutes'
 import RemandRoutes from './remandRoutes'
 import TaggedBailRoutes from './taggedBailRoutes'
 import PrisonerImageRoutes from './prisonerImageRoutes'
-import UnusedDeductionRoutes from './unusedDeductionRoutes'
+import ManualUnusedDeductionRoutes from './manualUnusedDeductionRoutes'
+import ReviewUnusedDeductionRoutes from './reviewUnusedDeductionRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -29,6 +30,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
     service.paramStoreService,
+    service.unusedDeductionsService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -43,9 +45,16 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
     service.paramStoreService,
+    service.unusedDeductionsService,
   )
 
-  const unusedDeductionRoutes = new UnusedDeductionRoutes(
+  const manualUnusedDeductionRoutes = new ManualUnusedDeductionRoutes(
+    service.prisonerService,
+    service.adjustmentsService,
+    service.adjustmentsStoreService,
+  )
+
+  const reviewUnusedDeductionRoutes = new ReviewUnusedDeductionRoutes(
     service.prisonerService,
     service.adjustmentsService,
     service.adjustmentsStoreService,
@@ -111,12 +120,16 @@ export default function routes(service: Services): Router {
   post('/:nomsId/tagged-bail/review/:addOrEdit/:id', taggedBailRoutes.submitReview)
   get('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.edit)
   post('/:nomsId/tagged-bail/edit/:id', taggedBailRoutes.submitEdit)
-  get('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.days)
-  post('/:nomsId/unused-deductions/days/:addOrEdit', unusedDeductionRoutes.submitDays)
-  get('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.review)
-  post('/:nomsId/unused-deductions/review/:saveOrDelete', unusedDeductionRoutes.submitReview)
-  get('/:nomsId/unused-deductions/review-deductions', unusedDeductionRoutes.reviewDeductions)
-  post('/:nomsId/unused-deductions/review-deductions', unusedDeductionRoutes.submitReviewDeductions)
+
+  get('/:nomsId/manual-unused-deductions/days/:addOrEdit', manualUnusedDeductionRoutes.days)
+  post('/:nomsId/manual-unused-deductions/days/:addOrEdit', manualUnusedDeductionRoutes.submitDays)
+  get('/:nomsId/manual-unused-deductions/:saveOrDelete', manualUnusedDeductionRoutes.review)
+  post('/:nomsId/manual-unused-deductions/:saveOrDelete', manualUnusedDeductionRoutes.submitReview)
+
+  get('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.review)
+  post('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.submitReview)
+  get('/:nomsId/review-deductions/confirm', reviewUnusedDeductionRoutes.confirm)
+  post('/:nomsId/review-deductions/confirm', reviewUnusedDeductionRoutes.submitConfirm)
 
   get('/:nomsId/:adjustmentTypeUrl/view', adjustmentRoutes.view)
   get('/:nomsId/:adjustmentTypeUrl/remove/:id', adjustmentRoutes.remove)
