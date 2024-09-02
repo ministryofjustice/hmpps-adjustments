@@ -47,11 +47,8 @@ export default class CalculateReleaseDatesService {
         ...adjustments,
       ]
 
-      // Remove duplicates
-      const allAdjustments = Array.from(new Map(adjustmentsReadyForCalculation.map(it => [it.id, it])).values())
-
-      return await this.calculateUnusedDeductions(nomsId, allAdjustments, username)
-    } catch (error) {
+      return await this.calculateUnusedDeductions(nomsId, adjustmentsReadyForCalculation, username)
+    } catch {
       // If CRDS can't calculate unused deductions. There may be a validation error, or some NOMIS deductions.
       return null
     }

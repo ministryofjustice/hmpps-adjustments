@@ -863,9 +863,7 @@ describe('Remand routes tests', () => {
       .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(200)
       .expect(res => {
-        expect(res.text).toContain(
-          `<a href="/${NOMS_ID}/unused-deductions/review-deductions" class="govuk-back-link">Back</a>`,
-        )
+        expect(res.text).toContain(`<a href="/${NOMS_ID}/review-deductions" class="govuk-back-link">Back</a>`)
         expect(res.text).toContain('Confirm and save')
       })
   })

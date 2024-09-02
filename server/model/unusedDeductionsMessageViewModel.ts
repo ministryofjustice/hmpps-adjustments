@@ -68,10 +68,10 @@ export default class UnusedDeductionsMessageViewModel {
 
   private getUnusedDeductionMessageForNomisAdjustment(): string {
     if (config.featureToggles.reviewUnusedDeductions) {
-      const nomisAdjustments = this.adjustments.filter(it => it.source === 'NOMIS')
-      const hasTaggedBail = nomisAdjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0
-      const hasRemand = nomisAdjustments.filter(it => it.adjustmentType === 'REMAND').length > 0
-      const hasUnusedRemand = nomisAdjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS').length > 0
+      const hasTaggedBail = this.adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0
+      const hasRemand = this.adjustments.filter(it => it.adjustmentType === 'REMAND').length > 0
+      const hasNOMISUnusedRemand =
+        this.adjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS' && it.source === 'NOMIS').length > 0
       let reviewMessage: string
       if (hasRemand && hasTaggedBail) {
         reviewMessage = 'review remand and tagged bail to calculate'
@@ -81,7 +81,7 @@ export default class UnusedDeductionsMessageViewModel {
         reviewMessage = 'review tagged bail to calculate'
       }
 
-      return `Unused deductions have not been calculated${hasUnusedRemand ? ' as there are deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/unused-deductions/review-deductions">${reviewMessage}</a>`
+      return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
     }
 
     return this.hasUnusedDeductions()

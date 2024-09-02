@@ -103,7 +103,7 @@ export default class TaggedBailRoutes {
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      return res.redirect(`/${nomsId}/review-deductions`)
     }
 
     if (addOrEdit === 'edit') {
@@ -325,7 +325,7 @@ export default class TaggedBailRoutes {
 
     const returnToReviewDeductions = this.paramStoreService.get(req, 'returnToReviewDeductions')
     if (returnToReviewDeductions) {
-      return res.redirect(`/${nomsId}/unused-deductions/review-deductions`)
+      return res.redirect(`/${nomsId}/review-deductions`)
     }
 
     await this.adjustmentsService.update(id, adjustment, username)
