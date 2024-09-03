@@ -4,21 +4,21 @@ import AddManualUnusedDeductionsPage from '../pages/unused-deductions/addManualU
 import ReviewManualUnusedDeductionsPage from '../pages/unused-deductions/reviewManualUnusedDeduction'
 import EditManualUnusedDeductionsPage from '../pages/unused-deductions/editManualUnusedDeduction'
 
-context('Enter Unused Deductions', () => {
+context('Add/edit/delete Unused Deductions', () => {
   beforeEach(() => {
     cy.task('reset')
     cy.task('stubSignIn')
     cy.task('stubManageUser')
     cy.task('stubGetPrisonerDetails')
     cy.task('stubGetUserCaseloads')
-    cy.task('stubGetAdjustments')
     cy.task('subAdaDetailsNoIntercept')
     cy.task('stubGetSentencesAndOffences')
-    cy.task('stubGetUnusedDeductionsCalculationResultUnsupported')
+    cy.task('stubGetUnusedDeductionsCalculationResultUnsupportedEdit')
     cy.task('stubSetUnusedDaysManually')
   })
 
   it('Add Manual Unused Deduction', () => {
+    cy.task('stubGetAdjustments')
     cy.signIn()
     const hub = HubPage.goTo('A1234AB')
     hub.manualUnusedDeductionsLink().click()
@@ -32,23 +32,9 @@ context('Enter Unused Deductions', () => {
     reviewManualUnusedDeductionsPage.submit().click()
     hub.successMessage().contains('10 days of unused deductions have been saved')
   })
-})
-
-context('Edit Unused Deductions', () => {
-  beforeEach(() => {
-    cy.task('reset')
-    cy.task('stubSignIn')
-    cy.task('stubManageUser')
-    cy.task('stubGetPrisonerDetails')
-    cy.task('stubGetUserCaseloads')
-    cy.task('stubGetAdjustmentsWithUnused')
-    cy.task('subAdaDetailsNoIntercept')
-    cy.task('stubGetSentencesAndOffences')
-    cy.task('stubGetUnusedDeductionsCalculationResultUnsupportedEdit')
-    cy.task('stubSetUnusedDaysManually')
-  })
 
   it('Edit Manual Unused Deduction', () => {
+    cy.task('stubGetAdjustmentsWithUnused')
     cy.signIn()
     const hub = HubPage.goTo('A1234AB')
     hub.manualUnusedDeductionsLink().click()
@@ -64,6 +50,7 @@ context('Edit Unused Deductions', () => {
   })
 
   it('Delete Manual Unused Deduction', () => {
+    cy.task('stubGetAdjustmentsWithUnused')
     cy.signIn()
     const hub = HubPage.goTo('A1234AB')
     hub.manualUnusedDeductionsLink().click()
