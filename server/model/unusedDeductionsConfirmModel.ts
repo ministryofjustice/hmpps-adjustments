@@ -23,7 +23,14 @@ export default class UnusedDeductionsConfirmModel {
   }
 
   public showUnusedDeductionsBanner(): boolean {
-    return this.reviewDeductions && this.unusedDeductionDays !== 0
+    return this.reviewDeductions
+  }
+
+  public bannerText(): string {
+    if (this.unusedDeductionDays === 0) {
+      return 'There are no unused deductions'
+    }
+    return `When you save this ${this.descriptionTextContext()}. The unused deductions will automatically be recorded. Check that the unused remand alert has been added.`
   }
 
   public descriptionTextContext(): string {
@@ -131,16 +138,17 @@ export default class UnusedDeductionsConfirmModel {
         text: 'Total',
       },
       value: {
-        html: this.includingHint(this.getTotalDays(), this.unusedDeductionDays),
+        html: `<strong>${this.includingHint(this.getTotalDays(), this.unusedDeductionDays, { bold: true })}</strong>`,
         classes: 'govuk-!-text-align-right',
       },
     }
   }
 
-  private includingHint(total: number, unused: number): string {
+  private includingHint(total: number, unused: number, options?: { bold: boolean }): string {
     let html = `${total}`
     if (unused > 0) {
-      html += ` <span class="govuk-hint">including ${unused} days unused</span>`
+      const boldStyle = options?.bold ? ' govuk-!-font-weight-bold' : ''
+      html += ` <span class="govuk-hint${boldStyle}">including ${unused} days unused</span>`
     }
     return html
   }
