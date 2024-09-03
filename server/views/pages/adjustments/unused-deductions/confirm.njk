@@ -34,7 +34,7 @@
 {% if model.showUnusedDeductionsBanner() %}
   {% set html %}
     <p class="govuk-notification-banner__heading">
-      When you save this {{ model.descriptionTextContext() }}. The unused deductions will automatically be recorded. Check that the unused remand alert has been added.
+      {{model.bannerText()}}
     </p>
   {% endset %}
 
