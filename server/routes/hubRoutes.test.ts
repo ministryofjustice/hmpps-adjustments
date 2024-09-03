@@ -255,7 +255,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/${NOMS_ID}/manual-unused-deductions/days/add">add any unused deductions here.</a>`,
+          `Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a data-qa="manual-unused-deductions" href="/${NOMS_ID}/manual-unused-deductions/days/add">add any unused deductions here.</a>`,
         )
       })
   })
@@ -291,7 +291,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          'Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a href="/ABC123/manual-unused-deductions/days/add">add any unused deductions here.</a>',
+          'Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service. You can <a data-qa="manual-unused-deductions" href="/ABC123/manual-unused-deductions/days/add">add any unused deductions here.</a>',
         )
       })
   })

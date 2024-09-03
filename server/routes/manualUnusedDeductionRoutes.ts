@@ -67,7 +67,7 @@ export default class ManualUnusedDeductionRoutes {
     }
 
     this.adjustmentsStoreService.storeOnly(req, nomsId, UnusedDeductionsDaysForm.toAdjustment(unusedDeductionsDaysForm))
-    return res.redirect(`/${nomsId}/review-deductions/confirm`)
+    return res.redirect(`/${nomsId}/manual-unused-deductions/save`)
   }
 
   public review: RequestHandler = async (req, res): Promise<void> => {
