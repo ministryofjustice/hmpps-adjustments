@@ -30,7 +30,8 @@ The params are wrapped inside the attributes object and are as follows:
           {
             href: '/' + offenderNo + '/remand/dates/edit/' + adjustment.id,
             text: "Edit",
-            visuallyHiddenText: "remand period starting " + adjustment.fromDate | date("DD MMM YYYY")
+            visuallyHiddenText: "remand period starting " + adjustment.fromDate | date("DD MMM YYYY"),
+            attributes: { 'data-qa': 'edit-remand-period' }
           }
         ]
       } if (isEdit)
@@ -47,7 +48,8 @@ The params are wrapped inside the attributes object and are as follows:
           {
             href: '/' + offenderNo + '/remand/offences/edit/' + adjustment.id,
             text: "Edit",
-            visuallyHiddenText: "offences for remand starting " + adjustment.fromDate | date("DD MMM YYYY")
+            visuallyHiddenText: "offences for remand starting " + adjustment.fromDate | date("DD MMM YYYY"),
+            attributes: { 'data-qa': 'edit-remand-offences' }
           }
         ]
       } if (isEdit)
