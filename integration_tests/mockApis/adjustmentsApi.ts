@@ -22,6 +22,7 @@ export default {
             fromDate: '2023-01-10',
             days: 11,
             prisonName: 'Leeds',
+            source: 'DPS',
           },
           {
             id: '5c618eb1-dcc9-4959-827e-27e6cd5fedf6',
@@ -33,6 +34,7 @@ export default {
             prisonId: 'KMI',
             prisonName: 'Leeds',
             additionalDaysAwarded: { adjudicationId: [1296861, 1296857, 1296855, 1296846, 1296839] },
+            source: 'DPS',
           },
           {
             id: '4c3c057c-896d-4793-9022-f3001e209a36',
@@ -44,6 +46,7 @@ export default {
             fromDate: '2023-03-30',
             days: 22,
             prisonName: 'Leeds',
+            source: 'DPS',
           },
           {
             id: '4c3c057c-896d-4793-9022-f3001e209a36',
@@ -56,6 +59,7 @@ export default {
             days: 22,
             prisonName: 'Leeds',
             taggedBail: { caseSequence: 2 },
+            source: 'DPS',
           },
         ],
       },
@@ -292,11 +296,23 @@ export default {
       },
     })
   },
+  stubDeleteAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
   stubUpdateRemandAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
         method: 'PUT',
-        urlPattern: '/adjustments-api/adjustments/5d2b87ee-02de-4ec7-b0ed-d3113a213136',
+        urlPattern: '/adjustments-api/adjustments/.*',
       },
       response: {
         status: 200,

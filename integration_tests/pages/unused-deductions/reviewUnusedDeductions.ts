@@ -3,7 +3,7 @@ import { PageElement } from '../page'
 
 export default class ReviewUnusedDeductionsPage extends AdjustmentsPage {
   constructor() {
-    super('Review and approve the remand dates and tagged bail days')
+    super('Review and approve')
   }
 
   public addTaggedBailLink = (): PageElement => cy.get('[data-qa=add-tagged-bail]')

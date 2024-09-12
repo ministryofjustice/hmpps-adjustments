@@ -344,7 +344,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Unused deductions have not been calculated as there are unused deductions in NOMIS - <a href="/ABC123/review-deductions">review remand to calculate</a>`,
+          `Unused deductions have not been calculated as there are unused deductions in NOMIS - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
         )
       })
   })
@@ -364,7 +364,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          `Unused deductions have not been calculated - <a href="/ABC123/review-deductions">review remand to calculate</a>`,
+          `Unused deductions have not been calculated - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
         )
       })
   })

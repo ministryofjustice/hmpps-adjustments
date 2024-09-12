@@ -2,12 +2,12 @@ import HubPage from '../pages/hub'
 import FormPage from '../pages/form'
 import ReviewUnusedDeductionsPage from '../pages/unused-deductions/reviewUnusedDeductions'
 import RemandSelectOffencesPage from '../pages/remand/remandSelectOffences'
-import SaveRemandPage from '../pages/remand/saveRemand'
 import ConfirmEditRemandPage from '../pages/remand/confirmEditRemand'
 import RemoveRemandPage from '../pages/remand/removeRemand'
 import TaggedBailSelectCasePage from '../pages/tagged-bail/taggedBailSelectCase'
-import ReviewTaggedBailPage from '../pages/tagged-bail/reviewTaggedBail'
 import RemoveTaggedBailPage from '../pages/tagged-bail/removeTaggedBail'
+import ConfirmReviewUnusedDeductionsPage from '../pages/unused-deductions/confirmReviewUnusedDeductions'
+import EditTaggedBailPage from '../pages/tagged-bail/editTaggedBail'
 
 context('Review Unused Deductions', () => {
   beforeEach(() => {
@@ -30,6 +30,7 @@ context('Review Unused Deductions', () => {
     cy.task('stubDeleteTaggedBailAdjustment')
     cy.task('stubGetTaggedBailAdjustment')
     cy.task('stubComponents')
+    cy.task('stubDeleteAdjustment')
   })
 
   it('Review Unused Deductions - Add remand', () => {
@@ -46,14 +47,13 @@ context('Review Unused Deductions', () => {
     const selectOffencesPage = RemandSelectOffencesPage.verifyOnPage(RemandSelectOffencesPage)
     selectOffencesPage.offenceRadio().first().click({ force: true })
     selectOffencesPage.submit().click()
-    const saveRemand = SaveRemandPage.verifyOnPage(SaveRemandPage)
-    saveRemand.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Edit remand', () => {
@@ -73,11 +73,12 @@ context('Review Unused Deductions', () => {
     ConfirmEditRemandPage.verifyOnPage(ConfirmEditRemandPage)
     confirmEditRemandPage.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Edit in-session remand', () => {
@@ -94,10 +95,8 @@ context('Review Unused Deductions', () => {
     const selectOffencesPage = RemandSelectOffencesPage.verifyOnPage(RemandSelectOffencesPage)
     selectOffencesPage.offenceRadio().first().click({ force: true })
     selectOffencesPage.submit().click()
-    const saveRemand = SaveRemandPage.verifyOnPage(SaveRemandPage)
-    saveRemand.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-    reviewUnusedDeductionsPage.editRemandLink().click()
+    reviewUnusedDeductionsPage.editRemandLink().eq(1).click()
     const confirmEditRemandPage = ConfirmEditRemandPage.verifyOnPage(ConfirmEditRemandPage)
     confirmEditRemandPage.editRemandPeriodLink().click()
     form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit remand dates')
@@ -108,11 +107,12 @@ context('Review Unused Deductions', () => {
     ConfirmEditRemandPage.verifyOnPage(ConfirmEditRemandPage)
     confirmEditRemandPage.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Delete remand', () => {
@@ -124,11 +124,12 @@ context('Review Unused Deductions', () => {
     const removeRemandPage = RemoveRemandPage.verifyOnPage(RemoveRemandPage)
     removeRemandPage.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Delete in-session remand', () => {
@@ -145,14 +146,16 @@ context('Review Unused Deductions', () => {
     const selectOffencesPage = RemandSelectOffencesPage.verifyOnPage(RemandSelectOffencesPage)
     selectOffencesPage.offenceRadio().first().click({ force: true })
     selectOffencesPage.submit().click()
-    const saveRemand = SaveRemandPage.verifyOnPage(SaveRemandPage)
-    saveRemand.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.deleteRemandLink().eq(1).click()
+    const removeRemandPage = RemoveRemandPage.verifyOnPage(RemoveRemandPage)
+    removeRemandPage.submit().click()
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Add tagged bail', () => {
@@ -167,11 +170,12 @@ context('Review Unused Deductions', () => {
     form.enterDays('10')
     form.submitButton().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Edit tagged bail', () => {
@@ -180,15 +184,18 @@ context('Review Unused Deductions', () => {
     hub.reviewUnusedDeductionsLink().click()
     const reviewUnusedDeductionsPage = ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
     reviewUnusedDeductionsPage.editTaggedBailLink().click()
+    const editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
+    editTaggedBailPage.editLink().click()
     const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit the amount of tagged bail')
     form.enterDays('10')
     form.submitButton().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Edit in-session tagged bail', () => {
@@ -203,16 +210,19 @@ context('Review Unused Deductions', () => {
     form.enterDays('10')
     form.submitButton().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-    reviewUnusedDeductionsPage.editTaggedBailLink().click()
+    reviewUnusedDeductionsPage.editTaggedBailLink().eq(1).click()
+    const editTaggedBailPage = EditTaggedBailPage.verifyOnPage(EditTaggedBailPage)
+    editTaggedBailPage.editLink().click()
     form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit the amount of tagged bail')
     form.enterDays('20')
     form.submitButton().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Delete tagged bail', () => {
@@ -224,11 +234,12 @@ context('Review Unused Deductions', () => {
     const removeTaggedBailPage = RemoveTaggedBailPage.verifyOnPage(RemoveTaggedBailPage)
     removeTaggedBailPage.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 
   it('Review Unused Deductions - Delete in-session tagged bail', () => {
@@ -239,22 +250,19 @@ context('Review Unused Deductions', () => {
     reviewUnusedDeductionsPage.addTaggedBailLink().click()
     const selectOffencesPage = TaggedBailSelectCasePage.verifyOnPage(TaggedBailSelectCasePage)
     selectOffencesPage.selectThisCaseLink().first().click()
-    let form = FormPage.verifyOnPage<FormPage>(FormPage, 'Enter the amount of tagged bail')
+    const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Enter the amount of tagged bail')
     form.enterDays('10')
     form.submitButton().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-    reviewUnusedDeductionsPage.editTaggedBailLink().click()
-    form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit the amount of tagged bail')
-    form.enterDays('20')
-    form.submitButton().click()
-    reviewUnusedDeductionsPage.deleteTaggedBailLink().click()
+    reviewUnusedDeductionsPage.deleteTaggedBailLink().eq(1).click()
     const removeTaggedBailPage = RemoveTaggedBailPage.verifyOnPage(RemoveTaggedBailPage)
     removeTaggedBailPage.submit().click()
     ReviewUnusedDeductionsPage.verifyOnPage(ReviewUnusedDeductionsPage)
-
-    // TODO: Fix session storage stuff
-
-    // reviewUnusedDeductionsPage.submit().click()
-    hub.successMessage().contains('Unused deductions can be calculated')
+    reviewUnusedDeductionsPage.submit().click()
+    const confirmReviewUnusedDeductionsPage = ConfirmReviewUnusedDeductionsPage.verifyOnPage(
+      ConfirmReviewUnusedDeductionsPage,
+    )
+    confirmReviewUnusedDeductionsPage.submit().click()
+    HubPage.verifyOnPage(HubPage)
   })
 })
