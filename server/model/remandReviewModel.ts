@@ -94,11 +94,13 @@ export default class RemandReviewModel {
             html: `<div>
                     ${offences
                       .map(it => {
-                        return `<div>${it.offenceDescription}${it.recall ? getSentenceRecallTagHTML() : ''}<br>
-                        <span class="govuk-hint">
+                        return `<div><span class="govuk-!-font-weight-bold">${it.offenceDescription}</span>${it.recall ? getSentenceRecallTagHTML() : ''}<br>
+                        <span class="govuk-body-s">
                           ${this.getCommittedText(it)}
                         </span><br>
+                        <span class="govuk-body-s">
                           ${this.getHeardAtCourt(it)}
+                        </span>
                         </div>`
                       })
                       .join('')}
