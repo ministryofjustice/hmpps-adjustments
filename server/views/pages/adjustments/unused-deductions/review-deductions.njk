@@ -38,7 +38,7 @@
           {{ remandCard(remand, prisoner.prisonerNumber, true) }}
         </div>
       {% endfor %}
-      <a href="/{{prisoner.prisonerNumber}}/remand/add">Add remand period</a>
+      <a data-qa="add-remand" href="/{{prisoner.prisonerNumber}}/remand/add">Add remand period</a>
     </div>
   {% endif %}
   {% if model.hasTaggedBail() %}
@@ -49,7 +49,7 @@
           {{ taggedBailCard(taggedBail, model.getSentenceAndOffence(taggedBail), prisoner.prisonerNumber, true) }}
         </div>
       {% endfor %}
-      <a href="/{{prisoner.prisonerNumber}}/tagged-bail/add">Add tagged bail</a>
+      <a data-qa="add-tagged-bail" href="/{{prisoner.prisonerNumber}}/tagged-bail/add">Add tagged bail</a>
     </div>
   {% endif %}
 

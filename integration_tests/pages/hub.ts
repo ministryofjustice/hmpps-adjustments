@@ -17,6 +17,8 @@ export default class HubPage extends AdjustmentsPage {
 
   public manualUnusedDeductionsLink = (): PageElement => cy.get('[data-qa=manual-unused-deductions]')
 
+  public reviewUnusedDeductionsLink = (): PageElement => cy.get('[data-qa=review-unused-deductions]')
+
   public addRemandLink = (): PageElement => cy.get('[data-qa=add-remand]')
 
   public viewRemandLink = (): PageElement => cy.get('[data-qa=view-remand]')

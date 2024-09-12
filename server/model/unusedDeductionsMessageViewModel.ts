@@ -81,7 +81,7 @@ export default class UnusedDeductionsMessageViewModel {
         reviewMessage = 'review tagged bail to calculate'
       }
 
-      return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
+      return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a data-qa="review-unused-deductions" href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
     }
 
     return this.hasUnusedDeductions()

@@ -6,5 +6,9 @@ export default class ConfirmEditRemandPage extends AdjustmentsPage {
     super('Confirm and save')
   }
 
+  public editRemandPeriodLink = (): PageElement => cy.get('[data-qa=edit-remand-period]')
+
+  public editRemandOffencesLink = (): PageElement => cy.get('[data-qa=edit-remand-offences]')
+
   public submit = (): PageElement => cy.get('[data-qa=save-button]')
 }
