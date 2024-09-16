@@ -327,8 +327,19 @@ export default class RemandRoutes {
       username,
     )
     this.adjustmentsStoreService.clear(req, nomsId)
+    const inactiveDeletedAdjustments =
+      unusedDeductionMessage === 'RECALL'
+        ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
+        : []
+
     return res.render('pages/adjustments/remand/view', {
-      model: new RemandViewModel(prisonerNumber, adjustments, sentencesAndOffences, unusedDeductionMessage),
+      model: new RemandViewModel(
+        prisonerNumber,
+        adjustments,
+        sentencesAndOffences,
+        unusedDeductionMessage,
+        inactiveDeletedAdjustments,
+      ),
     })
   }
 

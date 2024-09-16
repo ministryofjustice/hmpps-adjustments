@@ -23,6 +23,7 @@ export default class TaggedBailViewModel {
     public allAdjustments: Adjustment[],
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     unusedDeductionsMessageType: UnusedDeductionMessageType,
+    inactiveWhenDeletedAdjustments: Adjustment[],
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
     this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
@@ -30,6 +31,7 @@ export default class TaggedBailViewModel {
       prisonerNumber,
       allAdjustments,
       unusedDeductionsMessageType,
+      inactiveWhenDeletedAdjustments,
     )
   }
 

@@ -50,6 +50,7 @@ const unusedDeductions = {
   prisonId: 'LDS',
   days: 10,
   effectiveDays: 10,
+  source: 'DPS',
 } as Adjustment
 
 const remandResult = {
@@ -311,11 +312,56 @@ describe('GET /:nomsId', () => {
         )
       })
   })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because of recall sentence', () => {
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of recall sentence with existing unused deductions inactive detleted', () => {
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'RECALL',
       [remandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    adjustmentsService.findByPersonAndStatus.mockResolvedValue([
+      {
+        adjustmentType: 'UNUSED_DEDUCTIONS',
+        effectiveDays: 10,
+        lastUpdatedDate: '2024-01-01',
+      } as Adjustment,
+      {
+        adjustmentType: 'UNUSED_DEDUCTIONS',
+        effectiveDays: 11,
+        lastUpdatedDate: '2023-01-01',
+      } as Adjustment,
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'We have found 10 previous unused deductions that relate to the recall sentence. We cannot automatically calculate unused deductions, but you can <a data-qa="manual-unused-deductions" href="/ABC123/manual-unused-deductions/days/add">add any unused deductions here.</a>',
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of recall sentence with no existing unused', () => {
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'RECALL',
+      [remandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    adjustmentsService.findByPersonAndStatus.mockResolvedValue([])
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'We cannot automatically calculate unused deductions as there is a recall sentence, but you can <a data-qa="manual-unused-deductions" href="/ABC123/manual-unused-deductions/days/add">add any unused deductions here.</a>',
+        )
+      })
+  })
+  it('GET /{nomsId} hub unused deductions cannot be calculated because of recall sentence with existing dps unused', () => {
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'RECALL',
+      [remandAdjustment, unusedDeductions],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     return request(app)
@@ -323,7 +369,7 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          'Unused deductions cannot be calculated for recall sentences. To view or add unused deductions, go to the sentence adjustments screen in NOMIS.',
+          'We cannot automatically calculate unused deductions as there is a recall sentence, but you can <a data-qa="manual-unused-deductions" href="/ABC123/manual-unused-deductions/days/edit">edit or delete the unused deductions here.</a>',
         )
       })
   })

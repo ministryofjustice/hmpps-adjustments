@@ -10,6 +10,7 @@ export default class UnusedDeductionsMessageViewModel {
     public prisonerNumber: string,
     public adjustments: Adjustment[],
     public unusedDeductionMessage: UnusedDeductionMessageType,
+    public inactiveDeleted: Adjustment[],
   ) {
     this.checkInformationLink = `${config.services.calculateReleaseDatesUI.url}/calculation/${this.prisonerNumber}/check-information?hasErrors=true`
   }
@@ -46,7 +47,16 @@ export default class UnusedDeductionsMessageViewModel {
   }
 
   private getUnusedDeductionMessageForRecall(): string {
-    return 'Unused deductions cannot be calculated for recall sentences. To view or add unused deductions, go to the sentence adjustments screen in NOMIS.'
+    if (this.hasNonNomisUnusedDeductions()) {
+      return `We cannot automatically calculate unused deductions as there is a recall sentence, but you can <a data-qa="manual-unused-deductions" href="/${this.prisonerNumber}/manual-unused-deductions/days/edit">edit or delete the unused deductions here.</a>`
+    }
+    const inactiveUnused = this.inactiveDeleted
+      .filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+      .sort((a, b) => new Date(b.lastUpdatedDate).getTime() - new Date(a.lastUpdatedDate).getTime())
+    if (inactiveUnused.length) {
+      return `We have found ${inactiveUnused[0].effectiveDays} previous unused deductions that relate to the recall sentence. We cannot automatically calculate unused deductions, but you can <a data-qa="manual-unused-deductions" href="/${this.prisonerNumber}/manual-unused-deductions/days/add">add any unused deductions here.</a>`
+    }
+    return `We cannot automatically calculate unused deductions as there is a recall sentence, but you can <a data-qa="manual-unused-deductions" href="/${this.prisonerNumber}/manual-unused-deductions/days/add">add any unused deductions here.</a>`
   }
 
   private getUnusedDeductionMessageForValidation(): string {
@@ -106,5 +116,9 @@ export default class UnusedDeductionsMessageViewModel {
 
   public hasUnusedDeductions(): boolean {
     return this.adjustments.find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')?.days > 0 || false
+  }
+
+  public displayMessageOnViewPage(): boolean {
+    return ['UNSUPPORTED', 'RECALL', 'NOMIS_ADJUSTMENT'].includes(this.unusedDeductionMessage)
   }
 }

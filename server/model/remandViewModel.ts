@@ -15,12 +15,14 @@ export default class RemandViewModel {
     allAdjustments: Adjustment[],
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     unusedDeductionsMessageType: UnusedDeductionMessageType,
+    inactiveWhenDeletedAdjustments: Adjustment[],
   ) {
     this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'REMAND')
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
       prisonerNumber,
       allAdjustments,
       unusedDeductionsMessageType,
+      inactiveWhenDeletedAdjustments,
     )
   }
 
