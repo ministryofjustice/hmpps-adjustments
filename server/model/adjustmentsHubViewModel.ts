@@ -1,6 +1,5 @@
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
-import config from '../config'
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
@@ -37,10 +36,6 @@ export default class AdjustmentsHubViewModel {
 
   public deductions(): AdjustmentType[] {
     return adjustmentTypes.filter(it => it.deduction && it.value !== 'UNUSED_DEDUCTIONS')
-  }
-
-  public reviewUnusedDeductions(): boolean {
-    return config.featureToggles.reviewUnusedDeductions
   }
 
   public additions(): AdjustmentType[] {
