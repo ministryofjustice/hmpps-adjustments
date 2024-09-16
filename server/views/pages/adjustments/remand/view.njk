@@ -23,7 +23,7 @@
       <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
         Remand overview
       </h1>
-      {% if model.unusedDeductionMessage.unusedDeductionMessage == 'UNSUPPORTED' or  model.unusedDeductionMessage.unusedDeductionMessage == 'NOMIS_ADJUSTMENT' %}
+      {% if model.unusedDeductionMessage.displayMessageOnViewPage() %}
         <div class="govuk-inset-text govuk-!-margin-left-4">
           {{ model.unusedDeductionMessage.getUnusedDeductionMessage() | safe }}
         </div>

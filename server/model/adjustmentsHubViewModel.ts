@@ -26,11 +26,13 @@ export default class AdjustmentsHubViewModel {
     public message: Message,
     unusedDeductionsMessageType: UnusedDeductionMessageType,
     private adaAdjudicationDetails: AdaAdjudicationDetails,
+    inactiveDeletedAdjustments: Adjustment[],
   ) {
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
       prisonerNumber,
       adjustments,
       unusedDeductionsMessageType,
+      inactiveDeletedAdjustments,
     )
   }
 
@@ -123,13 +125,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public getUnused(adjustmentType: AdjustmentType): number {
-    const unusedDeductionAdjustment = this.adjustments
-      .filter(it => it.source !== 'NOMIS')
-      .find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
-    if (
-      this.unusedDeductionMessage.unusedDeductionMessage === 'NONE' ||
-      (this.unusedDeductionMessage.unusedDeductionMessage === 'UNSUPPORTED' && unusedDeductionAdjustment)
-    ) {
+    if (this.unusedDeductionMessage.unusedDeductionMessage === 'NONE' || this.unusedDeductionsManuallyEnteredInDps()) {
       const adjustments = this.adjustments.filter(it => it.adjustmentType === adjustmentType.value)
       const total = adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0)
       const effective = adjustments.map(a => a.effectiveDays).reduce((sum, current) => sum + current, 0)
@@ -137,6 +133,16 @@ export default class AdjustmentsHubViewModel {
     }
 
     return 0
+  }
+
+  private unusedDeductionsManuallyEnteredInDps() {
+    const unusedDeductionAdjustment = this.adjustments
+      .filter(it => it.source !== 'NOMIS')
+      .find(it => it.adjustmentType === 'UNUSED_DEDUCTIONS')
+    return (
+      ['UNSUPPORTED', 'RECALL'].includes(this.unusedDeductionMessage.unusedDeductionMessage) &&
+      unusedDeductionAdjustment
+    )
   }
 
   public showMissingRecallOutcomeMessage(): boolean {

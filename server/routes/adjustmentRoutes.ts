@@ -65,6 +65,11 @@ export default class AdjustmentRoutes {
     const [unusedDeductionMessage, adjustments] =
       await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username)
 
+    const inactiveDeletedAdjustments =
+      unusedDeductionMessage === 'RECALL'
+        ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
+        : []
+
     const adaAdjudicationDetails = await this.adjustmentsService.getAdaAdjudicationDetails(
       nomsId,
       username,
@@ -95,6 +100,7 @@ export default class AdjustmentRoutes {
         message && message[0] && (JSON.parse(message[0]) as Message),
         unusedDeductionMessage,
         adaAdjudicationDetails,
+        inactiveDeletedAdjustments,
       ),
     })
   }

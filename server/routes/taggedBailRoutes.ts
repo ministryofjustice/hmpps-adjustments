@@ -122,10 +122,21 @@ export default class TaggedBailRoutes {
     if (!taggedBailAdjustments.length) {
       return res.redirect(`/${nomsId}`)
     }
+    const inactiveDeletedAdjustments =
+      unusedDeductionMessage === 'RECALL'
+        ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
+        : []
+
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
 
     return res.render('pages/adjustments/tagged-bail/view', {
-      model: new TaggedBailViewModel(prisonerNumber, adjustments, sentencesAndOffences, unusedDeductionMessage),
+      model: new TaggedBailViewModel(
+        prisonerNumber,
+        adjustments,
+        sentencesAndOffences,
+        unusedDeductionMessage,
+        inactiveDeletedAdjustments,
+      ),
     })
   }
 
