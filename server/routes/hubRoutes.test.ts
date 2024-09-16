@@ -9,7 +9,6 @@ import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRe
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import './testutils/toContainInOrder'
 import ParamStoreService from '../services/paramStoreService'
-import config from '../config'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -374,7 +373,6 @@ describe('GET /:nomsId', () => {
       })
   })
   it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - with existing unused - Review unused deductions enabled', () => {
-    config.featureToggles.reviewUnusedDeductions = true
     const nomisRemandAdjustment = { ...remandAdjustment }
     nomisRemandAdjustment.source = 'NOMIS'
     const nomisUnusedDeduction = { ...unusedDeductions }
@@ -395,7 +393,6 @@ describe('GET /:nomsId', () => {
       })
   })
   it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused - Review unused deductions enabled', () => {
-    config.featureToggles.reviewUnusedDeductions = true
     const nomisRemandAdjustment = { ...remandAdjustment }
     nomisRemandAdjustment.source = 'NOMIS'
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
@@ -411,41 +408,6 @@ describe('GET /:nomsId', () => {
       .expect(res => {
         expect(res.text).toContain(
           `Unused deductions have not been calculated - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
-        )
-      })
-  })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - with existing unused - Review unused deductions disabled', () => {
-    config.featureToggles.reviewUnusedDeductions = false
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'NOMIS_ADJUSTMENT',
-      [remandAdjustment, unusedDeductions],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          'Unused remand/tagged bail time cannot be calculated. There is unused remand in NOMIS. Go to the sentence adjustments screen on NOMIS to view it.',
-        )
-      })
-  })
-  it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused - Review unused deductions disabled', () => {
-    config.featureToggles.reviewUnusedDeductions = false
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'NOMIS_ADJUSTMENT',
-      [remandAdjustment],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    paramStoreService.get.mockReturnValue(false)
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          'Unused remand/tagged bail time cannot be calculated. Go to the sentence adjustments screen on NOMIS to view or add any unused deductions.',
         )
       })
   })

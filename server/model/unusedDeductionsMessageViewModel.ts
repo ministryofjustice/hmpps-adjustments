@@ -77,34 +77,24 @@ export default class UnusedDeductionsMessageViewModel {
   }
 
   private getUnusedDeductionMessageForNomisAdjustment(): string {
-    if (config.featureToggles.reviewUnusedDeductions) {
-      const hasTaggedBail = this.adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0
-      const hasRemand = this.adjustments.filter(it => it.adjustmentType === 'REMAND').length > 0
-      const hasNOMISUnusedRemand =
-        this.adjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS' && it.source === 'NOMIS').length > 0
-      let reviewMessage: string
-      if (hasRemand && hasTaggedBail) {
-        reviewMessage = 'review remand and tagged bail to calculate'
-      } else if (hasRemand) {
-        reviewMessage = 'review remand to calculate'
-      } else if (hasTaggedBail) {
-        reviewMessage = 'review tagged bail to calculate'
-      }
-
-      return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a data-qa="review-unused-deductions" href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
+    const hasTaggedBail = this.adjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL').length > 0
+    const hasRemand = this.adjustments.filter(it => it.adjustmentType === 'REMAND').length > 0
+    const hasNOMISUnusedRemand =
+      this.adjustments.filter(it => it.adjustmentType === 'UNUSED_DEDUCTIONS' && it.source === 'NOMIS').length > 0
+    let reviewMessage: string
+    if (hasRemand && hasTaggedBail) {
+      reviewMessage = 'review remand and tagged bail to calculate'
+    } else if (hasRemand) {
+      reviewMessage = 'review remand to calculate'
+    } else if (hasTaggedBail) {
+      reviewMessage = 'review tagged bail to calculate'
     }
 
-    return this.hasUnusedDeductions()
-      ? 'Unused remand/tagged bail time cannot be calculated. There is unused remand in NOMIS. Go to the sentence adjustments screen on NOMIS to view it.'
-      : 'Unused remand/tagged bail time cannot be calculated. Go to the sentence adjustments screen on NOMIS to view or add any unused deductions.'
+    return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a data-qa="review-unused-deductions" href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
   }
 
   private getUnusedDeductionMessageForUnknown(): string {
     return 'Unused remand/tagged bail time cannot be calculated. There may be some present. Any unused deductions must be entered or viewed in NOMIS.'
-  }
-
-  public reviewUnusedDeductions(): boolean {
-    return config.featureToggles.reviewUnusedDeductions
   }
 
   public hasNonNomisUnusedDeductions(): boolean {
