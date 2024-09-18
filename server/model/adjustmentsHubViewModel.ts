@@ -1,7 +1,7 @@
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
-import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
+import { calculateReleaseDatesCheckInformationUrl, daysBetween } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
 
@@ -117,7 +117,9 @@ export default class AdjustmentsHubViewModel {
   }
 
   public getTotalDaysRelevantRemand() {
-    return this.relevantRemand.sentenceRemand.map(a => a.days).reduce((sum, current) => sum + current, 0)
+    return this.relevantRemand.adjustments
+      .map(a => daysBetween(new Date(a.fromDate), new Date(a.toDate)))
+      .reduce((sum, current) => sum + current, 0)
   }
 
   public calculateReleaseDatesUrl() {

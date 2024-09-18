@@ -29,6 +29,26 @@ export type webhooks = Record<string, never>
 
 export interface components {
   schemas: {
+    RemandCalculationRequestOptions: {
+      includeRemandCalculation: boolean
+    }
+    AdjustmentDto: {
+      /** Format: uuid */
+      id?: string
+      /** Format: int64 */
+      bookingId: number
+      /** Format: int32 */
+      sentenceSequence?: number
+      person: string
+      adjustmentType: string
+      /** Format: date */
+      toDate?: string
+      /** Format: date */
+      fromDate?: string
+      remand?: components['schemas']['RemandDto']
+      /** @enum {string} */
+      status: 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'INACTIVE_WHEN_DELETED'
+    }
     Charge: {
       /** Format: int64 */
       chargeId: number
@@ -37,6 +57,7 @@ export interface components {
       offenceDate: string
       /** Format: int64 */
       bookingId: number
+      bookNumber: string
       /** Format: date */
       offenceEndDate?: string
       /** Format: int32 */
@@ -46,34 +67,85 @@ export interface components {
       courtCaseRef?: string
       courtLocation?: string
       resultDescription?: string
+      isActiveBooking: boolean
+    }
+    ChargeAndEvents: {
+      charge: components['schemas']['Charge']
+      dates: components['schemas']['CourtDate'][]
+      combinedCharges: components['schemas']['Charge'][]
+    }
+    ChargeRemand: {
+      /** Format: date */
+      from: string
+      /** Format: date */
+      to: string
+      fromEvent: components['schemas']['CourtAppearance']
+      toEvent: components['schemas']['CourtAppearance']
+      chargeIds: number[]
+      /** @enum {string} */
+      status?: 'APPLICABLE' | 'SHARED' | 'INACTIVE' | 'INTERSECTED' | 'NOT_YET_SENTENCED'
+      /** Format: int64 */
+      days?: number
+    }
+    CourtAppearance: {
+      /** Format: date */
+      date: string
+      description: string
+    }
+    CourtDate: {
+      /** Format: date */
+      date: string
+      /** @enum {string} */
+      type: 'START' | 'STOP' | 'CONTINUE'
+      description: string
+      final: boolean
+      isRecallEvent: boolean
+      isCustodial: boolean
+    }
+    LegacyDataProblem: {
+      /** @enum {string} */
+      type: 'MISSING_OFFENCE_DATE' | 'MISSING_COURT_OUTCOME' | 'UNSUPPORTED_OUTCOME' | 'RELEASE_DATE_CALCULATION'
+      message: string
+      offence: components['schemas']['Offence']
+      /** Format: int64 */
+      bookingId: number
+      bookNumber: string
+      courtCaseRef?: string
+      developerMessage?: string
     }
     Offence: {
       code: string
       statute: string
       description: string
     }
-    Remand: {
-      /** Format: date */
-      from: string
-      /** Format: date */
-      to: string
-      charge: components['schemas']['Charge']
-      /** Format: int64 */
-      days?: number
+    RemandCalculation: {
+      prisonerId: string
+      chargesAndEvents: components['schemas']['ChargeAndEvents'][]
+      chargeIdsWithActiveSentence: number[]
+      issuesWithLegacyData: components['schemas']['LegacyDataProblem'][]
+      includeCalculationInResult: boolean
+    }
+    /** @description The details of remand adjustment */
+    RemandDto: {
+      /** @description The id of the charges this remand applies to */
+      chargeId: number[]
     }
     RemandResult: {
-      chargeRemand: components['schemas']['Remand'][]
-      sentenceRemand: components['schemas']['Remand'][]
+      adjustments: components['schemas']['AdjustmentDto'][]
+      chargeRemand: components['schemas']['ChargeRemand'][]
       intersectingSentences: components['schemas']['SentencePeriod'][]
-      issuesWithLegacyData: string[]
+      charges: {
+        [key: string]: components['schemas']['Charge']
+      }
+      issuesWithLegacyData: components['schemas']['LegacyDataProblem'][]
+      remandCalculation?: components['schemas']['RemandCalculation']
     }
     Sentence: {
       /** Format: int32 */
       sequence: number
       /** Format: date */
       sentenceDate: string
-      /** Format: date */
-      recallDate?: string
+      recallDates: string[]
       /** Format: int64 */
       bookingId: number
     }
@@ -83,6 +155,11 @@ export interface components {
       /** Format: date */
       to: string
       sentence: components['schemas']['Sentence']
+      /** Format: int64 */
+      chargeId: number
+      service: string
+      errors: string[]
+      calculationIds: number[]
       /** Format: int64 */
       days?: number
     }
@@ -94,6 +171,8 @@ export interface components {
       /** Format: date-time */
       decisionOn?: string
       decisionBy?: string
+      decisionByPrisonId?: string
+      decisionByPrisonDescription?: string
     }
   }
   responses: never
@@ -102,6 +181,8 @@ export interface components {
   headers: never
   pathItems: never
 }
+
+export type $defs = Record<string, never>
 
 export type external = Record<string, never>
 
@@ -118,6 +199,11 @@ export interface operations {
          * @example A1234AB
          */
         prisonerId: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['RemandCalculationRequestOptions']
       }
     }
     responses: {
@@ -197,11 +283,23 @@ export interface operations {
     }
     responses: {
       /** @description Decision created okay. */
-      201: never
+      201: {
+        content: {
+          'application/json': components['schemas']['IdentifyRemandDecisionDto']
+        }
+      }
       /** @description Unauthorised, requires a valid Oauth2 token */
-      401: never
+      401: {
+        content: {
+          'application/json': components['schemas']['IdentifyRemandDecisionDto']
+        }
+      }
       /** @description Forbidden, requires an appropriate role */
-      403: never
+      403: {
+        content: {
+          'application/json': components['schemas']['IdentifyRemandDecisionDto']
+        }
+      }
     }
   }
 }
