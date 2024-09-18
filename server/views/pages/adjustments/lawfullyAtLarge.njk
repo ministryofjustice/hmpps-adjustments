@@ -1,0 +1,51 @@
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+<div>
+    {{ govukDateInput({
+        id: "from",
+        namePrefix: "from",
+        items: model.form.fromItems(),
+        fieldset: {
+            legend: {
+                text: "First day spent LAL",
+                classes: "govuk-fieldset__legend--s"
+            }
+        },
+        hint: {
+            text: "For example, 27 3 2022"
+        },
+        errorMessage: model.form.messageForField('from-day', 'from-month', 'from-year')
+    }) }}
+    {{ govukDateInput({
+        id: "to",
+        namePrefix: "to",
+        items: model.form.toItems(),
+        fieldset: {
+            legend: {
+                text: "Last day spent LAL",
+                classes: "govuk-fieldset__legend--s"
+            }
+        },
+        hint: {
+            text: "For example, 27 3 2022"
+        },
+        errorMessage: model.form.messageForField('to-day', 'to-month', 'to-year')
+    }) }}
+    {{ govukRadios({
+        id: "affectsDates",
+        name: "affectsDates",
+        fieldset: {
+            legend: {
+                text: "Will the LAL delay this person's release dates?",
+                classes: "govuk-fieldset__legend--s"
+            }
+        },
+        errorMessage: model.form.messageForField('affectsDates'),
+        items: model.form.lalAffectsReleaseDates()
+    }) }}
+    <p class="govuk-body">Email <a href="mailto:omu.specialistsupportteam@justice.gov.uk">
+            omu.specialistsupportteam@justice.gov.uk</a> if you are unsure whether the LAL days
+        will delay this person's release dates.</p>
+
+</div>
