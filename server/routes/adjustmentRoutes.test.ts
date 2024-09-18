@@ -620,4 +620,95 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('The last day of unlawfully at large date must not be in the future')
       })
   })
+
+  it('GET /{nomsId}/lawfully-at-large/add Check supporting info is correctly displayed', () => {
+    return request(app)
+      .get(`/${NOMS_ID}/lawfully-at-large/add`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Enter LAL details')
+        expect(res.text).toContain(
+          `For example, a non-custodial sentence is upgraded at the Court of Appeal to a custodial sentence on appeal. The time lawfully at large between the original sentence and when the sentence is upgraded or amended would delay the release dates.`,
+        )
+        expect(res.text).toContain(
+          `For example, a prisoner is lawfully released on licence. The sentence is increased on appeal. The time spent on licence will count as time served towards the sentence`,
+        )
+        expect(res.text).toContain(
+          `Email <a href="mailto:omu.specialistsupportteam@justice.gov.uk">
+            omu.specialistsupportteam@justice.gov.uk</a> if you are unsure whether the LAL days
+        will delay this person's release dates.`,
+        )
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `(
+    'POST /{nomsId}/unlawfully-at-large/addOrEdit Check empty fields have the correct warnings',
+    async ({ addOrEdit }) => {
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      return request(app)
+        .post(`/${NOMS_ID}/lawfully-at-large/${addOrEdit}`)
+        .send()
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('This date must include a valid day, month and year.')
+          expect(res.text).toContain('You must select if the LAL will delay this person&#39;s release dates')
+        })
+    },
+  )
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/lawfully-at-large/addOrEdit toDate in the future', async ({ addOrEdit }) => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/lawfully-at-large/${addOrEdit}/58`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2900',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2900',
+        affectedDates: 'YES',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('The first day of lawfully at large date must not be in the future')
+        expect(res.text).toContain('The last day of lawfully at large date must not be in the future')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/lawfully-at-large/addOrEdit fromDate before earliest sentence date', async ({ addOrEdit }) => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/lawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2000',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2023',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'The lawfully at large period cannot start before the earliest sentence date, on 06 May 2023',
+        )
+      })
+  })
 })

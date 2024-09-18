@@ -5,6 +5,7 @@ import { AdjustmentType } from './adjustmentTypes'
 import AdjustmentsForm from './adjustmentsForm'
 import RestoredAdditionalDaysForm from './restoredAdditionalDaysForm'
 import GenericAdjustmentForm, { GenericAdjustmentFormOptions } from './genericAdjustmentForm'
+import LawfullyAtLargeForm from './lawfullyAtLargeForm'
 import UnlawfullyAtLargeForm from './unlawfullyAtLargeForm'
 
 export default class AdjustmentsFormFactory {
@@ -28,6 +29,17 @@ export default class AdjustmentsFormFactory {
         type: adjustment.unlawfullyAtLarge?.type,
       })
     }
+    if (adjustment.adjustmentType === 'LAWFULLY_AT_LARGE') {
+      return new LawfullyAtLargeForm({
+        'from-day': dayjs(adjustment.fromDate).get('date').toString(),
+        'from-month': (dayjs(adjustment.fromDate).get('month') + 1).toString(),
+        'from-year': dayjs(adjustment.fromDate).get('year').toString(),
+        'to-day': dayjs(adjustment.toDate).get('date').toString(),
+        'to-month': (dayjs(adjustment.toDate).get('month') + 1).toString(),
+        'to-year': dayjs(adjustment.toDate).get('year').toString(),
+      })
+    }
+
     return new GenericAdjustmentForm({
       options: this.options(adjustment.adjustmentType),
       'from-day': dayjs(adjustment.fromDate).get('date').toString(),
@@ -48,6 +60,9 @@ export default class AdjustmentsFormFactory {
     if (adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return new UnlawfullyAtLargeForm({})
     }
+    if (adjustmentType.value === 'LAWFULLY_AT_LARGE') {
+      return new LawfullyAtLargeForm({})
+    }
     return new GenericAdjustmentForm({
       options: this.options(adjustmentType.value),
     })
@@ -62,6 +77,9 @@ export default class AdjustmentsFormFactory {
     }
     if (adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return new UnlawfullyAtLargeForm(req.body)
+    }
+    if (adjustmentType.value === 'LAWFULLY_AT_LARGE') {
+      return new LawfullyAtLargeForm(req.body)
     }
     return new GenericAdjustmentForm({ ...req.body, options: this.options(adjustmentType.value) })
   }
