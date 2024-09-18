@@ -5,7 +5,7 @@ import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
-import { Remand, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import './testutils/toContainInOrder'
 import ParamStoreService from '../services/paramStoreService'
@@ -54,10 +54,11 @@ const unusedDeductions = {
 
 const remandResult = {
   chargeRemand: [],
-  sentenceRemand: [
+  adjustments: [
     {
-      days: 20,
-    } as Remand,
+      fromDate: '2024-01-01',
+      toDate: '2024-01-20',
+    },
   ],
 } as RemandResult
 
