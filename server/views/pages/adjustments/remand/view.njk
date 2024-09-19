@@ -35,14 +35,16 @@
 
       <div class="adjustment-card-container">
         {% for adjustment in model.adjustmentsWithOffences() %}
-              {{ remandCard(adjustment, prisoner.prisonerNumber) }}
+            {{ remandCard(adjustment, prisoner.prisonerNumber, null, not model.readonly()) }}
         {% endfor %}
         </div>
-      <div class="govuk-!-margin-top-6">
-        <a href="/{{ prisoner.prisonerNumber }}/remand/add" class="govuk-button" data-module="govuk-button">
-          Add new
-        </a>
-      </div>
+      {% if not model.readonly() %}
+        <div class="govuk-!-margin-top-6">
+          <a href="/{{ prisoner.prisonerNumber }}/remand/add" class="govuk-button" data-module="govuk-button">
+            Add new
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 
