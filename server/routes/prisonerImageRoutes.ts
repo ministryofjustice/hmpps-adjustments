@@ -11,7 +11,7 @@ export default class PrisonerImageRoutes {
     const { nomsId } = req.params
 
     return this.prisonerService
-      .getPrisonerImage(res.locals.user.token, nomsId)
+      .getPrisonerImage(res.locals.user.username, nomsId)
       .then(data => {
         res.set('Cache-control', 'private, max-age=86400')
         res.removeHeader('pragma')
