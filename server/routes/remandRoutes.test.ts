@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import type { Express } from 'express'
 import request from 'supertest'
-import { appWithAllRoutes } from './testutils/appSetup'
+import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
@@ -16,6 +16,7 @@ import {
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -23,6 +24,7 @@ jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/identifyRemandPeriodsService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
@@ -30,6 +32,7 @@ const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as j
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
+const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -121,9 +124,15 @@ const mockedUnusedDeductionCalculationResponse = {
   validationMessages: [remandOverlapWithSentenceMessage],
 } as UnusedDeductionCalculationResponse
 
+const defaultUser = user
+const userWithRemandRole = { ...user, roles: ['REMAND_IDENTIFIER'] }
+
+let userInTest = defaultUser
+
 let app: Express
 
 beforeEach(() => {
+  userInTest = defaultUser
   app = appWithAllRoutes({
     services: {
       prisonerService,
@@ -132,7 +141,9 @@ beforeEach(() => {
       calculateReleaseDatesService,
       paramStoreService,
       unusedDeductionsService,
+      identifyRemandPeriodsService,
     },
+    userSupplier: () => userInTest,
   })
 })
 
@@ -155,6 +166,43 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('From 01 Jan 2023 to 10 Jan 2023')
         expect(res.text).toContain('Doing a crime')
         expect(res.text).toContain('Heard at Court 1')
+        expect(res.text).toContain('edit-remand')
+        expect(res.text).toContain('delete-remand')
+        expect(res.text).toContain('Add new')
+      })
+  })
+
+  it('GET /{nomsId}/remand/view will be readonly if identify remand role without remand decision', () => {
+    userInTest = userWithRemandRole
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([sentenceAndOffenceBaseRecord])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [remandAdjustment],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}/remand/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).not.toContain('edit-remand')
+        expect(res.text).not.toContain('delete-remand')
+        expect(res.text).not.toContain('Add new')
+      })
+  })
+  it('GET /{nomsId}/remand/view will not be readonly if identify remand role with rejected remand decision', () => {
+    userInTest = userWithRemandRole
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([sentenceAndOffenceBaseRecord])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [remandAdjustment],
+    ])
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({ accepted: false })
+    return request(app)
+      .get(`/${NOMS_ID}/remand/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('edit-remand')
+        expect(res.text).toContain('delete-remand')
+        expect(res.text).toContain('Add new')
       })
   })
 

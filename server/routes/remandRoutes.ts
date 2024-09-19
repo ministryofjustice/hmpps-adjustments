@@ -23,6 +23,7 @@ import RemandChangeModel from '../model/remandChangeModel'
 import ParamStoreService from '../services/paramStoreService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 
 export default class RemandRoutes {
   constructor(
@@ -32,6 +33,7 @@ export default class RemandRoutes {
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
     private readonly paramStoreService: ParamStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
+    private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -314,7 +316,7 @@ export default class RemandRoutes {
 
   public view: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId } = req.params
-    const { username } = res.locals.user
+    const { username, roles } = res.locals.user
     const { prisonerNumber, bookingId } = res.locals.prisoner
     const [unusedDeductionMessage, adjustments] =
       await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username)
@@ -332,6 +334,15 @@ export default class RemandRoutes {
         ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
         : []
 
+    let remandDecision
+    if (roles.includes('REMAND_IDENTIFIER')) {
+      try {
+        remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
+      } catch {
+        // Nothing to do, remand review won't be displayed.
+      }
+    }
+
     return res.render('pages/adjustments/remand/view', {
       model: new RemandViewModel(
         prisonerNumber,
@@ -339,6 +350,8 @@ export default class RemandRoutes {
         sentencesAndOffences,
         unusedDeductionMessage,
         inactiveDeletedAdjustments,
+        roles,
+        remandDecision,
       ),
     })
   }

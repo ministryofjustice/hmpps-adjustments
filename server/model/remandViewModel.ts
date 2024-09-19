@@ -4,6 +4,7 @@ import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prison
 import { offencesForRemandAdjustment } from '../utils/utils'
 import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
+import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 
 export default class RemandViewModel {
   public adjustments: Adjustment[]
@@ -16,6 +17,8 @@ export default class RemandViewModel {
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     unusedDeductionsMessageType: UnusedDeductionMessageType,
     inactiveWhenDeletedAdjustments: Adjustment[],
+    public roles: string[],
+    public remandDecision: IdentifyRemandDecision,
   ) {
     this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'REMAND')
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
@@ -50,5 +53,13 @@ export default class RemandViewModel {
 
   public totalDays() {
     return this.adjustments.reduce((sum, it) => sum + it.days, 0)
+  }
+
+  public readonly() {
+    return this.hasIdentifyRemandRole() && this.remandDecision?.accepted !== false
+  }
+
+  private hasIdentifyRemandRole(): boolean {
+    return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }
 }
