@@ -58,6 +58,12 @@ const remandResult = {
     {
       fromDate: '2024-01-01',
       toDate: '2024-01-20',
+      status: 'ACTIVE',
+    },
+    {
+      fromDate: '2023-01-01',
+      toDate: '2023-01-20',
+      status: 'INACTIVE',
     },
   ],
 } as RemandResult
