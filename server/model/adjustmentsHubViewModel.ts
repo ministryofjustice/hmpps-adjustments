@@ -118,6 +118,7 @@ export default class AdjustmentsHubViewModel {
 
   public getTotalDaysRelevantRemand() {
     return this.relevantRemand.adjustments
+      .filter(a => a.status === 'ACTIVE')
       .map(a => daysBetween(new Date(a.fromDate), new Date(a.toDate)))
       .reduce((sum, current) => sum + current, 0)
   }
