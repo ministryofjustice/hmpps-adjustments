@@ -2,6 +2,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { daysBetween, formatDate } from '../utils/utils'
+import lalAffectsReleaseDates from './lalAffectsReleaseDates'
 
 export default class ReviewModel {
   constructor(public adjustment: Adjustment) {}
@@ -57,6 +58,9 @@ export default class ReviewModel {
     }
     if (adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
       return this.ualRows(adjustment, includeEdit)
+    }
+    if (adjustment.adjustmentType === 'LAWFULLY_AT_LARGE') {
+      return this.lalRows(adjustment, includeEdit)
     }
     return [
       {
@@ -154,6 +158,48 @@ export default class ReviewModel {
           text: type ? type.text : 'Unknown',
         },
         ...ReviewModel.editActions(adjustment, includeEdit, 'type of UAL'),
+      },
+    ]
+  }
+
+  private static lalRows(adjustment: Adjustment, includeEdit: boolean) {
+    const affectsDates = lalAffectsReleaseDates.find(it => it.value === adjustment.lawfullyAtLarge?.affectsDates)
+    return [
+      {
+        key: {
+          text: 'First day spent LAL',
+        },
+        value: {
+          text: formatDate(adjustment.fromDate),
+        },
+        ...ReviewModel.editActions(adjustment, includeEdit, 'first day spent on LAL'),
+      },
+      {
+        key: {
+          text: 'Last day spent LAL',
+        },
+        value: {
+          text: formatDate(adjustment.toDate),
+        },
+        ...ReviewModel.editActions(adjustment, includeEdit, 'last day spent on LAL'),
+      },
+      {
+        key: {
+          text: 'Number of days',
+        },
+        value: {
+          text: daysBetween(new Date(adjustment.fromDate), new Date(adjustment.toDate)),
+        },
+        ...ReviewModel.editActions(adjustment, includeEdit, 'number of days'),
+      },
+      {
+        key: {
+          text: 'Delay release dates',
+        },
+        value: {
+          text: affectsDates ? affectsDates.text : 'Unknown',
+        },
+        ...ReviewModel.editActions(adjustment, includeEdit, 'delay release dates'),
       },
     ]
   }

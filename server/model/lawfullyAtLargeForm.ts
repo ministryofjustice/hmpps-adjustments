@@ -38,6 +38,7 @@ export default class LawfullyAtLargeForm extends AdjustmentsForm<LawfullyAtLarge
       fromDate,
       toDate,
       person: nomsId,
+      lawfullyAtLarge: { affectsDates: this.affectsDates },
       prisonId: prisonerDetails.prisonId,
     }
   }
