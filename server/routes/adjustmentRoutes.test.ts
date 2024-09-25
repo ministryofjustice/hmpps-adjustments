@@ -559,7 +559,7 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/{adjustmentType}/view', () => {
+  it('GET /{nomsId}/restored-additional-days/view', () => {
     adjustmentsService.findByPerson.mockResolvedValue([
       { ...radaAdjustment, id: 'this-is-an-id', lastUpdatedBy: 'Doris McNealy', status: 'ACTIVE', prisonName: 'Leeds' },
     ])
@@ -577,6 +577,126 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('edit/this-is-an-id')
         expect(res.text).toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/view', () => {
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeAdjustment,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain('edit/this-is-an-id')
+        expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).toContain('First day')
+        expect(res.text).toContain('5 Jun 2023')
+        expect(res.text).toContain('Last day')
+        expect(res.text).toContain('25 Jul 2023')
+        expect(res.text).toContain('Type')
+        expect(res.text).toContain('Recall')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/view with no type', () => {
+    unlawfullyAtLargeAdjustment.unlawfullyAtLarge = null
+
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeAdjustment,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Type')
+        expect(res.text).toContain('Unknown')
+      })
+  })
+
+  it('GET /{nomsId}/lawfully-at-large/view', () => {
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...lawfullyAtLargeAdjustment,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/lawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain('edit/this-is-an-id')
+        expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).toContain('First day')
+        expect(res.text).toContain('5 Jul 2023')
+        expect(res.text).toContain('Last day')
+        expect(res.text).toContain('5 Sep 2023')
+        expect(res.text).toContain('Delay release dates')
+        expect(res.text).toContain('Yes')
+      })
+  })
+
+  it('GET /{nomsId}/lawfully-at-large/view with affects date not set', () => {
+    lawfullyAtLargeAdjustment.lawfullyAtLarge = null
+
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...lawfullyAtLargeAdjustment,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/lawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Delay release dates')
+        expect(res.text).toContain('Unknown')
       })
   })
 

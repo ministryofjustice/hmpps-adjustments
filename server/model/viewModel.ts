@@ -4,6 +4,7 @@ import { AdjustmentType } from './adjustmentTypes'
 import ualType from './ualType'
 import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { formatDate } from '../utils/utils'
+import lalAffectsReleaseDates from './lalAffectsReleaseDates'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
@@ -54,6 +55,16 @@ export default class ViewModel {
         { text: 'Actions' },
       ]
     }
+    if (this.adjustmentType.value === 'LAWFULLY_AT_LARGE') {
+      return [
+        { text: 'First day' },
+        { text: 'Last day' },
+        { text: 'Entered by' },
+        { text: 'Delay release dates' },
+        { text: 'Number of days', format: 'numeric' },
+        { text: 'Actions' },
+      ]
+    }
     return [
       { text: 'From' },
       ...(this.adjustmentType.value === 'REMAND' ? [{ text: 'To' }] : []),
@@ -86,6 +97,22 @@ export default class ViewModel {
         ]
       })
     }
+    if (this.adjustmentType.value === 'LAWFULLY_AT_LARGE') {
+      return this.adjustments.map(it => {
+        return [
+          { text: dayjs(it.fromDate).format('D MMM YYYY') },
+          { text: dayjs(it.toDate).format('D MMM YYYY') },
+          { text: it.prisonName || 'Unknown' },
+          {
+            text: it.lawfullyAtLarge
+              ? lalAffectsReleaseDates.find(u => u.value === it.lawfullyAtLarge.affectsDates)?.text
+              : 'Unknown',
+          },
+          { text: it.days, format: 'numeric' },
+          this.actionCell(it),
+        ]
+      })
+    }
     return this.adjustments.map(it => {
       return [
         { text: dayjs(it.fromDate).format('D MMM YYYY') },
@@ -107,7 +134,7 @@ export default class ViewModel {
         [{ html: '<b>Total days</b>' }, { text: '' }, { html: `<b>${total}</b>`, format: 'numeric' }, { html: '' }],
       ]
     }
-    if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
+    if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE' || this.adjustmentType.value === 'LAWFULLY_AT_LARGE') {
       return [
         [
           { html: '<b>Total days</b>' },
