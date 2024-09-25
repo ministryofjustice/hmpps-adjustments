@@ -227,6 +227,7 @@ export interface components {
       remand?: components['schemas']['RemandDto']
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
+      lawfullyAtLarge?: components['schemas']['LawfullyAtLargeDto']
       taggedBail?: components['schemas']['TaggedBailDto']
       /**
        * Format: int32
@@ -277,6 +278,14 @@ export interface components {
        * @enum {string}
        */
       source?: 'NOMIS' | 'DPS'
+    }
+    /** @description The details of a LAL adjustment */
+    LawfullyAtLargeDto: {
+      /**
+       * @description The type of LAL
+       * @enum {string}
+       */
+      affectsDates?: 'YES' | 'NO'
     }
     /** @description The details of remand adjustment */
     RemandDto: {
@@ -341,6 +350,13 @@ export interface components {
         | 'UAL_FIRST_DATE_CANNOT_BE_FUTURE'
         | 'UAL_LAST_DATE_CANNOT_BE_FUTURE'
         | 'UAL_DATE_MUST_BE_AFTER_SENTENCE_DATE'
+        | 'LAL_FROM_DATE_NOT_NULL'
+        | 'LAL_TO_DATE_NOT_NULL'
+        | 'LAL_FROM_DATE_AFTER_TO_DATE'
+        | 'LAL_AFFECTS_DATES_NOT_NULL'
+        | 'LAL_FIRST_DATE_CANNOT_BE_FUTURE'
+        | 'LAL_LAST_DATE_CANNOT_BE_FUTURE'
+        | 'LAL_DATE_MUST_BE_AFTER_SENTENCE_DATE'
       arguments: string[]
       message: string
       /** @enum {string} */

@@ -59,10 +59,23 @@ const adaAdjustment = {
 } as Adjustment
 
 const unlawfullyAtLargeAdjustment = {
-  id: '1',
+  id: '2',
   adjustmentType: 'UNLAWFULLY_AT_LARGE',
-  toDate: '2023-06-05',
-  fromDate: '2023-04-05',
+  toDate: '2023-07-25',
+  fromDate: '2023-06-05',
+  unlawfullyAtLarge: { type: 'RECALL' },
+  person: 'ABC123',
+  bookingId: 12345,
+  sentenceSequence: null,
+  prisonId: 'LDS',
+} as Adjustment
+
+const lawfullyAtLargeAdjustment = {
+  id: '3',
+  adjustmentType: 'LAWFULLY_AT_LARGE',
+  toDate: '2023-09-05',
+  fromDate: '2023-07-05',
+  lawfullyAtLarge: { affectsDates: 'YES' },
   person: 'ABC123',
   bookingId: 12345,
   sentenceSequence: null,
@@ -411,7 +424,7 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/review', () => {
+  it('GET /{nomsId}/review RADA', () => {
     adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
 
     return request(app)
@@ -425,6 +438,48 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('24')
         expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/edit`)
+      })
+  })
+
+  it('GET /{nomsId}/review UAL', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue(unlawfullyAtLargeAdjustment)
+
+    return request(app)
+      .get(`/${NOMS_ID}/review`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('First day spent UAL')
+        expect(res.text).toContain('Last day spent UAL')
+        expect(res.text).toContain('5 Jun 2023')
+        expect(res.text).toContain('25 Jul 2023')
+        expect(res.text).toContain('Number of days')
+        expect(res.text).toContain('51')
+        expect(res.text).toContain('Type of UAL')
+        expect(res.text).toContain('Recall')
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain(`/${NOMS_ID}/unlawfully-at-large/edit`)
+      })
+  })
+
+  it('GET /{nomsId}/review LAL', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue(lawfullyAtLargeAdjustment)
+
+    return request(app)
+      .get(`/${NOMS_ID}/review`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('First day spent LAL')
+        expect(res.text).toContain('Last day spent LAL')
+        expect(res.text).toContain('5 Jul 2023')
+        expect(res.text).toContain('5 Sep 2023')
+        expect(res.text).toContain('Number of days')
+        expect(res.text).toContain('61')
+        expect(res.text).toContain('Delay release dates')
+        expect(res.text).toContain('Yes')
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain(`/${NOMS_ID}/lawfully-at-large/edit`)
       })
   })
 
@@ -444,7 +499,7 @@ describe('Adjustment routes tests', () => {
         expect(adjustmentsService.create.mock.calls[0][0]).toStrictEqual([{ ...radaAdjustment, id: undefined }])
       })
   })
-  it('POST /{nomsId}/review with a adjustment with an id', () => {
+  it('POST /{nomsId}/review with a rada adjustment with an id', () => {
     adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
     return request(app)
@@ -459,6 +514,46 @@ describe('Adjustment routes tests', () => {
         expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
         expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
           ...radaAdjustment,
+          id: 'this-is-an-id',
+        })
+      })
+  })
+
+  it('POST /{nomsId}/review with a UAL adjustment with an id', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...unlawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    adjustmentsService.get.mockResolvedValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    return request(app)
+      .post(`/${NOMS_ID}/review`)
+      .expect(302)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22UNLAWFULLY_AT_LARGE%22,%22days%22:51,%22action%22:%22UPDATE%22%7D`,
+      )
+      .expect(res => {
+        expect(adjustmentsService.update.mock.calls).toHaveLength(1)
+        expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
+        expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
+          ...unlawfullyAtLargeAdjustment,
+          id: 'this-is-an-id',
+        })
+      })
+  })
+
+  it('POST /{nomsId}/review with a LAL adjustment with an id', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    adjustmentsService.get.mockResolvedValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    return request(app)
+      .post(`/${NOMS_ID}/review`)
+      .expect(302)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22LAWFULLY_AT_LARGE%22,%22days%22:63,%22action%22:%22UPDATE%22%7D`,
+      )
+      .expect(res => {
+        expect(adjustmentsService.update.mock.calls).toHaveLength(1)
+        expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
+        expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
+          ...lawfullyAtLargeAdjustment,
           id: 'this-is-an-id',
         })
       })
@@ -701,7 +796,7 @@ describe('Adjustment routes tests', () => {
         'to-day': '20',
         'to-month': '3',
         'to-year': '2023',
-        type: 'IMMIGRATION_DETENTION',
+        affectedDates: 'YES',
       })
       .type('form')
       .expect('Content-Type', /html/)
