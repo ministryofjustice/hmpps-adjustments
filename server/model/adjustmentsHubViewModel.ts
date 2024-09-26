@@ -88,6 +88,16 @@ export default class AdjustmentsHubViewModel {
     return this.getTotalDays(adjustmentType) !== 0
   }
 
+  public getLalAffectsDateText(adjustmentType: AdjustmentType): string {
+    const lalAdjustments = this.adjustments.filter(it => it.adjustmentType === 'LAWFULLY_AT_LARGE')
+    if (adjustmentType?.value !== 'LAWFULLY_AT_LARGE' || lalAdjustments.length !== 1) {
+      return null
+    }
+    return lalAdjustments[0].lawfullyAtLarge.affectsDates === 'YES'
+      ? 'These days will affect the release dates'
+      : 'These additional days will not adjust the release dates'
+  }
+
   public isAddEditDelete(): boolean {
     return ['CREATE', 'REMOVE', 'UPDATE'].includes(this.message.action)
   }

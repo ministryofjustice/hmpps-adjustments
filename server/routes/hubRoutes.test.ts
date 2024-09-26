@@ -92,6 +92,18 @@ const adaAdjustment = {
   days: 24,
 } as Adjustment
 
+const lawfullyAtLargeAdjustment = {
+  id: '3',
+  adjustmentType: 'LAWFULLY_AT_LARGE',
+  toDate: '2023-09-05',
+  fromDate: '2023-07-05',
+  lawfullyAtLarge: { affectsDates: 'YES' },
+  person: 'ABC123',
+  bookingId: 12345,
+  sentenceSequence: null,
+  prisonId: 'LDS',
+} as Adjustment
+
 const noInterceptAdjudication = {
   intercept: {
     type: 'NONE',
@@ -433,6 +445,67 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain(
           'Unused remand/tagged bail time cannot be calculated. There may be some present. Any unused deductions must be entered or viewed in NOMIS.',
         )
+      })
+  })
+
+  it('GET /{nomsId} one LAL adjustment that affects the date should have the correct text displayed', () => {
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...lawfullyAtLargeAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('These days will affect the release dates')
+      })
+  })
+  it('GET /{nomsId} one LAL adjustment that does not affects the date should have the correct text displayed', () => {
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    lawfullyAtLargeAdjustment.lawfullyAtLarge.affectsDates = 'NO'
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...lawfullyAtLargeAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('These additional days will not adjust the release dates')
+      })
+  })
+  it('GET /{nomsId} one LAL adjustment with lawfullyAtLarge unset will display correctly', () => {
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    lawfullyAtLargeAdjustment.lawfullyAtLarge.affectsDates = null
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...lawfullyAtLargeAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('These additional days will not adjust the release dates')
+      })
+  })
+  it('GET /{nomsId} two LAL adjustments will not show anything', () => {
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    const lal2 = lawfullyAtLargeAdjustment
+    lal2.lawfullyAtLarge.affectsDates = 'NO'
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [
+        { ...lawfullyAtLargeAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+        { ...lal2, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' },
+      ],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain('These days will affect the release dates')
+        expect(res.text).not.toContain('These additional days will not adjust the release dates')
       })
   })
 })
