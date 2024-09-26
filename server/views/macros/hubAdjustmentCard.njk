@@ -33,16 +33,14 @@
         {% endif %}
       </span>
         <br />
-      <p>
       {% if model.getLalAffectsDateText(adjustmentType) %}
-       <span class="govuk-body">{{ model.getLalAffectsDateText(adjustmentType) }}<br>
+       <span class="govuk-body">{{ model.getLalAffectsDateText(adjustmentType) }}</span><br>
       {% endif %}
       {% if model.showDetails(adjustmentType) %}
          <span class="govuk-hint govuk-!-font-size-14">Last update
           on {{ model.getLastUpdated(adjustmentType).lastUpdatedDate | date("DD MMM YYYY") }}
-          by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</p>
+          by {{ model.getLastUpdated(adjustmentType).prisonName or 'Unknown' }}.</span>
       {% endif %}
-
       {% if model.showProspectiveAdaLink(adjustmentType) %}
         <a href="/{{ prisonerNumber }}/additional-days/review-prospective">Review unapplied PADAs</a>
       {% endif %}
