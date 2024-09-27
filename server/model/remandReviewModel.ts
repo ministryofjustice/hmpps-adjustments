@@ -96,7 +96,7 @@ export default class RemandReviewModel {
                       .map(it => {
                         return `<div><span class="govuk-!-font-weight-bold">${it.offenceDescription}</span>${it.recall ? getSentenceRecallTagHTML() : ''}<br>
                         <span class="govuk-body-s">
-                          ${this.getCommittedText(it)}
+                          ${this.getCommittedText(it, true)}
                         </span><br>
                         <span class="govuk-body-s">
                           ${this.getHeardAtCourt(it)}
@@ -113,7 +113,7 @@ export default class RemandReviewModel {
                 text: 'Edit',
                 visuallyHiddenText: `offences. ${offences
                   .map(it => {
-                    return `${it.offenceDescription} ${this.getCommittedText(it)}${it.recall ? '. This offence was recalled' : ''}`
+                    return `${it.offenceDescription} ${this.getCommittedText(it, false)}${it.recall ? '. This offence was recalled' : ''}`
                   })
                   .join('. ')}`,
               },
@@ -136,14 +136,14 @@ export default class RemandReviewModel {
     return `Heard at ${offence.courtDescription}`
   }
 
-  public getCommittedText(offence: PrisonApiOffence & { recall: boolean }): string {
+  public getCommittedText(offence: PrisonApiOffence & { recall: boolean }, noWrapDate: boolean): string {
     let committedText
     if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
-      committedText = `Committed from ${this.nowrapDate(offence.offenceStartDate)} to ${this.nowrapDate(offence.offenceEndDate)}`
+      committedText = `Committed from ${this.formatDate(offence.offenceStartDate, noWrapDate)} to ${this.formatDate(offence.offenceEndDate, noWrapDate)}`
     } else if (offence.offenceStartDate) {
-      committedText = `Committed on ${this.nowrapDate(offence.offenceStartDate)}`
+      committedText = `Committed on ${this.formatDate(offence.offenceStartDate, noWrapDate)}`
     } else if (offence.offenceEndDate) {
-      committedText = `Committed on ${this.nowrapDate(offence.offenceEndDate)}`
+      committedText = `Committed on ${this.formatDate(offence.offenceEndDate, noWrapDate)}`
     } else {
       committedText = 'Offence date not entered'
     }
@@ -151,8 +151,9 @@ export default class RemandReviewModel {
     return committedText
   }
 
-  private nowrapDate(date: string) {
-    return `<span class="govuk-!-white-space-nowrap">${dayjs(date).format('DD MMM YYYY')}</span> `
+  private formatDate(date: string, noWrapDate: boolean) {
+    const formattedDate = dayjs(date).format('DD MMM YYYY')
+    return noWrapDate ? `<span class="govuk-!-white-space-nowrap">${formattedDate}</span> ` : formattedDate
   }
 
   public totalDaysSummary() {
