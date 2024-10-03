@@ -498,4 +498,36 @@ describe('Additional Days Awarded routes tests', () => {
         expect(adjustmentsService.delete).toHaveBeenCalledWith('UUID', 'user1')
       })
   })
+
+  it('GET /{nomsId}/additional-days/review-and-submit has required accessibility role tag present', () => {
+    const adas = [
+      {
+        adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+        additionalDaysAwarded: {
+          adjudicationId: ['1525916', '1525917', '1525918'],
+          prospective: false,
+        },
+        bookingId: 123,
+        days: 15,
+        fromDate: '2023-08-03',
+        person: NOMS_ID,
+        prisonId: undefined,
+      } as Adjustment,
+    ]
+
+    additionalDaysAwardedBackendService.getReviewAndSubmitModel.mockResolvedValue(
+      new ReviewAndSubmitAdaViewModel(adas, adas, []),
+    )
+
+    return request(app)
+      .get(`/${NOMS_ID}/additional-days/review-and-submit`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Total ADAs taken into calculation')
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain('tr class="govuk-table__row" role="presentation"')
+        expect(res.text).toContain('15')
+      })
+  })
 })

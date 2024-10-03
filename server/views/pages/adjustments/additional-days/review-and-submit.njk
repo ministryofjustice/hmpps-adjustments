@@ -1,4 +1,5 @@
 {% extends "../../../partials/layout.njk" %}
+{% from "../../../macros/adaSummaryTable.njk" import adaSummaryTable %}
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
@@ -32,7 +33,7 @@
       </div>
 
       {% if model.createTable() %}
-        {{ govukTable(
+        {{ adaSummaryTable(
               model.createTable()
           ) }}
       {% endif %}

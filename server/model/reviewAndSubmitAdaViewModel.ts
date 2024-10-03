@@ -31,14 +31,17 @@ export default class ReviewAndSubmitAdaViewModel {
               { text: it.days, format: 'numeric' },
             ]
           }),
-          [
+        ],
+        summaryRow: {
+          row: [
             { html: '<strong>Total ADAs taken into calculation</strong>', colspan: 2 },
             {
               text: this.adjustments.map(a => a.days).reduce((sum, current) => sum + current, 0),
               format: 'numeric',
             },
           ],
-        ],
+          role: 'presentation',
+        },
       }
     }
     return null
