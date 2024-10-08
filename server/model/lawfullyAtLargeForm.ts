@@ -120,7 +120,7 @@ export default class LawfullyAtLargeForm extends AdjustmentsForm<LawfullyAtLarge
 
     if (!this.affectsDates)
       errors.push({
-        text: "You must select if the LAL will delay this person's release dates",
+        text: "You must select if the LAL period will defer this person's release dates",
         fields: ['affectsDates'],
       })
 

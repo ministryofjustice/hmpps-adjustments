@@ -871,7 +871,7 @@ describe('Adjustment routes tests', () => {
         .expect('Content-Type', /html/)
         .expect(res => {
           expect(res.text).toContain('This date must include a valid day, month and year.')
-          expect(res.text).toContain('You must select if the LAL will delay this person&#39;s release dates')
+          expect(res.text).toContain('You must select if the LAL period will defer this person&#39;s release dates')
         })
     },
   )
