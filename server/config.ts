@@ -160,6 +160,6 @@ export default {
     appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
   },
   featureToggles: {
-    unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'false') === 'true',
+    unsupportedCalculationAdjustmentTypes: get('UNSUPPORTED_CALCULATION_ADJUSTMENT_TYPES_ENABLED', 'true') === 'true',
   },
 }

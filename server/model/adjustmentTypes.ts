@@ -55,19 +55,19 @@ let types: AdjustmentType[] = [
     url: 'additional-days',
     deduction: false,
   } as AdjustmentType,
-  {
-    value: 'LAWFULLY_AT_LARGE',
-    text: 'LAL (Lawfully at large)',
-    alternativeText: 'LAL',
-    shortText: 'LAL',
-    url: 'lawfully-at-large',
-    deduction: false,
-  } as AdjustmentType,
 ]
 
 if (config.featureToggles.unsupportedCalculationAdjustmentTypes) {
   types = [
     ...types,
+    {
+      value: 'LAWFULLY_AT_LARGE',
+      text: 'LAL (Lawfully at large)',
+      alternativeText: 'LAL',
+      shortText: 'LAL',
+      url: 'lawfully-at-large',
+      deduction: false,
+    } as AdjustmentType,
     {
       value: 'SPECIAL_REMISSION',
       text: 'Special remission',
