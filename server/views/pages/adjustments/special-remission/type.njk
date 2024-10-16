@@ -1,0 +1,79 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% if model.addOrEdit === 'edit' %}
+  {% set pageContentTitle = "Edit the number of special remission days" %}
+{% else %}
+  {% set pageContentTitle = "Enter the number of special remission days" %}
+{% endif %}
+{% set pageTitle = applicationName + " - " + pageContentTitle %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  {% if model.errorMessage() %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [ model.errorMessage() ]
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjustments</span>
+        Select the type of special remission
+        {#        {{ pageContentTitle }} #}
+      </h1>
+      <p>
+        You can read the rules for special remission
+        <a href="https://assets.publishing.service.gov.uk/media/661fd299ced96304c8757e86/sentence-calculation-pf-annex-a-operational-guidance.pdf"
+           class="govuk-link" rel="noreferrer noopener" target="_blank">the policy framework</a>
+      </p>
+
+
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+
+        {{ govukRadios({
+          id: "specialRemissionType",
+          name: "specialRemissionType",
+          errorMessage: model.errorMessage(),
+          items: model.specialRemissionTypes()
+        }) }}
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: model.cancelLink()
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

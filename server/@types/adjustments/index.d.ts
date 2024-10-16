@@ -228,6 +228,7 @@ export interface components {
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
       lawfullyAtLarge?: components['schemas']['LawfullyAtLargeDto']
+      specialRemission?: components['schemas']['SpecialRemissionDto']
       taggedBail?: components['schemas']['TaggedBailDto']
       /**
        * Format: int32
@@ -291,6 +292,13 @@ export interface components {
     RemandDto: {
       /** @description The id of the charges this remand applies to */
       chargeId: number[]
+    }
+    SpecialRemissionDto: {
+      /**
+       * @description The type of Special Remission
+       * @enum {string}
+       */
+      type?: 'MERITORIOUS_CONDUCT' | 'RELEASE_DATE_CALCULATED_TOO_EARLY' | 'RELEASE_IN_ERROR'
     }
     /** @description The details of the tagged bail adjustment */
     TaggedBailDto: {
@@ -357,6 +365,7 @@ export interface components {
         | 'LAL_FIRST_DATE_CANNOT_BE_FUTURE'
         | 'LAL_LAST_DATE_CANNOT_BE_FUTURE'
         | 'LAL_DATE_MUST_BE_AFTER_SENTENCE_DATE'
+        | 'SREM_TYPE_NOT_NULL'
       arguments: string[]
       message: string
       /** @enum {string} */
