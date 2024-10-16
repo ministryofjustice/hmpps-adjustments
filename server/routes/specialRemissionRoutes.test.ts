@@ -28,6 +28,7 @@ const specialRemissionAdjustment = {
   bookingId: 12345,
   sentenceSequence: null,
   prisonId: 'LDS',
+  prisonName: 'Leeds (HMP)',
 } as Adjustment
 
 const blankAdjustment = {
@@ -300,4 +301,32 @@ test.each`
     .expect(res => {
       expect(res.text).toContain(backLink)
     })
+})
+it('GET /{nomsId}/special-remission/remove displays the correct information', () => {
+  adjustmentsService.get.mockResolvedValue(specialRemissionAdjustment)
+  return request(app)
+    .get(`/${NOMS_ID}/special-remission/remove/${SESSION_ID}`)
+    .expect(200)
+    .expect('Content-Type', /html/)
+    .expect(res => {
+      expect(res.text).toContain('Delete special remission')
+      expect(res.text).toContain('Special remission details')
+      expect(res.text).toContain('Entered by')
+      expect(res.text).toContain('Leeds (HMP)')
+      expect(res.text).toContain('Number of days')
+      expect(res.text).toContain('27')
+      expect(res.text).toContain('Type')
+      expect(res.text).toContain('Release in error')
+      expect(res.text).toContain(`/${NOMS_ID}/special-remission/view" class="govuk-back-link"`)
+    })
+})
+it('POST /{nomsId}/special-remission/remove returns to the hub with the remove message', () => {
+  adjustmentsService.get.mockResolvedValue(specialRemissionAdjustment)
+  return request(app)
+    .post(`/${NOMS_ID}/special-remission/remove/${SESSION_ID}`)
+    .expect(302)
+    .expect(
+      'Location',
+      `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:27,%22action%22:%22REMOVE%22%7D`,
+    )
 })

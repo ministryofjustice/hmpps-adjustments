@@ -1,0 +1,57 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - Delete special remission" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+{{ super() }}
+<nav>
+    {{ govukBackLink({
+    text: "Back",
+    href: "/" + prisoner.prisonerNumber + "/special-remission/view"
+    }) }}
+</nav>
+{% endblock %}
+{% block content %}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjustments</span>
+            Delete special remission
+        </h1>
+    </div>
+</div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-m">
+            Special remission details
+        </h1>
+    </div>
+</div>
+<div class="govuk-grid-row">
+	<div class="govuk-grid-column-two-thirds">
+		{{ govukTable(
+		model.table()
+		) }}
+		<form method="post">
+			<input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+			<div class="govuk-button-group">
+				{{ govukButton({
+					text: "Delete",
+					type: submit,
+					preventDoubleClick: true,
+					attributes: { 'data-qa': 'remove-button' }
+				}) }}
+				{{ govukButton({
+					text: "Cancel",
+					classes: "govuk-button--secondary",
+					href: "/" + prisoner.prisonerNumber + "/special-remission/view"
+				}) }}
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

@@ -39,13 +39,14 @@ export default class SpecialRemissionViewModel {
   }
 
   private actionCell(adjustment: Adjustment) {
+    const visuallyHiddenText = `${adjustment.days} of special remission`
     return {
       html: `
       <div class="govuk-grid-column-one-quarter govuk-!-margin-right-2 govuk-!-padding-0">
-        <a class="govuk-link" href="/${adjustment.person}/special-remission/check/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit</a><br />
+        <a class="govuk-link" href="/${adjustment.person}/special-remission/check/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
       <div class="govuk-grid-column-one-half govuk-!-padding-0">
-        <a class="govuk-link" href="/${adjustment.person}/special-remission/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete</span></a><br />
+        <a class="govuk-link" href="/${adjustment.person}/special-remission/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
     `,
     }
