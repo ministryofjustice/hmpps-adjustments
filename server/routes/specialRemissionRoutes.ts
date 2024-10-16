@@ -12,6 +12,7 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import SpecialRemissionViewModel from '../model/specialRemissionViewModel'
 import PrisonerService from '../services/prisonerService'
 import { daysBetween } from '../utils/utils'
+import SpecialRemissionRemoveModel from '../model/specialRemissionRemoveModel'
 
 export default class SpecialRemissionRoutes {
   constructor(
@@ -176,6 +177,31 @@ export default class SpecialRemissionRoutes {
       return res.redirect(`/${nomsId}/success?message=${JSON.stringify(message)}`)
     }
     return res.redirect(`/${nomsId}`)
+  }
+
+  public remove: RequestHandler = async (req, res): Promise<void> => {
+    const { username } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = await this.adjustmentsService.get(id, username)
+    return res.render('pages/adjustments/special-remission/remove', {
+      model: new SpecialRemissionRemoveModel(nomsId, adjustment),
+    })
+  }
+
+  public submitRemove: RequestHandler = async (req, res): Promise<void> => {
+    const { username } = res.locals.user
+    const { nomsId, id } = req.params
+
+    const adjustment = await this.adjustmentsService.get(id, username)
+
+    await this.adjustmentsService.delete(id, username)
+    const message = JSON.stringify({
+      type: adjustment.adjustmentType,
+      days: adjustment.days,
+      action: 'REMOVE',
+    } as Message)
+    return res.redirect(`/${nomsId}/success?message=${message}`)
   }
 
   public decline: RequestHandler = async (req, res): Promise<void> => {

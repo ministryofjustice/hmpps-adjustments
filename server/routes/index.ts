@@ -136,6 +136,9 @@ export default function routes(service: Services): Router {
 
   get('/:nomsId/special-remission/add', specialRemissionRoutes.add)
   get('/:nomsId/special-remission/view', specialRemissionRoutes.view)
+  get('/:nomsId/special-remission/remove/:id', specialRemissionRoutes.remove)
+  post('/:nomsId/special-remission/remove/:id', specialRemissionRoutes.submitRemove)
+  get('/:nomsId/special-remission/decline/:addOrEdit/:id', specialRemissionRoutes.decline)
   get('/:nomsId/special-remission/check/:addOrEdit/:id', specialRemissionRoutes.check)
   post('/:nomsId/special-remission/check/:addOrEdit/:id', specialRemissionRoutes.submitCheck)
   get('/:nomsId/special-remission/days/:addOrEdit/:id', specialRemissionRoutes.days)
@@ -144,7 +147,6 @@ export default function routes(service: Services): Router {
   post('/:nomsId/special-remission/type/:addOrEdit/:id', specialRemissionRoutes.submitType)
   get('/:nomsId/special-remission/review/:addOrEdit/:id', specialRemissionRoutes.review)
   post('/:nomsId/special-remission/review/:addOrEdit/:id', specialRemissionRoutes.submitReview)
-  get('/:nomsId/special-remission/decline/:addOrEdit/:id', specialRemissionRoutes.decline)
 
   get('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.review)
   post('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.submitReview)
