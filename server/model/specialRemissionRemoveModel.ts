@@ -1,6 +1,4 @@
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateToString, getSentenceRecallTagHTML, isSentenceRecalled } from '../utils/utils'
 import specialRemissionType from './specialRemissionType'
 
 export default class SpecialRemissionRemoveModel {
