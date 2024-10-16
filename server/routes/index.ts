@@ -9,6 +9,7 @@ import TaggedBailRoutes from './taggedBailRoutes'
 import PrisonerImageRoutes from './prisonerImageRoutes'
 import ManualUnusedDeductionRoutes from './manualUnusedDeductionRoutes'
 import ReviewUnusedDeductionRoutes from './reviewUnusedDeductionRoutes'
+import SpecialRemissionRoutes from './specialRemissionRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -61,6 +62,12 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.paramStoreService,
     service.calculateReleaseDatesService,
+  )
+
+  const specialRemissionRoutes = new SpecialRemissionRoutes(
+    service.adjustmentsStoreService,
+    service.adjustmentsService,
+    service.prisonerService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)
@@ -126,6 +133,18 @@ export default function routes(service: Services): Router {
   post('/:nomsId/manual-unused-deductions/days/:addOrEdit', manualUnusedDeductionRoutes.submitDays)
   get('/:nomsId/manual-unused-deductions/:saveOrDelete', manualUnusedDeductionRoutes.review)
   post('/:nomsId/manual-unused-deductions/:saveOrDelete', manualUnusedDeductionRoutes.submitReview)
+
+  get('/:nomsId/special-remission/add', specialRemissionRoutes.add)
+  get('/:nomsId/special-remission/view', specialRemissionRoutes.view)
+  get('/:nomsId/special-remission/check/:addOrEdit/:id', specialRemissionRoutes.check)
+  post('/:nomsId/special-remission/check/:addOrEdit/:id', specialRemissionRoutes.submitCheck)
+  get('/:nomsId/special-remission/days/:addOrEdit/:id', specialRemissionRoutes.days)
+  post('/:nomsId/special-remission/days/:addOrEdit/:id', specialRemissionRoutes.submitDays)
+  get('/:nomsId/special-remission/type/:addOrEdit/:id', specialRemissionRoutes.type)
+  post('/:nomsId/special-remission/type/:addOrEdit/:id', specialRemissionRoutes.submitType)
+  get('/:nomsId/special-remission/review/:addOrEdit/:id', specialRemissionRoutes.review)
+  post('/:nomsId/special-remission/review/:addOrEdit/:id', specialRemissionRoutes.submitReview)
+  get('/:nomsId/special-remission/decline/:addOrEdit/:id', specialRemissionRoutes.decline)
 
   get('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.review)
   post('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.submitReview)

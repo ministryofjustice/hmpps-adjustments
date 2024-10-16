@@ -1,0 +1,92 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set pageTitle = applicationName + " - Enter tagged bail dates" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjustments</span>
+        Confirm and save
+      </h1>
+    </div>
+  </div>
+
+  <h2 class="govuk-heading-m">Special remission details</h2>
+  <div class="govuk-grid-column-two-thirds govuk-!-padding-left-0">
+
+    {{ govukSummaryList({
+      rows: [
+        {
+          key: {
+            text: "Number of days"
+          },
+          value: {
+            text: model.adjustment.days + " days"
+          },
+          actions: {
+            items: [
+              {
+                href: "/" + prisoner.prisonerNumber + "/special-remission/days/" + model.addOrEdit + "/" + model.id,
+                text: "Edit",
+                visuallyHiddenText: "number of days"
+              }
+            ]
+          }
+        },
+        {
+          key: {
+          text: "Type of special remission"
+        },
+          value: {
+          text: model.specialRemissionType()
+        },
+          actions: {
+            items: [
+              {
+                href: "/" + prisoner.prisonerNumber + "/special-remission/type/" + model.addOrEdit + "/" + model.id,
+                text: "Edit",
+                visuallyHiddenText: "special remission type"
+              }
+            ]
+          }
+        }
+      ]
+    }) }}
+
+    <div class="govuk-button-group">
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+        {{ govukButton({
+          text: "Confirm and save",
+          type: submit,
+          preventDoubleClick: true,
+          attributes: { 'data-qa': 'submit-form' }
+        }) }}
+        {{ govukButton({
+          text: "Cancel",
+          classes: "govuk-button--secondary",
+          href: "/" + prisoner.prisonerNumber + "/tagged-bail/view"
+        }) }}
+      </form>
+    </div>
+  </div>
+{% endblock %}
