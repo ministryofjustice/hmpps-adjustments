@@ -111,7 +111,7 @@ export default class ReviewModel {
       actions: {
         items: [
           {
-            href: `/${adjustment.person}/${adjustmentType.url}/edit`,
+            href: `/${adjustment.person}/${adjustmentType.url}/edit/${adjustment.id}`,
             text: 'Edit',
             visuallyHiddenText: visuallyHiddenText || adjustmentType.text,
           },
