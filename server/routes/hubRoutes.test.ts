@@ -477,16 +477,27 @@ describe('GET /:nomsId', () => {
   })
   it('GET /{nomsId} one LAL adjustment with lawfullyAtLarge unset will display correctly', () => {
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    lawfullyAtLargeAdjustment.lawfullyAtLarge.affectsDates = null
+    const nomisAdjustment = {
+      id: '3',
+      adjustmentType: 'LAWFULLY_AT_LARGE',
+      toDate: '2023-09-05',
+      fromDate: '2023-07-05',
+      person: 'ABC123',
+      bookingId: 12345,
+      sentenceSequence: null,
+      prisonId: 'LDS',
+    } as Adjustment
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NONE',
-      [{ ...lawfullyAtLargeAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+      [{ ...nomisAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
     ])
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
+      .expect(200)
       .expect(res => {
-        expect(res.text).toContain('These additional days will not adjust the release dates')
+        expect(res.text).not.toContain('These days will affect the release dates')
+        expect(res.text).not.toContain('These additional days will not adjust the release dates')
       })
   })
   it('GET /{nomsId} two LAL adjustments will not show anything', () => {

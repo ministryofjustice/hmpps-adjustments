@@ -90,7 +90,11 @@ export default class AdjustmentsHubViewModel {
 
   public getLalAffectsDateText(adjustmentType: AdjustmentType): string {
     const lalAdjustments = this.adjustments.filter(it => it.adjustmentType === 'LAWFULLY_AT_LARGE')
-    if (adjustmentType?.value !== 'LAWFULLY_AT_LARGE' || lalAdjustments.length !== 1) {
+    if (
+      adjustmentType?.value !== 'LAWFULLY_AT_LARGE' ||
+      lalAdjustments.length !== 1 ||
+      lalAdjustments[0].lawfullyAtLarge == null
+    ) {
       return null
     }
     return lalAdjustments[0].lawfullyAtLarge.affectsDates === 'YES'
