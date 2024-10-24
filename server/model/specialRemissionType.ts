@@ -3,7 +3,7 @@ const specialRemissionType = [
     value: 'MERITORIOUS_CONDUCT',
     text: 'Meritorious (excellent) conduct',
     hint: {
-      text: 'The person has been rewarded with automatic release. or consideration for release by the Parole Board at an earlier date. If the person is on licence, their SLED is being brought forward.',
+      text: 'The person has been rewarded with automatic release or consideration for release by the Parole Board at an earlier date. If the person is on licence, their SLED is being brought forward.',
     },
   },
   {

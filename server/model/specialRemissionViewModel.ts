@@ -1,10 +1,7 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
 import specialRemissionType from './specialRemissionType'
 
 export default class SpecialRemissionViewModel {
-  public unusedDeductionMessage: UnusedDeductionsMessageViewModel
-
   constructor(
     public prisonerNumber: string,
     public adjustments: Adjustment[],
@@ -20,7 +17,9 @@ export default class SpecialRemissionViewModel {
 
   public rows() {
     return this.adjustments.map(it => {
-      const displayText = specialRemissionType.find(srem => srem.value === it.specialRemission.type).text
+      const displayText = it.specialRemission
+        ? specialRemissionType.find(srem => srem.value === it.specialRemission.type).text
+        : 'Unknown'
       return [{ text: it.prisonName }, { text: displayText }, { text: it.days }, this.actionCell(it)]
     })
   }

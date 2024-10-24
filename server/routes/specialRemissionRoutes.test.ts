@@ -198,7 +198,7 @@ describe('Special remission routes', () => {
         expect(res.text).toContain('Select the type of special remission')
         expect(res.text).toContain('Meritorious (excellent) conduct')
         expect(res.text).toContain(
-          'The person has been rewarded with automatic release. or consideration for release by the Parole Board at an earlier date. If the person is on licence, their SLED is being brought forward.',
+          'The person has been rewarded with automatic release or consideration for release by the Parole Board at an earlier date. If the person is on licence, their SLED is being brought forward.',
         )
         expect(res.text).toContain('Release date calculated too early')
         expect(res.text).toContain(
@@ -331,5 +331,35 @@ describe('Special remission routes', () => {
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:27,%22action%22:%22REMOVE%22%7D`,
       )
+  })
+
+  it('GET /{nomsId}/special-remission/view returns correctly for a nomis adjustment', () => {
+    const nomisAdjustment = {
+      id: '3',
+      adjustmentType: 'SPECIAL_REMISSION',
+      toDate: '2023-09-05',
+      fromDate: '2023-07-05',
+      person: 'ABC123',
+      bookingId: 12345,
+      sentenceSequence: null,
+      prisonId: 'LDS',
+    } as Adjustment
+
+    adjustmentsService.findByPerson.mockResolvedValue([nomisAdjustment])
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/special-remission/view`)
+      .expect('Content-Type', /html/)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Unknown')
+        expect(res.text).not.toContain('Meritorious (excellent) conduct')
+        expect(res.text).not.toContain('Release date calculated too early')
+        expect(res.text).not.toContain("The person was released in error and they're not being returned to custody.")
+      })
   })
 })
