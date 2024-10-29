@@ -93,7 +93,7 @@ export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
       if (fromDate < minOffenceDate) {
         errors.push({
           text: `The remand period cannot start before the earliest offence date, on ${dayjs(minOffenceDate).format(
-            'DD MMM YYYY',
+            'D MMMM YYYY',
           )}`,
           fields: ['from-day', 'from-month', 'from-year'],
         })

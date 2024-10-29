@@ -163,7 +163,7 @@ describe('Remand routes tests', () => {
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Remand overview')
-        expect(res.text).toContain('From 01 Jan 2023 to 10 Jan 2023')
+        expect(res.text).toContain('From 1 January 2023 to 10 January 2023')
         expect(res.text).toContain('Doing a crime')
         expect(res.text).toContain('Heard at Court 1')
         expect(res.text).toContain('edit-remand')
@@ -378,7 +378,9 @@ describe('Remand routes tests', () => {
         .type('form')
         .expect('Content-Type', /html/)
         .expect(res => {
-          expect(res.text).toContain('The remand period cannot start before the earliest offence date, on 04 Jan 2021')
+          expect(res.text).toContain(
+            'The remand period cannot start before the earliest offence date, on 4 January 2021',
+          )
         })
     })
 
@@ -411,7 +413,7 @@ describe('Remand routes tests', () => {
           .expect('Content-Type', /html/)
           .expect(res => {
             expect(res.text).toContain(
-              'The remand period cannot start before the earliest offence date, on 04 Jan 2021',
+              'The remand period cannot start before the earliest offence date, on 4 January 2021',
             )
           })
       },
@@ -455,8 +457,8 @@ describe('Remand routes tests', () => {
           fromDate: '2023-01-06',
           toDate: '2023-01-10',
           id: '123-abb',
-          from: '06 Jan 2023',
-          to: '10 Jan 2023',
+          from: '6 January 2023',
+          to: '10 January 2023',
         },
         from: { year: '2023', month: '01', day: '01' },
         to: { year: '2023', month: '03', day: '20' },
@@ -468,8 +470,8 @@ describe('Remand routes tests', () => {
           fromDate: '2023-01-07',
           toDate: '2023-01-10',
           id: '123-abb',
-          from: '07 Jan 2023',
-          to: '10 Jan 2023',
+          from: '7 January 2023',
+          to: '10 January 2023',
         },
         from: { year: '2023', month: '01', day: '01' },
         to: { year: '2023', month: '01', day: '07' },
@@ -481,8 +483,8 @@ describe('Remand routes tests', () => {
           fromDate: '2023-01-06',
           toDate: '2023-01-10',
           id: '123-abb',
-          from: '06 Jan 2023',
-          to: '10 Jan 2023',
+          from: '6 January 2023',
+          to: '10 January 2023',
         },
         from: { year: '2023', month: '01', day: '1' },
         to: { year: '2023', month: '01', day: '10' },
@@ -541,12 +543,12 @@ describe('Remand routes tests', () => {
             'CASE001',
             'Doing a crime',
             'Committed from',
-            '04 Jan 2021',
+            '4 January 2021',
             'to',
-            '05 Jan 2021',
+            '5 January 2021',
             'Doing a different crime',
             'Committed on',
-            '06 Mar 2021',
+            '6 March 2021',
           ])
         })
     })
@@ -608,12 +610,12 @@ describe('Remand routes tests', () => {
         )
         expect(res.text).toContainInOrder([
           'Remand cannot be applied when a sentence is being served.',
-          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with the sentence starting on 01 Jan 2021 with a release date of the 01 Feb 2021',
+          'The remand dates from 2 January 2021 to 2 February 2021 overlaps with the sentence starting on 1 January 2021 with a release date of the 1 February 2021',
         ])
         expect(res.text).toContain('Review remand details')
         expect(res.text).toContainInOrder([
           'Remand period',
-          '01 Jan 2023 to 10 Jan 2023',
+          '1 January 2023 to 10 January 2023',
           'Offences',
           'Doing a crime',
           'Doing a different crime',
@@ -724,8 +726,8 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Delete remand')
-        expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
-        expect(res.text).toContainInOrder(['Committed from', '04 Jan 2021', 'to', '05 Jan 2021'])
+        expect(res.text).toContain('1 January 2023 to 10 January 2023')
+        expect(res.text).toContainInOrder(['Committed from', '4 January 2021', 'to', '5 January 2021'])
         expect(res.text).toContain('Doing a crime')
       })
   })
@@ -756,8 +758,8 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
         expect(res.text).toContain('Edit remand')
-        expect(res.text).toContain('01 Jan 2023 to 10 Jan 2023')
-        expect(res.text).toContainInOrder(['Committed from', '04 Jan 2021', 'to', '05 Jan 2021'])
+        expect(res.text).toContain('1 January 2023 to 10 January 2023')
+        expect(res.text).toContainInOrder(['Committed from', '4 January 2021', 'to', '5 January 2021'])
         expect(res.text).toContain('Doing a crime')
       })
   })
@@ -959,7 +961,7 @@ describe('Remand routes tests', () => {
       .expect(res => {
         expect(res.text).toContainInOrder([
           'Remand cannot be applied when a sentence is being served.',
-          'The remand dates from 02 Jan 2021 to 02 Feb 2021 overlaps with the sentence starting on 01 Jan 2021 with a release date of the 01 Feb 2021',
+          'The remand dates from 2 January 2021 to 2 February 2021 overlaps with the sentence starting on 1 January 2021 with a release date of the 1 February 2021',
           'Update the remand dates to continue.',
         ])
       })
@@ -980,7 +982,7 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain(
           'Some of the details recorded cannot be used for a sentence calculation. This means unused deductions cannot be automatically calculated by this service',
         )
-        expect(res.text).toContain('From 01 Jan 2023 to 10 Jan 2023')
+        expect(res.text).toContain('From 1 January 2023 to 10 January 2023')
         expect(res.text).toContain('Doing a crime')
       })
   })

@@ -433,7 +433,7 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Date of days restored')
-        expect(res.text).toContain('5 Apr 2023')
+        expect(res.text).toContain('5 April 2023')
         expect(res.text).toContain('Number of days')
         expect(res.text).toContain('24')
         expect(res.text).toContain('Confirm and save')
@@ -451,8 +451,8 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('First day spent UAL')
         expect(res.text).toContain('Last day spent UAL')
-        expect(res.text).toContain('5 Jun 2023')
-        expect(res.text).toContain('25 Jul 2023')
+        expect(res.text).toContain('5 June 2023')
+        expect(res.text).toContain('25 July 2023')
         expect(res.text).toContain('Number of days')
         expect(res.text).toContain('51')
         expect(res.text).toContain('Type of UAL')
@@ -472,8 +472,8 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('First day spent LAL')
         expect(res.text).toContain('Last day spent LAL')
-        expect(res.text).toContain('5 Jul 2023')
-        expect(res.text).toContain('5 Sep 2023')
+        expect(res.text).toContain('5 July 2023')
+        expect(res.text).toContain('5 September 2023')
         expect(res.text).toContain('Number of days')
         expect(res.text).toContain('61')
         expect(res.text).toContain('Delay release dates')
@@ -605,9 +605,9 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
         expect(res.text).toContain('First day')
-        expect(res.text).toContain('5 Jun 2023')
+        expect(res.text).toContain('5 June 2023')
         expect(res.text).toContain('Last day')
-        expect(res.text).toContain('25 Jul 2023')
+        expect(res.text).toContain('25 July 2023')
         expect(res.text).toContain('Type')
         expect(res.text).toContain('Recall')
       })
@@ -665,9 +665,9 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
         expect(res.text).toContain('First day')
-        expect(res.text).toContain('5 Jul 2023')
+        expect(res.text).toContain('5 July 2023')
         expect(res.text).toContain('Last day')
-        expect(res.text).toContain('5 Sep 2023')
+        expect(res.text).toContain('5 September 2023')
         expect(res.text).toContain('Delay release dates')
         expect(res.text).toContain('Yes')
       })
@@ -707,7 +707,7 @@ describe('Adjustment routes tests', () => {
       .get(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('5 Apr 2023')
+        expect(res.text).toContain('5 April 2023')
         expect(res.text).toContain('22')
       })
   })
@@ -773,7 +773,7 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          'The unlawfully at large period cannot start before the earliest sentence date, on 06 May 2023',
+          'The unlawfully at large period cannot start before the earliest sentence date, on 6 May 2023',
         )
       })
   })
@@ -922,7 +922,7 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain(
-          'The lawfully at large period cannot start before the earliest sentence date, on 06 May 2023',
+          'The lawfully at large period cannot start before the earliest sentence date, on 6 May 2023',
         )
       })
   })

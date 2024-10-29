@@ -26,7 +26,7 @@ export default class ReviewAndSubmitAdaViewModel {
         rows: [
           ...this.adjustments.map(it => {
             return [
-              { text: dayjs(it.fromDate).format('D MMM YYYY') },
+              { text: dayjs(it.fromDate).format('D MMMM YYYY') },
               { html: it.additionalDaysAwarded.adjudicationId.join('<br/>') },
               { text: it.days, format: 'numeric' },
             ]
@@ -55,7 +55,7 @@ export default class ReviewAndSubmitAdaViewModel {
         rows: [
           ...this.quashedAdjustments.map(it => {
             return [
-              { text: dayjs(it.fromDate).format('D MMM YYYY') },
+              { text: dayjs(it.fromDate).format('D MMMM YYYY') },
               { html: it.additionalDaysAwarded.adjudicationId.join('<br/>') },
               { text: it.days, format: 'numeric' },
             ]
@@ -86,9 +86,9 @@ export default class ReviewAndSubmitAdaViewModel {
         rows: [
           ...this.existingAdjustments.map(it => {
             return [
-              { text: dayjs(it.lastUpdatedDate).format('D MMM YYYY') },
-              { text: dayjs(it.fromDate).format('D MMM YYYY') },
-              { text: dayjs(it.toDate).format('D MMM YYYY') },
+              { text: dayjs(it.lastUpdatedDate).format('D MMMM YYYY') },
+              { text: dayjs(it.fromDate).format('D MMMM YYYY') },
+              { text: dayjs(it.toDate).format('D MMMM YYYY') },
               { text: it.days, format: 'numeric' },
             ]
           }),

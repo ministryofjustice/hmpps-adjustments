@@ -105,7 +105,7 @@ export function calculateReleaseDatesCheckInformationUrl(prisonerNumber: string)
 export const fieldsToDate = (day: string, month: string, year: string): Date =>
   new Date(dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD'))
 
-export const dateToString = (date: Date): string => dayjs(date).format('DD MMM YYYY')
+export const dateToString = (date: Date): string => dayjs(date).format('D MMMM YYYY')
 
 export function offencesForRemandAdjustment(
   adjustment: Adjustment,
@@ -210,7 +210,7 @@ export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSeque
     : it.sentences.some(sent => sent.sentenceSequence === adjustment.sentenceSequence)
 }
 
-export function formatDate(date: string | Date | number, format: string = 'D MMM YYYY'): string {
+export function formatDate(date: string | Date | number, format: string = 'D MMMM YYYY'): string {
   return dayjs(date).format(format)
 }
 
@@ -232,13 +232,13 @@ export function remandRelatedValidationSummary(messages: CalculateReleaseDatesVa
       : 'Remand cannot be applied when a sentence is being served.',
     errorList: [
       {
-        text: `The remand dates from ${dayjs(message.arguments[2]).format('DD MMM YYYY')} to ${dayjs(
+        text: `The remand dates from ${dayjs(message.arguments[2]).format('D MMMM YYYY')} to ${dayjs(
           message.arguments[3],
-        ).format('DD MMM YYYY')} overlaps with ${
+        ).format('D MMMM YYYY')} overlaps with ${
           overlapsWithRemand ? 'another remand period from' : 'the sentence starting on'
-        } ${dayjs(message.arguments[0]).format('DD MMM YYYY')} ${
+        } ${dayjs(message.arguments[0]).format('D MMMM YYYY')} ${
           overlapsWithRemand ? 'to' : 'with a release date of the'
-        } ${dayjs(message.arguments[1]).format('DD MMM YYYY')}`,
+        } ${dayjs(message.arguments[1]).format('D MMMM YYYY')}`,
       },
     ],
     subText: {

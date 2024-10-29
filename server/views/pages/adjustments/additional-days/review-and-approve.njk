@@ -29,11 +29,11 @@
           {% set totalDays = 0 %}
           {% for ada in adasToReview.adjustmentsToRemove %}
             {% set adaRows = (adaRows.push([{
-              text: ada.lastUpdatedDate | date("DD MMM YYYY")
+              text: ada.lastUpdatedDate | date("D MMMM YYYY")
             }, {
-              text: ada.fromDate | date("DD MMM YYYY")
+              text: ada.fromDate | date("D MMMM YYYY")
             }, {
-              text: ada.toDate | date("DD MMM YYYY")
+              text: ada.toDate | date("D MMMM YYYY")
             }, {
               html: '<strong class="govuk-tag govuk-tag--red">Pending deletion</strong>'
             }, {

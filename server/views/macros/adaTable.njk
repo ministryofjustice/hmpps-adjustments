@@ -104,7 +104,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
                     <div class="govuk-checkboxes__item">
                       <input class="govuk-checkboxes__input row-checkbox" id="prospective-{{ isoDate }}" name="prospective" type="checkbox" value="{{ isoDate }}">
                       <label class="govuk-label govuk-checkboxes__label" for="prospective-{{ isoDate }}">
-                      <span class="govuk-visually-hidden">Select this adjudication</span> Date charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }} at {{ ada.charges[0].heardAt }}</label>
+                      <span class="govuk-visually-hidden">Select this adjudication</span> Date charge proved {{ ada.dateChargeProved | date("D MMMM YYYY") }} at {{ ada.charges[0].heardAt }}</label>
                     </div>
                     {% if not params.hideStatuses %}
                       <div class="status-tag-row">
@@ -127,7 +127,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
           <div class="govuk-grid-column-three-quarters">
             <div class="govuk-summary-card govuk-!-margin-bottom-4">
               <div class="govuk-summary-card__content equal-padding">
-                <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("DD MMM YYYY") }} at {{ ada.charges[0].heardAt }}</h3>
+                <h3 class="govuk-heading-s">Charge proved {{ ada.dateChargeProved | date("D MMMM YYYY") }} at {{ ada.charges[0].heardAt }}</h3>
                 {% if not params.hideStatuses %}
                 <div class="status-tag-row">
                   {{ pendingApprovalStatus | safe }}
