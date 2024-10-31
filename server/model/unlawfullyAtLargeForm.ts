@@ -107,7 +107,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       const minSentenceDate = this.getMinSentenceDate(sentencesWithOffenceDates)
       if (fromDate < minSentenceDate) {
         errors.push({
-          text: `The unlawfully at large period cannot start before the earliest sentence date, on ${dayjs(minSentenceDate).format('DD MMM YYYY')}`,
+          text: `The unlawfully at large period cannot start before the earliest sentence date, on ${dayjs(minSentenceDate).format('D MMMM YYYY')}`,
           fields: ['from-day', 'from-month', 'from-year'],
         })
       }

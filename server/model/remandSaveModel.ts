@@ -33,7 +33,7 @@ export default class RemandSaveModel {
     return this.adjustments.map(it => {
       return [
         {
-          text: `${dayjs(it.fromDate).format('DD MMM YYYY')} to ${dayjs(it.toDate).format('DD MMM YYYY')}`,
+          text: `${dayjs(it.fromDate).format('D MMMM YYYY')} to ${dayjs(it.toDate).format('D MMMM YYYY')}`,
         },
         {
           text: daysBetween(new Date(it.fromDate), new Date(it.toDate)),

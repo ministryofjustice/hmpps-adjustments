@@ -25,7 +25,7 @@
       {% for ada in model.adjustments %}
         {% set removeHtml = '<a href="/' + prisoner.prisonerNumber + '/additional-days/remove-prospective/' + ada.fromDate + '">Remove PADA</a>' if ada.additionalDaysAwarded.prospective else '' %}
         {% set adaRows = (adaRows.push([{
-          text: ada.fromDate | date("D MMM YYYY")
+          text: ada.fromDate | date("D MMMM YYYY")
         }, {
           text: ada.days
         }, {

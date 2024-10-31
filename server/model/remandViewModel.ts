@@ -33,7 +33,7 @@ export default class RemandViewModel {
     return [
       ...this.adjustments.map(it => {
         return [
-          { text: `From ${dayjs(it.fromDate).format('DD MMM YYYY')} to ${dayjs(it.toDate).format('DD MMM YYYY')}` },
+          { text: `From ${dayjs(it.fromDate).format('D MMMM YYYY')} to ${dayjs(it.toDate).format('D MMMM YYYY')}` },
           { text: it.days },
         ]
       }),
