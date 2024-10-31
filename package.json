@@ -113,7 +113,7 @@
     "csurf": "^1.11.0",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
-    "express": "^4.19.2",
+    "express": "^4.21.1",
     "express-prom-bundle": "^7.0.0",
     "express-session": "^1.18.0",
     "govuk-frontend": "^5.5.0",
