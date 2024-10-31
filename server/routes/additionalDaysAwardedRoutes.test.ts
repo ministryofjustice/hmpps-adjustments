@@ -311,7 +311,7 @@ describe('Additional Days Awarded routes tests', () => {
         .expect(res => {
           expect(res.text).toContain('Review and delete ADAs')
           expect(res.text).toContain('Pending deletion')
-          expect(res.text).toContain('03 Aug 2023')
+          expect(res.text).toContain('3 August 2023')
           expect(res.text).toContain('Total ADAs removed from calculation')
           expect(res.text).toContain('10')
         })
@@ -356,7 +356,7 @@ describe('Additional Days Awarded routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Select all the relevant PADAs')
-        expect(res.text).toContain('Date charge proved 03 Aug 2023 at Moorland')
+        expect(res.text).toContain('Date charge proved 3 August 2023 at Moorland')
       })
   })
 

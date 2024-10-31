@@ -23,14 +23,14 @@ The params are wrapped inside the attributes object and are as follows:
         text: "Remand period"
       },
         value: {
-        text: 'From ' + adjustment.fromDate | date("DD MMM YYYY") + ' to ' + adjustment.toDate | date("DD MMM YYYY")
+        text: 'From ' + adjustment.fromDate | date("D MMMM YYYY") + ' to ' + adjustment.toDate | date("D MMMM YYYY")
       },
         actions: {
         items: [
           {
             href: '/' + offenderNo + '/remand/dates/edit/' + adjustment.id,
             text: "Edit",
-            visuallyHiddenText: "remand period starting " + adjustment.fromDate | date("DD MMM YYYY"),
+            visuallyHiddenText: "remand period starting " + adjustment.fromDate | date("D MMMM YYYY"),
             attributes: { 'data-qa': 'edit-remand-period' }
           }
         ]
@@ -48,7 +48,7 @@ The params are wrapped inside the attributes object and are as follows:
           {
             href: '/' + offenderNo + '/remand/offences/edit/' + adjustment.id,
             text: "Edit",
-            visuallyHiddenText: "offences for remand starting " + adjustment.fromDate | date("DD MMM YYYY"),
+            visuallyHiddenText: "offences for remand starting " + adjustment.fromDate | date("D MMMM YYYY"),
             attributes: { 'data-qa': 'edit-remand-offences' }
           }
         ]

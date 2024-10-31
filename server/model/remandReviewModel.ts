@@ -42,7 +42,7 @@ export default class RemandReviewModel {
     return [
       ...Object.values(this.adjustments).map(it => {
         return [
-          { text: `From ${dayjs(it.fromDate).format('DD MMM YYYY')} to ${dayjs(it.toDate).format('DD MMM YYYY')}` },
+          { text: `From ${dayjs(it.fromDate).format('D MMMM YYYY')} to ${dayjs(it.toDate).format('D MMMM YYYY')}` },
           { text: daysBetween(new Date(it.fromDate), new Date(it.toDate)) },
         ]
       }),
@@ -65,8 +65,8 @@ export default class RemandReviewModel {
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
     const offences = offencesForRemandAdjustment(adjustment, this.sentencesAndOffences)
-    const adjustmentFromDate = dayjs(adjustment.fromDate).format('DD MMM YYYY')
-    const adjustmentToDate = dayjs(adjustment.toDate).format('DD MMM YYYY')
+    const adjustmentFromDate = dayjs(adjustment.fromDate).format('D MMMM YYYY')
+    const adjustmentToDate = dayjs(adjustment.toDate).format('D MMMM YYYY')
     return {
       rows: [
         {
@@ -152,7 +152,7 @@ export default class RemandReviewModel {
   }
 
   private formatDate(date: string, noWrapDate: boolean) {
-    const formattedDate = dayjs(date).format('DD MMM YYYY')
+    const formattedDate = dayjs(date).format('D MMMM YYYY')
     return noWrapDate ? `<span class="govuk-!-white-space-nowrap">${formattedDate}</span> ` : formattedDate
   }
 
