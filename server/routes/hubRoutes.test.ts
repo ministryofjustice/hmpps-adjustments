@@ -519,4 +519,18 @@ describe('GET /:nomsId', () => {
         expect(res.text).not.toContain('These additional days will not adjust the release dates')
       })
   })
+
+  it('GET /{nomsId} test', () => {
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['RECALL', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      intercept: {
+        type: 'PADA',
+        number: 5,
+        anyProspective: true,
+        messageArguments: [],
+      },
+    })
+
+    return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', 'not here')
+  })
 })
