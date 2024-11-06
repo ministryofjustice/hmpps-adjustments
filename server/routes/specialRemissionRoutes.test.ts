@@ -7,6 +7,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -52,6 +53,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.resetAllMocks()
+  jest.useRealTimers()
 })
 
 describe('Special remission routes', () => {
@@ -266,6 +268,43 @@ describe('Special remission routes', () => {
 
   it('POST /{nomsId}/special-remission/review/add creates with the correct message', () => {
     adjustmentsStoreService.getOnly.mockReturnValue(blankAdjustment)
+    const sentenceAndOffences = {
+      sentenceDate: '2022-04-30',
+    } as PrisonApiOffenderSentenceAndOffences
+
+    prisonerService.getSentencesAndOffences.mockResolvedValue([sentenceAndOffences])
+
+    return request(app)
+      .post(`/${NOMS_ID}/special-remission/review/add/${SESSION_ID}`)
+      .expect(302)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:13,%22action%22:%22CREATE%22%7D`,
+      )
+      .expect(() => {
+        expect(adjustmentsService.create).toHaveBeenCalledWith(
+          [
+            {
+              adjustmentType: 'SPECIAL_REMISSION',
+              bookingId: 12345,
+              days: 13,
+              fromDate: '2022-04-30',
+              person: 'ABC123',
+              specialRemission: {
+                type: 'MERITORIOUS_CONDUCT',
+              },
+            },
+          ],
+          'user1',
+        )
+      })
+  })
+
+  it('POST /{nomsId}/special-remission/review/add uses the date of submission if no sentence date is present', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue(blankAdjustment)
+    prisonerService.getSentencesAndOffences.mockResolvedValue([])
+    jest.useFakeTimers().setSystemTime(new Date('2020-12-25'))
+
     return request(app)
       .post(`/${NOMS_ID}/special-remission/review/edit/${SESSION_ID}`)
       .expect(302)
@@ -273,9 +312,36 @@ describe('Special remission routes', () => {
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:13,%22action%22:%22CREATE%22%7D`,
       )
+      .expect(() => {
+        expect(adjustmentsService.create).toHaveBeenCalledWith(
+          [
+            {
+              adjustmentType: 'SPECIAL_REMISSION',
+              bookingId: 12345,
+              days: 13,
+              fromDate: '2020-12-25',
+              person: 'ABC123',
+              specialRemission: {
+                type: 'MERITORIOUS_CONDUCT',
+              },
+            },
+          ],
+          'user1',
+        )
+      })
   })
-  it('POST /{nomsId}/special-remission/review/edit updates with the correct message', () => {
+
+  it('POST /{nomsId}/special-remission/review/edit updates with the correct message using the earliest sentence date', () => {
     adjustmentsStoreService.getOnly.mockReturnValue(specialRemissionAdjustment)
+    const sentenceAndOffences = {
+      sentenceDate: '2024-04-30',
+    } as PrisonApiOffenderSentenceAndOffences
+    const sentenceAndOffences1 = {
+      sentenceDate: '2023-04-30',
+    } as PrisonApiOffenderSentenceAndOffences
+
+    prisonerService.getSentencesAndOffences.mockResolvedValue([sentenceAndOffences, sentenceAndOffences1])
+
     return request(app)
       .post(`/${NOMS_ID}/special-remission/review/edit/${SESSION_ID}`)
       .expect(302)
@@ -283,6 +349,57 @@ describe('Special remission routes', () => {
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:27,%22action%22:%22UPDATE%22%7D`,
       )
+      .expect(() => {
+        expect(adjustmentsService.update).toHaveBeenCalledWith(
+          '3',
+          {
+            adjustmentType: 'SPECIAL_REMISSION',
+            bookingId: 12345,
+            days: 27,
+            fromDate: '2023-04-30',
+            id: '3',
+            person: 'ABC123',
+            prisonId: 'LDS',
+            prisonName: 'Leeds (HMP)',
+            sentenceSequence: null,
+            specialRemission: {
+              type: 'RELEASE_IN_ERROR',
+            },
+          },
+          'user1',
+        )
+      })
+  })
+
+  it('POST /{nomsId}/special-remission/review/add uses the date of submission if no sentence date is present', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue(blankAdjustment)
+    prisonerService.getSentencesAndOffences.mockResolvedValue([])
+    jest.useFakeTimers().setSystemTime(new Date('2020-12-25'))
+
+    return request(app)
+      .post(`/${NOMS_ID}/special-remission/review/edit/${SESSION_ID}`)
+      .expect(302)
+      .expect(
+        'Location',
+        `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:13,%22action%22:%22CREATE%22%7D`,
+      )
+      .expect(() => {
+        expect(adjustmentsService.create).toHaveBeenCalledWith(
+          [
+            {
+              adjustmentType: 'SPECIAL_REMISSION',
+              bookingId: 12345,
+              days: 13,
+              fromDate: '2020-12-25',
+              person: 'ABC123',
+              specialRemission: {
+                type: 'MERITORIOUS_CONDUCT',
+              },
+            },
+          ],
+          'user1',
+        )
+      })
   })
 
   test.each`
