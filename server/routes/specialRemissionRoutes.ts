@@ -13,6 +13,7 @@ import SpecialRemissionViewModel from '../model/specialRemissionViewModel'
 import PrisonerService from '../services/prisonerService'
 import { daysBetween } from '../utils/utils'
 import SpecialRemissionRemoveModel from '../model/specialRemissionRemoveModel'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 export default class SpecialRemissionRoutes {
   constructor(
@@ -159,9 +160,14 @@ export default class SpecialRemissionRoutes {
 
   public submitReview: RequestHandler = async (req, res): Promise<void> => {
     const { username } = res.locals.user
+    const { bookingId } = res.locals.prisoner
     const { nomsId } = req.params
 
     const adjustment = this.adjustmentsStoreService.getOnly(req, nomsId)
+    const fromDate = this.getFromDate(await this.prisonerService.getSentencesAndOffences(bookingId, username))
+
+    adjustment.fromDate = fromDate.toISOString().substring(0, 10)
+
     if (adjustment) {
       if (adjustment.id) {
         await this.adjustmentsService.update(adjustment.id, adjustment, username)
@@ -210,5 +216,19 @@ export default class SpecialRemissionRoutes {
     return res.render('pages/adjustments/special-remission/decline', {
       model: new SpecialRemissionDeclineModel(nomsId, addOrEdit, id),
     })
+  }
+
+  private getFromDate(activeSentences: PrisonApiOffenderSentenceAndOffences[]) {
+    let fromDate = new Date()
+    const sentencesWithSentenceDate = activeSentences.filter(it => it.sentenceDate)
+
+    if (sentencesWithSentenceDate.length) {
+      fromDate = new Date(
+        sentencesWithSentenceDate.reduce((a, b) =>
+          new Date(a.sentenceDate) < new Date(b.sentenceDate) ? a : b,
+        ).sentenceDate,
+      )
+    }
+    return fromDate
   }
 }
