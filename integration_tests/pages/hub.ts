@@ -27,6 +27,10 @@ export default class HubPage extends AdjustmentsPage {
 
   public viewTaggedBailLink = (): PageElement => cy.get('[data-qa=view-tagged-bail]')
 
+  public addLawfullyAtLargeLink = (): PageElement => cy.get('[data-qa=add-lawfully-at-large]')
+
+  public viewLawfullyAtLargeLink = (): PageElement => cy.get('[data-qa=view-lawfully-at-large]')
+
   public relevantRemandMessage = (): PageElement => cy.get('[data-qa=relevant-remand-message]')
 
   public successMessage = (): PageElement => cy.get('[data-qa=success-message]')
