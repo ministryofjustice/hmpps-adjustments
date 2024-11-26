@@ -61,6 +61,18 @@ export default {
             taggedBail: { caseSequence: 2 },
             source: 'DPS',
           },
+          {
+            id: 'e626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+            bookingId: 1204935,
+            sentenceSequence: 2,
+            person: 'A1234AB',
+            adjustmentType: 'LAWFULLY_AT_LARGE',
+            fromDate: '2023-03-30',
+            toDate: '2023-04-17',
+            lawfullyAtLarge: { affectsDates: 'YES' },
+            prisonName: 'Leeds',
+            source: 'DPS',
+          },
         ],
       },
     })
@@ -261,6 +273,28 @@ export default {
       },
     })
   },
+  stubGetLalAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/e626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+      },
+      response: {
+        jsonBody: {
+          id: 'e626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+          adjustmentType: 'LAWFULLY_AT_LARGE',
+          bookingId: '1234',
+          fromDate: '2023-03-30',
+          toDate: '2023-04-17',
+          days: 18,
+          lawfullyAtLarge: { affectsDates: 'YES' },
+          person: 'A1234AB',
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
   stubGetRemandAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
@@ -289,6 +323,30 @@ export default {
       request: {
         method: 'PUT',
         urlPattern: '/adjustments-api/adjustments/4c3c057c-896d-4793-9022-f3001e209a36',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateLalAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/e626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteLalAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/e626a0e7-5eae-4ced-a10d-8e3bce9c522c',
       },
       response: {
         status: 200,

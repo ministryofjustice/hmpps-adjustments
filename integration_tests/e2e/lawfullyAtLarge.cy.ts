@@ -1,0 +1,66 @@
+import HubPage from '../pages/hub'
+import ReviewLawfullyAtLargePage from '../pages/lawfullAtLarge/reviewLawfullyAtLarge'
+import LawfulAtLargeFormPage from '../pages/lawfullAtLarge/lawfulAtLargeFormPage'
+import ViewLawfullyAtLargePage from '../pages/lawfullAtLarge/viewLawfullyAtLarge'
+import RemoveLawfullyAtLargePage from '../pages/lawfullAtLarge/removeLawfullyAtLarge'
+
+context('Enter Lawfully at Large', () => {
+  beforeEach(() => {
+    cy.task('reset')
+    cy.task('stubSignIn')
+    cy.task('stubManageUser')
+    cy.task('stubGetPrisonerDetails')
+    cy.task('stubGetUserCaseloads')
+    cy.task('stubGetAdjustments')
+    cy.task('subAdaDetailsNoIntercept')
+    cy.task('stubGetSentencesAndOffences')
+    cy.task('stubCreateAdjustment')
+    cy.task('stubGetLalAdjustment')
+    cy.task('stubUpdateLalAdjustment')
+    cy.task('stubDeleteLalAdjustment')
+    cy.task('stubValidateAdjustment')
+    cy.task('stubComponents')
+    cy.task('stubGetUnusedDeductionsCalculationResult')
+  })
+
+  it('Add Lawfully At Large', () => {
+    cy.signIn()
+    const hub = HubPage.goTo('A1234AB')
+    hub.addLawfullyAtLargeLink().click()
+    const form = LawfulAtLargeFormPage.verifyOnPage<LawfulAtLargeFormPage>(LawfulAtLargeFormPage, 'Enter LAL details')
+    form.enterFromDate('2024-04-20')
+    form.enterToDate('2024-05-22')
+    form.affectsDatesRadio().click()
+    form.submitButton().click()
+    const reviewLawfullyAtLargePage = ReviewLawfullyAtLargePage.verifyOnPage(ReviewLawfullyAtLargePage)
+    reviewLawfullyAtLargePage.checkOnPage()
+    reviewLawfullyAtLargePage.submit().click()
+    hub.successMessage().contains('33 days of LAL have been saved')
+  })
+  it('View & Edit Lawfully At Large', () => {
+    cy.signIn()
+    const hub = HubPage.goTo('A1234AB')
+    hub.viewLawfullyAtLargeLink().click()
+    const viewLawfullyAtLargePage = ViewLawfullyAtLargePage.verifyOnPage(ViewLawfullyAtLargePage)
+    viewLawfullyAtLargePage.editLink().click()
+    const form = LawfulAtLargeFormPage.verifyOnPage<LawfulAtLargeFormPage>(LawfulAtLargeFormPage, 'Edit LAL details')
+    form.clearToAndFromDateFields()
+    form.enterFromDate('2023-04-01')
+    form.enterToDate('2023-04-18')
+    form.submitButton().click()
+    const reviewLawfullyAtLargePage = ReviewLawfullyAtLargePage.verifyOnPage(ReviewLawfullyAtLargePage)
+    reviewLawfullyAtLargePage.checkOnPage()
+    reviewLawfullyAtLargePage.submit().click()
+    hub.successMessage().contains('LAL (Lawfully at large) details have been updated')
+  })
+  it('View & Delete Lawfully At Large', () => {
+    cy.signIn()
+    const hub = HubPage.goTo('A1234AB')
+    hub.viewLawfullyAtLargeLink().click()
+    const viewLawfullyAtLargePage = ViewLawfullyAtLargePage.verifyOnPage(ViewLawfullyAtLargePage)
+    viewLawfullyAtLargePage.deleteLink().click()
+    const removeLawfullyAtLargePage = RemoveLawfullyAtLargePage.verifyOnPage(RemoveLawfullyAtLargePage)
+    removeLawfullyAtLargePage.submit().click()
+    hub.successMessage().contains('18 days of LAL have been deleted')
+  })
+})
