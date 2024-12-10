@@ -51,7 +51,8 @@
     {{ govukButton({
       text: "Return to homepage",
       preventDoubleClick: true,
-      href: "/" + model.nomsId
+      href: "/" + model.nomsId,
+      attributes: {'data-qa': 'return-to-homepage'}
     }) }}
   </div>
 
