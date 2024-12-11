@@ -74,6 +74,18 @@ export default {
             source: 'DPS',
           },
           {
+            id: 'ual-626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+            adjustmentType: 'UNLAWFULLY_AT_LARGE',
+            toDate: '2024-02-23',
+            fromDate: '2024-03-23',
+            unlawfullyAtLarge: { type: 'RECALL' },
+            person: 'A1234AB',
+            bookingId: 12345,
+            sentenceSequence: null,
+            prisonId: 'LDS',
+            days: 30,
+          },
+          {
             id: '8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
             bookingId: 1204935,
             sentenceSequence: 2,
@@ -285,6 +297,30 @@ export default {
       },
     })
   },
+  stubGetUalAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/ual-626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+      },
+      response: {
+        jsonBody: {
+          id: 'ual-626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+          adjustmentType: 'UNLAWFULLY_AT_LARGE',
+          toDate: '2024-02-23',
+          fromDate: '2024-03-23',
+          unlawfullyAtLarge: { type: 'RECALL' },
+          person: 'A1234AB',
+          bookingId: 12345,
+          sentenceSequence: null,
+          prisonId: 'LDS',
+          days: 30,
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
   stubGetLalAdjustment: (): SuperAgentRequest => {
     return stubFor({
       request: {
@@ -393,6 +429,30 @@ export default {
       request: {
         method: 'PUT',
         urlPattern: '/adjustments-api/adjustments/e626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateUalAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/ual-626a0e7-5eae-4ced-a10d-8e3bce9c522c',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteUalAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/ual-626a0e7-5eae-4ced-a10d-8e3bce9c522c',
       },
       response: {
         status: 200,
