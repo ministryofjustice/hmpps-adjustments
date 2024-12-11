@@ -84,6 +84,16 @@ export default {
             sentenceSequence: null,
             prisonId: 'LDS',
             days: 30,
+          },
+            id: '8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+            bookingId: 1204935,
+            sentenceSequence: 2,
+            person: 'A1234AB',
+            adjustmentType: 'SPECIAL_REMISSION',
+            fromDate: '2023-03-30',
+            days: 123,
+            specialRemission: { type: 'MERITORIOUS_CONDUCT' },
+            prisonName: 'Leeds',
             source: 'DPS',
           },
         ],
@@ -327,6 +337,52 @@ export default {
           lawfullyAtLarge: { affectsDates: 'YES' },
           person: 'A1234AB',
         },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubGetSpecialRemissionAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
+        jsonBody: {
+          id: '8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+          adjustmentType: 'SPECIAL_REMISSION',
+          bookingId: '1234',
+          fromDate: '2023-03-30',
+          toDate: '2023-04-17',
+          days: 42,
+          specialRemission: { type: 'MERITORIOUS_CONDUCT' },
+          person: 'A1234AB',
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteSpecialRemissionAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateSpecialRemissionAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
         status: 200,
         headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       },
