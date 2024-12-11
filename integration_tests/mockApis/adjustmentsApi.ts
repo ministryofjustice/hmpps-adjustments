@@ -85,6 +85,7 @@ export default {
             prisonId: 'LDS',
             days: 30,
           },
+          {
             id: '8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
             bookingId: 1204935,
             sentenceSequence: 2,
