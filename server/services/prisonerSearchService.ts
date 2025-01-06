@@ -2,20 +2,17 @@ import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerS
 import PrisonerSearchApiClient from '../api/prisonerSearchApiClient'
 import { HmppsAuthClient } from '../data'
 import FullPageError from '../model/FullPageError'
+import { UserDetails } from './userService'
 
 export default class PrisonerSearchService {
   constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
 
-  async getPrisonerDetails(
-    nomsId: string,
-    userCaseloads: string[],
-    username: string,
-  ): Promise<PrisonerSearchApiPrisoner> {
+  async getPrisonerDetails(nomsId: string, user: UserDetails): Promise<PrisonerSearchApiPrisoner> {
     try {
       const prisonerDetails = await new PrisonerSearchApiClient(
-        await this.getSystemClientToken(username),
+        await this.getSystemClientToken(user.username),
       ).getPrisonerDetails(nomsId)
-      if (userCaseloads.includes(prisonerDetails.prisonId)) {
+      if (this.isAccessiblePrisoner(prisonerDetails.prisonId, user)) {
         return prisonerDetails
       }
       throw FullPageError.notInCaseLoadError()
@@ -26,6 +23,14 @@ export default class PrisonerSearchService {
         throw error
       }
     }
+  }
+
+  private isAccessiblePrisoner(agencyId: string, user: UserDetails): boolean {
+    return user.caseloads.includes(agencyId) || ['TRN'].includes(agencyId) || this.isReleasedAccessible(agencyId, user)
+  }
+
+  private isReleasedAccessible(agencyId: string, user: UserDetails): boolean {
+    return user.hasInactiveBookingsAccess && ['OUT'].includes(agencyId)
   }
 
   private async getSystemClientToken(username: string): Promise<string> {
