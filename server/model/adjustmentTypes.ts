@@ -1,5 +1,4 @@
 import { AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
-import config from '../config'
 
 export type AdjustmentType = {
   value: AdjustmentTypes
@@ -10,7 +9,7 @@ export type AdjustmentType = {
   deduction: boolean
 }
 
-let types: AdjustmentType[] = [
+const types: AdjustmentType[] = [
   {
     value: 'UNUSED_DEDUCTIONS',
     text: 'Unused deductions',
@@ -63,20 +62,14 @@ let types: AdjustmentType[] = [
     url: 'lawfully-at-large',
     deduction: false,
   } as AdjustmentType,
+  {
+    value: 'SPECIAL_REMISSION',
+    text: 'Special remission',
+    shortText: 'Special remission',
+    url: 'special-remission',
+    deduction: true,
+  } as AdjustmentType,
 ]
-
-if (config.featureToggles.unsupportedCalculationAdjustmentTypes) {
-  types = [
-    ...types,
-    {
-      value: 'SPECIAL_REMISSION',
-      text: 'Special remission',
-      shortText: 'Special remission',
-      url: 'special-remission',
-      deduction: true,
-    } as AdjustmentType,
-  ]
-}
 
 const adjustmentTypes = [...types]
 export default adjustmentTypes
