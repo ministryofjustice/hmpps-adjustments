@@ -31,24 +31,8 @@
           {% endif %}
       </h1>
 
-      <p class="govuk-body">
-        {% if model.intercept.type == 'FIRST_TIME' %}
-          {% if model.showExistingAdaMessage %}
-            This service has identified an ADA adjustment with no supporting ADA adjudication.
-            You must review the ADA adjustment and confirm whether it should be deleted.
-          {% else %}
-            This service has identified ADA adjustments that were created in NOMIS.
-            You must review the adjudications with ADAs and approve them in this service.
-          {% endif %}
-        {% elif model.intercept.type == 'PADA' %}
-          {% if model.intercept.number > 1 %}
-            There are PADAs (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADAs and approve the ones that are relevant to the current sentence.
-          {% else %}
-            There is a PADA (Prospective additional days awarded) recorded for {{ prisoner.firstName | title }} {{ prisoner.lastName | title }}. Review the PADA and approve if it's relevant to the current sentence.
-          {% endif %}
-        {% elif model.intercept.type == 'UPDATE' %}
-          Updates have been made to ADA (Additional days awarded) information, which need to be approved.
-        {% endif %}
+      <p class="govuk-body" data-qa="page-body-message">
+          {{model.intercept.message}}
       </p>
 
       {% if model.intercept.anyProspective %}
