@@ -167,5 +167,11 @@ export default {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
     appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
   },
+<<<<<<< HEAD
   displayAdaIntercept: get('DISPLAY_ADA_INTERCEPT', 'true') === 'true',
+=======
+  featureToggles: {
+    timeSpentInCustodyAbroadEnabled: get('TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED', 'true') === 'true',
+  },
+>>>>>>> 79aadf8 (ADJST-921 Add time spent in custody abroad adjustment type)
 }

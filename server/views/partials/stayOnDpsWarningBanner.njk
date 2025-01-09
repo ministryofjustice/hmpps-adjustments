@@ -1,0 +1,10 @@
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% set html %}
+  <p class="govuk-notification-banner__heading"> Stay on DPS to accurately calculate a release date. </p>
+  <p> If you return to NOMIS to calculate a release date, this adjustment will not be included in that calculation. </p>
+{% endset %}
+
+{{ govukNotificationBanner({
+  html: html
+}) }}

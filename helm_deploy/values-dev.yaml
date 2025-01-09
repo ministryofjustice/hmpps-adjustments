@@ -24,8 +24,12 @@ generic-service:
     PRISONER_SEARCH_API_URL: "https://prisoner-search-dev.prison.service.justice.gov.uk"
     COMPONENT_API_URL: "https://frontend-components-dev.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
+<<<<<<< HEAD
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api-dev.hmpps.service.justice.gov.uk"
     DISPLAY_ADA_INTERCEPT: 'false'
+=======
+    TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'true'
+>>>>>>> 79aadf8 (ADJST-921 Add time spent in custody abroad adjustment type)
 
   # Switches off the allow list in the DEV env only.
   allowlist: null
