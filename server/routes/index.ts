@@ -10,6 +10,7 @@ import PrisonerImageRoutes from './prisonerImageRoutes'
 import ManualUnusedDeductionRoutes from './manualUnusedDeductionRoutes'
 import ReviewUnusedDeductionRoutes from './reviewUnusedDeductionRoutes'
 import SpecialRemissionRoutes from './specialRemissionRoutes'
+import TimeSpentInCustodyAbroadRoutes from './timeSpentInCustodyAbroadRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -67,6 +68,12 @@ export default function routes(service: Services): Router {
   )
 
   const specialRemissionRoutes = new SpecialRemissionRoutes(
+    service.adjustmentsStoreService,
+    service.adjustmentsService,
+    service.prisonerService,
+  )
+
+  const timeSpentInCustodyAbroadRoutes = new TimeSpentInCustodyAbroadRoutes(
     service.adjustmentsStoreService,
     service.adjustmentsService,
     service.prisonerService,
@@ -149,6 +156,17 @@ export default function routes(service: Services): Router {
   post('/:nomsId/special-remission/type/:addOrEdit/:id', specialRemissionRoutes.submitType)
   get('/:nomsId/special-remission/review/:addOrEdit/:id', specialRemissionRoutes.review)
   post('/:nomsId/special-remission/review/:addOrEdit/:id', specialRemissionRoutes.submitReview)
+
+  get('/:nomsId/custody-abroad/add', timeSpentInCustodyAbroadRoutes.add)
+  get('/:nomsId/custody-abroad/view', timeSpentInCustodyAbroadRoutes.view)
+  get('/:nomsId/custody-abroad/remove/:id', timeSpentInCustodyAbroadRoutes.remove)
+  post('/:nomsId/custody-abroad/remove/:id', timeSpentInCustodyAbroadRoutes.submitRemove)
+  get('/:nomsId/custody-abroad/documentation/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.documentation)
+  post('/:nomsId/custody-abroad/documentation/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitDocumentation)
+  get('/:nomsId/custody-abroad/days/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.days)
+  post('/:nomsId/custody-abroad/days/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitDays)
+  get('/:nomsId/custody-abroad/review/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.review)
+  post('/:nomsId/custody-abroad/review/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitReview)
 
   get('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.review)
   post('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.submitReview)
