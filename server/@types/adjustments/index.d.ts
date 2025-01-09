@@ -210,6 +210,7 @@ export interface components {
         | 'SPECIAL_REMISSION'
         | 'UNUSED_DEDUCTIONS'
         | 'CUSTODY_ABROAD'
+        | 'APPEAL_APPLICANT'
       /**
        * Format: date
        * @description The end date of the adjustment
@@ -232,6 +233,7 @@ export interface components {
       specialRemission?: components['schemas']['SpecialRemissionDto']
       taggedBail?: components['schemas']['TaggedBailDto']
       timeSpentInCustodyAbroad?: components['schemas']['TimeSpentInCustodyAbroadDto']
+      timeSpentAsAnAppealApplicantNotToCount?: components['schemas']['TimeSpentAsAnAppealApplicantNotToCountDto']
       /**
        * Format: int32
        * @description The NOMIS sentence sequence of the adjustment
@@ -318,6 +320,11 @@ export interface components {
        */
       documentationSource?: 'COURT_WARRANT' | 'PPCS_LETTER'
     }
+    /** @description The details of the time spent as an appeal applicant not to count adjustment */
+    TimeSpentAsAnAppealApplicantNotToCountDto: {
+      /** @description The court of appeal reference number for the time spent as an appeal applicant not to count adjustment */
+      courtOfAppealReferenceNumber?: string
+    }
     /** @description The details of a UAL adjustment */
     UnlawfullyAtLargeDto: {
       /**
@@ -377,6 +384,9 @@ export interface components {
         | 'LAL_DATE_MUST_BE_AFTER_SENTENCE_DATE'
         | 'SREM_TYPE_NOT_NULL'
         | 'TSICA_DOCUMENTATION_SOURCE_NOT_NULL'
+        | 'TSAANTC_COURT_OF_APPEAL_REFERENCE_NOT_NULL'
+        | 'TSAANTC_COURT_OF_APPEAL_REFERENCE_WRONG_LENGTH'
+        | 'TSAANTC_COURT_OF_APPEAL_REFERENCE_INVALID_CHARACTERS'
       arguments: string[]
       message: string
       /** @enum {string} */

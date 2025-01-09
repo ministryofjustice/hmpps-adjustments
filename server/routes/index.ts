@@ -11,6 +11,7 @@ import ManualUnusedDeductionRoutes from './manualUnusedDeductionRoutes'
 import ReviewUnusedDeductionRoutes from './reviewUnusedDeductionRoutes'
 import SpecialRemissionRoutes from './specialRemissionRoutes'
 import TimeSpentInCustodyAbroadRoutes from './timeSpentInCustodyAbroadRoutes'
+import TimeSpentAsAnAppealApplicantRoutes from './timeSpentAsAnAppealApplicantRoutes'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
@@ -74,6 +75,12 @@ export default function routes(service: Services): Router {
   )
 
   const timeSpentInCustodyAbroadRoutes = new TimeSpentInCustodyAbroadRoutes(
+    service.adjustmentsStoreService,
+    service.adjustmentsService,
+    service.prisonerService,
+  )
+
+  const timeSpentAsAnAppealApplicantRoutes = new TimeSpentAsAnAppealApplicantRoutes(
     service.adjustmentsStoreService,
     service.adjustmentsService,
     service.prisonerService,
@@ -167,6 +174,17 @@ export default function routes(service: Services): Router {
   post('/:nomsId/custody-abroad/days/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitDays)
   get('/:nomsId/custody-abroad/review/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.review)
   post('/:nomsId/custody-abroad/review/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitReview)
+
+  get('/:nomsId/appeal-applicant/add/', timeSpentAsAnAppealApplicantRoutes.add)
+  get('/:nomsId/appeal-applicant/view/', timeSpentAsAnAppealApplicantRoutes.view)
+  get('/:nomsId/appeal-applicant/remove/:id', timeSpentAsAnAppealApplicantRoutes.remove)
+  post('/:nomsId/appeal-applicant/remove/:id', timeSpentAsAnAppealApplicantRoutes.submitRemove)
+  get('/:nomsId/appeal-applicant/days/:addOrEdit/:id', timeSpentAsAnAppealApplicantRoutes.days)
+  post('/:nomsId/appeal-applicant/days/:addOrEdit/:id', timeSpentAsAnAppealApplicantRoutes.submitDays)
+  get('/:nomsId/appeal-applicant/reference/:addOrEdit/:id', timeSpentAsAnAppealApplicantRoutes.reference)
+  post('/:nomsId/appeal-applicant/reference/:addOrEdit/:id', timeSpentAsAnAppealApplicantRoutes.submitReference)
+  get('/:nomsId/appeal-applicant/review/:addOrEdit/:id', timeSpentAsAnAppealApplicantRoutes.review)
+  post('/:nomsId/appeal-applicant/review/:addOrEdit/:id', timeSpentAsAnAppealApplicantRoutes.submitReview)
 
   get('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.review)
   post('/:nomsId/review-deductions', reviewUnusedDeductionRoutes.submitReview)
