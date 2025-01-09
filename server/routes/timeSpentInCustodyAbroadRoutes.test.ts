@@ -7,7 +7,6 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import SessionAdjustment from '../@types/AdjustmentTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
