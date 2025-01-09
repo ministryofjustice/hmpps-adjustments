@@ -1,25 +1,5 @@
 {%- from "hmpps/components/mini-profile/macro.njk" import miniProfile -%}
-{% from "hmpps/components/court-cases-release-dates/profile-banner/macro.njk" import profileBanner %}
-
 {% if prisoner %}
-    {% set banners = {
-        'OUT': {
-            dataQa: "personOutsideBanner",
-            heading: "This person has been released",
-            paragraphText: "Some information may be hidden"
-        },
-        'TRN': {
-            dataQa: "personTransferredBanner",
-            heading: "This person has been transferred",
-            paragraphText: "Some information may be hidden"
-        }
-    } %}
-
-    {% set profileBannerParams = banners[prisoner.prisonId] %}
-
-    {% if profileBannerParams %}
-        {{ profileBanner(profileBannerParams) }}
-    {% endif %}
     {% set person = {
         firstName: prisoner.firstName,
         lastName: prisoner.lastName,

@@ -11,7 +11,6 @@ export interface UserDetails extends User {
   caseloadDescriptions: string[]
   caseloadMap: Map<string, string>
   isSupportUser: boolean
-  hasInactiveBookingsAccess: boolean
 }
 
 export default class UserService {
@@ -32,7 +31,6 @@ export default class UserService {
       caseloadDescriptions: userCaseloads.map(uc => uc.description),
       caseloadMap: new Map(userCaseloads.map(uc => [uc.caseLoadId, uc.description])),
       isSupportUser: roles.includes('COURTCASE_RELEASEDATE_SUPPORT'),
-      hasInactiveBookingsAccess: roles.includes('INACTIVE_BOOKINGS'),
     }
   }
 
