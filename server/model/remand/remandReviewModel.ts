@@ -4,7 +4,8 @@ import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../../@t
 import {
   daysBetween,
   formatDate,
-  getSentenceRecallTagHTML,
+  getCommittedText,
+  getSummaryHtmlForOffences,
   offencesForRemandAdjustment,
   remandRelatedValidationSummary,
 } from '../../utils/utils'
@@ -91,20 +92,7 @@ export default class RemandReviewModel {
             text: 'Offences',
           },
           value: {
-            html: `<div>
-                    ${offences
-                      .map(it => {
-                        return `<div><span class="govuk-!-font-weight-bold">${it.offenceDescription}</span>${it.recall ? getSentenceRecallTagHTML() : ''}<br>
-                        <span class="govuk-body-s">
-                          ${this.getCommittedText(it, true)}
-                        </span><br>
-                        <span class="govuk-body-s">
-                          ${this.getHeardAtCourt(it)}
-                        </span>
-                        </div>`
-                      })
-                      .join('')}
-                  </div>`,
+            html: getSummaryHtmlForOffences(offences),
           },
           actions: {
             items: [
@@ -113,7 +101,7 @@ export default class RemandReviewModel {
                 text: 'Edit',
                 visuallyHiddenText: `offences. ${offences
                   .map(it => {
-                    return `${it.offenceDescription} ${this.getCommittedText(it, false)}${it.recall ? '. This offence was recalled' : ''}`
+                    return `${it.offenceDescription} ${getCommittedText(it, false)}${it.recall ? '. This offence was recalled' : ''}`
                   })
                   .join('. ')}`,
               },
@@ -134,26 +122,6 @@ export default class RemandReviewModel {
 
   public getHeardAtCourt(offence: PrisonApiOffence & { recall: boolean; courtDescription: string }): string {
     return `Heard at ${offence.courtDescription}`
-  }
-
-  public getCommittedText(offence: PrisonApiOffence & { recall: boolean }, noWrapDate: boolean): string {
-    let committedText
-    if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
-      committedText = `Committed from ${this.formatDate(offence.offenceStartDate, noWrapDate)} to ${this.formatDate(offence.offenceEndDate, noWrapDate)}`
-    } else if (offence.offenceStartDate) {
-      committedText = `Committed on ${this.formatDate(offence.offenceStartDate, noWrapDate)}`
-    } else if (offence.offenceEndDate) {
-      committedText = `Committed on ${this.formatDate(offence.offenceEndDate, noWrapDate)}`
-    } else {
-      committedText = 'Offence date not entered'
-    }
-
-    return committedText
-  }
-
-  private formatDate(date: string, noWrapDate: boolean) {
-    const formattedDate = dayjs(date).format('D MMMM YYYY')
-    return noWrapDate ? `<span class="govuk-!-white-space-nowrap">${formattedDate}</span> ` : formattedDate
   }
 
   public totalDaysSummary() {
