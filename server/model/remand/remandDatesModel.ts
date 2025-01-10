@@ -1,4 +1,4 @@
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 import RemandDatesForm from './remandDatesForm'
 
 export default class RemandDatesModel {

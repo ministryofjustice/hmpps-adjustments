@@ -1,7 +1,7 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { UnusedDeductionCalculationResponse } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
-import { offencesForRemandAdjustment, remandRelatedValidationSummary } from '../utils/utils'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { UnusedDeductionCalculationResponse } from '../../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import { offencesForRemandAdjustment, remandRelatedValidationSummary } from '../../utils/utils'
 
 export default class RemandChangeModel {
   constructor(

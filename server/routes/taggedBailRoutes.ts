@@ -3,12 +3,12 @@ import { randomUUID } from 'crypto'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
-import TaggedBailSelectCaseModel from '../model/taggedBailSelectCaseModel'
-import TaggedBailDaysModel from '../model/taggedBailDaysModel'
-import TaggedBailDaysForm from '../model/taggedBailDaysForm'
-import TaggedBailReviewModel from '../model/taggedBailReviewModel'
+import TaggedBailSelectCaseModel from '../model/tagged-bail/taggedBailSelectCaseModel'
+import TaggedBailDaysModel from '../model/tagged-bail/taggedBailDaysModel'
+import TaggedBailDaysForm from '../model/tagged-bail/taggedBailDaysForm'
+import TaggedBailReviewModel from '../model/tagged-bail/taggedBailReviewModel'
 import { Message } from '../model/adjustmentsHubViewModel'
-import TaggedBailViewModel from '../model/taggedBailViewModel'
+import TaggedBailViewModel from '../model/tagged-bail/taggedBailViewModel'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
@@ -16,8 +16,8 @@ import {
   relevantSentenceForTaggedBailAdjustment,
 } from '../utils/utils'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
-import TaggedBailChangeModel from '../model/taggedBailEditModel'
-import TaggedBailRemoveModel from '../model/taggedBailRemoveModel'
+import TaggedBailChangeModel from '../model/tagged-bail/taggedBailEditModel'
+import TaggedBailRemoveModel from '../model/tagged-bail/taggedBailRemoveModel'
 import ParamStoreService from '../services/paramStoreService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import UnusedDeductionsService from '../services/unusedDeductionsService'

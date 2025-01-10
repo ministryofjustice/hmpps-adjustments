@@ -5,8 +5,8 @@ import { AdjustmentType } from './adjustmentTypes'
 import AdjustmentsForm from './adjustmentsForm'
 import RestoredAdditionalDaysForm from './restoredAdditionalDaysForm'
 import GenericAdjustmentForm, { GenericAdjustmentFormOptions } from './genericAdjustmentForm'
-import LawfullyAtLargeForm from './lawfullyAtLargeForm'
-import UnlawfullyAtLargeForm from './unlawfullyAtLargeForm'
+import LawfullyAtLargeForm from './lawfully-at-large/lawfullyAtLargeForm'
+import UnlawfullyAtLargeForm from './unlawfully-at-large/unlawfullyAtLargeForm'
 
 export default class AdjustmentsFormFactory {
   static fromAdjustment<T extends AdjustmentsForm<unknown>>(adjustment: Adjustment): AdjustmentsForm<T> {

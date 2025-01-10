@@ -1,5 +1,5 @@
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
 import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
@@ -7,9 +7,9 @@ import {
   isSentenceRecalled,
   relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
-} from '../utils/utils'
-import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
-import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
+} from '../../utils/utils'
+import UnusedDeductionsMessageViewModel from '../unused-deductions/unusedDeductionsMessageViewModel'
+import { UnusedDeductionMessageType } from '../../services/unusedDeductionsService'
 
 export default class TaggedBailViewModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]

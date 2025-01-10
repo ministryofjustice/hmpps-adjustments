@@ -1,7 +1,7 @@
-import SessionAdjustment from '../@types/AdjustmentTypes'
-import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import PrisonerService from '../services/prisonerService'
-import { daysBetween, groupBy } from '../utils/utils'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import PrisonerService from '../../services/prisonerService'
+import { daysBetween, groupBy } from '../../utils/utils'
 import RemandOffencesForm from './remandOffencesForm'
 
 export default class RemandSelectOffencesModel {

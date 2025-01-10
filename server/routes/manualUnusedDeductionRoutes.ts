@@ -1,13 +1,13 @@
 import { RequestHandler } from 'express'
-import UnusedDeductionsDaysModel from '../model/unusedDeductionsDaysModel'
-import UnusedDeductionsDaysForm from '../model/unusedDeductionsDaysForm'
+import UnusedDeductionsDaysModel from '../model/unused-deductions/unusedDeductionsDaysModel'
+import UnusedDeductionsDaysForm from '../model/unused-deductions/unusedDeductionsDaysForm'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import { Message } from '../model/adjustmentsHubViewModel'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import UnusedDeductionsConfirmModel from '../model/unusedDeductionsConfirmModel'
+import UnusedDeductionsConfirmModel from '../model/unused-deductions/unusedDeductionsConfirmModel'
 
 export default class ManualUnusedDeductionRoutes {
   constructor(
