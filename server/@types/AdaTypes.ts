@@ -27,7 +27,7 @@ type PadasToReview = {
   totalProspective: number
 }
 
-type InterceptType = 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA'
+type InterceptType = 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA' | 'PADAS' | 'FIRST_TIME_WITH_NO_ADJUDICATION'
 
 type AdaIntercept = {
   type: InterceptType
