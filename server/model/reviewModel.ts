@@ -1,8 +1,8 @@
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
-import ualType from './ualType'
+import ualType from './unlawfully-at-large/ualType'
 import { daysBetween, formatDate } from '../utils/utils'
-import lalAffectsReleaseDates from './lalAffectsReleaseDates'
+import lalAffectsReleaseDates from './lawfully-at-large/lalAffectsReleaseDates'
 
 export default class ReviewModel {
   constructor(public adjustment: Adjustment) {}

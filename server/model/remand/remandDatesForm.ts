@@ -1,10 +1,10 @@
 import dayjs from 'dayjs'
 import { areIntervalsOverlapping } from 'date-fns'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import AbstractForm from './abstractForm'
-import ValidationError from './validationError'
-import { dateItems, dateToString, daysBetween, fieldsToDate, isDateInFuture, isFromAfterTo } from '../utils/utils'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import AbstractForm from '../abstractForm'
+import ValidationError from '../validationError'
+import { dateItems, dateToString, daysBetween, fieldsToDate, isDateInFuture, isFromAfterTo } from '../../utils/utils'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 
 export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
   'from-day': string

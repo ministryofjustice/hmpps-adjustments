@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { daysBetween } from '../utils/utils'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import { daysBetween } from '../../utils/utils'
 
 export default class RemandSaveModel {
   constructor(

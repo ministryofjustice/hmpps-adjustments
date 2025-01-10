@@ -1,7 +1,7 @@
-import SessionAdjustment from '../@types/AdjustmentTypes'
-import AbstractForm from './abstractForm'
-import ValidationError from './validationError'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
+import AbstractForm from '../abstractForm'
+import ValidationError from '../validationError'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
 
 export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeductionsDaysForm> {
   days: string

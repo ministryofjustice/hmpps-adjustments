@@ -1,11 +1,11 @@
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 import {
   getActiveSentencesByCaseSequence,
   isSentenceRecalled,
   relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
-} from '../utils/utils'
+} from '../../utils/utils'
 
 type SentenceWithCaseDetails = PrisonApiOffenderSentenceAndOffences & {
   selected: boolean
