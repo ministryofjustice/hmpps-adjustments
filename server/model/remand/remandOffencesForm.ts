@@ -1,9 +1,9 @@
-import SessionAdjustment from '../@types/AdjustmentTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { offencesForRemandAdjustment } from '../utils/utils'
-import AbstractForm from './abstractForm'
-import ValidationError from './validationError'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { offencesForRemandAdjustment } from '../../utils/utils'
+import AbstractForm from '../abstractForm'
+import ValidationError from '../validationError'
 
 export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm> {
   chargeId: string | string[]

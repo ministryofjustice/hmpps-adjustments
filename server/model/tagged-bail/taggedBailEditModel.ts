@@ -1,7 +1,7 @@
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { dateToString, getSentenceRecallTagHTML, isSentenceRecalled } from '../utils/utils'
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import { dateToString, getSentenceRecallTagHTML, isSentenceRecalled } from '../../utils/utils'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 
 export default class TaggedBailEditModel {
   constructor(

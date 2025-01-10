@@ -1,9 +1,9 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import AbstractForm from './abstractForm'
-import ValidationError from './validationError'
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import AbstractForm from '../abstractForm'
+import ValidationError from '../validationError'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 
-export default class SpecialRemissionDaysForm extends AbstractForm<SpecialRemissionDaysForm> {
+export default class SpecialRemissionTypeForm extends AbstractForm<SpecialRemissionTypeForm> {
   days: string
 
   isEdit: boolean
@@ -34,8 +34,8 @@ export default class SpecialRemissionDaysForm extends AbstractForm<SpecialRemiss
     return []
   }
 
-  static fromAdjustment(adjustment: Adjustment): SpecialRemissionDaysForm {
-    return new SpecialRemissionDaysForm({
+  static fromAdjustment(adjustment: Adjustment): SpecialRemissionTypeForm {
+    return new SpecialRemissionTypeForm({
       days: adjustment.days?.toString() || '',
     })
   }

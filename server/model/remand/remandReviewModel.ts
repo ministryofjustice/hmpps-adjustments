@@ -1,15 +1,15 @@
 import dayjs from 'dayjs'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 import {
   daysBetween,
   formatDate,
   getSentenceRecallTagHTML,
   offencesForRemandAdjustment,
   remandRelatedValidationSummary,
-} from '../utils/utils'
-import ReviewRemandForm from './reviewRemandForm'
-import { CalculateReleaseDatesValidationMessage } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+} from '../../utils/utils'
+import ReviewRemandForm from '../reviewRemandForm'
+import { CalculateReleaseDatesValidationMessage } from '../../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
 
 export default class RemandReviewModel {
   adjustmentIds: string[]
