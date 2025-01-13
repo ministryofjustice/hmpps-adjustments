@@ -3,8 +3,8 @@ import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPe
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 import { calculateReleaseDatesCheckInformationUrl, daysBetween } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
-import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
 import { ThingsToDo } from '../@types/courtCasesReleaseDatesApi/types'
+import UnusedDeductionsMessageViewModel from './unused-deductions/unusedDeductionsMessageViewModel'
 
 export type Message = {
   type: string

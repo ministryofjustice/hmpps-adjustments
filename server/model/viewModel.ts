@@ -1,10 +1,10 @@
 import dayjs from 'dayjs'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
-import ualType from './ualType'
+import ualType from './unlawfully-at-large/ualType'
 import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { formatDate } from '../utils/utils'
-import lalAffectsReleaseDates from './lalAffectsReleaseDates'
+import lalAffectsReleaseDates from './lawfully-at-large/lalAffectsReleaseDates'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
