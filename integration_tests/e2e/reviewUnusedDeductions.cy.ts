@@ -31,6 +31,7 @@ context('Review Unused Deductions', () => {
     cy.task('stubGetTaggedBailAdjustment')
     cy.task('stubComponents')
     cy.task('stubDeleteAdjustment')
+    cy.task('stubGetThingsToDo')
   })
 
   it('Review Unused Deductions - Add remand', () => {

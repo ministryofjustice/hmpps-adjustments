@@ -26,6 +26,7 @@ context('Enter Remand', () => {
     cy.task('stubDeleteRemandAdjustment')
     cy.task('stubComponents')
     cy.task('stubGetUnusedDeductionsCalculationResult')
+    cy.task('stubGetThingsToDo')
   })
 
   it('Add Remand', () => {
