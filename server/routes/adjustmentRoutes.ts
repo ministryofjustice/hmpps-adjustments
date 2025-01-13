@@ -20,6 +20,7 @@ import RecallForm from '../model/recallForm'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
+import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -29,6 +30,7 @@ export default class AdjustmentRoutes {
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
     private readonly paramStoreService: ParamStoreService,
+    private readonly courtCasesReleaseDatesService: CourtCasesReleaseDatesService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -75,8 +77,10 @@ export default class AdjustmentRoutes {
       username,
       activeCaseLoadId,
     )
+
+    const thingsToDo = await this.courtCasesReleaseDatesService.getThingsToDo(prisonerNumber)
     if (!messageExists) {
-      if (!isSupportUser && adaAdjudicationDetails.intercept.type !== 'NONE') {
+      if (!isSupportUser && adaAdjudicationDetails.intercept.type !== 'NONE' && config.displayAdaIntercept) {
         return res.redirect(`/${nomsId}/additional-days/intercept`)
       }
     }
@@ -101,6 +105,8 @@ export default class AdjustmentRoutes {
         unusedDeductionMessage,
         adaAdjudicationDetails,
         inactiveDeletedAdjustments,
+        thingsToDo,
+        thingsToDo.hasAdjustmentThingsToDo ? '1' : null,
       ),
     })
   }

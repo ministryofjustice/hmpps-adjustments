@@ -108,6 +108,14 @@ export default {
       },
       agent: new AgentConfig(),
     },
+    courtCasesReleaseDatesApi: {
+      url: get('COURT_CASES_RELEASE_DATES_API_URL', 'http://localhost:8083', requiredInProduction),
+      timeout: {
+        response: Number(get('COURT_CASES_RELEASE_DATES_API_TIMEOUT_RESPONSE', 10000)),
+        deadline: Number(get('COURT_CASES_RELEASE_DATES_API_TIMEOUT_DEADLINE', 10000)),
+      },
+      agent: new AgentConfig(Number(get('COURT_CASES_RELEASE_DATES_API_TIMEOUT_RESPONSE', 10000))),
+    },
     adjudications: {
       url: get('ADJUDICATIONS_API_URL', 'http://localhost:8080', requiredInProduction),
       timeout: {
@@ -159,4 +167,5 @@ export default {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
     appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
   },
+  displayAdaIntercept: get('DISPLAY_ADA_INTERCEPT', 'true') === 'true',
 }
