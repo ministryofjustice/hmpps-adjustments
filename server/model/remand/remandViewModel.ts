@@ -1,10 +1,10 @@
 import dayjs from 'dayjs'
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
-import { offencesForRemandAdjustment } from '../utils/utils'
-import UnusedDeductionsMessageViewModel from './unusedDeductionsMessageViewModel'
-import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
-import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { offencesForRemandAdjustment } from '../../utils/utils'
+import UnusedDeductionsMessageViewModel from '../unused-deductions/unusedDeductionsMessageViewModel'
+import { UnusedDeductionMessageType } from '../../services/unusedDeductionsService'
+import { IdentifyRemandDecision } from '../../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 
 export default class RemandViewModel {
   public adjustments: Adjustment[]

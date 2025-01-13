@@ -1,5 +1,5 @@
 import TaggedBailDaysForm from './taggedBailDaysForm'
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 
 export default class TaggedBailDaysModel {
   constructor(

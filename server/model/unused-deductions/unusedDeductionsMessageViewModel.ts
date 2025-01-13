@@ -1,7 +1,7 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import config from '../config'
-import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
-import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import config from '../../config'
+import { UnusedDeductionMessageType } from '../../services/unusedDeductionsService'
+import adjustmentTypes, { AdjustmentType } from '../adjustmentTypes'
 
 export default class UnusedDeductionsMessageViewModel {
   public checkInformationLink: string

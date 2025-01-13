@@ -1,7 +1,7 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import AbstractForm from './abstractForm'
-import ValidationError from './validationError'
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
+import AbstractForm from '../abstractForm'
+import ValidationError from '../validationError'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 
 export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm> {
   days: string

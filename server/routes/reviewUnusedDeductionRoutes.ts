@@ -7,7 +7,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ReviewDeductionsModel from '../model/reviewDeductionsModel'
 import ParamStoreService from '../services/paramStoreService'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
-import UnusedDeductionsConfirmModel from '../model/unusedDeductionsConfirmModel'
+import UnusedDeductionsConfirmModel from '../model/unused-deductions/unusedDeductionsConfirmModel'
 
 export default class ReviewUnusedDeductionRoutes {
   constructor(

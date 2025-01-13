@@ -1,4 +1,4 @@
-import SessionAdjustment from '../@types/AdjustmentTypes'
+import SessionAdjustment from '../../@types/AdjustmentTypes'
 import specialRemissionType from './specialRemissionType'
 
 export default class SpecialRemissionTypeModel {

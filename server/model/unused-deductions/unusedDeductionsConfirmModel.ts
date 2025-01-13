@@ -1,4 +1,4 @@
-import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
+import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
 
 export default class UnusedDeductionsConfirmModel {
   constructor(
