@@ -1,5 +1,6 @@
 import type { Express } from 'express'
 import request from 'supertest'
+import * as cheerio from 'cheerio'
 import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
@@ -9,18 +10,25 @@ import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeri
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import './testutils/toContainInOrder'
 import ParamStoreService from '../services/paramStoreService'
+import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
+import { ThingsToDo } from '../@types/courtCasesReleaseDatesApi/types'
+import config from '../config'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/unusedDeductionsService')
 jest.mock('../services/paramStoreService')
+jest.mock('../services/courtCasesReleaseDatesService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
+const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService(
+  null,
+) as jest.Mocked<CourtCasesReleaseDatesService>
 
 const remandAdjustment = {
   id: '1',
@@ -111,6 +119,54 @@ const noInterceptAdjudication = {
   },
 } as AdaAdjudicationDetails
 
+const noThingsToDo = {
+  prisonerId: 'ABC123',
+  calculationThingsToDo: [],
+  adjustmentThingsToDo: {
+    prisonerId: 'ABC123',
+    thingsToDo: [],
+    adaIntercept: {},
+  },
+  hasAdjustmentThingsToDo: false,
+  hasCalculationThingsToDo: false,
+} as ThingsToDo
+
+const thingsToDoWithProspective = {
+  prisonerId: 'ABC123',
+  calculationThingsToDo: [],
+  adjustmentThingsToDo: {
+    prisonerId: 'ABC123',
+    thingsToDo: ['ADA_INTERCEPT'],
+    adaIntercept: {
+      type: 'PADAS',
+      number: 2,
+      anyProspective: true,
+      messageArguments: [],
+      message: 'Prospective ADA message.',
+    },
+  },
+  hasAdjustmentThingsToDo: true,
+  hasCalculationThingsToDo: false,
+} as ThingsToDo
+
+const thingsToDoWithOutProspective = {
+  prisonerId: 'ABC123',
+  calculationThingsToDo: [],
+  adjustmentThingsToDo: {
+    prisonerId: 'ABC123',
+    thingsToDo: ['ADA_INTERCEPT'],
+    adaIntercept: {
+      type: 'FIRST_TIME_WITH_NO_ADJUDICATION',
+      number: 1,
+      anyProspective: false,
+      messageArguments: [],
+      message: 'ADA message.',
+    },
+  },
+  hasAdjustmentThingsToDo: true,
+  hasCalculationThingsToDo: false,
+} as ThingsToDo
+
 const defaultUser = user
 const userWithRemandRole = { ...user, roles: ['REMAND_IDENTIFIER'] }
 const userWithSupportRole = { ...user, roles: ['COURTCASE_RELEASEDATE_SUPPORT'], isSupportUser: true }
@@ -129,6 +185,7 @@ beforeEach(() => {
       identifyRemandPeriodsService,
       unusedDeductionsService,
       paramStoreService,
+      courtCasesReleaseDatesService,
     },
     userSupplier: () => userInTest,
   })
@@ -157,6 +214,7 @@ describe('GET /:nomsId', () => {
       'NONE',
       [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
     ])
+    courtCasesReleaseDatesService.getThingsToDo = jest.fn().mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -164,7 +222,62 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('Nobody may have 20 days remand')
       })
   })
-  it('GET /{nomsId} is intercepted if there is adas to review', () => {
+  it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
+    config.displayAdaIntercept = false
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      intercept: {
+        type: 'FIRST_TIME',
+        number: 5,
+        anyProspective: true,
+        messageArguments: [],
+      },
+    } as AdaAdjudicationDetails)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(thingsToDoWithProspective)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect(200)
+      .expect(res => {
+        const $ = cheerio.load(res.text)
+        const adaLink = $('[data-qa=review-link]').first()
+        const adaMessage = $('[data-qa=ada-message]').first()
+        const adaTitle = $('[data-qa=ada-title]').first()
+        expect(adaLink.attr('href')).toStrictEqual('/ABC123/additional-days/review-prospective')
+        expect(adaTitle.text()).toContain('Review PADAs')
+        expect(adaMessage.text()).toStrictEqual('Prospective ADA message.')
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+      })
+  })
+  it('GET /{nomsId} - ada things to do is displayed if there is adas to review', () => {
+    config.displayAdaIntercept = false
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
+      intercept: {
+        type: 'FIRST_TIME',
+        number: 5,
+        anyProspective: true,
+        messageArguments: [],
+      },
+    } as AdaAdjudicationDetails)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(thingsToDoWithOutProspective)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect(200)
+      .expect(res => {
+        const $ = cheerio.load(res.text)
+        const adaLink = $('[data-qa=review-link]').first()
+        const adaMessage = $('[data-qa=ada-message]').first()
+        const adaTitle = $('[data-qa=ada-title]').first()
+        expect(adaLink.attr('href')).toStrictEqual('/ABC123/additional-days/review-and-approve')
+        expect(adaTitle.text()).toContain('Review ADA adjustment')
+        expect(adaMessage.text()).toStrictEqual('ADA message.')
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Nobody')
+      })
+  })
+  it('GET /{nomsId} is intercepted if there is adas to review and flag turned on', () => {
+    config.displayAdaIntercept = true
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
       ...noInterceptAdjudication,
@@ -178,6 +291,7 @@ describe('GET /:nomsId', () => {
     return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', `/${NOMS_ID}/additional-days/intercept`)
   })
   it('GET /{nomsId} is not intercepted if its a support user', () => {
+    config.displayAdaIntercept = true
     userInTest = userWithSupportRole
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
@@ -224,6 +338,7 @@ describe('GET /:nomsId', () => {
         messageArguments: [],
       },
     })
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -238,6 +353,7 @@ describe('GET /:nomsId', () => {
       recallWithMissingOutcome: true,
     })
     paramStoreService.get.mockReturnValue(false)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -269,6 +385,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -286,6 +403,7 @@ describe('GET /:nomsId', () => {
       [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }, remandAdjustment, unusedDeductions],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -305,6 +423,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -321,6 +440,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -349,6 +469,7 @@ describe('GET /:nomsId', () => {
         lastUpdatedDate: '2023-01-01',
       } as Adjustment,
     ])
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -366,6 +487,7 @@ describe('GET /:nomsId', () => {
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     adjustmentsService.findByPersonAndStatus.mockResolvedValue([])
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -382,6 +504,7 @@ describe('GET /:nomsId', () => {
       [remandAdjustment, unusedDeductions],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -402,6 +525,7 @@ describe('GET /:nomsId', () => {
       [nomisRemandAdjustment, nomisUnusedDeduction],
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -421,6 +545,7 @@ describe('GET /:nomsId', () => {
     ])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     paramStoreService.get.mockReturnValue(false)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     return request(app)
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
@@ -431,6 +556,7 @@ describe('GET /:nomsId', () => {
       })
   })
   it('GET /{nomsId} hub unused deductions cannot be calculated because of an exception', () => {
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'UNKNOWN',
@@ -449,6 +575,7 @@ describe('GET /:nomsId', () => {
   })
 
   it('GET /{nomsId} one LAL adjustment that affects the date should have the correct text displayed', () => {
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NONE',
@@ -462,6 +589,7 @@ describe('GET /:nomsId', () => {
       })
   })
   it('GET /{nomsId} one LAL adjustment that does not affects the date should have the correct text displayed', () => {
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     lawfullyAtLargeAdjustment.lawfullyAtLarge.affectsDates = 'NO'
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
@@ -477,6 +605,7 @@ describe('GET /:nomsId', () => {
   })
   it('GET /{nomsId} one LAL adjustment with lawfullyAtLarge unset will display correctly', () => {
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     const nomisAdjustment = {
       id: '3',
       adjustmentType: 'LAWFULLY_AT_LARGE',
@@ -501,6 +630,7 @@ describe('GET /:nomsId', () => {
       })
   })
   it('GET /{nomsId} two LAL adjustments will not show anything', () => {
+    courtCasesReleaseDatesService.getThingsToDo.mockResolvedValue(noThingsToDo)
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     const lal2 = lawfullyAtLargeAdjustment
     lal2.lawfullyAtLarge.affectsDates = 'NO'

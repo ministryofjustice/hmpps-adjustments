@@ -24,6 +24,8 @@ generic-service:
     PRISONER_SEARCH_API_URL: "https://prisoner-search-preprod.prison.service.justice.gov.uk"
     COMPONENT_API_URL: "https://frontend-components-preprod.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
+    COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api-preprod.hmpps.service.justice.gov.uk"
+    DISPLAY_ADA_INTERCEPT: 'true'
 
   allowlist:
     cymulate-1: 54.217.50.18/32

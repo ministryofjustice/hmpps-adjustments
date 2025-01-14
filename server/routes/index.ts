@@ -24,6 +24,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.unusedDeductionsService,
     service.paramStoreService,
+    service.courtCasesReleaseDatesService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,

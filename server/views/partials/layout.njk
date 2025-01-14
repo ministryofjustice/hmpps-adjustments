@@ -120,7 +120,8 @@
               recalls: { enabled: environment == 'dev' },
               documents: {
                   enabled: false
-              }
+              },
+              adjustments : { thingsToDo: model.noOfAdjustmentThingsToDo }
             }, 
             prisoner.prisonerNumber) 
           }}

@@ -16,13 +16,13 @@
             {% set pluralisation = "" %}
           {% endif %}
 
-          {% if model.intercept.type == 'FIRST_TIME' %}
+          {% if model.intercept.type in ['FIRST_TIME', 'FIRST_TIME_WITH_NO_ADJUDICATION'] %}
             {% if model.numOfAdaAdjudications === 0 %}
               Review ADA adjustment{{pluralisation}}
             {% else %}
               Review ADA adjudication{{pluralisation}}
             {% endif %}
-          {% elif model.intercept.type == 'PADA' %}
+          {% elif model.intercept.type in ['PADA', 'PADAS'] %}
             Review PADA{{pluralisation}}
           {% elif model.intercept.type == 'UPDATE' %}
             Review ADA updates
