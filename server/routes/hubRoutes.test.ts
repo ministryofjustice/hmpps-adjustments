@@ -270,7 +270,7 @@ describe('GET /:nomsId', () => {
         const adaMessage = $('[data-qa=ada-message]').first()
         const adaTitle = $('[data-qa=ada-title]').first()
         expect(adaLink.attr('href')).toStrictEqual('/ABC123/additional-days/review-and-approve')
-        expect(adaTitle.text()).toContain('Review ADA adjustment')
+        expect(adaTitle.text()).toContain('Review ADA adjudication')
         expect(adaMessage.text()).toStrictEqual('ADA message.')
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
