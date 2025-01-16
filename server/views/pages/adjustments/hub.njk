@@ -54,8 +54,8 @@
           }) }}
       {% endif %}
 
-      {% if model.thingsToDo.hasAdjustmentThingsToDo %}
-        {{ thingsToDoPanel(model.thingsToDo) }}
+      {% if model.hasAdjustmentThingsToDo() %}
+        {{ thingsToDoPanel(model.thingsToDo, prisoner.prisonerNumber) }}
       {% endif %}
 
       <div class="moj-page-header-actions">

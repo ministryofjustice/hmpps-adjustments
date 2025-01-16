@@ -21,6 +21,7 @@ import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
 import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
+import { AdjustmentThingToDo } from '../@types/courtCasesReleaseDatesApi/types'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -49,7 +50,7 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { username, roles, activeCaseLoadId, isSupportUser } = res.locals.user
+    const { username, roles, activeCaseLoadId, isSupportUser, token } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
 
@@ -64,21 +65,17 @@ export default class AdjustmentRoutes {
       this.adjustmentsStoreService.clear(req, nomsId)
     }
 
-    const [unusedDeductionMessage, adjustments] =
-      await this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username)
+    const [[unusedDeductionMessage, adjustments], adaAdjudicationDetails, serviceDefinitions] = await Promise.all([
+      this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username),
+      this.adjustmentsService.getAdaAdjudicationDetails(nomsId, username, activeCaseLoadId),
+      this.courtCasesReleaseDatesService.getServiceDefinitions(prisonerNumber, token),
+    ])
 
     const inactiveDeletedAdjustments =
       unusedDeductionMessage === 'RECALL'
         ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
         : []
 
-    const adaAdjudicationDetails = await this.adjustmentsService.getAdaAdjudicationDetails(
-      nomsId,
-      username,
-      activeCaseLoadId,
-    )
-
-    const thingsToDo = await this.courtCasesReleaseDatesService.getThingsToDo(prisonerNumber)
     if (!messageExists) {
       if (!isSupportUser && adaAdjudicationDetails.intercept.type !== 'NONE' && config.displayAdaIntercept) {
         return res.redirect(`/${nomsId}/additional-days/intercept`)
@@ -95,6 +92,7 @@ export default class AdjustmentRoutes {
       }
     }
     return res.render('pages/adjustments/hub', {
+      serviceDefinitions,
       model: new AdjustmentsHubViewModel(
         prisonerNumber,
         adjustments,
@@ -105,8 +103,7 @@ export default class AdjustmentRoutes {
         unusedDeductionMessage,
         adaAdjudicationDetails,
         inactiveDeletedAdjustments,
-        thingsToDo,
-        thingsToDo.hasAdjustmentThingsToDo ? '1' : null,
+        serviceDefinitions.services.adjustments.thingsToDo as AdjustmentThingToDo,
       ),
     })
   }

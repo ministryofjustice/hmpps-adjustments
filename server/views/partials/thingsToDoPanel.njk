@@ -1,6 +1,6 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% macro thingsToDoPanel(model) %}
-      {% set intercept = model.adjustmentThingsToDo.adaIntercept %}
+{% macro thingsToDoPanel(thingToDo, prisonerId) %}
+      {% set intercept = thingToDo.adaIntercept %}
       {% if intercept.number > 1 %}
         {% set pluralisation = "s" %}
       {% else %}
@@ -8,9 +8,9 @@
       {% endif %}
 
       {% if intercept.anyProspective %}
-         {% set url = "/" + model.prisonerId + "/additional-days/review-prospective" %}
+         {% set url = "/" + prisonerId + "/additional-days/review-prospective" %}
       {% else %}
-         {% set url =  "/" + model.prisonerId + "/additional-days/review-and-approve" %}
+         {% set url =  "/" + prisonerId + "/additional-days/review-and-approve" %}
       {% endif %}
 
       {% if intercept.type in ['PADA','PADAS'] %}
