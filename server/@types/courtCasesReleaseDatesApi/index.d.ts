@@ -3,9 +3,6 @@
  * Do not make direct changes to the file.
  */
 
-/** WithRequired type helpers */
-type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
-
 export interface paths {
   '/things-to-do/prisoner/{prisonerId}': {
     /**
@@ -41,33 +38,34 @@ export interface components {
       thingsToDo: 'ADA_INTERCEPT'[]
       adaIntercept?: components['schemas']['AdaIntercept']
     }
-    ThingsToDo: {
+    ThingsToDoOld: {
       prisonerId: string
       calculationThingsToDo: 'CALCULATION_REQUIRED'[]
       adjustmentThingsToDo?: components['schemas']['AdjustmentThingsToDo']
       hasAdjustmentThingsToDo: boolean
       hasCalculationThingsToDo: boolean
     }
-    AdjustmentThingToDo: WithRequired<
-      components['schemas']['ThingToDo'] & {
-        types?: 'ADA_INTERCEPT'[]
-        adaIntercept?: components['schemas']['AdaIntercept']
-      },
-      'count' | 'types'
-    >
     CcrdServiceDefinition: {
       href: string
       text: string
-      thingsToDo: components['schemas']['AdjustmentThingToDo'] | components['schemas']['EmptyThingToDo']
+      thingsToDo: components['schemas']['ThingsToDo']
     }
     CcrdServiceDefinitions: {
       services: {
         [key: string]: components['schemas']['CcrdServiceDefinition']
       }
     }
-    EmptyThingToDo: WithRequired<components['schemas']['ThingToDo'], 'count'>
     ThingToDo: {
-      /** Format: int64 */
+      title: string
+      message: string
+      buttonText: string
+      buttonHref: string
+      /** @enum {string} */
+      type: 'CALCULATION_REQUIRED' | 'ADA_INTERCEPT'
+    }
+    ThingsToDo: {
+      things: components['schemas']['ThingToDo'][]
+      /** Format: int32 */
       count: number
     }
   }
@@ -101,19 +99,19 @@ export interface operations {
       /** @description Successfully returns the things-to-do list */
       200: {
         content: {
-          'application/json': components['schemas']['ThingsToDo']
+          'application/json': components['schemas']['ThingsToDoOld']
         }
       }
       /** @description Unauthorized - valid Oauth2 token required */
       401: {
         content: {
-          'application/json': components['schemas']['ThingsToDo']
+          'application/json': components['schemas']['ThingsToDoOld']
         }
       }
       /** @description Forbidden - requires appropriate role */
       403: {
         content: {
-          'application/json': components['schemas']['ThingsToDo']
+          'application/json': components['schemas']['ThingsToDoOld']
         }
       }
     }

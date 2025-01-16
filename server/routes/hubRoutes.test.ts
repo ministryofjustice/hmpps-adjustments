@@ -11,7 +11,7 @@ import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjust
 import './testutils/toContainInOrder'
 import ParamStoreService from '../services/paramStoreService'
 import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
-import { AdjustmentThingToDo, CcrdServiceDefinitions } from '../@types/courtCasesReleaseDatesApi/types'
+import { CcrdServiceDefinitions } from '../@types/courtCasesReleaseDatesApi/types'
 import config from '../config'
 
 jest.mock('../services/adjustmentsService')
@@ -123,6 +123,7 @@ const serviceDefinitionsNoThingsToDo = {
       href: 'http://localhost:8000/prisoner/AB1234AB/overview',
       text: 'Overview',
       thingsToDo: {
+        things: [],
         count: 0,
       },
     },
@@ -130,6 +131,7 @@ const serviceDefinitionsNoThingsToDo = {
       href: 'http://localhost:8002/AB1234AB',
       text: 'Adjustments',
       thingsToDo: {
+        things: [],
         count: 0,
       },
     },
@@ -137,6 +139,7 @@ const serviceDefinitionsNoThingsToDo = {
       href: 'http://localhost:8004?prisonId=AB1234AB',
       text: 'Release dates and calculations',
       thingsToDo: {
+        things: [],
         count: 0,
       },
     },
@@ -149,6 +152,7 @@ const serviceDefinitionsProspectiveThingsToDo = {
       href: 'http://localhost:8000/prisoner/AB1234AB/overview',
       text: 'Overview',
       thingsToDo: {
+        things: [],
         count: 0,
       },
     },
@@ -156,55 +160,23 @@ const serviceDefinitionsProspectiveThingsToDo = {
       href: 'http://localhost:8002/AB1234AB',
       text: 'Adjustments',
       thingsToDo: {
+        things: [
+          {
+            title: 'Review ADA adjudications',
+            message: 'message',
+            buttonText: 'Review ADA',
+            buttonHref: 'http://localhost:8002/AB1234AB/additional-days/review-and-approve',
+            type: 'ADA_INTERCEPT',
+          },
+        ],
         count: 1,
-        types: ['ADA_INTERCEPT'],
-        adaIntercept: {
-          type: 'PADAS',
-          number: 2,
-          anyProspective: true,
-          messageArguments: [],
-          message: 'Prospective ADA message.',
-        },
-      } as AdjustmentThingToDo,
+      },
     },
     releaseDates: {
       href: 'http://localhost:8004?prisonId=AB1234AB',
       text: 'Release dates and calculations',
       thingsToDo: {
-        count: 0,
-      },
-    },
-  },
-} as CcrdServiceDefinitions
-
-const serviceDefinitionsWithoutProspectiveThingsToDo = {
-  services: {
-    overview: {
-      href: 'http://localhost:8000/prisoner/AB1234AB/overview',
-      text: 'Overview',
-      thingsToDo: {
-        count: 0,
-      },
-    },
-    adjustments: {
-      href: 'http://localhost:8002/AB1234AB',
-      text: 'Adjustments',
-      thingsToDo: {
-        count: 1,
-        types: ['ADA_INTERCEPT'],
-        adaIntercept: {
-          type: 'FIRST_TIME_WITH_NO_ADJUDICATION',
-          number: 1,
-          anyProspective: false,
-          messageArguments: [],
-          message: 'ADA message.',
-        },
-      } as AdjustmentThingToDo,
-    },
-    releaseDates: {
-      href: 'http://localhost:8004?prisonId=AB1234AB',
-      text: 'Release dates and calculations',
-      thingsToDo: {
+        things: [],
         count: 0,
       },
     },
@@ -283,45 +255,16 @@ describe('GET /:nomsId', () => {
       .expect(200)
       .expect(res => {
         const $ = cheerio.load(res.text)
-        const adaLink = $('[data-qa=review-link]').first()
-        const adaMessage = $('[data-qa=ada-message]').first()
-        const adaTitle = $('[data-qa=ada-title]').first()
+        const adaTitle = $('h2:contains(Review ADA adjudications)').first()
+        const adaMessage = $('p:contains(message)').first()
+        const adaLink = $('a:contains(Review ADA)').first()
         const nav = $('nav')
         const adjustmentsLink = nav.find('a:contains(Adjustments)')
         expect(adjustmentsLink.find('span:contains(1)')).not.toBeUndefined()
         expect(adjustmentsLink.attr('aria-current')).toBe('page')
-        expect(adaLink.attr('href')).toStrictEqual('/ABC123/additional-days/review-prospective')
-        expect(adaTitle.text()).toContain('Review PADAs')
-        expect(adaMessage.text()).toStrictEqual('Prospective ADA message.')
-        expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Nobody')
-      })
-  })
-  it('GET /{nomsId} - ada things to do is displayed if there is adas to review', () => {
-    config.displayAdaIntercept = false
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
-      intercept: {
-        type: 'FIRST_TIME',
-        number: 5,
-        anyProspective: true,
-        messageArguments: [],
-      },
-    } as AdaAdjudicationDetails)
-    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(
-      serviceDefinitionsWithoutProspectiveThingsToDo,
-    )
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect(200)
-      .expect(res => {
-        const $ = cheerio.load(res.text)
-        const adaLink = $('[data-qa=review-link]').first()
-        const adaMessage = $('[data-qa=ada-message]').first()
-        const adaTitle = $('[data-qa=ada-title]').first()
-        expect(adaLink.attr('href')).toStrictEqual('/ABC123/additional-days/review-and-approve')
-        expect(adaTitle.text()).toContain('Review ADA adjudication')
-        expect(adaMessage.text()).toStrictEqual('ADA message.')
+        expect(adaLink.attr('href')).toStrictEqual('http://localhost:8002/AB1234AB/additional-days/review-and-approve')
+        expect(adaTitle.text()).toContain('Review ADA adjudications')
+        expect(adaMessage.text()).toStrictEqual('message')
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
       })

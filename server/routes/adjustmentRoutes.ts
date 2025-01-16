@@ -21,7 +21,6 @@ import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
 import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
-import { AdjustmentThingToDo } from '../@types/courtCasesReleaseDatesApi/types'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -103,7 +102,6 @@ export default class AdjustmentRoutes {
         unusedDeductionMessage,
         adaAdjudicationDetails,
         inactiveDeletedAdjustments,
-        serviceDefinitions.services.adjustments.thingsToDo as AdjustmentThingToDo,
       ),
     })
   }

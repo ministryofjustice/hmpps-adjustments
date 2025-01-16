@@ -3,6 +3,7 @@
 {% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "../../macros/hubAdjustmentCard.njk" import adjustmentCard %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "hmpps/components/court-cases-release-dates/things-to-do/macro.njk" import thingsToDo %}
 
 {% set pageTitle = applicationName + " - Home" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -54,9 +55,7 @@
           }) }}
       {% endif %}
 
-      {% if model.hasAdjustmentThingsToDo() %}
-        {{ thingsToDoPanel(model.thingsToDo, prisoner.prisonerNumber) }}
-      {% endif %}
+      {{ thingsToDo(serviceDefinitions, 'adjustments') }}
 
       <div class="moj-page-header-actions">
 
