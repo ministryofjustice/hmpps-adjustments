@@ -109,22 +109,8 @@
       {% include "./prisonerProfileBanner.njk" %}
     </aside>
     {% block subNavigation %}
-        {% if prisoner.prisonerNumber !== undefined and showSubNav %}
-          {{ subNavigation(
-            environment, 
-            {
-              activeSubNav: 'adjustments',
-              courtCases: {
-                  enabled: false
-              },
-              recalls: { enabled: environment == 'dev' },
-              documents: {
-                  enabled: false
-              },
-              adjustments : { thingsToDo: model.noOfAdjustmentThingsToDo }
-            }, 
-            prisoner.prisonerNumber) 
-          }}
+        {% if prisoner.prisonerNumber !== undefined and showSubNav and serviceDefinitions %}
+          {{ subNavigation(serviceDefinitions.services, 'adjustments') }}
         {% endif %}
     {% endblock %}
   <span class="govuk-visually-hidden" id="{{ pageId }}"></span>

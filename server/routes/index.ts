@@ -32,6 +32,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
     service.paramStoreService,
+
     service.unusedDeductionsService,
     service.identifyRemandPeriodsService,
   )
