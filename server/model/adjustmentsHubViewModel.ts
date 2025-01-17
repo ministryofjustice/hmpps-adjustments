@@ -3,7 +3,6 @@ import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPe
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 import { calculateReleaseDatesCheckInformationUrl, daysBetween } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
-import { AdjustmentThingToDo } from '../@types/courtCasesReleaseDatesApi/types'
 import UnusedDeductionsMessageViewModel from './unused-deductions/unusedDeductionsMessageViewModel'
 
 export type Message = {
@@ -28,7 +27,6 @@ export default class AdjustmentsHubViewModel {
     unusedDeductionsMessageType: UnusedDeductionMessageType,
     private adaAdjudicationDetails: AdaAdjudicationDetails,
     inactiveDeletedAdjustments: Adjustment[],
-    public thingsToDo: AdjustmentThingToDo,
   ) {
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
       prisonerNumber,
@@ -36,10 +34,6 @@ export default class AdjustmentsHubViewModel {
       unusedDeductionsMessageType,
       inactiveDeletedAdjustments,
     )
-  }
-
-  public hasAdjustmentThingsToDo(): boolean {
-    return this.thingsToDo.count > 0
   }
 
   public deductions(): AdjustmentType[] {
