@@ -18,6 +18,7 @@ export default {
               text: 'Overview',
               thingsToDo: {
                 count: 0,
+                things: [],
               },
             },
             adjustments: {
@@ -25,6 +26,7 @@ export default {
               text: 'Adjustments',
               thingsToDo: {
                 count: 0,
+                things: [],
               },
             },
             releaseDates: {
@@ -32,6 +34,7 @@ export default {
               text: 'Release dates and calculations',
               thingsToDo: {
                 count: 0,
+                things: [],
               },
             },
           },
