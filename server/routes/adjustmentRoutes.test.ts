@@ -424,8 +424,8 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/review RADA', () => {
-    adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
+  it('GET /{nomsId}/review RADA without id', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: undefined })
 
     return request(app)
       .get(`/${NOMS_ID}/review`)
@@ -438,6 +438,23 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('24')
         expect(res.text).toContain('Confirm and save')
         expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/edit`)
+      })
+  })
+
+  it('GET /{nomsId}/review RADA with an id', () => {
+    adjustmentsStoreService.getOnly.mockReturnValue(radaAdjustment)
+
+    return request(app)
+      .get(`/${NOMS_ID}/review`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Anon')
+        expect(res.text).toContain('Date of days restored')
+        expect(res.text).toContain('5 April 2023')
+        expect(res.text).toContain('Number of days')
+        expect(res.text).toContain('24')
+        expect(res.text).toContain('Confirm and save')
+        expect(res.text).toContain(`/${NOMS_ID}/restored-additional-days/edit/1`)
       })
   })
 
