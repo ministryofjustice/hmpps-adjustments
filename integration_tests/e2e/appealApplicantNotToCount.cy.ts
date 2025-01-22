@@ -84,7 +84,7 @@ context('Enter Appeal Applicant Not To Count', () => {
     confirm.checkOnPage()
     confirm.submit().click()
 
-    hub.successMessage().contains('LAL (Lawfully at large) details have been updated')
+    hub.successMessage().contains('Time spent as an appeal applicant not to count details have been updated')
   })
 
   it('View & Delete Appeal Applicant', () => {
