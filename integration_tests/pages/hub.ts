@@ -31,6 +31,10 @@ export default class HubPage extends AdjustmentsPage {
 
   public addUnlawfullyAtLargeLink = (): PageElement => cy.get('[data-qa=add-unlawfully-at-large]')
 
+  public addAppealApplicantLink = (): PageElement => cy.get('[data-qa=add-appeal-applicant]')
+
+  public viewAppealApplicantLink = (): PageElement => cy.get('[data-qa=view-appeal-applicant]')
+
   public viewLawfullyAtLargeLink = (): PageElement => cy.get('[data-qa=view-lawfully-at-large]')
 
   public viewUnlawfullyAtLargeLink = (): PageElement => cy.get('[data-qa=view-unlawfully-at-large]')
