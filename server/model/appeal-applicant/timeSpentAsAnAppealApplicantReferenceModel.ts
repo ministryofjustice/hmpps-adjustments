@@ -7,8 +7,8 @@ export default class TimeSpentAsAnAppealApplicantReferenceModel {
     public id: string,
     public addOrEdit: string,
     public adjustment: SessionAdjustment,
-    public errors?: ValidationError[],
     public reference?: string,
+    public errors?: ValidationError[],
   ) {}
 
   public backlink(): string {

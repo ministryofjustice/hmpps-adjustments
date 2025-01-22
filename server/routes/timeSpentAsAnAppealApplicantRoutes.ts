@@ -56,14 +56,10 @@ export default class TimeSpentAsAnAppealApplicantRoutes {
 
   public reference: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit, id } = req.params
-    const { username } = res.locals.user
-
-    let adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
-    adjustment = adjustment || (await this.adjustmentsService.get(id, username))
-    this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
-
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const reference = adjustment.timeSpentAsAnAppealApplicantNotToCount?.courtOfAppealReferenceNumber
     return res.render('pages/adjustments/appeal-applicant/reference', {
-      model: new TimeSpentAsAnAppealApplicantReferenceModel(nomsId, id, addOrEdit, adjustment),
+      model: new TimeSpentAsAnAppealApplicantReferenceModel(nomsId, id, addOrEdit, adjustment, reference),
     })
   }
 
@@ -80,13 +76,15 @@ export default class TimeSpentAsAnAppealApplicantRoutes {
           id,
           addOrEdit,
           adjustment,
-          errors,
           req.body.reference,
+          errors,
         ),
       })
     }
 
-    adjustment.timeSpentAsAnAppealApplicantNotToCount = { courtOfAppealReferenceNumber: req.body.reference }
+    adjustment.timeSpentAsAnAppealApplicantNotToCount = {
+      courtOfAppealReferenceNumber: req.body.reference.toUpperCase(),
+    }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
 
@@ -99,6 +97,7 @@ export default class TimeSpentAsAnAppealApplicantRoutes {
 
     let adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
     adjustment = adjustment || (await this.adjustmentsService.get(id, username))
+    this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
 
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)

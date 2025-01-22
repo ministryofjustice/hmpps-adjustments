@@ -132,6 +132,16 @@ describe('Time spent as an appeal applicant not to count routes', () => {
     },
   )
 
+  it('GET /{nomsId}/appeal-applicant/days/edit to be pre populated with the existing reference number', async () => {
+    adjustmentsStoreService.getById.mockReturnValue(timeSpentAsAnAppealApplicantAdjustment)
+    return request(app)
+      .get(`/${NOMS_ID}/appeal-applicant/reference/edit/${SESSION_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('COA12345')
+      })
+  })
+
   test.each`
     addOrEdit | reference                                 | errorMessage
     ${'add'}  | ${''}                                     | ${'Enter a Court of Appeal reference number'}
