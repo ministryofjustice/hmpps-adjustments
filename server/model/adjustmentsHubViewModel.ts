@@ -116,8 +116,7 @@ export default class AdjustmentsHubViewModel {
     const useShortText =
       adjustmentType.value === 'UNLAWFULLY_AT_LARGE' ||
       adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED' ||
-      adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED' ||
-      adjustmentType.value === 'REMAND'
+      adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED'
 
     let heading
     if (this.message.action === 'CREATE') {
