@@ -12,7 +12,6 @@ import './testutils/toContainInOrder'
 import ParamStoreService from '../services/paramStoreService'
 import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
 import { CcrdServiceDefinitions } from '../@types/courtCasesReleaseDatesApi/types'
-import config from '../config'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -185,7 +184,6 @@ const serviceDefinitionsProspectiveThingsToDo = {
 
 const defaultUser = user
 const userWithRemandRole = { ...user, roles: ['REMAND_IDENTIFIER'] }
-const userWithSupportRole = { ...user, roles: ['COURTCASE_RELEASEDATE_SUPPORT'], isSupportUser: true }
 
 const NOMS_ID = 'ABC123'
 
