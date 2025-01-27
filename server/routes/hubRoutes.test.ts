@@ -239,7 +239,6 @@ describe('GET /:nomsId', () => {
       })
   })
   it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
-    config.displayAdaIntercept = false
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
       intercept: {
@@ -265,41 +264,6 @@ describe('GET /:nomsId', () => {
         expect(adaLink.attr('href')).toStrictEqual('http://localhost:8002/AB1234AB/additional-days/review-and-approve')
         expect(adaTitle.text()).toContain('Review ADA adjudications')
         expect(adaMessage.text()).toStrictEqual('message')
-        expect(res.text).toContain('Anon')
-        expect(res.text).toContain('Nobody')
-      })
-  })
-  it('GET /{nomsId} is intercepted if there is adas to review and flag turned on', () => {
-    config.displayAdaIntercept = true
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
-      ...noInterceptAdjudication,
-      intercept: {
-        type: 'FIRST_TIME',
-        number: 5,
-        anyProspective: true,
-        messageArguments: [],
-      },
-    })
-    return request(app).get(`/${NOMS_ID}`).expect(302).expect('Location', `/${NOMS_ID}/additional-days/intercept`)
-  })
-  it('GET /{nomsId} is not intercepted if its a support user', () => {
-    config.displayAdaIntercept = true
-    userInTest = userWithSupportRole
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
-      ...noInterceptAdjudication,
-      intercept: {
-        type: 'FIRST_TIME',
-        number: 5,
-        anyProspective: true,
-        messageArguments: [],
-      },
-    })
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
       })

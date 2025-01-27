@@ -25,7 +25,6 @@ generic-service:
     COMPONENT_API_URL: "https://frontend-components-dev.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api-dev.hmpps.service.justice.gov.uk"
-    DISPLAY_ADA_INTERCEPT: 'false'
 
   # Switches off the allow list in the DEV env only.
   allowlist: null

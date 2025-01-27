@@ -167,5 +167,4 @@ export default {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
     appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
   },
-  displayAdaIntercept: get('DISPLAY_ADA_INTERCEPT', 'true') === 'true',
 }

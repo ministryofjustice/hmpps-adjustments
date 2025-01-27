@@ -75,11 +75,6 @@ export default class AdjustmentRoutes {
         ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
         : []
 
-    if (!messageExists) {
-      if (!isSupportUser && adaAdjudicationDetails.intercept.type !== 'NONE' && config.displayAdaIntercept) {
-        return res.redirect(`/${nomsId}/additional-days/intercept`)
-      }
-    }
     let remandDecision
     let relevantRemand
     if (roles.includes('REMAND_IDENTIFIER')) {
