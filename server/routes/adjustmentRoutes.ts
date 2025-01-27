@@ -49,7 +49,7 @@ export default class AdjustmentRoutes {
   }
 
   public hub: RequestHandler = async (req, res): Promise<void> => {
-    const { username, roles, activeCaseLoadId, isSupportUser, token } = res.locals.user
+    const { username, roles, activeCaseLoadId, token } = res.locals.user
     const { nomsId } = req.params
     const { bookingId, prisonerNumber } = res.locals.prisoner
 
@@ -75,11 +75,6 @@ export default class AdjustmentRoutes {
         ? await this.adjustmentsService.findByPersonAndStatus(nomsId, 'INACTIVE_WHEN_DELETED', username)
         : []
 
-    if (!messageExists) {
-      if (!isSupportUser && adaAdjudicationDetails.intercept.type !== 'NONE' && config.displayAdaIntercept) {
-        return res.redirect(`/${nomsId}/additional-days/intercept`)
-      }
-    }
     let remandDecision
     let relevantRemand
     if (roles.includes('REMAND_IDENTIFIER')) {

@@ -44,4 +44,6 @@ export default class HubPage extends AdjustmentsPage {
   public successMessage = (): PageElement => cy.get('[data-qa=success-message]')
 
   public errorMessage = (): PageElement => cy.get('[data-qa=error-message]')
+
+  public reviewLink = (): PageElement => cy.get('.govuk-button').contains('Review ADA')
 }

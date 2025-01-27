@@ -1,5 +1,4 @@
 import AdaAprovePage from '../pages/adaApprove'
-import AdaInterceptPage from '../pages/adaIntercept'
 import AdaSubmitPage from '../pages/adaSubmit'
 import HubPage from '../pages/hub'
 import PadaPage from '../pages/pada'
@@ -21,13 +20,13 @@ context('Enter an ADA', () => {
     cy.task('stubComponents')
     cy.task('stubRejectProspectiveAda')
     cy.task('stubGetUnusedDeductionsCalculationResult')
-    cy.task('stubGetThingsToDo')
+    cy.task('stubGetAdjustmentThingsToDo')
   })
 
   it('Enter an AADA', () => {
     cy.signIn()
-    const intercept = AdaInterceptPage.goTo('A1234AB')
-    intercept.reviewLink().click()
+    const hubPage = HubPage.goTo('A1234AB')
+    hubPage.reviewLink().click()
     const pada = PadaPage.verifyOnPage(PadaPage)
 
     // Test frontend script for unselecting

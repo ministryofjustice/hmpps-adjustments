@@ -24,7 +24,6 @@ generic-service:
     COMPONENT_API_URL: "https://frontend-components.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api.hmpps.service.justice.gov.uk"
-    DISPLAY_ADA_INTERCEPT: 'false'
 
 generic-prometheus-alerts:
   alertSeverity: legacy-replacement-alerts
