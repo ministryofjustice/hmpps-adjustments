@@ -34,7 +34,7 @@ export default class SpecialRemissionViewModel {
 
   public totalRow() {
     const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
-    return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }]]
+    return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }, { html: '' }]]
   }
 
   private actionCell(adjustment: Adjustment) {

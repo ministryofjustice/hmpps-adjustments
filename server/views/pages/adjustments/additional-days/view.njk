@@ -19,10 +19,12 @@
     </div>
   </div>
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-grid-column-three-quarters">
       {% set adaRows = [] %}
       {% set totalDays = 0 %}
+      {% set isRemovePADA = false %}
       {% for ada in model.adjustments %}
+        {% set isRemovePADA = isRemovePADA or ada.additionalDaysAwarded.prospective %}
         {% set removeHtml = '<a href="/' + prisoner.prisonerNumber + '/additional-days/remove-prospective/' + ada.fromDate + '">Remove PADA</a>' if ada.additionalDaysAwarded.prospective else '' %}
         {% set adaRows = (adaRows.push([{
           text: ada.fromDate | date("D MMMM YYYY")
@@ -37,38 +39,34 @@
         html: '<strong>Total ADAs taken into calculation</strong>',
         classes: 'govuk-!-text-align-right'
       }, {
-        text: totalDays,
+        html: '<strong>' + totalDays + '</strong>',
         colspan: 2
       }]), adaRows) %}
-      {{ govukTable({
-        caption: "Adas pending deletion",
-        captionClasses: "govuk-visually-hidden",
-        head: [{
-          text: "Date charge proved"
-        }, {
-          text: "Days"
-        }, {
-          text: ""
-        }],
-        rows: adaRows
-      }) }}
+      {% if isRemovePADA or adaRows | length > 2 %}
+          {{ govukTable({
+            caption: "Adas pending deletion",
+            captionClasses: "govuk-visually-hidden",
+            head: [{
+              text: "Date charge proved"
+            }, {
+              text: "Days"
+            }, {
+              text: ""
+            }],
+            rows: adaRows
+          }) }}
+      {% endif %}
     </div>
   </div>
 
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-full">
+  {{ adaTable({
+      tableId:'awarded-adas',
+      adas: model.awarded,
+      total: model.totalAwarded,
+      hideStatuses: true,
+      totalText: 'Total ADAs taken into calculation',
+      showTotalPerDateCharged: true
+  }) }}
 
-
-        {{ adaTable({
-          tableId:'awarded-adas',
-          adas: model.awarded,
-          total: model.totalAwarded,
-          hideStatuses: true,
-          totalText: 'Total ADAs taken into calculation',
-          showTotalPerDateCharged: true
-        }) }}
-
-      </div>
-    </div>
   </div>
 {% endblock %}

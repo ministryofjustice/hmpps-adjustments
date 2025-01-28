@@ -37,7 +37,10 @@ export default class RemandViewModel {
           { text: it.days },
         ]
       }),
-      [{ text: 'Total days on remand', classes: 'govuk-table__header' }, { text: this.totalDays() }],
+      [
+        { text: 'Total days on remand', classes: 'govuk-table__header' },
+        { html: `<strong>${this.totalDays()}</strong>` },
+      ],
     ]
   }
 

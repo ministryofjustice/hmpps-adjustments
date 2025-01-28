@@ -413,7 +413,64 @@ describe('Additional Days Awarded routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/additional-days/view', () => {
+  it('GET /{nomsId}/additional-days/view to display the summary table for 2 set of charges', () => {
+    additionalDaysAwardedBackendService.viewAdjustments.mockResolvedValue({
+      ...noAwaitingApproval,
+      adjustments: [
+        {
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: false },
+          bookingId: 123,
+          days: 10,
+          fromDate: '2023-08-03',
+          person: NOMS_ID,
+          prisonId: undefined,
+        } as Adjustment,
+        {
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          additionalDaysAwarded: { adjudicationId: ['1525919', '1525920', '1525921'], prospective: false },
+          bookingId: 123,
+          days: 10,
+          fromDate: '2023-08-03',
+          person: NOMS_ID,
+          prisonId: undefined,
+        } as Adjustment,
+      ],
+    })
+
+    return request(app)
+      .get(`/${NOMS_ID}/additional-days/view`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(`Date charge proved`)
+      })
+  })
+  it('GET /{nomsId}/additional-days/view to not display the summary table for 1 set of charges', () => {
+    additionalDaysAwardedBackendService.viewAdjustments.mockResolvedValue({
+      ...noAwaitingApproval,
+      adjustments: [
+        {
+          adjustmentType: 'ADDITIONAL_DAYS_AWARDED',
+          additionalDaysAwarded: { adjudicationId: ['1525916', '1525917', '1525918'], prospective: false },
+          bookingId: 123,
+          days: 10,
+          fromDate: '2023-08-03',
+          person: NOMS_ID,
+          prisonId: undefined,
+        } as Adjustment,
+      ],
+    })
+
+    return request(app)
+      .get(`/${NOMS_ID}/additional-days/view`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain(`Date charge proved`)
+      })
+  })
+  it('GET /{nomsId}/additional-days/view to display summary table if there is prospective adjustment', () => {
     additionalDaysAwardedBackendService.viewAdjustments.mockResolvedValue({
       ...noAwaitingApproval,
       adjustments: [
