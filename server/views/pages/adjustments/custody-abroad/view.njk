@@ -1,0 +1,44 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+
+{% set pageTitle = applicationName + " - View time spent in custody abroad" %}
+{% set mainClasses = "app-container govuk-body" %}
+{% set reviewDeductionsLink = "/" + prisoner.prisonerNumber + "/review-deductions" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: "/" + prisoner.prisonerNumber
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% include "./../../../partials/stayOnDpsWarningBanner.njk" %}
+      <span class="govuk-caption-xl">Adjustments</span>
+      <h1 class="govuk-heading-l">
+        Time spent in custody abroad details
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {{ govukTable(
+        model.table()
+      ) }}
+      <div>
+        {{ govukButton({
+          text: "Add new",
+          href: "/" + prisoner.prisonerNumber + "/custody-abroad/add"
+        }) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

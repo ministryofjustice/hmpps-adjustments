@@ -1,0 +1,79 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+
+{% set pageTitle = applicationName + " - Enter remand dates" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+{% block content %}
+
+  {% if model.errorMessage() %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            model.errorMessage()
+          ]
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjustments</span>
+      </h1>
+    </div>
+  </div>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+        <h1 class="govuk-heading-l">
+          Select the documentation that confirms time spent in custody abroad will count towards the sentence
+        </h1>
+        <p>
+          You can read the rules for time spent in custody abroad in
+          <a href="https://assets.publishing.service.gov.uk/media/661fd299ced96304c8757e86/sentence-calculation-pf-annex-a-operational-guidance.pdf"
+             class="govuk-link" rel="noreferrer noopener" target="_blank">the policy document</a>
+        </p>
+        {{ govukRadios({
+          id: "documentationSource",
+          name: "documentationSource",
+            errorMessage: model.errorMessage(),
+            items: model.documentationSources()
+        }) }}
+
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: model.cancelLink()
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
