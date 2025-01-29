@@ -86,7 +86,7 @@ showTotalPerDateCharged: optional,  defaults to false, should the total be shown
               <th class="govuk-table__cell govuk-!-text-align-right" scope="row" colspan="2">
                 {{ params.totalText if params.totalText else 'Total' }}
               </th>
-              <td class="govuk-table__cell govuk-!-text-align-right">{{ params.total }}</td>
+              <td class="govuk-table__cell govuk-!-text-align-right"><strong>{{ params.total }}</strong></td>
             </tr>
             </tfoot>
           {% endif %}
