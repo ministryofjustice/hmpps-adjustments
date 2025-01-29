@@ -52,14 +52,6 @@ export default class AdjustmentsHubViewModel {
     return adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED' && !!this.adaAdjudicationDetails?.prospective?.length
   }
 
-  public displayReview(): boolean {
-    return (
-      this.hasRemandToolRole() &&
-      this.relevantRemand &&
-      (!this.remandDecision || this.remandDecision.days !== this.getTotalDaysRelevantRemand())
-    )
-  }
-
   public displayAddLink(adjustmentType: AdjustmentType): boolean {
     return (
       !this.hasRemandToolRole() ||
