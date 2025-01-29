@@ -151,7 +151,7 @@ export interface components {
        * @description The NOMIS adjustment type
        * @enum {string}
        */
-      adjustmentType: 'ADA' | 'RADA' | 'UAL' | 'LAL' | 'SREM' | 'RSR' | 'RST' | 'RX' | 'S240A' | 'UR'
+      adjustmentType: 'ADA' | 'RADA' | 'UAL' | 'LAL' | 'SREM' | 'RSR' | 'RST' | 'RX' | 'S240A' | 'UR' | 'TCA'
       /**
        * Format: date
        * @description The NOMIS date of adjustment
@@ -209,6 +209,7 @@ export interface components {
         | 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED'
         | 'SPECIAL_REMISSION'
         | 'UNUSED_DEDUCTIONS'
+        | 'CUSTODY_ABROAD'
       /**
        * Format: date
        * @description The end date of the adjustment
@@ -230,6 +231,7 @@ export interface components {
       lawfullyAtLarge?: components['schemas']['LawfullyAtLargeDto']
       specialRemission?: components['schemas']['SpecialRemissionDto']
       taggedBail?: components['schemas']['TaggedBailDto']
+      timeSpentInCustodyAbroad?: components['schemas']['TimeSpentInCustodyAbroadDto']
       /**
        * Format: int32
        * @description The NOMIS sentence sequence of the adjustment
@@ -308,6 +310,14 @@ export interface components {
        */
       caseSequence: number
     }
+    /** @description The details of the time spent in custody abroad adjustment */
+    TimeSpentInCustodyAbroadDto: {
+      /**
+       * @description The source document for the time spent in custody abroad information
+       * @enum {string}
+       */
+      documentationSource?: 'COURT_WARRANT' | 'PPCS_LETTER'
+    }
     /** @description The details of a UAL adjustment */
     UnlawfullyAtLargeDto: {
       /**
@@ -366,6 +376,7 @@ export interface components {
         | 'LAL_LAST_DATE_CANNOT_BE_FUTURE'
         | 'LAL_DATE_MUST_BE_AFTER_SENTENCE_DATE'
         | 'SREM_TYPE_NOT_NULL'
+        | 'TSICA_DOCUMENTATION_SOURCE_NOT_NULL'
       arguments: string[]
       message: string
       /** @enum {string} */

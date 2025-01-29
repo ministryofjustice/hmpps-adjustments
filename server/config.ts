@@ -167,4 +167,7 @@ export default {
     tagManagerContainerId: get('TAG_MANAGER_CONTAINER_ID', false),
     appInsightsConnectionString: get('APPLICATIONINSIGHTS_CONNECTION_STRING', '', requiredInProduction),
   },
+  featureToggles: {
+    timeSpentInCustodyAbroadEnabled: get('TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED', 'true') === 'true',
+  },
 }

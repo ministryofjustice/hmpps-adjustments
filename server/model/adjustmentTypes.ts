@@ -1,4 +1,5 @@
 import { AdjustmentTypes } from '../@types/adjustments/adjustmentsTypes'
+import config from '../config'
 
 export type AdjustmentType = {
   value: AdjustmentTypes
@@ -9,7 +10,7 @@ export type AdjustmentType = {
   deduction: boolean
 }
 
-const types: AdjustmentType[] = [
+let types: AdjustmentType[] = [
   {
     value: 'UNUSED_DEDUCTIONS',
     text: 'Unused deductions',
@@ -70,6 +71,19 @@ const types: AdjustmentType[] = [
     deduction: true,
   } as AdjustmentType,
 ]
+
+if (config.featureToggles.timeSpentInCustodyAbroadEnabled) {
+  types = [
+    ...types,
+    {
+      value: 'CUSTODY_ABROAD',
+      text: 'Time spent in custody abroad',
+      shortText: 'Time spent in custody abroad',
+      url: 'custody-abroad',
+      deduction: true,
+    } as AdjustmentType,
+  ]
+}
 
 const adjustmentTypes = [...types]
 export default adjustmentTypes
