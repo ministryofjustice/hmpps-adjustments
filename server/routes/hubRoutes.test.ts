@@ -233,7 +233,7 @@ describe('GET /:nomsId', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Nobody may have 20 days remand')
+        expect(res.text).toContain('Review remand')
       })
   })
   it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
@@ -324,7 +324,7 @@ describe('GET /:nomsId', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).not.toContain('Nobody may have 20 days remand')
+        expect(res.text).not.toContain('Review remand')
       })
   })
 
@@ -365,7 +365,7 @@ describe('GET /:nomsId', () => {
       .expect(res => {
         expect(res.text).toContain('Anon')
         expect(res.text).toContain('Nobody')
-        expect(res.text).not.toContain('Nobody may have 20 days remand')
+        expect(res.text).not.toContain('Review remand')
         expect(res.text).toContain('24')
         expect(res.text).toContainInOrder(['Last update', 'on 5 April 2023', 'by Leeds'])
         expect(res.text).toContain('including 10 days unused')

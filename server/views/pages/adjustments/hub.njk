@@ -80,16 +80,6 @@
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      {% if model.displayReview() %}
-        <div class="custom-card">
-          <h2 class="govuk-heading-m adj-card-heading">There is existing remand to review</h2>
-          <p data-qa="relevant-remand-message">Based on the data from court outcomes in
-            NOMIS, {{ prisoner.firstName | title }}
-            {{ prisoner.lastName | title }} may have {{ model.getTotalDaysRelevantRemand() }} days remand.
-            Review the remand to make sure it is relevant.</p>
-          <a href="/{{ prisoner.prisonerNumber }}/remand" class="govuk-button" role="button" data-qa="relevant-remand">Review</a>
-        </div>
-      {% endif %}
 
       <h2 class="govuk-heading-m govuk-!-padding-left-4">
         Deductions
