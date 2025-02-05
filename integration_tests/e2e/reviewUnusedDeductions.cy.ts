@@ -32,6 +32,7 @@ context('Review Unused Deductions', () => {
     cy.task('stubComponents')
     cy.task('stubDeleteAdjustment')
     cy.task('stubGetThingsToDo')
+    cy.task('stubEvictCache')
   })
 
   it('Review Unused Deductions - Add remand', () => {
