@@ -21,6 +21,7 @@ context('Enter an ADA', () => {
     cy.task('stubRejectProspectiveAda')
     cy.task('stubGetUnusedDeductionsCalculationResult')
     cy.task('stubGetAdjustmentThingsToDo')
+    cy.task('stubEvictCache')
   })
 
   it('Enter an AADA', () => {

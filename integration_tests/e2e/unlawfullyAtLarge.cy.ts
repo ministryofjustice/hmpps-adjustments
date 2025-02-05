@@ -22,6 +22,7 @@ context('Enter Unlawfully at Large', () => {
     cy.task('stubComponents')
     cy.task('stubGetUnusedDeductionsCalculationResult')
     cy.task('stubGetThingsToDo')
+    cy.task('stubEvictCache')
   })
 
   it('Add Unlawfully At Large', () => {

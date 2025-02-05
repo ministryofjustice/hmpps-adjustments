@@ -90,4 +90,16 @@ export default {
       },
     })
   },
+  stubEvictCache: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/court-cases-release-dates-api/things-to-do/prisoner/A1234AB',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
 }

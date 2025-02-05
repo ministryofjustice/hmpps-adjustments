@@ -25,7 +25,9 @@ const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<Adjustmen
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
-const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService() as jest.Mocked<CourtCasesReleaseDatesService>
+const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService(
+  null,
+) as jest.Mocked<CourtCasesReleaseDatesService>
 
 const remandAdjustment = {
   id: '1',

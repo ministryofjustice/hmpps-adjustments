@@ -16,6 +16,7 @@ context('Add/edit/delete Unused Deductions', () => {
     cy.task('stubGetUnusedDeductionsCalculationResultUnsupportedEdit')
     cy.task('stubSetUnusedDaysManually')
     cy.task('stubGetThingsToDo')
+    cy.task('stubEvictCache')
   })
 
   it('Add Manual Unused Deduction', () => {

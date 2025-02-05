@@ -25,6 +25,7 @@ context('Enter Special Remission', () => {
     cy.task('stubComponents')
     cy.task('stubGetUnusedDeductionsCalculationResult')
     cy.task('stubGetThingsToDo')
+    cy.task('stubEvictCache')
   })
 
   it('Add Special Remission Happy Path', () => {

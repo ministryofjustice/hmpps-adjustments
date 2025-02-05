@@ -64,6 +64,10 @@ export default class AdjustmentRoutes {
       this.adjustmentsStoreService.clear(req, nomsId)
     }
 
+    if (messageExists) {
+      this.courtCasesReleaseDatesService.evictCache(nomsId, username)
+    }
+
     const [[unusedDeductionMessage, adjustments], adaAdjudicationDetails, serviceDefinitions] = await Promise.all([
       this.unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments(nomsId, bookingId, username),
       this.adjustmentsService.getAdaAdjudicationDetails(nomsId, username, activeCaseLoadId),

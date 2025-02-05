@@ -18,4 +18,10 @@ export default class CourtCasesReleaseDatesApiClient {
       path: `/service-definitions/prisoner/${prisonerId}`,
     }) as Promise<CcrdServiceDefinitions>
   }
+
+  evictCache(prisonerId: string): Promise<void> {
+    return this.restClient.delete({
+      path: `/things-to-do/prisoner/${prisonerId}`,
+    }) as Promise<void>
+  }
 }

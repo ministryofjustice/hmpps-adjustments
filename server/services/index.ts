@@ -31,7 +31,7 @@ export const services = () => {
     adjustmentsService,
     additionalDaysAwardedStoreService,
   )
-  const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService()
+  const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService(hmppsAuthClient)
 
   return {
     applicationInfo,
