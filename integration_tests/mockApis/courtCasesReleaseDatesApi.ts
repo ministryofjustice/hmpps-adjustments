@@ -94,7 +94,7 @@ export default {
     return stubFor({
       request: {
         method: 'DELETE',
-        urlPattern: '/court-cases-release-dates-api/things-to-do/prisoner/A1234AB',
+        urlPattern: '/court-cases-release-dates-api/things-to-do/prisoner/A1234AB/evict',
       },
       response: {
         status: 200,

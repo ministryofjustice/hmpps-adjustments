@@ -21,7 +21,7 @@ export default class CourtCasesReleaseDatesApiClient {
 
   evictCache(prisonerId: string): Promise<void> {
     return this.restClient.delete({
-      path: `/things-to-do/prisoner/${prisonerId}`,
+      path: `/things-to-do/prisoner/${prisonerId}/evict`,
     }) as Promise<void>
   }
 }
