@@ -10,6 +10,9 @@ import TimeSpentInCustodyAbroadReviewModel from '../model/custody-abroad/timeSpe
 import { Message } from '../model/adjustmentsHubViewModel'
 import TimeSpentInCustodyAbroadViewModel from '../model/custody-abroad/timeSpentInCustodyAbroadViewModel'
 import TimeSpentInCustodyAbroadRemoveModel from '../model/custody-abroad/timeSpentInCustodyAbroadRemoveModel'
+import TimeSpentInCustodyAbroadSelectOffencesModel from '../model/custody-abroad/timeSpentInCustodyAbroadSelectOffencesModel'
+import TimeSpentInCustodyAbroadOffencesForm from '../model/custody-abroad/timeSpentInCustodyAbroadOffencesForm'
+import FullPageError from '../model/FullPageError'
 
 export default class TimeSpentInCustodyAbroadRoutes {
   constructor(
@@ -43,13 +46,22 @@ export default class TimeSpentInCustodyAbroadRoutes {
       username,
     )
 
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      bookingId,
+      username,
+    )
+
     const timeSpentInCustodyAbroadAdjustments = adjustments.filter(it => it.adjustmentType === 'CUSTODY_ABROAD')
     if (!timeSpentInCustodyAbroadAdjustments.length) {
       return res.redirect(`/${nomsId}`)
     }
 
     return res.render('pages/adjustments/custody-abroad/view', {
-      model: new TimeSpentInCustodyAbroadViewModel(prisonerNumber, timeSpentInCustodyAbroadAdjustments),
+      model: new TimeSpentInCustodyAbroadViewModel(
+        prisonerNumber,
+        timeSpentInCustodyAbroadAdjustments,
+        sentencesAndOffences,
+      ),
     })
   }
 
@@ -77,7 +89,10 @@ export default class TimeSpentInCustodyAbroadRoutes {
       })
     }
 
-    adjustment.timeSpentInCustodyAbroad = { documentationSource: req.body.documentationSource }
+    adjustment.timeSpentInCustodyAbroad = {
+      ...adjustment.timeSpentInCustodyAbroad,
+      documentationSource: req.body.documentationSource,
+    }
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustment)
 
@@ -112,18 +127,90 @@ export default class TimeSpentInCustodyAbroadRoutes {
 
     this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
 
+    return res.redirect(`/${nomsId}/custody-abroad/offences/${addOrEdit}/${id}`)
+  }
+
+  public offences: RequestHandler = async (req, res): Promise<void> => {
+    const { nomsId, addOrEdit, id } = req.params
+    const { bookingId, prisonerNumber } = res.locals.prisoner
+    const { username } = res.locals.user
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    if (!adjustment) {
+      return res.redirect(`/${nomsId}`)
+    }
+
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      bookingId,
+      username,
+    )
+    const form = TimeSpentInCustodyAbroadOffencesForm.fromAdjustment(adjustment, sentencesAndOffences)
+
+    return res.render('pages/adjustments/custody-abroad/offences', {
+      model: new TimeSpentInCustodyAbroadSelectOffencesModel(
+        id,
+        prisonerNumber,
+        adjustment,
+        form,
+        sentencesAndOffences,
+        addOrEdit,
+      ),
+    })
+  }
+
+  public submitOffences: RequestHandler = async (req, res): Promise<void> => {
+    const { username } = res.locals.user
+    const { nomsId, addOrEdit, id } = req.params
+    const { bookingId, prisonerNumber } = res.locals.prisoner
+
+    if (!['edit', 'add'].includes(addOrEdit)) {
+      throw FullPageError.notFoundError()
+    }
+
+    const adjustmentForm = new TimeSpentInCustodyAbroadOffencesForm(req.body)
+
+    await adjustmentForm.validate()
+    const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
+    if (adjustmentForm.errors.length) {
+      const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+        bookingId,
+        username,
+      )
+
+      return res.render('pages/adjustments/custody-abroad/offences', {
+        model: new TimeSpentInCustodyAbroadSelectOffencesModel(
+          id,
+          prisonerNumber,
+          adjustment,
+          adjustmentForm,
+          sentencesAndOffences,
+          addOrEdit,
+        ),
+      })
+    }
+
+    this.adjustmentsStoreService.store(req, nomsId, id, adjustmentForm.toAdjustment(adjustment))
+
     return res.redirect(`/${nomsId}/custody-abroad/review/${addOrEdit}/${id}`)
   }
 
   public review: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit, id } = req.params
+    const { username } = res.locals.user
+    const { bookingId } = res.locals.prisoner
+
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+    const sentencesAndOffences = await this.prisonerService.getSentencesAndOffencesFilteredForRemand(
+      bookingId,
+      username,
+    )
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
     }
 
     return res.render('pages/adjustments/custody-abroad/review', {
-      model: new TimeSpentInCustodyAbroadReviewModel(nomsId, id, addOrEdit, adjustment),
+      model: new TimeSpentInCustodyAbroadReviewModel(nomsId, id, addOrEdit, adjustment, sentencesAndOffences),
     })
   }
 

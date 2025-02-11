@@ -125,6 +125,24 @@ export function offencesForRemandAdjustment(
   })
 }
 
+export function offencesForTimeSpentInCustodyAbroadAdjustment(
+  adjustment: Adjustment,
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): (PrisonApiOffence & { courtDescription: string })[] {
+  return sentencesAndOffences.flatMap(so => {
+    return so.offences
+      .filter(off => {
+        if (adjustment.timeSpentInCustodyAbroad?.chargeIds?.length) {
+          return adjustment.timeSpentInCustodyAbroad?.chargeIds.includes(off.offenderChargeId)
+        }
+        return adjustment.sentenceSequence === so.sentenceSequence
+      })
+      .map(off => {
+        return { ...off, courtDescription: so.courtDescription }
+      })
+  })
+}
+
 /**
  * Type used to organise sentences and offences by caseSequence.
  */

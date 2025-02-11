@@ -1,18 +1,28 @@
+import dayjs from 'dayjs'
 import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
 import timeSpentInCustodyAbroadDocumentationSource from './timeSpentInCustodyAbroadDocumentationSource'
+import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { offencesForTimeSpentInCustodyAbroadAdjustment } from '../../utils/utils'
 
 export default class TimeSpentInCustodyAbroadViewModel {
   constructor(
-    public prisonerNumber: string,
+    public nomsId: string,
     public adjustments: Adjustment[],
+    private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
   ) {}
 
   public backlink(): string {
-    return `/${this.prisonerNumber}`
+    return `/${this.nomsId}`
   }
 
   public columnHeadings() {
-    return [{ text: 'Entered by' }, { text: 'Type' }, { text: 'Days' }, { text: 'Actions' }]
+    return [
+      { text: 'Entered by' },
+      { text: 'Type', classes: 'govuk-!-width-one-third' },
+      { text: 'Days' },
+      { text: 'Offences', classes: 'govuk-!-width-one-third' },
+      { text: 'Actions' },
+    ]
   }
 
   public rows() {
@@ -22,8 +32,32 @@ export default class TimeSpentInCustodyAbroadViewModel {
             tsica => tsica.value === it.timeSpentInCustodyAbroad.documentationSource,
           ).text
         : 'Unknown'
-      return [{ text: it.prisonName }, { text: displayText }, { text: it.days }, this.actionCell(it)]
+      return [
+        { text: it.prisonName },
+        { text: displayText },
+        { text: it.days },
+        { html: this.offenceSummary(it) },
+        this.actionCell(it),
+      ]
     })
+  }
+
+  public offenceSummary(adjustment: Adjustment): string {
+    const offences = offencesForTimeSpentInCustodyAbroadAdjustment(adjustment, this.sentencesAndOffences)
+    return `<div>
+                    ${offences
+                      .map(it => {
+                        return `<div><span class="govuk-!-font-weight-bold">${it.offenceDescription}</span><br>
+                        <span class="govuk-body-s">
+                          ${this.getCommittedText(it, true)}
+                        </span><br>
+                        <span class="govuk-body-s">
+                          ${this.getHeardAtCourt(it)}
+                        </span>
+                        </div>`
+                      })
+                      .join('')}
+                  </div>`
   }
 
   public table() {
@@ -51,5 +85,28 @@ export default class TimeSpentInCustodyAbroadViewModel {
       </div>
     `,
     }
+  }
+
+  public getCommittedText(offence: PrisonApiOffence, noWrapDate: boolean): string {
+    let committedText
+    if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
+      committedText = `Committed from ${this.formatDate(offence.offenceStartDate, noWrapDate)} to ${this.formatDate(offence.offenceEndDate, noWrapDate)}`
+    } else if (offence.offenceStartDate) {
+      committedText = `Committed on ${this.formatDate(offence.offenceStartDate, noWrapDate)}`
+    } else if (offence.offenceEndDate) {
+      committedText = `Committed on ${this.formatDate(offence.offenceEndDate, noWrapDate)}`
+    } else {
+      committedText = 'Offence date not entered'
+    }
+    return committedText
+  }
+
+  private formatDate(date: string, noWrapDate: boolean) {
+    const formattedDate = dayjs(date).format('D MMMM YYYY')
+    return noWrapDate ? `<span class="govuk-!-white-space-nowrap">${formattedDate}</span> ` : formattedDate
+  }
+
+  public getHeardAtCourt(offence: PrisonApiOffence & { courtDescription: string }): string {
+    return `Heard at ${offence.courtDescription}`
   }
 }
