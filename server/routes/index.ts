@@ -165,6 +165,8 @@ export default function routes(service: Services): Router {
   post('/:nomsId/custody-abroad/documentation/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitDocumentation)
   get('/:nomsId/custody-abroad/days/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.days)
   post('/:nomsId/custody-abroad/days/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitDays)
+  get('/:nomsId/custody-abroad/offences/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.offences)
+  post('/:nomsId/custody-abroad/offences/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitOffences)
   get('/:nomsId/custody-abroad/review/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.review)
   post('/:nomsId/custody-abroad/review/:addOrEdit/:id', timeSpentInCustodyAbroadRoutes.submitReview)
 

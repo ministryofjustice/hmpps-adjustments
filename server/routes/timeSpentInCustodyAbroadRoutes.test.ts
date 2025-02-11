@@ -7,6 +7,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -18,6 +19,32 @@ const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<Adj
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '96c83672-8499-4a64-abc9-3e031b1747b3'
+
+const sentenceAndOffenceBaseRecord = {
+  terms: [
+    {
+      years: 3,
+    },
+  ],
+  sentenceTypeDescription: 'SDS Standard Sentence',
+  caseSequence: 1,
+  lineSequence: 1,
+  caseReference: 'CASE001',
+  courtDescription: 'Court 1',
+  sentenceSequence: 1,
+  sentenceStatus: 'A',
+  offences: [
+    {
+      offenderChargeId: 1,
+      offenceDescription: 'Doing a crime',
+      offenceStartDate: '2021-01-04',
+      offenceEndDate: '2021-01-05',
+    },
+    { offenderChargeId: 2, offenceDescription: 'Doing a different crime', offenceStartDate: '2021-03-06' },
+  ],
+} as PrisonApiOffenderSentenceAndOffences
+
+const stubbedSentencesAndOffences = [sentenceAndOffenceBaseRecord]
 
 const timeSpentInCustodyAbroadAdjustment = {
   id: '3',
@@ -129,7 +156,7 @@ describe('Time spent in custody abroad routes', () => {
     ${'edit'} | ${`-1`}
     ${'edit'} | ${`1.5`}
     ${'edit'} | ${`text`}
-  `('POST /{nomsId}/special remission/days/:addOrEdit invalid number entered for days', async ({ addOrEdit, days }) => {
+  `('POST /{nomsId}/custody-abroad/days/:addOrEdit invalid number entered for days', async ({ addOrEdit, days }) => {
     return request(app)
       .post(`/${NOMS_ID}/custody-abroad/days/${addOrEdit}/${SESSION_ID}`)
       .send({ days })
@@ -140,12 +167,12 @@ describe('Time spent in custody abroad routes', () => {
         )
       })
   })
-  //
+
   test.each`
     addOrEdit
     ${'add'}
     ${'edit'}
-  `('POST /{nomsId}/special remission/days/:addOrEdit invalid number entered for days', async ({ addOrEdit }) => {
+  `('POST /{nomsId}/custody-abroad/days/:addOrEdit invalid number entered for days', async ({ addOrEdit }) => {
     return request(app)
       .post(`/${NOMS_ID}/custody-abroad/days/${addOrEdit}/${SESSION_ID}`)
       .send()
@@ -159,13 +186,73 @@ describe('Time spent in custody abroad routes', () => {
     addOrEdit
     ${'add'}
     ${'edit'}
-  `('POST /{nomsId}/special remission/days/:addOrEdit a valid days input redirects to type', async ({ addOrEdit }) => {
+  `('POST /{nomsId}/custody-abroad/days/:addOrEdit a valid days input redirects to type', async ({ addOrEdit }) => {
     return request(app)
       .post(`/${NOMS_ID}/custody-abroad/days/${addOrEdit}/${SESSION_ID}`)
       .send({ days: 7 })
       .expect(302)
-      .expect('Location', `/${NOMS_ID}/custody-abroad/review/${addOrEdit}/${SESSION_ID}`)
+      .expect('Location', `/${NOMS_ID}/custody-abroad/offences/${addOrEdit}/${SESSION_ID}`)
   })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('GET /{nomsId}/custody-abroad/offences/add displays the correct information', async ({ addOrEdit }) => {
+    adjustmentsStoreService.getById.mockReturnValue(timeSpentInCustodyAbroadAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .get(`/${NOMS_ID}/custody-abroad/offences/${addOrEdit}/${SESSION_ID}`)
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Select all the offences that apply to this adjustment')
+        expect(res.text).toContain('Doing a crime')
+        expect(res.text).toContain('Doing a different crime')
+        expect(res.text).toContain('Court 1')
+        expect(res.text).toContain('CASE001')
+        expect(res.text).toContain('Doing a crime')
+        expect(res.text).toContain('Doing a different crime')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `(
+    'POST /{nomsId}/custody-abroad/offences/:addOrEdit no offences are selected results in an error',
+    async ({ addOrEdit }) => {
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+      adjustmentsStoreService.getById.mockReturnValue(timeSpentInCustodyAbroadAdjustment)
+      return request(app)
+        .post(`/${NOMS_ID}/custody-abroad/offences/${addOrEdit}/${SESSION_ID}`)
+        .send()
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain(
+            'You must select the offence(s) which relate to the time spent in custody abroad adjustment.',
+          )
+        })
+    },
+  )
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `(
+    'POST /{nomsId}/custody-abroad/offences/:addOrEdit selected offences redircets to review',
+    async ({ addOrEdit }) => {
+      prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+      adjustmentsStoreService.getById.mockReturnValue(timeSpentInCustodyAbroadAdjustment)
+      return request(app)
+        .post(`/${NOMS_ID}/custody-abroad/offences/${addOrEdit}/${SESSION_ID}`)
+        .send({ chargeId: [7] })
+        .expect(302)
+        .expect('Location', `/${NOMS_ID}/custody-abroad/review/${addOrEdit}/${SESSION_ID}`)
+    },
+  )
 
   test.each`
     addOrEdit
@@ -173,6 +260,7 @@ describe('Time spent in custody abroad routes', () => {
     ${'edit'}
   `('GET /{nomsId}/custody-abroad/review/:addOrEdit displays the correct information', async ({ addOrEdit }) => {
     adjustmentsStoreService.getById.mockReturnValue(timeSpentInCustodyAbroadAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/custody-abroad/review/${addOrEdit}/${SESSION_ID}`)
       .expect(200)
@@ -222,10 +310,13 @@ describe('Time spent in custody abroad routes', () => {
     ${'documentation'} | ${'edit'} | ${`/${NOMS_ID}/custody-abroad/view" class="govuk-back-link"`}
     ${'days'}          | ${'add'}  | ${`/${NOMS_ID}/custody-abroad/documentation/add/${SESSION_ID}" class="govuk-back-link"`}
     ${'days'}          | ${'edit'} | ${`/${NOMS_ID}/custody-abroad/documentation/edit/${SESSION_ID}" class="govuk-back-link"`}
-    ${'review'}        | ${'add'}  | ${`/${NOMS_ID}/custody-abroad/days/add/${SESSION_ID}" class="govuk-back-link"`}
-    ${'review'}        | ${'edit'} | ${`/${NOMS_ID}/custody-abroad/days/edit/${SESSION_ID}" class="govuk-back-link"`}
+    ${'offences'}      | ${'add'}  | ${`/${NOMS_ID}/custody-abroad/days/add/${SESSION_ID}" class="govuk-back-link"`}
+    ${'offences'}      | ${'edit'} | ${`/${NOMS_ID}/custody-abroad/days/edit/${SESSION_ID}" class="govuk-back-link"`}
+    ${'review'}        | ${'add'}  | ${`/${NOMS_ID}/custody-abroad/offences/add/${SESSION_ID}" class="govuk-back-link"`}
+    ${'review'}        | ${'edit'} | ${`/${NOMS_ID}/custody-abroad/offences/edit/${SESSION_ID}" class="govuk-back-link"`}
   `('test back links', async ({ route, addOrEdit, backLink }) => {
     adjustmentsStoreService.getById.mockReturnValue(timeSpentInCustodyAbroadAdjustment)
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
       .get(`/${NOMS_ID}/custody-abroad/${route}/${addOrEdit}/${SESSION_ID}`)
       .expect('Content-Type', /html/)
