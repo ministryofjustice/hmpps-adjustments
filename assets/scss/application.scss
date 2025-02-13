@@ -12,3 +12,9 @@ $govuk-page-width: $moj-page-width;
 @import './components/review-list';
 @import './components/header-bar';
 @import 'assets/scss/local';
+
+
+.table-ual-column-type {
+  width: 8em;
+  word-wrap: break-word;
+}
