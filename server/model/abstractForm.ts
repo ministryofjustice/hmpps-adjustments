@@ -91,7 +91,7 @@ export default abstract class AbstractForm<T> {
   addErrors(validationMessages: ValidationMessage[]) {
     this.errors = validationMessages.map(it => {
       return {
-        fields: [],
+        fields: [] as string[],
         html: `<div${it.message.indexOf('\n') !== -1 ? ' class="govuk-!-margin-bottom-2"' : ''}>
           ${it.message.replace('\n', '<br />')}
         </div>`,
