@@ -108,7 +108,9 @@ export default class AdjustmentsHubViewModel {
     const useShortText =
       adjustmentType.value === 'UNLAWFULLY_AT_LARGE' ||
       adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED' ||
-      adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED'
+      adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED' ||
+      adjustmentType.value === 'CUSTODY_ABROAD' ||
+      adjustmentType.value === 'APPEAL_APPLICANT'
 
     let heading
     if (this.message.action === 'CREATE') {
@@ -117,6 +119,7 @@ export default class AdjustmentsHubViewModel {
       heading = `${this.message.days} ${this.message.days > 1 ? 'days' : 'day'} of ${adjustmentType.shortText} ${this.message.days > 1 ? 'have' : 'has'} been deleted`
     } else {
       heading = `${useShortText ? adjustmentType.shortText : adjustmentType.text} details have been updated`
+      heading = `${heading.charAt(0).toUpperCase()}${heading.slice(1)}`
     }
 
     return heading

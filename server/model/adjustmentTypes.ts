@@ -66,7 +66,7 @@ let types: AdjustmentType[] = [
   {
     value: 'SPECIAL_REMISSION',
     text: 'Special remission',
-    shortText: 'Special remission',
+    shortText: 'special remission',
     url: 'special-remission',
     deduction: true,
   } as AdjustmentType,
@@ -78,7 +78,7 @@ if (config.featureToggles.timeSpentInCustodyAbroadEnabled) {
     {
       value: 'CUSTODY_ABROAD',
       text: 'Time spent in custody abroad',
-      shortText: 'Time spent in custody abroad',
+      shortText: 'time spent in custody abroad',
       url: 'custody-abroad',
       deduction: true,
     } as AdjustmentType,
@@ -91,7 +91,7 @@ if (config.featureToggles.timeSpentAsAnAppealApplicantEnabled) {
     {
       value: 'APPEAL_APPLICANT',
       text: 'Time spent as an appeal applicant not to count',
-      shortText: 'Time spent as an appeal applicant not to count',
+      shortText: 'time spent as an appeal applicant not to count',
       url: 'appeal-applicant',
       deduction: false,
     } as AdjustmentType,

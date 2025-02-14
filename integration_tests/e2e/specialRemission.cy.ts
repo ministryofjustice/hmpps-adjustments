@@ -54,7 +54,7 @@ context('Enter Special Remission', () => {
     confirm.checkOnPage()
     confirm.submit().click()
 
-    hub.successMessage().contains('45 days of Special remission have been saved')
+    hub.successMessage().contains('45 days of special remission have been saved')
   })
 
   it('No days from PPCS returns to the hub', () => {
@@ -121,7 +121,6 @@ context('Enter Special Remission', () => {
 
     deleteSpecialRemission.checkOnPage()
     deleteSpecialRemission.deleteButton().click()
-    cy.screenshot('deleteSpecialRemission')
-    hub.successMessage().contains('42 days of Special remission have been deleted')
+    hub.successMessage().contains('42 days of special remission have been deleted')
   })
 })
