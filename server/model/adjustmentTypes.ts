@@ -85,5 +85,18 @@ if (config.featureToggles.timeSpentInCustodyAbroadEnabled) {
   ]
 }
 
+if (config.featureToggles.timeSpentAsAnAppealApplicantEnabled) {
+  types = [
+    ...types,
+    {
+      value: 'APPEAL_APPLICANT',
+      text: 'Time spent as an appeal applicant not to count',
+      shortText: 'Time spent as an appeal applicant not to count',
+      url: 'appeal-applicant',
+      deduction: false,
+    } as AdjustmentType,
+  ]
+}
+
 const adjustmentTypes = [...types]
 export default adjustmentTypes

@@ -1,41 +1,35 @@
 import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
-import timeSpentInCustodyAbroadDocumentationSource from './timeSpentInCustodyAbroadDocumentationSource'
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 import { getSummaryHtmlForOffences, offencesForTimeSpentInCustodyAbroadAdjustment } from '../../utils/utils'
 
-export default class TimeSpentInCustodyAbroadViewModel {
+export default class TimeSpentAsAnAppealApplicantViewModel {
   constructor(
-    public nomsId: string,
+    public prisonerNumber: string,
     public adjustments: Adjustment[],
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
   ) {}
 
   public backlink(): string {
-    return `/${this.nomsId}`
+    return `/${this.prisonerNumber}`
   }
 
   public columnHeadings() {
     return [
       { text: 'Entered by' },
-      { text: 'Type', classes: 'govuk-!-width-one-third' },
-      { text: 'Days' },
+      { text: 'Court of Appeal reference number' },
       { text: 'Offences', classes: 'govuk-!-width-one-third' },
+      { text: 'Number of Days' },
       { text: 'Actions' },
     ]
   }
 
   public rows() {
     return this.adjustments.map(it => {
-      const displayText = it.timeSpentInCustodyAbroad
-        ? timeSpentInCustodyAbroadDocumentationSource.find(
-            tsica => tsica.value === it.timeSpentInCustodyAbroad.documentationSource,
-          ).text
-        : 'Unknown'
       return [
         { text: it.prisonName },
-        { text: displayText },
-        { text: it.days },
+        { text: it.timeSpentAsAnAppealApplicant?.courtOfAppealReferenceNumber || 'Unknown' },
         { html: this.offenceSummary(it) },
+        { text: it.days },
         this.actionCell(it),
       ]
     })
@@ -56,18 +50,18 @@ export default class TimeSpentInCustodyAbroadViewModel {
 
   public totalRow() {
     const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
-    return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }]]
+    return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: '' }, { html: `<b>${total}</b>` }, { html: '' }]]
   }
 
   private actionCell(adjustment: Adjustment) {
-    const visuallyHiddenText = `${adjustment.days} of time spent in custody abroad`
+    const visuallyHiddenText = `${adjustment.days} of time spent as an appeal applicant not to count`
     return {
       html: `
       <div class="govuk-grid-column-one-quarter govuk-!-margin-right-2 govuk-!-padding-0">
-        <a class="govuk-link" href="/${adjustment.person}/custody-abroad/documentation/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
+        <a class="govuk-link" href="/${adjustment.person}/appeal-applicant/days/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
       <div class="govuk-grid-column-one-half govuk-!-padding-0">
-        <a class="govuk-link" href="/${adjustment.person}/custody-abroad/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Delete<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
+        <a class="govuk-link" href="/${adjustment.person}/appeal-applicant/remove/${adjustment.id}" data-qa="remove-${adjustment.id}">Delete<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
     `,
     }

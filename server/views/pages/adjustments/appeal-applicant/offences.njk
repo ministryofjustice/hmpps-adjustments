@@ -1,0 +1,83 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "../remand/partials/remandOffence.njk" import offencesCard %}
+
+{% set pageTitle = applicationName + " - Select offences" %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block beforeContent %}
+  {{ super() }}
+  <nav>
+    {{ govukBackLink({
+      text: "Back",
+      href: model.backlink()
+    }) }}
+  </nav>
+{% endblock %}
+
+{% block content %}
+
+  {% if model.form.errors.length %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: model.form.errorList()
+        }) }}
+      </div>
+    </div>
+  {% endif %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-xl">Adjustments</span>
+        {% if model.addOrEdit === 'edit' %}Edit{% else %}Select the{% endif %} offences
+      </h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <p class="govuk-body">You have entered <strong>{{model.days()}}</strong> day(s) of time spent as an appeal applicant not to count. Select all the offences that apply to this adjustment.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+
+      <form class="form" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
+
+        {% for sentences in model
+          .cases
+          .values() %}
+          {% for sentence in sentences %}
+            {{ offencesCard(sentence, model.getOffences(sentence)) }}
+          {% endfor %}
+
+        {% endfor %}
+
+        <div class="govuk-inset-text">
+            If you think some information is wrong, you can edit it in NOMIS and <a href="">reload this page</a>.
+        </div>
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue",
+            type: submit,
+            preventDoubleClick: true,
+            attributes: { 'data-qa': 'submit-form' }
+          }) }}
+          {{ govukButton({
+            text: "Cancel",
+            classes: "govuk-button--secondary",
+            href: model.backlink() if model.addOrEdit === 'edit' else "/" + prisoner.prisonerNumber
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

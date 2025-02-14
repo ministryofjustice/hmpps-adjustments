@@ -169,5 +169,6 @@ export default {
   },
   featureToggles: {
     timeSpentInCustodyAbroadEnabled: get('TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED', 'true') === 'true',
+    timeSpentAsAnAppealApplicantEnabled: get('TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED', 'true') === 'true',
   },
 }

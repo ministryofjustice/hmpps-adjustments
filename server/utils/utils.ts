@@ -110,7 +110,7 @@ export const dateToString = (date: Date): string => dayjs(date).format('D MMMM Y
 export function offencesForRemandAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-): (PrisonApiOffence & { recall: boolean; courtDescription: string })[] {
+): (PrisonApiOffence & { courtDescription: string; recall?: boolean })[] {
   return sentencesAndOffences.flatMap(so => {
     return so.offences
       .filter(off => {
@@ -120,7 +120,7 @@ export function offencesForRemandAdjustment(
         return adjustment.sentenceSequence === so.sentenceSequence
       })
       .map(off => {
-        return { ...off, recall: isSentenceRecalled(so.sentenceCalculationType), courtDescription: so.courtDescription }
+        return { ...off, courtDescription: so.courtDescription, recall: isSentenceRecalled(so.sentenceCalculationType) }
       })
   })
 }
@@ -134,6 +134,24 @@ export function offencesForTimeSpentInCustodyAbroadAdjustment(
       .filter(off => {
         if (adjustment.timeSpentInCustodyAbroad?.chargeIds?.length) {
           return adjustment.timeSpentInCustodyAbroad?.chargeIds.includes(off.offenderChargeId)
+        }
+        return adjustment.sentenceSequence === so.sentenceSequence
+      })
+      .map(off => {
+        return { ...off, courtDescription: so.courtDescription }
+      })
+  })
+}
+
+export function offencesForTimeSpentAsAnAppealApplicantAdjustment(
+  adjustment: Adjustment,
+  sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+): (PrisonApiOffence & { courtDescription: string })[] {
+  return sentencesAndOffences.flatMap(so => {
+    return so.offences
+      .filter(off => {
+        if (adjustment.timeSpentAsAnAppealApplicant?.chargeIds?.length) {
+          return adjustment.timeSpentAsAnAppealApplicant?.chargeIds.includes(off.offenderChargeId)
         }
         return adjustment.sentenceSequence === so.sentenceSequence
       })
@@ -230,6 +248,44 @@ export function relevantSentenceForTaggedBailAdjustment(it: SentencesByCaseSeque
 
 export function formatDate(date: string | Date | number, format: string = 'D MMMM YYYY'): string {
   return dayjs(date).format(format)
+}
+
+export function getCommittedText(offence: PrisonApiOffence, noWrapDate: boolean): string {
+  let committedText
+  if (offence.offenceEndDate && offence.offenceStartDate && offence.offenceEndDate !== offence.offenceStartDate) {
+    committedText = `Committed from ${formatNoWrapDate(offence.offenceStartDate, noWrapDate)} to ${formatNoWrapDate(offence.offenceEndDate, noWrapDate)}`
+  } else if (offence.offenceStartDate) {
+    committedText = `Committed on ${formatNoWrapDate(offence.offenceStartDate, noWrapDate)}`
+  } else if (offence.offenceEndDate) {
+    committedText = `Committed on ${formatNoWrapDate(offence.offenceEndDate, noWrapDate)}`
+  } else {
+    committedText = 'Offence date not entered'
+  }
+  return committedText
+}
+
+export function formatNoWrapDate(date: string, noWrapDate: boolean) {
+  const formattedDate = formatDate(date)
+  return noWrapDate ? `<span class="govuk-!-white-space-nowrap">${formattedDate}</span> ` : formattedDate
+}
+
+export function getSummaryHtmlForOffences(
+  offences: (PrisonApiOffence & { courtDescription: string; recall?: boolean })[],
+) {
+  return `<div> 
+                    ${offences
+                      .map(it => {
+                        return `<div><span class="govuk-!-font-weight-bold">${it.offenceDescription}</span>${it.recall ? getSentenceRecallTagHTML() : ''}<br>
+                        <span class="govuk-body-s">
+                          ${getCommittedText(it, true)}
+                        </span><br>
+                        <span class="govuk-body-s">
+                          Heard at ${it.courtDescription}
+                        </span>
+                        </div>`
+                      })
+                      .join('')}
+                  </div>`
 }
 
 export function remandRelatedValidationSummary(messages: CalculateReleaseDatesValidationMessage[]) {

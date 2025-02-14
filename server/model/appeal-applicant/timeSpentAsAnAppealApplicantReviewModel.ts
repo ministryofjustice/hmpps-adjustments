@@ -1,13 +1,12 @@
 import SessionAdjustment from '../../@types/AdjustmentTypes'
-import timeSpentInCustodyAbroadDocumentationSource from './timeSpentInCustodyAbroadDocumentationSource'
 import {
-  offencesForTimeSpentInCustodyAbroadAdjustment,
   getCommittedText,
   getSummaryHtmlForOffences,
+  offencesForTimeSpentAsAnAppealApplicantAdjustment,
 } from '../../utils/utils'
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 
-export default class TimeSpentInCustodyAbroadReviewModel {
+export default class TimeSpentAsAnAppealApplicantReviewModel {
   constructor(
     public nomsId: string,
     public id: string,
@@ -17,21 +16,15 @@ export default class TimeSpentInCustodyAbroadReviewModel {
   ) {}
 
   public backlink(): string {
-    return `/${this.nomsId}/custody-abroad/offences/${this.addOrEdit}/${this.id}`
-  }
-
-  public timeSpentInCustodyAbroadDocumentationSource(): string {
-    return timeSpentInCustodyAbroadDocumentationSource.find(
-      it => it.value === this.adjustment.timeSpentInCustodyAbroad?.documentationSource,
-    ).text
+    return `/${this.nomsId}/appeal-applicant/offences/${this.addOrEdit}/${this.id}`
   }
 
   public cancelLink(): string {
-    return `/${this.nomsId}/`
+    return this.addOrEdit === 'add' ? `/${this.nomsId}/` : `/${this.nomsId}/appeal-applicant/view`
   }
 
   public offenceSummary() {
-    const offences = offencesForTimeSpentInCustodyAbroadAdjustment(this.adjustment, this.sentencesAndOffences)
+    const offences = offencesForTimeSpentAsAnAppealApplicantAdjustment(this.adjustment, this.sentencesAndOffences)
     return {
       key: {
         text: 'Offences',
@@ -42,7 +35,7 @@ export default class TimeSpentInCustodyAbroadReviewModel {
       actions: {
         items: [
           {
-            href: `/${this.nomsId}/custody-abroad/offences/${this.addOrEdit}/${this.id}`,
+            href: `/${this.nomsId}/appeal-applicant/offences/${this.addOrEdit}/${this.id}`,
             text: 'Edit',
             visuallyHiddenText: `offences. ${offences
               .map(it => {
