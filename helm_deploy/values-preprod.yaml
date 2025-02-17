@@ -25,8 +25,8 @@ generic-service:
     COMPONENT_API_URL: "https://frontend-components-preprod.hmpps.service.justice.gov.uk"
     COMMON_COMPONENTS_ENABLED: 'true'
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api-preprod.hmpps.service.justice.gov.uk"
-    TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'false'
-    TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'false'
+    TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'true'
+    TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'true'
 
   allowlist:
     cymulate-1: 54.217.50.18/32

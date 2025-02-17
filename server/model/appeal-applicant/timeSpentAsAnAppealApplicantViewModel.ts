@@ -18,7 +18,7 @@ export default class TimeSpentAsAnAppealApplicantViewModel {
       { text: 'Entered by' },
       { text: 'Court of Appeal reference number' },
       { text: 'Offences', classes: 'govuk-!-width-one-third' },
-      { text: 'Number of Days' },
+      { text: 'Days' },
       { text: 'Actions' },
     ]
   }
