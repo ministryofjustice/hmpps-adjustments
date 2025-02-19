@@ -4,7 +4,6 @@ import AppealApplicantCountCourtRefNumFormPage from '../pages/appealApplicantNot
 import SaveAppealApplicantCount from '../pages/appealApplicantNotToCount/saveAppealApplicantCount'
 import ViewAppealApplicantCountPage from '../pages/appealApplicantNotToCount/viewAppealApplicantCount'
 import RemoveAppealApplicantPage from '../pages/appealApplicantNotToCount/removeAppealApplicantPage'
-import RemandSelectOffencesPage from '../pages/remand/remandSelectOffences'
 import AppealApplicantSelectOffencesPage from '../pages/appealApplicantNotToCount/appealApplicantSelectOffences'
 import AppealApplicantEditOffencesPage from '../pages/appealApplicantNotToCount/appealApplicantEditOffences'
 
