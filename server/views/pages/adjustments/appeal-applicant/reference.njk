@@ -46,6 +46,9 @@
   <form class="form" method="post">
     <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
     {{ govukInput({
+     label: {
+        text: "Enter Court of Appeal reference number"
+      },
       classes: "govuk-input--width-10",
       id: "reference",
       name: "reference",
