@@ -97,7 +97,62 @@ export default {
             prisonName: 'Leeds',
             source: 'DPS',
           },
+          {
+            id: 'aa-8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+            bookingId: 1204935,
+            sentenceSequence: 2,
+            person: 'A1234AB',
+            adjustmentType: 'APPEAL_APPLICANT',
+            timeSpentAsAnAppealApplicantNotToCount: { courtOfAppealReferenceNumber: '12345678' },
+            days: 1,
+            prisonName: 'Leeds',
+            source: 'DPS',
+          },
         ],
+      },
+    })
+  },
+  stubGetAppealApplicantAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/aa-8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
+        jsonBody: {
+          id: 'aa-8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+          adjustmentType: 'APPEAL_APPLICANT',
+          timeSpentAsAnAppealApplicantNotToCount: { courtOfAppealReferenceNumber: '12345678' },
+          bookingId: '1204935',
+          days: 1,
+          person: 'A1234AB',
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateAppealApplicantAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/aa-8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteAppealApplicantAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/aa-8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
       },
     })
   },
