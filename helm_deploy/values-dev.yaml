@@ -5,7 +5,9 @@ generic-service:
   replicaCount: 2
 
   ingress:
-    host: adjust-release-dates-dev.hmpps.service.justice.gov.uk
+    hosts:
+      - adjust-release-dates-dev.hmpps.service.justice.gov.uk
+      - adjustments-dev.hmpps.service.justice.gov.uk
 
   env:
     INGRESS_URL: "https://adjust-release-dates-dev.hmpps.service.justice.gov.uk"
