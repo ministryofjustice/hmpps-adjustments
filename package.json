@@ -7,7 +7,7 @@
   "scripts": {
     "prepare": "husky",
     "copy-views": "cp -R server/views dist/server/",
-    "compile-sass": "sass --quiet-deps --no-source-map --load-path=node_modules/govuk-frontend/dist --load-path=node_modules/@ministryofjustice/frontend --load-path=node_modules/hmpps-court-cases-release-dates-design --load-path=. assets/scss/application.scss:./assets/stylesheets/application.css --style compressed",
+    "compile-sass": "sass --quiet-deps --no-source-map --load-path=node_modules/govuk-frontend/dist --load-path=node_modules/@ministryofjustice/frontend --load-path=node_modules/@ministryofjustice/hmpps-court-cases-release-dates-design --load-path=. assets/scss/application.scss:./assets/stylesheets/application.css --style compressed",
     "watch-ts": "tsc -w",
     "watch-views": "nodemon --watch server/views -e html,njk -x npm run copy-views",
     "watch-node": "DEBUG=gov-starter-server* nodemon -r dotenv/config --watch dist/ dist/server.js | bunyan -o short",
@@ -120,7 +120,7 @@
     "express-session": "^1.18.1",
     "govuk-frontend": "^5.8.0",
     "helmet": "^8.0.0",
-    "hmpps-court-cases-release-dates-design": "^4.4.0",
+    "@ministryofjustice/hmpps-court-cases-release-dates-design": "^4.4.1",
     "http-errors": "^2.0.0",
     "jwt-decode": "^4.0.0",
     "nocache": "^4.0.0",
