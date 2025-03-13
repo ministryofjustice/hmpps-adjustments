@@ -147,6 +147,44 @@ const serviceDefinitionsNoThingsToDo = {
   },
 } as CcrdServiceDefinitions
 
+const serviceDefinitionsRemandThingsToDo = {
+  services: {
+    overview: {
+      href: 'http://localhost:8000/prisoner/AB1234AB/overview',
+      text: 'Overview',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+    adjustments: {
+      href: 'http://localhost:8002/AB1234AB',
+      text: 'Adjustments',
+      thingsToDo: {
+        things: [
+          {
+            title: 'There are periods of remand to review',
+            message:
+              'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
+            buttonText: 'Review remand',
+            buttonHref: 'https://identify-remand-periods-dev.hmpps.service.justice.gov.uk/prisoner/A8902DZ',
+            type: 'REVIEW_IDENTIFIED_REMAND',
+          },
+        ],
+        count: 1,
+      },
+    },
+    releaseDates: {
+      href: 'http://localhost:8004?prisonId=AB1234AB',
+      text: 'Release dates and calculations',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+  },
+} as CcrdServiceDefinitions
+
 const serviceDefinitionsProspectiveThingsToDo = {
   services: {
     overview: {
@@ -489,6 +527,60 @@ describe('GET /:nomsId', () => {
       .expect(res => {
         expect(res.text).toContain(
           `Unused deductions have not been calculated as there are unused deductions in NOMIS - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
+        )
+      })
+  })
+  it('GET /{nomsId} unused deductions banner is suppressed if the user has the remand role and there are remand thingsToDo', () => {
+    const nomisRemandAdjustment = { ...remandAdjustment }
+    nomisRemandAdjustment.source = 'NOMIS'
+    userInTest = userWithRemandRole
+
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [nomisRemandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
+
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain(
+          `Unused deductions have not been calculated - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
+        )
+        expect(res.text).toContain('There are periods of remand to review')
+        expect(res.text).toContain(
+          'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
+        )
+      })
+  })
+  it('GET /{nomsId} remand thingsToDo banner is suppressed if the user has the remand role and there are validation problems', () => {
+    const nomisRemandAdjustment = { ...remandAdjustment }
+    nomisRemandAdjustment.source = 'NOMIS'
+    userInTest = userWithRemandRole
+
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'VALIDATION',
+      [nomisRemandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
+
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          `Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.`,
+        )
+        expect(res.text).not.toContain('There are periods of remand to review')
+        expect(res.text).not.toContain(
+          'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
         )
       })
   })

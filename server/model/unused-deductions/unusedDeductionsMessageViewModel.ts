@@ -11,6 +11,7 @@ export default class UnusedDeductionsMessageViewModel {
     public adjustments: Adjustment[],
     public unusedDeductionMessage: UnusedDeductionMessageType,
     public inactiveDeleted: Adjustment[],
+    public remandBannerVisible: boolean,
   ) {
     this.checkInformationLink = `${config.services.calculateReleaseDatesUI.url}/calculation/${this.prisonerNumber}/check-information?hasErrors=true`
   }
@@ -88,6 +89,10 @@ export default class UnusedDeductionsMessageViewModel {
       reviewMessage = 'review remand to calculate'
     } else if (hasTaggedBail) {
       reviewMessage = 'review tagged bail to calculate'
+    }
+
+    if (this.remandBannerVisible) {
+      return ''
     }
 
     return `Unused deductions have not been calculated${hasNOMISUnusedRemand ? ' as there are unused deductions in NOMIS' : ''} - <a data-qa="review-unused-deductions" href="/${this.prisonerNumber}/review-deductions">${reviewMessage}</a>`
