@@ -81,14 +81,19 @@ export default class AdjustmentRoutes {
 
     let remandDecision
     let relevantRemand
+    let remandBannerVisible = false
     if (roles.includes('REMAND_IDENTIFIER')) {
       try {
         remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
         relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, username)
+        remandBannerVisible = serviceDefinitions.services.adjustments.thingsToDo.things.some(
+          thing => thing.type === 'REVIEW_IDENTIFIED_REMAND',
+        )
       } catch {
         // Nothing to do, remand review won't be displayed.
       }
     }
+
     return res.render('pages/adjustments/hub', {
       serviceDefinitions,
       model: new AdjustmentsHubViewModel(
@@ -101,6 +106,7 @@ export default class AdjustmentRoutes {
         unusedDeductionMessage,
         adaAdjudicationDetails,
         inactiveDeletedAdjustments,
+        remandBannerVisible,
       ),
     })
   }

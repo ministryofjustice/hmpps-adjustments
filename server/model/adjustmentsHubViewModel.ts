@@ -27,12 +27,14 @@ export default class AdjustmentsHubViewModel {
     unusedDeductionsMessageType: UnusedDeductionMessageType,
     private adaAdjudicationDetails: AdaAdjudicationDetails,
     inactiveDeletedAdjustments: Adjustment[],
+    private remandBannerVisible: boolean,
   ) {
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
       prisonerNumber,
       adjustments,
       unusedDeductionsMessageType,
       inactiveDeletedAdjustments,
+      remandBannerVisible,
     )
   }
 
