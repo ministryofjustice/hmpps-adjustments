@@ -557,33 +557,6 @@ describe('GET /:nomsId', () => {
         )
       })
   })
-  it('GET /{nomsId} remand thingsToDo banner is suppressed if the user has the remand role and there are validation problems', () => {
-    const nomisRemandAdjustment = { ...remandAdjustment }
-    nomisRemandAdjustment.source = 'NOMIS'
-    userInTest = userWithRemandRole
-
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'VALIDATION',
-      [nomisRemandAdjustment],
-    ])
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    paramStoreService.get.mockReturnValue(false)
-    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
-
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain(
-          `Some of the data in NOMIS related to this person is incorrect. This means unused deductions cannot be automatically calculated.`,
-        )
-        expect(res.text).not.toContain('There are periods of remand to review')
-        expect(res.text).not.toContain(
-          'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
-        )
-      })
-  })
   it('GET /{nomsId} hub unused deductions cannot be calculated because its a nomis adjustment - without existing unused - Review unused deductions enabled', () => {
     const nomisRemandAdjustment = { ...remandAdjustment }
     nomisRemandAdjustment.source = 'NOMIS'

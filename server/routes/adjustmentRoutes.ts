@@ -89,9 +89,6 @@ export default class AdjustmentRoutes {
         remandBannerVisible = serviceDefinitions.services.adjustments.thingsToDo.things.some(
           thing => thing.type === 'REVIEW_IDENTIFIED_REMAND',
         )
-        if (unusedDeductionMessage === 'VALIDATION') {
-          serviceDefinitions.services.adjustments.thingsToDo = { things: [], count: 0 }
-        }
       } catch {
         // Nothing to do, remand review won't be displayed.
       }
