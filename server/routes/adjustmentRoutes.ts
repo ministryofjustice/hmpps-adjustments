@@ -300,8 +300,13 @@ export default class AdjustmentRoutes {
       adjustmentType.value === 'REMAND' && roles.includes('REMAND_IDENTIFIER')
         ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
         : null
+    const secondTable =
+      adjustmentType.value === 'UNLAWFULLY_AT_LARGE'
+        ? await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
+        : null
     return res.render('pages/adjustments/view', {
       model: new ViewModel(adjustments, adjustmentType, remandDecision, roles),
+      secondTable,
     })
   }
 

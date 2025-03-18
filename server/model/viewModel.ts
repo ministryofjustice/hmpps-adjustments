@@ -36,6 +36,8 @@ export default class ViewModel {
     }
   }
 
+  // remove all non recall owned ones from table and have method called 2nd table with only recall ones
+
   public columnHeadings() {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return [
