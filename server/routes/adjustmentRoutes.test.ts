@@ -625,27 +625,63 @@ describe('Adjustment routes tests', () => {
       earliestSentence: new Date(),
       sentencesAndOffences: [],
     })
-    return (
-      request(app)
-        .get(`/${NOMS_ID}/unlawfully-at-large/view`)
-        .expect('Content-Type', /html/)
-        // .expect(res => {
-        //   console.log(res.text);
-        // })
-        .expect(res => {
-          expect(res.text).toContain('Leeds')
-          expect(res.text).toContain('edit/this-is-an-id')
-          expect(res.text).toContain('remove/this-is-an-id')
-          expect(res.text).toContain('Total days')
-          expect(res.text).toContain('First day')
-          expect(res.text).toContain('5 June 2023')
-          expect(res.text).toContain('Last day')
-          expect(res.text).toContain('25 July 2023')
-          expect(res.text).toContain('Type')
-          expect(res.text).toContain('Escape, including absconds and ROTL failures')
-          // expect(res.text).toContain('Recall') // need to add test for second table
-        })
-    )
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain('edit/this-is-an-id')
+        expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).toContain('First day')
+        expect(res.text).toContain('5 June 2023')
+        expect(res.text).toContain('Last day')
+        expect(res.text).toContain('25 July 2023')
+        expect(res.text).toContain('Type')
+        expect(res.text).toContain('Escape, including absconds and ROTL failures')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/view', () => {
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeTypeRecall,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+      {
+        ...unlawfullyAtLargeOtherTypes,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain('edit/this-is-an-id')
+        expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).toContain('First day')
+        expect(res.text).toContain('5 June 2023')
+        expect(res.text).toContain('Last day')
+        expect(res.text).toContain('25 July 2023')
+        expect(res.text).toContain('Type')
+        expect(res.text).toContain('Escape, including absconds and ROTL failures')
+        expect(res.text).toContain('UAL from recalls')
+        expect(res.text).toContain('RECALL')
+      })
   })
 
   it('GET /{nomsId}/unlawfully-at-large/view with no type', () => {
