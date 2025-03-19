@@ -50,8 +50,8 @@ export default class ViewModel {
 
   public secondTable() {
     return {
-      head: this.columnHeadings(),
-      rows: this.recallRows().concat(this.totalRecallRow()),
+      head: this.recallColumnHeadings(),
+      rows: [...this.recallRows(), ...this.totalRecallRow()],
       attributes: { 'data-qa': 'recall-table' },
     }
   }
@@ -94,6 +94,17 @@ export default class ViewModel {
     ]
   }
 
+  public recallColumnHeadings() {
+    return [
+      { html: '<span class="nowrap-header">Date of Revocation</span>' },
+      { text: 'Arrest date' },
+      { text: 'Entered by' },
+      { text: 'Type', classes: 'table-ual-column-type' },
+      { text: 'Number of days', format: 'numeric' },
+      { text: 'Actions' },
+    ]
+  }
+
   public recallRows() {
     return this.recallAdjustments.map(it => {
       return [
@@ -102,7 +113,7 @@ export default class ViewModel {
         { text: it.prisonName || 'Unknown' },
         { text: 'RECALL', classes: 'table-ual-column-type' },
         { text: it.days, format: 'numeric' },
-        this.actionCell(it),
+        this.recallActionCell(it),
       ]
     })
   }
@@ -214,6 +225,17 @@ export default class ViewModel {
         </a>
       </div>
     `,
+    }
+  }
+
+  private recallActionCell(adjustment: Adjustment) {
+    return {
+      html: `
+        <a class="govuk-link govuk-!-white-space-nowrap" href="/person/${adjustment.person}/edit-recall/${adjustment.id}/edit-summary" data-qa="edit-recall-${adjustment.id}">
+          Edit recall<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
+        </a>
+      `,
+      attributes: { class: 'govuk-table__cell' },
     }
   }
 
