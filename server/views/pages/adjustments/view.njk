@@ -31,6 +31,10 @@
         model.table()
       ) }}
       {# conditional on second table call gov.uk table (same as 3 lines above) + write a method call 2nd table #}
+        {% if model.recallAdjustments and model.recallAdjustments.length > 0 %}
+          <h2 class="govuk-heading-m">UAL from recalls</h2>
+            {{ govukTable(model.secondTable())}}
+        {% endif %}
         <div>
           {{ govukButton({
           text: "Add new",

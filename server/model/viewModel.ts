@@ -9,6 +9,8 @@ import lalAffectsReleaseDates from './lawfully-at-large/lalAffectsReleaseDates'
 export default class ViewModel {
   public adjustments: Adjustment[]
 
+  public recallAdjustments: Adjustment[]
+
   constructor(
     allAdjustments: Adjustment[],
     public adjustmentType: AdjustmentType,
@@ -17,6 +19,8 @@ export default class ViewModel {
   ) {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
+      // Keep all UAL adjustments except RECALL
+      .filter(it => it.adjustmentType !== 'UNLAWFULLY_AT_LARGE' || it.unlawfullyAtLarge?.type !== 'RECALL')
       .sort((a, b) => {
         if (a.fromDate == null) {
           return 1
@@ -24,6 +28,14 @@ export default class ViewModel {
         if (b.fromDate == null) {
           return -1
         }
+        return a.fromDate.localeCompare(b.fromDate)
+      })
+
+    this.recallAdjustments = allAdjustments
+      .filter(it => it.adjustmentType === 'UNLAWFULLY_AT_LARGE' && it.unlawfullyAtLarge?.type === 'RECALL')
+      .sort((a, b) => {
+        if (a.fromDate == null) return 1
+        if (b.fromDate == null) return -1
         return a.fromDate.localeCompare(b.fromDate)
       })
   }
@@ -36,7 +48,13 @@ export default class ViewModel {
     }
   }
 
-  // remove all non recall owned ones from table and have method called 2nd table with only recall ones
+  public secondTable() {
+    return {
+      head: this.columnHeadings(),
+      rows: this.recallRows().concat(this.totalRecallRow()),
+      attributes: { 'data-qa': 'recall-table' },
+    }
+  }
 
   public columnHeadings() {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
@@ -74,6 +92,19 @@ export default class ViewModel {
       { text: 'Entered by' },
       { text: 'Actions' },
     ]
+  }
+
+  public recallRows() {
+    return this.recallAdjustments.map(it => {
+      return [
+        { text: dayjs(it.fromDate).format('D MMMM YYYY') },
+        { text: dayjs(it.toDate).format('D MMMM YYYY') },
+        { text: it.prisonName || 'Unknown' },
+        { text: 'RECALL', classes: 'table-ual-column-type' },
+        { text: it.days, format: 'numeric' },
+        this.actionCell(it),
+      ]
+    })
   }
 
   public rows() {
@@ -127,6 +158,20 @@ export default class ViewModel {
         this.actionCell(it),
       ]
     })
+  }
+
+  public totalRecallRow() {
+    const total = this.recallAdjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    return [
+      [
+        { html: '<b>Total days</b>' },
+        { text: '' },
+        { text: '' },
+        { text: '' },
+        { html: `<b>${total}</b>`, format: 'numeric' },
+        { html: '' },
+      ],
+    ]
   }
 
   public totalRow() {
