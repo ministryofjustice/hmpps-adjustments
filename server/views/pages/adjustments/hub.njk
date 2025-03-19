@@ -85,9 +85,10 @@
         Deductions
       </h2>
 
-      {% if model.unusedDeductionMessage.unusedDeductionMessage != 'NONE' %}
+      {% set unusedDeductionMessage = model.unusedDeductionMessage.getUnusedDeductionMessage() %}
+      {% if unusedDeductionMessage != ''  %}
         <div class="govuk-inset-text govuk-!-margin-left-4">
-          {{ model.unusedDeductionMessage.getUnusedDeductionMessage() | safe }}
+          {{ unusedDeductionMessage | safe }}
         </div>
       {% endif %}
 
