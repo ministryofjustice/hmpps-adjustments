@@ -551,6 +551,9 @@ describe('GET /:nomsId', () => {
         expect(res.text).not.toContain(
           `Unused deductions have not been calculated - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
         )
+        expect(res.text).not.toContain(
+          '<div class="govuk-inset-text govuk-!-margin-left-4">\n          \n        </div>',
+        )
         expect(res.text).toContain('There are periods of remand to review')
         expect(res.text).toContain(
           'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
