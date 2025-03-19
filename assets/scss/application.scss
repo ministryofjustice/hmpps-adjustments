@@ -18,3 +18,7 @@ $govuk-page-width: $moj-page-width;
   width: 8em;
   word-wrap: break-word;
 }
+
+.nowrap-header {
+  white-space: nowrap;
+}
