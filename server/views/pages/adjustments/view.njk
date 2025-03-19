@@ -27,15 +27,16 @@
   </div>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-three-quarters">
-      {{ govukTable(
-        model.table()
-      ) }}
-      {# conditional on second table call gov.uk table (same as 3 lines above) + write a method call 2nd table #}
-        {% if model.recallAdjustments and model.recallAdjustments.length > 0 %}
-          <h2 class="govuk-heading-m">UAL from recalls</h2>
-          <h3 class="govuk-body">This UAL time was identified when a recall was recorded</h3>
-            {{ govukTable(model.secondTable())}}
-        {% endif %}
+     {{ govukTable(model.table()) }}
+
+{% if model.recallAdjustments and model.recallAdjustments.length > 0 %}
+  <h2 class="govuk-heading-m">UAL from recalls</h2>
+  <h3 class="govuk-body">This UAL time was identified when a recall was recorded</h3>
+  {{ govukTable(model.secondTable()) }}
+{% endif %}
+
+{# Final Total Row #}
+  <p class="govuk-body govuk-!-font-weight-bold">{{ model.allTables().total }}</p>
         <div>
           {{ govukButton({
           text: "Add new",

@@ -22,17 +22,18 @@ export default class ViewModel {
       // Keep all UAL adjustments except RECALL
       .filter(it => it.adjustmentType !== 'UNLAWFULLY_AT_LARGE' || it.unlawfullyAtLarge?.type !== 'RECALL')
       .sort((a, b) => {
-        if (a.fromDate == null) {
-          return 1
-        }
-        if (b.fromDate == null) {
-          return -1
-        }
+        if (a.fromDate == null) return 1
+        if (b.fromDate == null) return -1
         return a.fromDate.localeCompare(b.fromDate)
       })
 
     this.recallAdjustments = allAdjustments
       .filter(it => it.adjustmentType === 'UNLAWFULLY_AT_LARGE' && it.unlawfullyAtLarge?.type === 'RECALL')
+      .map(it => ({
+        ...it,
+        fromDate: dayjs(it.fromDate).subtract(1, 'day').format('YYYY-MM-DD'), // Set fromDate as revocationDate
+        toDate: dayjs(it.toDate).add(1, 'day').format('YYYY-MM-DD'), // Set toDate as arrestDate
+      }))
       .sort((a, b) => {
         if (a.fromDate == null) return 1
         if (b.fromDate == null) return -1
@@ -43,7 +44,7 @@ export default class ViewModel {
   public table() {
     return {
       head: this.columnHeadings(),
-      rows: this.rows().concat(this.totalRow()),
+      rows: this.rows(),
       attributes: { 'data-qa': 'view-table' },
     }
   }
@@ -51,8 +52,27 @@ export default class ViewModel {
   public secondTable() {
     return {
       head: this.recallColumnHeadings(),
-      rows: [...this.recallRows(), ...this.totalRecallRow()],
+      rows: this.recallRows(),
       attributes: { 'data-qa': 'recall-table' },
+    }
+  }
+
+  public totalUnlawfullyAtLargeDays(): number {
+    const adjustmentDays = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    const recallAdjustmentDays = this.recallAdjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    return recallAdjustmentDays + adjustmentDays
+  }
+
+  public TotalRow() {
+    const total = this.totalUnlawfullyAtLargeDays()
+    const isPlural = total !== 1 ? 'days' : 'day'
+    return `Total days unlawfully at large: ${total} ${isPlural}`
+  }
+
+  public allTables() {
+    return {
+      tables: [this.table(), this.secondTable()],
+      total: this.TotalRow(),
     }
   }
 
