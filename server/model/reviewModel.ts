@@ -15,12 +15,6 @@ export default class ReviewModel {
     return adjustmentTypes.find(it => it.value === adjustment.adjustmentType)
   }
 
-  public changeLink(): string {
-    return `/${this.adjustment.person}/${this.adjustmentType().url}/edit${
-      this.adjustment.id ? `/${this.adjustment.id}` : ''
-    }`
-  }
-
   public isEdit(): boolean {
     return !!this.adjustment.id
   }
@@ -31,6 +25,14 @@ export default class ReviewModel {
 
   public summaryRows() {
     return ReviewModel.summaryRowsFromAdjustment(this.adjustment, true)
+  }
+
+  public changeLink(): string {
+    return ReviewModel.changeLink(this.adjustment, this.adjustmentType().url)
+  }
+
+  public static changeLink(adjustment: Adjustment, url: string) {
+    return `/${adjustment.person}/${url}/edit${adjustment.id ? `/${adjustment.id}` : ''}`
   }
 
   public static summaryRowsFromAdjustment(adjustment: Adjustment, includeEdit: boolean) {
@@ -111,7 +113,7 @@ export default class ReviewModel {
       actions: {
         items: [
           {
-            href: `/${adjustment.person}/${adjustmentType.url}/edit/${adjustment.id}`,
+            href: ReviewModel.changeLink(adjustment, adjustmentType.url),
             text: 'Edit',
             visuallyHiddenText: visuallyHiddenText || adjustmentType.text,
           },
