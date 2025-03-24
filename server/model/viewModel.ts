@@ -6,6 +6,7 @@ import ualType from './unlawfully-at-large/ualType'
 import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { formatDate } from '../utils/utils'
 import lalAffectsReleaseDates from './lawfully-at-large/lalAffectsReleaseDates'
+import config from '../config'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
@@ -21,7 +22,8 @@ export default class ViewModel {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
       // Keep all UAL adjustments except RECALL
-      .filter(it => it.adjustmentType !== 'UNLAWFULLY_AT_LARGE' || it.unlawfullyAtLarge?.type !== 'RECALL')
+      /// not told FE that recallID exists in this model
+      .filter(it => it.recallId === null)
       .sort((a, b) => {
         if (a.fromDate == null) return 1
         if (b.fromDate == null) return -1
@@ -29,12 +31,14 @@ export default class ViewModel {
       })
 
     this.recallAdjustments = allAdjustments
-      .filter(it => it.adjustmentType === 'UNLAWFULLY_AT_LARGE' && it.unlawfullyAtLarge?.type === 'RECALL')
+      .filter(it => it.recallId !== null && it.adjustmentType === adjustmentType.value)
       .map(it => ({
         ...it,
         fromDate: dayjs(it.fromDate).subtract(1, 'day').format('YYYY-MM-DD'), // Set fromDate as revocationDate
         toDate: dayjs(it.toDate).add(1, 'day').format('YYYY-MM-DD'), // Set toDate as arrestDate
-      }))
+      })) // recallual exists in adjustments without it being associated to a recall, lso can edit in adjustments instead of going to recall
+      // filter it on whether adjustment has a recallid.  if yes, go to recalls and edit there, if no recalls id it can be edited in adjustments.
+      // instead dont filter on type and ual type, its whether it has a recall id or not.
       .sort((a, b) => {
         if (a.fromDate == null) return 1
         if (b.fromDate == null) return -1
@@ -254,7 +258,7 @@ export default class ViewModel {
   private recallActionCell(adjustment: Adjustment) {
     return {
       html: `
-        <a class="govuk-link govuk-!-white-space-nowrap" href="/person/${adjustment.person}/edit-recall/${adjustment.id}/edit-summary" data-qa="edit-recall-${adjustment.id}">
+        <a class="govuk-link govuk-!-white-space-nowrap" href="${config.services.recallsUI.url}/person/${adjustment.person}/edit-recall/${adjustment.recallId}" data-qa="edit-recall-${adjustment.id}">
           Edit recall<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
         </a>
       `,
