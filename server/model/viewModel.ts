@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { format } from 'date-fns'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { AdjustmentType } from './adjustmentTypes'
 import ualType from './unlawfully-at-large/ualType'
@@ -128,8 +129,8 @@ export default class ViewModel {
   public recallRows() {
     return this.recallAdjustments.map(it => {
       return [
-        { text: dayjs(it.fromDate).format('D MMMM YYYY') },
-        { text: dayjs(it.toDate).format('D MMMM YYYY') },
+        { text: it.fromDate ? format(new Date(it.fromDate), 'dd/MM/yyyy') : '' },
+        { text: it.toDate ? format(new Date(it.toDate), 'dd/MM/yyyy') : '' },
         { text: it.prisonName || 'Unknown' },
         { text: 'RECALL', classes: 'table-ual-column-type' },
         { text: it.days, format: 'numeric' },
@@ -142,7 +143,7 @@ export default class ViewModel {
     if (this.adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return this.adjustments.map(it => {
         return [
-          { text: dayjs(it.fromDate).format('D MMMM YYYY') },
+          { text: it.fromDate ? format(new Date(it.fromDate), 'dd/MM/yyyy') : '' },
           { text: it.prisonName || 'Unknown' },
           { text: it.days, format: 'numeric' },
           this.actionCell(it),
@@ -152,8 +153,8 @@ export default class ViewModel {
     if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return this.adjustments.map(it => {
         return [
-          { text: dayjs(it.fromDate).format('D MMMM YYYY') },
-          { text: dayjs(it.toDate).format('D MMMM YYYY') },
+          { text: it.fromDate ? format(new Date(it.fromDate), 'dd/MM/yyyy') : '' },
+          { text: it.toDate ? format(new Date(it.toDate), 'dd/MM/yyyy') : '' },
           { text: it.prisonName || 'Unknown' },
           {
             text: it.unlawfullyAtLarge ? ualType.find(u => u.value === it.unlawfullyAtLarge.type)?.text : 'Unknown',
@@ -167,8 +168,8 @@ export default class ViewModel {
     if (this.adjustmentType.value === 'LAWFULLY_AT_LARGE') {
       return this.adjustments.map(it => {
         return [
-          { text: dayjs(it.fromDate).format('D MMMM YYYY') },
-          { text: dayjs(it.toDate).format('D MMMM YYYY') },
+          { text: it.fromDate ? format(new Date(it.fromDate), 'dd/MM/yyyy') : '' },
+          { text: it.toDate ? format(new Date(it.toDate), 'dd/MM/yyyy') : '' },
           { text: it.prisonName || 'Unknown' },
           {
             text: it.lawfullyAtLarge
@@ -182,8 +183,10 @@ export default class ViewModel {
     }
     return this.adjustments.map(it => {
       return [
-        { text: dayjs(it.fromDate).format('D MMMM YYYY') },
-        ...(this.adjustmentType.value === 'REMAND' ? [{ text: dayjs(it.toDate).format('D MMMM YYYY') }] : []),
+        { text: it.fromDate ? format(new Date(it.fromDate), 'dd/MM/yyyy') : '' },
+        ...(this.adjustmentType.value === 'REMAND'
+          ? [{ text: it.toDate ? format(new Date(it.toDate), 'dd/MM/yyyy') : '' }]
+          : []),
         { text: it.days, format: 'numeric' },
         { text: it.prisonName || 'Unknown' },
         this.actionCell(it),
