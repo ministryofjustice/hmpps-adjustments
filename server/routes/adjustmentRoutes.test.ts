@@ -700,16 +700,16 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain(`/person/${NOMS_ID}/edit-recall/recall-id`)
         expect(res.text).not.toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
-        expect(res.text).toContain('First day')
+        expect(res.text).toContain('Date of Revocation')
         // this is the day after as its rev date
         expect(res.text).toContain('4 June 2023')
-        expect(res.text).toContain('Last day')
+        expect(res.text).toContain('Arrest date')
         // this is the day after as its arrest date
         // and need to check that its got revocation date in it
         expect(res.text).toContain('26 July 2023')
         expect(res.text).toContain('Type')
         expect(res.text).toContain('UAL from recalls')
-        expect(res.text).toContain('RECALL')
+        expect(res.text).toContain('Recall')
       })
   })
 

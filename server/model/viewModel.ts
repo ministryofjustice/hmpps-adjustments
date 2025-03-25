@@ -21,7 +21,6 @@ export default class ViewModel {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
       // Keep all UAL adjustments except RECALL
-      /// not told FE that recallID exists in this model
       .filter(it => !it.recallId)
       .sort((a, b) => {
         if (a.fromDate == null) return 1
@@ -33,11 +32,10 @@ export default class ViewModel {
       .filter(it => it.recallId && it.adjustmentType === adjustmentType.value)
       .map(it => ({
         ...it,
-        fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'), // Set fromDate as revocationDate
-        toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'), // Set toDate as arrestDate
-      })) // recallual exists in adjustments without it being associated to a recall, lso can edit in adjustments instead of going to recall
-      // filter it on whether adjustment has a recallid.  if yes, go to recalls and edit there, if no recalls id it can be edited in adjustments.
-      // instead dont filter on type and ual type, its whether it has a recall id or not.
+        fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'),
+        toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'),
+      }))
+
       .sort((a, b) => {
         if (a.fromDate == null) return 1
         if (b.fromDate == null) return -1
@@ -135,7 +133,7 @@ export default class ViewModel {
         { text: dayjs(it.fromDate).format('D MMMM YYYY') },
         { text: dayjs(it.toDate).format('D MMMM YYYY') },
         { text: it.prisonName || 'Unknown' },
-        { text: 'RECALL', classes: 'table-ual-column-type' },
+        { text: 'Recall', classes: 'table-ual-column-type' },
         { text: it.days, format: 'numeric' },
         this.recallActionCell(it),
       ]
