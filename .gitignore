@@ -127,3 +127,6 @@ integration_tests/screenshots/
 */*.iml
 **/Chart.lock
 *.iml
+
+# e2e tests
+cypress/downloads

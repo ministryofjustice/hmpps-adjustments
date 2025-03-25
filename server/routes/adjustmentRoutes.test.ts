@@ -58,12 +58,24 @@ const adaAdjustment = {
   days: 24,
 } as Adjustment
 
-const unlawfullyAtLargeAdjustment = {
+const unlawfullyAtLargeTypeRecall = {
   id: '2',
   adjustmentType: 'UNLAWFULLY_AT_LARGE',
   toDate: '2023-07-25',
   fromDate: '2023-06-05',
   unlawfullyAtLarge: { type: 'RECALL' },
+  person: 'ABC123',
+  bookingId: 12345,
+  sentenceSequence: null,
+  prisonId: 'LDS',
+} as Adjustment
+
+const unlawfullyAtLargeOtherTypes = {
+  id: '2',
+  adjustmentType: 'UNLAWFULLY_AT_LARGE',
+  toDate: '2023-07-25',
+  fromDate: '2023-06-05',
+  unlawfullyAtLarge: { type: 'ESCAPE' },
   person: 'ABC123',
   bookingId: 12345,
   sentenceSequence: null,
@@ -459,7 +471,7 @@ describe('Adjustment routes tests', () => {
   })
 
   it('GET /{nomsId}/review UAL', () => {
-    adjustmentsStoreService.getOnly.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsStoreService.getOnly.mockReturnValue(unlawfullyAtLargeTypeRecall)
 
     return request(app)
       .get(`/${NOMS_ID}/review`)
@@ -537,7 +549,7 @@ describe('Adjustment routes tests', () => {
   })
 
   it('POST /{nomsId}/review with a UAL adjustment with an id', () => {
-    adjustmentsStoreService.getOnly.mockReturnValue({ ...unlawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    adjustmentsStoreService.getOnly.mockReturnValue({ ...unlawfullyAtLargeTypeRecall, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
     return request(app)
       .post(`/${NOMS_ID}/review`)
@@ -550,7 +562,7 @@ describe('Adjustment routes tests', () => {
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
         expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
         expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
-          ...unlawfullyAtLargeAdjustment,
+          ...unlawfullyAtLargeTypeRecall,
           id: 'this-is-an-id',
         })
       })
@@ -600,7 +612,7 @@ describe('Adjustment routes tests', () => {
   it('GET /{nomsId}/unlawfully-at-large/view', () => {
     adjustmentsService.findByPerson.mockResolvedValue([
       {
-        ...unlawfullyAtLargeAdjustment,
+        ...unlawfullyAtLargeOtherTypes,
         id: 'this-is-an-id',
         lastUpdatedBy: 'Doris McNealy',
         status: 'ACTIVE',
@@ -626,16 +638,87 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Last day')
         expect(res.text).toContain('25 July 2023')
         expect(res.text).toContain('Type')
+        expect(res.text).toContain('Escape, including absconds and ROTL failures')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/view', () => {
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeOtherTypes,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain('edit/this-is-an-id')
+        expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).toContain('First day')
+        expect(res.text).toContain('5 June 2023')
+        expect(res.text).toContain('Last day')
+        expect(res.text).toContain('25 July 2023')
+        expect(res.text).toContain('Type')
+        expect(res.text).toContain('Escape, including absconds and ROTL failures')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/view', () => {
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeTypeRecall,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+        recallId: 'recall-id',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain(`/person/${NOMS_ID}/edit-recall/recall-id`)
+        expect(res.text).not.toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).toContain('Date of Revocation')
+        // this is the day after as its rev date
+        expect(res.text).toContain('4 June 2023')
+        expect(res.text).toContain('Arrest date')
+        // this is the day after as its arrest date
+        // and need to check that its got revocation date in it
+        expect(res.text).toContain('26 July 2023')
+        expect(res.text).toContain('Type')
+        expect(res.text).toContain('UAL from recalls')
         expect(res.text).toContain('Recall')
       })
   })
 
   it('GET /{nomsId}/unlawfully-at-large/view with no type', () => {
-    unlawfullyAtLargeAdjustment.unlawfullyAtLarge = null
+    unlawfullyAtLargeOtherTypes.unlawfullyAtLarge = null
 
     adjustmentsService.findByPerson.mockResolvedValue([
       {
-        ...unlawfullyAtLargeAdjustment,
+        ...unlawfullyAtLargeOtherTypes,
         id: 'this-is-an-id',
         lastUpdatedBy: 'Doris McNealy',
         status: 'ACTIVE',
@@ -656,6 +739,8 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('Unknown')
       })
   })
+
+  // check recalls ones are going into recalls table
 
   it('GET /{nomsId}/lawfully-at-large/view', () => {
     adjustmentsService.findByPerson.mockResolvedValue([
@@ -747,9 +832,9 @@ describe('Adjustment routes tests', () => {
 
   it('GET /{nomsId}/unlawfully-at-large/add', () => {
     const adjustments: Record<string, SessionAdjustment> = {}
-    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustments[85] = unlawfullyAtLargeTypeRecall
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
@@ -770,9 +855,9 @@ describe('Adjustment routes tests', () => {
     ${'edit'}
   `('POST /{nomsId}/unlawfully-at-large/addOrEdit fromDate before earliest sentence date', async ({ addOrEdit }) => {
     const adjustments: Record<string, SessionAdjustment> = {}
-    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustments[85] = unlawfullyAtLargeTypeRecall
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
@@ -801,9 +886,9 @@ describe('Adjustment routes tests', () => {
     ${'edit'}
   `('POST /{nomsId}/unlawfully-at-large/addOrEdit No UAL type selected', async ({ addOrEdit }) => {
     const adjustments: Record<string, SessionAdjustment> = {}
-    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustments[85] = unlawfullyAtLargeTypeRecall
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)
@@ -829,9 +914,9 @@ describe('Adjustment routes tests', () => {
     ${'edit'}
   `('POST /{nomsId}/unlawfully-at-large/addOrEdit toDate in the future', async ({ addOrEdit }) => {
     const adjustments: Record<string, SessionAdjustment> = {}
-    adjustments[85] = unlawfullyAtLargeAdjustment
+    adjustments[85] = unlawfullyAtLargeTypeRecall
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
-    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeAdjustment)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     return request(app)

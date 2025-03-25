@@ -5,9 +5,12 @@ import ualType from './unlawfully-at-large/ualType'
 import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { formatDate } from '../utils/utils'
 import lalAffectsReleaseDates from './lawfully-at-large/lalAffectsReleaseDates'
+import config from '../config'
 
 export default class ViewModel {
   public adjustments: Adjustment[]
+
+  public recallAdjustments: Adjustment[]
 
   constructor(
     allAdjustments: Adjustment[],
@@ -17,13 +20,25 @@ export default class ViewModel {
   ) {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
+      // Keep all UAL adjustments except RECALL
+      .filter(it => !it.recallId)
       .sort((a, b) => {
-        if (a.fromDate == null) {
-          return 1
-        }
-        if (b.fromDate == null) {
-          return -1
-        }
+        if (a.fromDate == null) return 1
+        if (b.fromDate == null) return -1
+        return a.fromDate.localeCompare(b.fromDate)
+      })
+
+    this.recallAdjustments = allAdjustments
+      .filter(it => it.recallId && it.adjustmentType === adjustmentType.value)
+      .map(it => ({
+        ...it,
+        fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'),
+        toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'),
+      }))
+
+      .sort((a, b) => {
+        if (a.fromDate == null) return 1
+        if (b.fromDate == null) return -1
         return a.fromDate.localeCompare(b.fromDate)
       })
   }
@@ -31,8 +46,35 @@ export default class ViewModel {
   public table() {
     return {
       head: this.columnHeadings(),
-      rows: this.rows().concat(this.totalRow()),
+      rows: this.rows(),
       attributes: { 'data-qa': 'view-table' },
+    }
+  }
+
+  public secondTable() {
+    return {
+      head: this.recallColumnHeadings(),
+      rows: this.recallRows(),
+      attributes: { 'data-qa': 'recall-table' },
+    }
+  }
+
+  public totalDays(): number {
+    const adjustmentDays = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    const recallAdjustmentDays = this.recallAdjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    return recallAdjustmentDays + adjustmentDays
+  }
+
+  public TotalRow() {
+    const total = this.totalDays()
+    const isPlural = total !== 1 ? 'days' : 'day'
+    return `Total days: ${total} ${isPlural}`
+  }
+
+  public allTables() {
+    return {
+      tables: [this.table(), this.secondTable()],
+      total: this.TotalRow(),
     }
   }
 
@@ -72,6 +114,30 @@ export default class ViewModel {
       { text: 'Entered by' },
       { text: 'Actions' },
     ]
+  }
+
+  public recallColumnHeadings() {
+    return [
+      { html: '<span class="nowrap-header">Date of Revocation</span>' },
+      { text: 'Arrest date' },
+      { text: 'Entered by' },
+      { text: 'Type', classes: 'table-ual-column-type' },
+      { text: 'Number of days', format: 'numeric' },
+      { text: 'Actions' },
+    ]
+  }
+
+  public recallRows() {
+    return this.recallAdjustments.map(it => {
+      return [
+        { text: dayjs(it.fromDate).format('D MMMM YYYY') },
+        { text: dayjs(it.toDate).format('D MMMM YYYY') },
+        { text: it.prisonName || 'Unknown' },
+        { text: 'Recall', classes: 'table-ual-column-type' },
+        { text: it.days, format: 'numeric' },
+        this.recallActionCell(it),
+      ]
+    })
   }
 
   public rows() {
@@ -127,6 +193,20 @@ export default class ViewModel {
     })
   }
 
+  public totalRecallRow() {
+    const total = this.recallAdjustments.map(it => it.days).reduce((a, b) => a + b, 0)
+    return [
+      [
+        { html: '<b>Total days</b>' },
+        { text: '' },
+        { text: '' },
+        { text: '' },
+        { html: `<b>${total}</b>`, format: 'numeric' },
+        { html: '' },
+      ],
+    ]
+  }
+
   public totalRow() {
     const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
     if (
@@ -167,6 +247,17 @@ export default class ViewModel {
         </a>
       </div>
     `,
+    }
+  }
+
+  private recallActionCell(adjustment: Adjustment) {
+    return {
+      html: `
+        <a class="govuk-link govuk-!-white-space-nowrap" href="${config.services.recallsUI.url}/person/${adjustment.person}/edit-recall/${adjustment.recallId}" data-qa="edit-recall-${adjustment.id}">
+          Edit recall<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
+        </a>
+      `,
+      attributes: { class: 'govuk-table__cell' },
     }
   }
 
