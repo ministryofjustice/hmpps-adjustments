@@ -2,7 +2,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
 {% from "./partials/remandCard.njk" import remandCard %}
-{% from "./partials/remandTotals.njk" import remandTotals %}
+{% from "./partials/remandSingleLineDetails.njk" import remandSingleLineDetails %}
 
 {% set pageTitle = applicationName + " - View remand details" %}
 {% set mainClasses = "app-container govuk-body" %}
@@ -19,7 +19,7 @@
 
 {% block content %}
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-three-quarters">
+    <div class="govuk-grid-column-full">
       <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
         Remand overview
       </h1>
@@ -30,20 +30,29 @@
       {% endif %}
 
       {% if model.adjustmentsWithOffences().length > 1 %}
-        {{remandTotals(model.remandTotals())}}
+        {{remandSingleLineDetails(model.remandSingleLineDetails())}}
       {% endif %}
-
+    </div>
+    <div class="govuk-grid-column-three-quarters">
       <div class="adjustment-card-container">
         {% for adjustment in model.adjustmentsWithOffences() %}
-            {{ remandCard(adjustment, prisoner.prisonerNumber, null, not model.readonly()) }}
+            {{ remandCard(adjustment, prisoner.prisonerNumber, null, not model.readonly(), true) }}
         {% endfor %}
         </div>
-      {% if not model.readonly() %}
+      {% if  model.hasIdentifyRemandRole() %}
         <div class="govuk-!-margin-top-6">
-          <a href="/{{ prisoner.prisonerNumber }}/remand/add" class="govuk-button" data-module="govuk-button">
-            Add new
+          <a href= "{{ model.getRemandToolUrl() }}" class="govuk-button" data-module="govuk-button">
+            Check remand tool
           </a>
         </div>
+        {% else %}
+          {% if not model.readonly() %}
+          <div class="govuk-!-margin-top-6">
+            <a href="/{{ prisoner.prisonerNumber }}/remand/add" class="govuk-button" data-module="govuk-button">
+              Add new
+            </a>
+          </div>
+          {% endif %}
       {% endif %}
     </div>
   </div>

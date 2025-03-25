@@ -202,7 +202,7 @@ describe('Remand routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('edit-remand')
         expect(res.text).toContain('delete-remand')
-        expect(res.text).toContain('Add new')
+        expect(res.text).toContain('Check remand tool')
       })
   })
 
