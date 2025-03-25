@@ -5,6 +5,7 @@ import { offencesForRemandAdjustment } from '../../utils/utils'
 import UnusedDeductionsMessageViewModel from '../unused-deductions/unusedDeductionsMessageViewModel'
 import { UnusedDeductionMessageType } from '../../services/unusedDeductionsService'
 import { IdentifyRemandDecision } from '../../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import config from '../../config'
 
 export default class RemandViewModel {
   public adjustments: Adjustment[]
@@ -12,7 +13,7 @@ export default class RemandViewModel {
   public unusedDeductionMessage: UnusedDeductionsMessageViewModel
 
   constructor(
-    prisonerNumber: string,
+    public prisonerNumber: string,
     allAdjustments: Adjustment[],
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     unusedDeductionsMessageType: UnusedDeductionMessageType,
@@ -30,17 +31,27 @@ export default class RemandViewModel {
     )
   }
 
-  public remandTotals() {
+  public remandSingleLineDetails() {
     return [
-      ...this.adjustments.map(it => {
+      ...this.adjustmentsWithOffences().map(it => {
         return [
-          { text: `From ${dayjs(it.fromDate).format('D MMMM YYYY')} to ${dayjs(it.toDate).format('D MMMM YYYY')}` },
+          { text: `${dayjs(it.fromDate).format('D MMMM YYYY')}` },
+          { text: `${dayjs(it.toDate).format('D MMMM YYYY')}` },
           { text: it.days },
+          { html: it.offences ? it.offences.map(offence => offence.offenceDescription).join('<br>') : 'No offences' },
+          {
+            html: it.offences
+              ? it.offences.map(offence => `${dayjs(offence.offenceStartDate).format('D MMMM YYYY')}`).join('<br>')
+              : 'No offences',
+          },
         ]
       }),
       [
-        { text: 'Total days on remand', classes: 'govuk-table__header' },
-        { html: `<strong>${this.totalDays()}</strong>` },
+        { text: 'Total days', classes: 'govuk-table__header' },
+        {},
+        { html: `<strong>${this.totalDays()} days</strong>` },
+        {},
+        {},
       ],
     ]
   }
@@ -63,7 +74,11 @@ export default class RemandViewModel {
     return this.hasIdentifyRemandRole() && this.remandDecision?.accepted !== false
   }
 
-  private hasIdentifyRemandRole(): boolean {
+  public getRemandToolUrl(): string {
+    return `${config.services.identifyRemandPeriods.url}/prisoner/${this.prisonerNumber}`
+  }
+
+  public hasIdentifyRemandRole(): boolean {
     return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }
 }

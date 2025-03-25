@@ -3,7 +3,7 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "./remandOffence.njk" import offenceList %}
 
-{% macro remandCard(adjustment, offenderNo, alternateSummaryListStyle, showLinks) %}
+{% macro remandCard(adjustment, offenderNo, alternateSummaryListStyle, showLinks, showDateAndEstablisment) %}
 {% if alternateSummaryListStyle %}
   {% set summaryListClasses = "no-footer-summary-list" %}
 {% else %}
@@ -28,25 +28,63 @@
         {% endif %}
     </div>
     <div class="adjustment-card_content">
-      {{ govukSummaryList({
-          classes: summaryListClasses,
-          rows: [
-          {  
-            key: {
-              text: "Offences"
-            },
-            value: {
-              html: offenceList(adjustment.offences)
-            }
-          },    
+
+      {% if showDateAndEstablisment %}
+       {% set rows = [
           {
             key: {
-              text: "Days"
+            text: "Offences"
+          },
+            value: {
+            html: offenceList(adjustment.offences)
+          }
+          },
+          {
+            key: {
+            text: "Days"
+          },
+            value: {
+            html:  '<strong>' + adjustment.daysToDisplay + '</strong>'          }
+          },
+          {
+            key: {
+            text: "Date applied"
+          },
+            value: {
+            text: adjustment.lastUpdatedDate | date("D MMMM YYYY")
+          }
+          },{
+            key: {
+              text: "Establishment"
             },
             value: {
-              text: adjustment.daysToDisplay
+              text: adjustment.prisonName or 'Unknown'
             }
-          }]
+        }] %}
+      {% else %}
+        {% set rows = [
+          {
+            key: {
+            text: "Offences"
+          },
+            value: {
+            html: offenceList(adjustment.offences)
+          }
+          },
+          {
+            key: {
+            text: "Days"
+          },
+            value: {
+            text: adjustment.daysToDisplay
+          }
+        }] %}
+
+      {% endif %}
+
+      {{ govukSummaryList({
+          classes: summaryListClasses,
+          rows: rows
         }) }}
     </div>
 </div>
