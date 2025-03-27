@@ -50,7 +50,7 @@
         <div class="govuk-!-margin-top-6 govuk-button-group">
           {{ govukButton({
             text: "Add new",
-            href: "/{{ prisoner.prisonerNumber }}/remand/add",
+            href: "/" + prisoner.prisonerNumber  + "/remand/add",
             classes: "govuk-button"
           }) }}
           {% set remandToolButtonClass = "govuk-button--secondary" %}
