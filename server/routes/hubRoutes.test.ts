@@ -273,7 +273,7 @@ describe('GET /:nomsId', () => {
       .get(`/${NOMS_ID}`)
       .expect('Content-Type', /html/)
       .expect(res => {
-        expect(res.text).toContain('Review remand')
+        expect(res.text).toContain('View')
       })
   })
   it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
