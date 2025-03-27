@@ -697,7 +697,7 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Leeds')
-        expect(res.text).toContain(`/person/${NOMS_ID}/edit-recall/recall-id`)
+        expect(res.text).toContain(`/person/${NOMS_ID}/edit-recall/recall-id?entrypoint=adj_unlawfully-at-large`)
         expect(res.text).not.toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
         expect(res.text).toContain('Date of Revocation')
