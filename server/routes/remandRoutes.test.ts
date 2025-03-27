@@ -195,14 +195,21 @@ describe('Remand routes tests', () => {
       'NONE',
       [remandAdjustment],
     ])
-    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({ accepted: false })
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+      accepted: false,
+      rejectComment: 'The remand is wrong',
+      decisionOn: '2025-01-10',
+    })
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
       .expect(res => {
+        expect(res.text).toContain('The reason given was <strong>The remand is wrong</strong>')
+        expect(res.text).toContain('The remand tool was rejected on <strong>10 January 2025</strong>')
         expect(res.text).toContain('edit-remand')
         expect(res.text).toContain('delete-remand')
         expect(res.text).toContain('Check remand tool')
+        expect(res.text).toContain('Add new')
       })
   })
 
