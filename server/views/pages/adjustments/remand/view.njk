@@ -23,7 +23,13 @@
       <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
         Remand overview
       </h1>
-      {% if model.unusedDeductionMessage.displayMessageOnViewPage() %}
+      {% if model.hasIdentifyRemandRole() %}
+        {% if not model.readonly() %}
+          <div class="govuk-inset-text govuk-!-margin-left-4">
+            {{ model.getRemandRejectionBanner() | safe }}
+          </div>
+        {% endif %}
+      {% elseif model.unusedDeductionMessage.displayMessageOnViewPage() %}
         <div class="govuk-inset-text govuk-!-margin-left-4">
           {{ model.unusedDeductionMessage.getUnusedDeductionMessage() | safe }}
         </div>
@@ -39,20 +45,23 @@
             {{ remandCard(adjustment, prisoner.prisonerNumber, null, not model.readonly(), true) }}
         {% endfor %}
         </div>
+      {% set remandToolButtonClass = "govuk-button" %}
+      {% if not model.readonly() %}
+        <div class="govuk-!-margin-top-6 govuk-button-group">
+          {{ govukButton({
+            text: "Add new",
+            href: "/{{ prisoner.prisonerNumber }}/remand/add",
+            classes: "govuk-button"
+          }) }}
+          {% set remandToolButtonClass = "govuk-button--secondary" %}
+      {% endif %}
       {% if  model.hasIdentifyRemandRole() %}
-        <div class="govuk-!-margin-top-6">
-          <a href= "{{ model.getRemandToolUrl() }}" class="govuk-button" data-module="govuk-button">
-            Check remand tool
-          </a>
+          {{ govukButton({
+            text: "Check remand tool",
+            href: model.getRemandToolUrl(),
+            classes: remandToolButtonClass
+          }) }}
         </div>
-        {% else %}
-          {% if not model.readonly() %}
-          <div class="govuk-!-margin-top-6">
-            <a href="/{{ prisoner.prisonerNumber }}/remand/add" class="govuk-button" data-module="govuk-button">
-              Add new
-            </a>
-          </div>
-          {% endif %}
       {% endif %}
     </div>
   </div>
