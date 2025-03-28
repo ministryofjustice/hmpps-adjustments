@@ -260,9 +260,11 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('mini-profile-status">Life imprisonment<')
       })
   })
-  it('GET /{nomsId} with remand role', () => {
+  it('GET /{nomsId} with remand role accepted remand', () => {
     userInTest = userWithRemandRole
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+      accepted: true,
+    })
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NONE',
@@ -274,6 +276,42 @@ describe('GET /:nomsId', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('View')
+      })
+  })
+  it('GET /{nomsId} with remand role things to do', () => {
+    userInTest = userWithRemandRole
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+      accepted: true,
+    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Review remand')
+      })
+  })
+  it('GET /{nomsId} with remand role rejected remand', () => {
+    userInTest = userWithRemandRole
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+      accepted: false,
+    })
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('data-qa="add-remand"')
       })
   })
   it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
