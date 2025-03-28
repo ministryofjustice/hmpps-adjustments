@@ -27,7 +27,7 @@ export default class UnusedDeductionsMessageViewModel {
       case 'RECALL':
         return this.getUnusedDeductionMessageForRecall()
       case 'VALIDATION':
-        return this.getUnusedDeductionMessageForValidation()
+        return this.remandBannerVisible ? '' : this.getUnusedDeductionMessageForValidation()
       case 'NOMIS_ADJUSTMENT':
         return this.remandBannerVisible ? '' : this.getUnusedDeductionMessageForNomisAdjustment()
       case 'UNKNOWN':
