@@ -50,7 +50,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public displayAddLink(adjustmentType: AdjustmentType): boolean {
-    return !this.hasRemandToolRole() || adjustmentType.value !== 'REMAND' || this.isRemandDecisionNotAccepted()
+    return !this.hasRemandToolRole() || !this.isRemand(adjustmentType) || this.isRemandDecisionNotAccepted()
   }
 
   private isRemandDecisionNotAccepted(): boolean {
