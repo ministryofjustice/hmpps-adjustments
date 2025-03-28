@@ -80,12 +80,10 @@ export default class AdjustmentRoutes {
         : []
 
     let remandDecision
-    let relevantRemand
     let remandBannerVisible = false
     if (roles.includes('REMAND_IDENTIFIER')) {
       try {
         remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
-        relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, username)
         remandBannerVisible = serviceDefinitions.services.adjustments.thingsToDo.things.some(
           thing => thing.type === 'REVIEW_IDENTIFIED_REMAND',
         )
@@ -99,7 +97,6 @@ export default class AdjustmentRoutes {
       model: new AdjustmentsHubViewModel(
         prisonerNumber,
         adjustments,
-        relevantRemand,
         remandDecision,
         roles,
         message && message[0] && (JSON.parse(message[0]) as Message),

@@ -3,20 +3,23 @@
     <div class="govuk-summary-card__title-wrapper">
       <h2 class="govuk-summary-card__title">{{ adjustmentType.text }}</h2>
       <ul class="govuk-summary-card__actions govuk-!-width-two-fifths">
-        <li class="govuk-summary-card__action">
           {% if model.displayAddLink(adjustmentType) %}
+          <li class="govuk-summary-card__action">
             <a href="/{{ prisonerNumber }}/{{ adjustmentType.url }}/add"
               data-qa="add-{{ adjustmentType.url }}">
               Add new <span class="govuk-visually-hidden">{{ adjustmentType.shortText }}</span>
             </a>
-          {% else %}
-            <a href="/{{ prisonerNumber }}/remand" class="govuk-!-text-align-right">Review remand</a>
-          {% endif %}
-        </li>
+          </li>
+        {% endif %}
+        {% if model.displayReviewRemand(adjustmentType) %}
+          <li class="govuk-summary-card__action">
+            <a href="/{{ prisonerNumber }}/remand">Review remand</a>
+          </li>
+        {% endif %}
         {% if model.showDetails(adjustmentType) %}
           <li class="govuk-summary-card__action">
             <a href="/{{ prisonerNumber }}/{{ adjustmentType.url }}/view"
-              data-qa="view-{{ adjustmentType.url }}">
+               data-qa="view-{{ adjustmentType.url }}">
               View <span class="govuk-visually-hidden">{{ adjustmentType.shortText }}</span>
             </a>
           </li>
@@ -43,21 +46,6 @@
       {% endif %}
       {% if model.showProspectiveAdaLink(adjustmentType) %}
         <a href="/{{ prisonerNumber }}/additional-days/review-prospective">Review unapplied PADAs</a>
-      {% endif %}
-      {% if adjustmentType.value == 'REMAND' and model
-      .remandDecision and model
-      .hasRemandToolRole() %}
-        <p class="govuk-body">{{ model.remandDecision.days }} days of suggested remand was
-          {{ "accepted" if model.remandDecision.accepted else "rejected" }}
-          on {{ model.remandDecision.decisionOn | date("D MMMM YYYY HH:mm") }}
-          by {{ model.remandDecision.decisionByPrisonDescription }}.
-          {% if not model.remandDecision.accepted %}
-            <br/>
-            Reason for rejection: {{ model.remandDecision.rejectComment }}
-            <br/>
-            <a href="{{ prisonerNumber }}/remand">Re-review</a>
-          {% endif %}
-        </p>
       {% endif %}
     </div>
   </div>
