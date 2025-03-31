@@ -97,8 +97,15 @@ export default class AdjustmentsHubViewModel {
     return (
       this.hasRemandToolRole() &&
       this.isRemand(adjustmentType) &&
-      (this.remandBannerVisible || this.isRemandDecisionUnanswered() || this.isRemandDecisionAccepted())
+      (this.remandBannerVisible ||
+        this.isRemandDecisionUnanswered() ||
+        this.isRemandDecisionAccepted() ||
+        this.displayReviewRemandForZeroDayRejection(adjustmentType))
     )
+  }
+
+  private displayReviewRemandForZeroDayRejection(adjustmentType: AdjustmentType): boolean {
+    return this.isRemandDecisionRejected() && this.getTotalDays(adjustmentType) === 0
   }
 
   public getLalAffectsDateText(adjustmentType: AdjustmentType): string {
