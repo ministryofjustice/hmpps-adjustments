@@ -118,7 +118,7 @@ export default class ViewModel {
 
   public recallColumnHeadings() {
     return [
-      { html: '<span class="nowrap-header">Date of Revocation</span>' },
+      { html: '<span class="nowrap-header">Date of revocation</span>' },
       { text: 'Arrest date' },
       { text: 'Entered by' },
       { text: 'Type', classes: 'table-ual-column-type' },
