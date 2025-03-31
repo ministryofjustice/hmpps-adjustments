@@ -314,6 +314,22 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('data-qa="add-remand"')
       })
   })
+  it('GET /{nomsId} with remand role unanswerd remand', () => {
+    userInTest = userWithRemandRole
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+    ])
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Review remand')
+      })
+  })
   it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
     adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue({
@@ -430,7 +446,6 @@ describe('GET /:nomsId', () => {
   })
 
   it('GET /{nomsId} hub with unused deductions', () => {
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NONE',
       [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }, remandAdjustment, unusedDeductions],

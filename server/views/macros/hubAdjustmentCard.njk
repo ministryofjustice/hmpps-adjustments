@@ -3,7 +3,7 @@
     <div class="govuk-summary-card__title-wrapper">
       <h2 class="govuk-summary-card__title">{{ adjustmentType.text }}</h2>
       <ul class="govuk-summary-card__actions govuk-!-width-two-fifths">
-          {% if model.displayAddLink(adjustmentType) %}
+        {% if model.displayAddLink(adjustmentType) %}
           <li class="govuk-summary-card__action">
             <a href="/{{ prisonerNumber }}/{{ adjustmentType.url }}/add"
               data-qa="add-{{ adjustmentType.url }}">

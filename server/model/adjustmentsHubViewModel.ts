@@ -50,11 +50,19 @@ export default class AdjustmentsHubViewModel {
   }
 
   public displayAddLink(adjustmentType: AdjustmentType): boolean {
-    return !this.hasRemandToolRole() || !this.isRemand(adjustmentType) || this.isRemandDecisionNotAccepted()
+    return !this.hasRemandToolRole() || !this.isRemand(adjustmentType) || this.isRemandDecisionRejected()
   }
 
-  private isRemandDecisionNotAccepted(): boolean {
-    return this.remandDecision && !this.remandDecision.accepted
+  private isRemandDecisionRejected(): boolean {
+    return this.remandDecision?.accepted === false
+  }
+
+  private isRemandDecisionAccepted(): boolean {
+    return this.remandDecision?.accepted === true
+  }
+
+  private isRemandDecisionUnanswered(): boolean {
+    return !this.remandDecision
   }
 
   public hasRemandToolRole(): boolean {
@@ -86,7 +94,11 @@ export default class AdjustmentsHubViewModel {
   }
 
   public displayReviewRemand(adjustmentType: AdjustmentType): boolean {
-    return this.isRemand(adjustmentType) && (this.remandBannerVisible || this.isRemandDecisionNotAccepted())
+    return (
+      this.hasRemandToolRole() &&
+      this.isRemand(adjustmentType) &&
+      (this.remandBannerVisible || this.isRemandDecisionUnanswered() || this.isRemandDecisionAccepted())
+    )
   }
 
   public getLalAffectsDateText(adjustmentType: AdjustmentType): string {
