@@ -26,6 +26,7 @@ generic-service:
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api.hmpps.service.justice.gov.uk"
     TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'true'
     TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'true'
+    RECALLS_URL: 'https://record-a-recall.hmpps.service.justice.gov.uk'
 
 generic-prometheus-alerts:
   alertSeverity: legacy-replacement-alerts
