@@ -23,8 +23,8 @@
       <h1 class="govuk-heading-xl"><span class="govuk-caption-xl">Adjustments</span>
         Remand overview
       </h1>
-      {% if model.hasIdentifyRemandRole() %}
-        {% if not model.readonly() %}
+      {% if model.hasRemandToolRole() %}
+        {% if model.remandIsRejected() %}
           <div class="govuk-inset-text govuk-!-margin-left-4">
             {{ model.getRemandRejectionBanner() | safe }}
           </div>
@@ -55,7 +55,7 @@
           }) }}
           {% set remandToolButtonClass = "govuk-button--secondary" %}
       {% endif %}
-      {% if  model.hasIdentifyRemandRole() %}
+      {% if  model.remandToolIsAccessible() %}
           {{ govukButton({
             text: "Check remand tool",
             href: model.getRemandToolUrl(),

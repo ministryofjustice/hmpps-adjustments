@@ -17,6 +17,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
+import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -179,6 +180,10 @@ describe('Remand routes tests', () => {
       'NONE',
       [remandAdjustment],
     ])
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+      adjustments: [],
+    } as RemandResult)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
@@ -200,6 +205,9 @@ describe('Remand routes tests', () => {
       rejectComment: 'The remand is wrong',
       decisionOn: '2025-01-10',
     })
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+      adjustments: [],
+    } as RemandResult)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
@@ -209,6 +217,26 @@ describe('Remand routes tests', () => {
         expect(res.text).toContain('edit-remand')
         expect(res.text).toContain('delete-remand')
         expect(res.text).toContain('Check remand tool')
+        expect(res.text).toContain('Add new')
+      })
+  })
+  it('GET /{nomsId}/remand/view will not be readonly if identify remand role uncalculable remand', () => {
+    userInTest = userWithRemandRole
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue([sentenceAndOffenceBaseRecord])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [remandAdjustment],
+    ])
+    identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(null)
+    return request(app)
+      .get(`/${NOMS_ID}/remand/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).not.toContain('The remand tool was rejected')
+        expect(res.text).toContain('edit-remand')
+        expect(res.text).toContain('delete-remand')
+        expect(res.text).not.toContain('Check remand tool')
         expect(res.text).toContain('Add new')
       })
   })

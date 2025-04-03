@@ -1,5 +1,5 @@
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
-import { IdentifyRemandDecision } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
 import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
@@ -21,6 +21,7 @@ export default class AdjustmentsHubViewModel {
     public prisonerNumber: string,
     public adjustments: Adjustment[],
     public remandDecision: IdentifyRemandDecision,
+    public remandResult: RemandResult,
     public roles: string[],
     public message: Message,
     unusedDeductionsMessageType: UnusedDeductionMessageType,
@@ -50,7 +51,7 @@ export default class AdjustmentsHubViewModel {
   }
 
   public displayAddLink(adjustmentType: AdjustmentType): boolean {
-    return !this.hasRemandToolRole() || !this.isRemand(adjustmentType) || this.isRemandDecisionRejected()
+    return !this.remandToolIsAccessible() || !this.isRemand(adjustmentType) || this.isRemandDecisionRejected()
   }
 
   private isRemandDecisionRejected(): boolean {
@@ -65,7 +66,7 @@ export default class AdjustmentsHubViewModel {
     return !this.remandDecision
   }
 
-  public hasRemandToolRole(): boolean {
+  private hasRemandToolRole(): boolean {
     return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }
 
@@ -95,13 +96,17 @@ export default class AdjustmentsHubViewModel {
 
   public displayReviewRemand(adjustmentType: AdjustmentType): boolean {
     return (
-      this.hasRemandToolRole() &&
+      this.remandToolIsAccessible() &&
       this.isRemand(adjustmentType) &&
       (this.remandBannerVisible ||
         this.isRemandDecisionUnanswered() ||
         this.isRemandDecisionAccepted() ||
         this.displayReviewRemandForZeroDayRejection(adjustmentType))
     )
+  }
+
+  public remandToolIsAccessible(): boolean {
+    return this.hasRemandToolRole() && !!this.remandResult
   }
 
   private displayReviewRemandForZeroDayRejection(adjustmentType: AdjustmentType): boolean {

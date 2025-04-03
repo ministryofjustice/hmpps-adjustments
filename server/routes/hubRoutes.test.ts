@@ -267,6 +267,9 @@ describe('GET /:nomsId', () => {
       identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
         accepted: true,
       })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
       adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
       unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
         'NONE',
@@ -286,6 +289,9 @@ describe('GET /:nomsId', () => {
       identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
         accepted: true,
       })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
       adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
       unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['NONE', []])
       courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
@@ -302,6 +308,9 @@ describe('GET /:nomsId', () => {
       identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
         accepted: false,
       })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
       adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
       unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
         'NONE',
@@ -321,6 +330,9 @@ describe('GET /:nomsId', () => {
       identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
         accepted: false,
       })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
       adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
       unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['NONE', []])
       courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
@@ -335,6 +347,9 @@ describe('GET /:nomsId', () => {
     it('GET /{nomsId} with remand role unanswerd remand', () => {
       userInTest = userWithRemandRole
       identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
       adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
       unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
         'NONE',
@@ -347,6 +362,25 @@ describe('GET /:nomsId', () => {
         .expect(res => {
           expect(res.text).toContain('Review remand')
           expect(res.text).not.toContain('data-qa="add-remand"')
+        })
+    })
+
+    it('GET /{nomsId} with remand role uncalculable remand', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(null)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+        'NONE',
+        [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+      ])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).not.toContain('Review remand')
+          expect(res.text).toContain('data-qa="add-remand"')
         })
     })
   })
