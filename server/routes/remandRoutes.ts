@@ -335,9 +335,11 @@ export default class RemandRoutes {
         : []
 
     let remandDecision
+    let remandResult
     if (roles.includes('REMAND_IDENTIFIER')) {
       try {
         remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
+        remandResult = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, username)
       } catch {
         // Nothing to do, remand review won't be displayed.
       }
@@ -352,6 +354,7 @@ export default class RemandRoutes {
         inactiveDeletedAdjustments,
         roles,
         remandDecision,
+        remandResult,
       ),
     })
   }
