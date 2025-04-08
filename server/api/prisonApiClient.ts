@@ -7,6 +7,7 @@ import type {
   PrisonApiOffenderSentenceAndOffences,
   PrisonApiUserCaseloads,
 } from '../@types/prisonApi/prisonClientTypes'
+import { SentenceCalcDates } from '../@types/prisonApi/prisonClientTypes'
 
 export default class PrisonApiClient {
   restClient: RestClient
@@ -41,5 +42,11 @@ export default class PrisonApiClient {
     return this.restClient.stream({
       path: `/api/bookings/offenderNo/${prisonerNumber}/image/data`,
     })
+  }
+
+  async getOffenderDates(bookingId: string): Promise<SentenceCalcDates> {
+    return this.restClient.get({
+      path: `/api/offender-dates/${bookingId}`,
+    }) as Promise<SentenceCalcDates>
   }
 }

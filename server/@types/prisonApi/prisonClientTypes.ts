@@ -6,3 +6,4 @@ export type PrisonApiBookingAndSentenceAdjustments = components['schemas']['Book
 export type PrisonApiSentenceAdjustments = components['schemas']['SentenceAdjustmentValues']
 export type PrisonApiOffenderSentenceAndOffences = components['schemas']['OffenderSentenceAndOffences']
 export type PrisonApiOffence = components['schemas']['OffenderOffence']
+export type SentenceCalcDates = components['schemas']['SentenceCalcDates']

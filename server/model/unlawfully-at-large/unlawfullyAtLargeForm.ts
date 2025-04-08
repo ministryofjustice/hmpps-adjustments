@@ -6,7 +6,7 @@ import AdjustmentsForm from '../adjustmentsForm'
 import adjustmentTypes, { AdjustmentType } from '../adjustmentTypes'
 import ualType from './ualType'
 import { PrisonerSearchApiPrisoner } from '../../@types/prisonerSearchApi/prisonerSearchTypes'
-import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
+import { PrisonApiOffenderSentenceAndOffences, SentenceCalcDates } from '../../@types/prisonApi/prisonClientTypes'
 import ValidationError from '../validationError'
 
 export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtLargeForm> {
@@ -60,6 +60,7 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
   async validation(
     getSentences?: () => Promise<PrisonApiOffenderSentenceAndOffences[]>,
     getAdjustments?: () => Promise<Adjustment[]>,
+    getOffenderDates?: () => Promise<SentenceCalcDates>,
   ): Promise<ValidationError[]> {
     const errors = []
     const fromDateError = this.validateDate(this['from-day'], this['from-month'], this['from-year'], 'from')
@@ -108,6 +109,27 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       if (fromDate < minSentenceDate) {
         errors.push({
           text: `The unlawfully at large period cannot start before the earliest sentence date, on ${dayjs(minSentenceDate).format('D MMMM YYYY')}`,
+          fields: ['from-day', 'from-month', 'from-year'],
+        })
+      }
+    }
+
+    const offenderDates = await getOffenderDates()
+    const sed = offenderDates.sentenceExpiryDate
+    if (sed) {
+      const [expiryYear, expiryMonth, expiryDay] = sed.split('-')
+      const isAfter = isFromAfterTo(
+        this['from-year'],
+        this['from-month'],
+        this['from-day'],
+        expiryYear,
+        expiryMonth,
+        expiryDay,
+      )
+
+      if (isAfter) {
+        errors.push({
+          text: `The first day of unlawfully at large must be before the calculated release date, ${dayjs(sed).format('D MMMM YYYY')}`,
           fields: ['from-day', 'from-month', 'from-year'],
         })
       }

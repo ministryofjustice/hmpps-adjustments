@@ -149,6 +149,7 @@ describe('Adjustment routes tests', () => {
       earliestSentence: new Date(),
       sentencesAndOffences: [],
     })
+    prisonerService.getOffenderDates.mockResolvedValue({ sentenceExpiryDate: '2027-08-02' })
     return request(app)
       .get(`/${NOMS_ID}/restored-additional-days/add`)
       .expect('Content-Type', /html/)
@@ -860,6 +861,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getOffenderDates.mockResolvedValue({ sentenceExpiryDate: '2027-08-02' })
     return request(app)
       .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
       .send({
@@ -891,6 +893,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getOffenderDates.mockResolvedValue({ sentenceExpiryDate: '2027-08-02' })
     return request(app)
       .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
       .send({
@@ -919,6 +922,7 @@ describe('Adjustment routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getOffenderDates.mockResolvedValue({ sentenceExpiryDate: '2027-08-02' })
     return request(app)
       .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
       .send({
@@ -935,6 +939,70 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('The first day of unlawfully at large date must not be in the future')
         expect(res.text).toContain('The last day of unlawfully at large date must not be in the future')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit fromDate after SED', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeTypeRecall
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getOffenderDates.mockResolvedValue({ sentenceExpiryDate: '2025-01-05' })
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2025',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2025',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'The first day of unlawfully at large must be before the calculated release date, 5 January 2025',
+        )
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit fromDate after null SED', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeTypeRecall
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    prisonerService.getOffenderDates.mockResolvedValue({})
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2025',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2025',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain(
+          'The first day of unlawfully at large must be before the calculated release date, 5 January 2025',
+        )
       })
   })
 

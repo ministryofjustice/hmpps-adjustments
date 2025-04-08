@@ -6,12 +6,17 @@ import {
   PrisonApiOffence,
   PrisonApiOffenderSentenceAndOffences,
   PrisonApiUserCaseloads,
+  SentenceCalcDates,
 } from '../@types/prisonApi/prisonClientTypes'
 import FullPageError from '../model/FullPageError'
 import { HmppsAuthClient } from '../data'
 
 export default class PrisonerService {
   constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+
+  async getOffenderDates(bookingId: string, username: string): Promise<SentenceCalcDates> {
+    return new PrisonApiClient(await this.getSystemClientToken(username)).getOffenderDates(bookingId)
+  }
 
   async getSentencesAndOffencesFilteredForRemand(
     bookingId: string,
