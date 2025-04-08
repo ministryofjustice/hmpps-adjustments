@@ -2,6 +2,23 @@ import { SuperAgentRequest } from 'superagent'
 import { stubFor } from './wiremock'
 
 export default {
+  stubGetOffenderDates: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/prison-api/api/offender-dates/[A-Z0-9]+',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: [
+          {
+            sentenceExpiryDate: '2026-12-19',
+          },
+        ],
+      },
+    })
+  },
   stubGetUserCaseloads: (): SuperAgentRequest => {
     return stubFor({
       request: {
