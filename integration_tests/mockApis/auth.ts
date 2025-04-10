@@ -97,7 +97,7 @@ const manageDetails = () =>
     },
   })
 
-const token = (roles: string[] = ['ROLE_RELEASE_DATES_CALCULATOR']) =>
+const token = (roles: string[] = ['RELEASE_DATES_CALCULATOR']) =>
   stubFor({
     request: {
       method: 'POST',
