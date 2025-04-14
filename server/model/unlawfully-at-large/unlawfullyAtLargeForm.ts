@@ -113,6 +113,40 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       }
     }
 
+    const adjustments = (await getAdjustments()).filter(a => a.adjustmentType === 'UNLAWFULLY_AT_LARGE')
+
+    const matchingAdjustments = adjustments
+      .map(adjustment =>
+        this.isDateInAdjustmentRange(adjustment, this['from-year'], this['from-month'], this['from-day']),
+      )
+      .filter((a): a is Adjustment => a !== null)
+
+    if (matchingAdjustments.length > 0) {
+      const dateFormat = 'D MMMM YYYY'
+      const formatInputDate = (year: string, month: string, day: string) =>
+        dayjs(`${year}-${month}-${day}`).format(dateFormat)
+
+      const formattedInputFrom = formatInputDate(this['from-year'], this['from-month'], this['from-day'])
+      const formattedInputTo = formatInputDate(this['to-year'], this['to-month'], this['to-day'])
+
+      const fields = ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year']
+
+      matchingAdjustments.forEach(adjustment => {
+        const formattedAdjFrom = dayjs(adjustment.fromDate).format(dateFormat)
+        const formattedAdjTo = dayjs(adjustment.toDate).format(dateFormat)
+
+        errors.push({
+          text: `The UAL dates from ${formattedInputFrom} to ${formattedInputTo} overlaps with another UAL period from ${formattedAdjFrom} to ${formattedAdjTo}.`,
+          fields,
+        })
+      })
+
+      errors.push({
+        text: `To continue, edit or remove the UAL days that overlap.`,
+        fields,
+      })
+    }
+
     // Edit specific validation
     if (this.isEdit) {
       errors.push(...(await this.validationForEdit(getAdjustments)))
@@ -125,6 +159,24 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       })
 
     return errors
+  }
+
+  isDateInAdjustmentRange(
+    adjustment: Adjustment,
+    fromYear: string,
+    fromMonth: string,
+    fromDay: string,
+  ): Adjustment | null {
+    const inputDate = new Date(`${fromYear.padStart(4, '0')}-${fromMonth.padStart(2, '0')}-${fromDay.padStart(2, '0')}`)
+    const fromDate = adjustment.fromDate ? new Date(adjustment.fromDate) : null
+    const toDate = adjustment.toDate ? new Date(adjustment.toDate) : null
+
+    const isWithinRange =
+      (fromDate && toDate && inputDate >= fromDate && inputDate <= toDate) ||
+      (fromDate && !toDate && inputDate >= fromDate) ||
+      (!fromDate && toDate && inputDate <= toDate)
+
+    return isWithinRange ? adjustment : null
   }
 
   private async validationForEdit(getAdjustments?: () => Promise<Adjustment[]>): Promise<ValidationError[]> {

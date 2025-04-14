@@ -173,7 +173,10 @@ export default class AdjustmentRoutes {
 
     const adjustmentForm = AdjustmentsFormFactory.fromRequest(req, adjustmentType)
 
-    await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(bookingId, username))
+    await adjustmentForm.validate(
+      () => this.prisonerService.getSentencesAndOffences(bookingId, username),
+      () => this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username),
+    )
 
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/form', {
