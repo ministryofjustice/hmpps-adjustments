@@ -962,6 +962,122 @@ describe('Adjustment routes tests', () => {
     addOrEdit
     ${'add'}
     ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit entered dates overlaps', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeTypeRecall
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+      {
+        id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+        bookingId: 1061607,
+        person: 'G9144UT',
+        adjustmentType: 'UNLAWFULLY_AT_LARGE',
+        toDate: '2024-04-23',
+        fromDate: '2024-02-23',
+      },
+    ])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2024',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2024',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'The UAL dates from 5 March 2024 to 20 March 2024 overlaps with another UAL period from 23 February 2024 to 23 April 2024.',
+        )
+        expect(res.text).toContain('To continue, edit or remove the UAL days that overlap.')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `(
+    'POST /{nomsId}/unlawfully-at-large/addOrEdit no entered dates doesnt trigger overlap validation',
+    async ({ addOrEdit }) => {
+      const adjustments: Record<string, SessionAdjustment> = {}
+      adjustments[85] = unlawfullyAtLargeTypeRecall
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+        {
+          id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+          bookingId: 1061607,
+          person: 'G9144UT',
+          adjustmentType: 'UNLAWFULLY_AT_LARGE',
+          toDate: '2024-04-23',
+          fromDate: '2024-02-23',
+        },
+      ])
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      return request(app)
+        .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+        .send({
+          type: 'IMMIGRATION_DETENTION',
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).not.toContain('The UAL dates from')
+          expect(res.text).not.toContain('To continue, edit or remove the UAL days that overlap.')
+        })
+    },
+  )
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit entered dates does not overlaps', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeTypeRecall
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+      {
+        id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+        bookingId: 1061607,
+        person: 'G9144UT',
+        adjustmentType: 'UNLAWFULLY_AT_LARGE',
+        toDate: '2024-04-23',
+        fromDate: '2024-02-23',
+      },
+    ])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2025',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2025',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain('The UAL dates from')
+        expect(res.text).not.toContain('To continue, edit or remove the UAL days that overlap.')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
   `(
     'POST /{nomsId}/unlawfully-at-large/addOrEdit Check empty fields have the correct warnings',
     async ({ addOrEdit }) => {
