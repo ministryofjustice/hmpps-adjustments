@@ -1003,6 +1003,42 @@ describe('Adjustment routes tests', () => {
     addOrEdit
     ${'add'}
     ${'edit'}
+  `(
+    'POST /{nomsId}/unlawfully-at-large/addOrEdit no entered dates doesnt trigger overlap validation',
+    async ({ addOrEdit }) => {
+      const adjustments: Record<string, SessionAdjustment> = {}
+      adjustments[85] = unlawfullyAtLargeTypeRecall
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+        {
+          id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+          bookingId: 1061607,
+          person: 'G9144UT',
+          adjustmentType: 'UNLAWFULLY_AT_LARGE',
+          toDate: '2024-04-23',
+          fromDate: '2024-02-23',
+        },
+      ])
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      return request(app)
+        .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+        .send({
+          type: 'IMMIGRATION_DETENTION',
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).not.toContain('The UAL dates from')
+          expect(res.text).not.toContain('To continue, edit or remove the UAL days that overlap.')
+        })
+    },
+  )
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
   `('POST /{nomsId}/unlawfully-at-large/addOrEdit entered dates does not overlaps', async ({ addOrEdit }) => {
     const adjustments: Record<string, SessionAdjustment> = {}
     adjustments[85] = unlawfullyAtLargeTypeRecall

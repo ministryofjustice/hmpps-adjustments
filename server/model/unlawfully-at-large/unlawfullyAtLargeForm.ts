@@ -120,16 +120,16 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
         this.isDateInAdjustmentRange(adjustment, this['from-year'], this['from-month'], this['from-day']),
       )
       .filter((a): a is Adjustment => a !== null)
+    const fields = ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year']
+    const hasAllDateFields = fields.every(field => !!(this as never)[field])
 
-    if (matchingAdjustments.length > 0) {
+    if (hasAllDateFields && matchingAdjustments.length > 0) {
       const dateFormat = 'D MMMM YYYY'
       const formatInputDate = (year: string, month: string, day: string) =>
         dayjs(`${year}-${month}-${day}`).format(dateFormat)
 
       const formattedInputFrom = formatInputDate(this['from-year'], this['from-month'], this['from-day'])
       const formattedInputTo = formatInputDate(this['to-year'], this['to-month'], this['to-day'])
-
-      const fields = ['from-day', 'from-month', 'from-year', 'to-day', 'to-month', 'to-year']
 
       matchingAdjustments.forEach(adjustment => {
         const formattedAdjFrom = dayjs(adjustment.fromDate).format(dateFormat)
