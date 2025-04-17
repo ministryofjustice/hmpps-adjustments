@@ -72,6 +72,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.adjustmentsService,
     service.prisonerService,
+    service.auditService,
   )
 
   const timeSpentInCustodyAbroadRoutes = new TimeSpentInCustodyAbroadRoutes(
