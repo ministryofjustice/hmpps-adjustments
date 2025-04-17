@@ -20,7 +20,6 @@ const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const auditService = new AuditService() as jest.Mocked<AuditService>
-auditService.sendAuditMessage = jest.fn()
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '873e5aae-c0d8-49f4-901f-33bc92f6d7c9'
