@@ -1,5 +1,6 @@
 generic-service:
   nameOverride: hmpps-adjustments
+  serviceAccountName: "hmpps-adjustments"
   productId: "DPS014"
 
   replicaCount: 4
