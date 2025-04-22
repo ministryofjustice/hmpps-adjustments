@@ -13,12 +13,15 @@ import TimeSpentInCustodyAbroadRemoveModel from '../model/custody-abroad/timeSpe
 import TimeSpentInCustodyAbroadSelectOffencesModel from '../model/custody-abroad/timeSpentInCustodyAbroadSelectOffencesModel'
 import TimeSpentInCustodyAbroadOffencesForm from '../model/custody-abroad/timeSpentInCustodyAbroadOffencesForm'
 import FullPageError from '../model/FullPageError'
+import AuditAction from '../enumerations/auditType'
+import AuditService from '../services/auditService'
 
 export default class TimeSpentInCustodyAbroadRoutes {
   constructor(
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly prisonerService: PrisonerService,
+    private readonly auditService: AuditService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -223,8 +226,20 @@ export default class TimeSpentInCustodyAbroadRoutes {
     if (adjustment) {
       if (adjustment.id) {
         await this.adjustmentsService.update(adjustment.id, adjustment, username)
+        await this.auditService.sendAuditMessage(
+          AuditAction.CUSTODY_ABROAD_EDIT,
+          username,
+          adjustment.person,
+          adjustment.id,
+        )
       } else {
         await this.adjustmentsService.create([adjustment], username)
+        await this.auditService.sendAuditMessage(
+          AuditAction.CUSTODY_ABROAD_ADD,
+          username,
+          adjustment.person,
+          adjustment.id,
+        )
       }
 
       const message = {
@@ -254,6 +269,7 @@ export default class TimeSpentInCustodyAbroadRoutes {
     const adjustment = await this.adjustmentsService.get(id, username)
 
     await this.adjustmentsService.delete(id, username)
+    await this.auditService.sendAuditMessage(AuditAction.CUSTODY_ABROAD_DELETE, username, adjustment.person, id)
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.days,

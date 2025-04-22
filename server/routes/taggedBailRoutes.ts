@@ -21,6 +21,8 @@ import TaggedBailRemoveModel from '../model/tagged-bail/taggedBailRemoveModel'
 import ParamStoreService from '../services/paramStoreService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import AuditAction from '../enumerations/auditType'
+import AuditService from '../services/auditService'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -30,6 +32,7 @@ export default class TaggedBailRoutes {
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
     private readonly paramStoreService: ParamStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
+    private readonly auditService: AuditService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -239,6 +242,7 @@ export default class TaggedBailRoutes {
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
     await this.adjustmentsService.create([adjustment], username)
+    await this.auditService.sendAuditMessage(AuditAction.TAGGED_BAIL_ADD, username, adjustment.person, adjustment.id)
 
     const message = {
       type: 'TAGGED_BAIL',
@@ -340,6 +344,7 @@ export default class TaggedBailRoutes {
     }
 
     await this.adjustmentsService.update(id, adjustment, username)
+    await this.auditService.sendAuditMessage(AuditAction.TAGGED_BAIL_EDIT, username, adjustment.person, id)
 
     const message = {
       type: 'TAGGED_BAIL',
