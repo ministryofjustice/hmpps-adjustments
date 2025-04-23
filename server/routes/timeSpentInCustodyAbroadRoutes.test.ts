@@ -8,14 +8,18 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/auditService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const auditService = new AuditService() as jest.Mocked<AuditService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '96c83672-8499-4a64-abc9-3e031b1747b3'
@@ -74,6 +78,7 @@ beforeEach(() => {
       prisonerService,
       adjustmentsService,
       adjustmentsStoreService,
+      auditService,
     },
   })
 })
@@ -289,6 +294,12 @@ describe('Time spent in custody abroad routes', () => {
         `/${NOMS_ID}/success?message=%7B%22type%22:%22CUSTODY_ABROAD%22,%22days%22:13,%22action%22:%22CREATE%22%7D`,
       )
       .expect(() => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.CUSTODY_ABROAD_ADD,
+          'user1',
+          NOMS_ID,
+          undefined,
+        )
         expect(adjustmentsService.create).toHaveBeenCalledWith(
           [
             {
@@ -353,5 +364,13 @@ describe('Time spent in custody abroad routes', () => {
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22CUSTODY_ABROAD%22,%22days%22:31,%22action%22:%22REMOVE%22%7D`,
       )
+      .expect(res => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.CUSTODY_ABROAD_DELETE,
+          'user1',
+          NOMS_ID,
+          '96c83672-8499-4a64-abc9-3e031b1747b3',
+        )
+      })
   })
 })
