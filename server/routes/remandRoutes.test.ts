@@ -18,6 +18,8 @@ import ParamStoreService from '../services/paramStoreService'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -26,6 +28,7 @@ jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
 jest.mock('../services/unusedDeductionsService')
 jest.mock('../services/identifyRemandPeriodsService')
+jest.mock('../services/auditService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
@@ -34,6 +37,7 @@ const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<Adj
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
+const auditService = new AuditService() as jest.Mocked<AuditService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -143,6 +147,7 @@ beforeEach(() => {
       paramStoreService,
       unusedDeductionsService,
       identifyRemandPeriodsService,
+      auditService,
     },
     userSupplier: () => userInTest,
   })
@@ -770,11 +775,20 @@ describe('Remand routes tests', () => {
   it('POST /{nomsId}/remand/remove', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    auditService.getAuditAction.mockReturnValue(AuditAction.REMAND_DELETE)
 
     return request(app)
       .post(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(302)
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22REMOVE%22%7D`)
+      .expect(res => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.REMAND_DELETE,
+          'user1',
+          NOMS_ID,
+          ADJUSTMENT_ID,
+        )
+      })
   })
 
   it('GET /{nomsId}/remand/edit with successful unused deductions calculation', () => {
@@ -910,6 +924,12 @@ describe('Remand routes tests', () => {
       .expect(302)
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22REMAND%22,%22action%22:%22UPDATE%22%7D`)
       .expect(() => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.REMAND_EDIT,
+          'user1',
+          NOMS_ID,
+          SESSION_ID,
+        )
         const updateCall = adjustmentsService.update.mock.calls[0]
         const updateAdjustment = updateCall[1] as Adjustment
         expect(updateAdjustment.remand.chargeId).toEqual([1, 2])

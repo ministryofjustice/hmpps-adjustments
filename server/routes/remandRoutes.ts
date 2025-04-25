@@ -24,6 +24,8 @@ import ParamStoreService from '../services/paramStoreService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
+import AuditAction from '../enumerations/auditType'
+import AuditService from '../services/auditService'
 
 export default class RemandRoutes {
   constructor(
@@ -34,6 +36,7 @@ export default class RemandRoutes {
     private readonly paramStoreService: ParamStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
+    private readonly auditService: AuditService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -294,6 +297,7 @@ export default class RemandRoutes {
     const adjustments = Object.values(this.adjustmentsStoreService.getAll(req, nomsId))
 
     await this.adjustmentsService.create(adjustments, username)
+    await this.auditService.sendAuditMessage(AuditAction.REMAND_ADD, username, nomsId, undefined)
 
     const days = adjustments.reduce(
       (sum, current) => sum + daysBetween(new Date(current.fromDate), new Date(current.toDate)),
@@ -479,6 +483,7 @@ export default class RemandRoutes {
     }
 
     await this.adjustmentsService.update(id, adjustment, username)
+    await this.auditService.sendAuditMessage(AuditAction.REMAND_EDIT, username, adjustment.person, id)
 
     const message = {
       type: 'REMAND',
