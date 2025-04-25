@@ -98,6 +98,18 @@ export default {
             source: 'DPS',
           },
           {
+            id: '37bb9690-0977-4804-b766-559f7e1d5084',
+            bookingId: 1204935,
+            sentenceSequence: 2,
+            person: 'A1234AB',
+            adjustmentType: 'CUSTODY_ABROAD',
+            fromDate: '2023-03-30',
+            days: 46,
+            timeSpentInCustodyAbroad: { documentationSource: 'PPCS_LETTER' },
+            prisonName: 'Leeds',
+            source: 'DPS',
+          },
+          {
             id: 'aa-8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
             bookingId: 1204935,
             sentenceSequence: 2,
@@ -437,6 +449,52 @@ export default {
       request: {
         method: 'PUT',
         urlPattern: '/adjustments-api/adjustments/8f390784-1bd2-4bb8-8e91-9d487c8e8b28',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubGetCustodyAbroadAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/37bb9690-0977-4804-b766-559f7e1d5084',
+      },
+      response: {
+        jsonBody: {
+          id: '37bb9690-0977-4804-b766-559f7e1d5084',
+          adjustmentType: 'CUSTODY_ABROAD',
+          bookingId: '1234',
+          fromDate: '2023-03-30',
+          toDate: '2023-04-17',
+          days: 16,
+          timeSpentInCustodyAbroad: { documentationSource: 'PPCS_LETTER' },
+          person: 'A1234AB',
+        },
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubUpdateCustodyAbroadAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/37bb9690-0977-4804-b766-559f7e1d5084',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
+  stubDeleteCustodyAbroadAdjustment: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'DELETE',
+        urlPattern: '/adjustments-api/adjustments/37bb9690-0977-4804-b766-559f7e1d5084',
       },
       response: {
         status: 200,

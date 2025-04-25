@@ -4,46 +4,121 @@
  */
 
 export interface paths {
-  '/things-to-do/prisoner/{prisonerId}': {
-    /**
-     * Retrieve things-to-do for a prisoner
-     * @description Provides a list of things-to-do for a specified prisoner based on their ID.
-     */
-    get: operations['getThingsToDo']
+  '/queue-admin/retry-dlq/{dlqName}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['retryDlq']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/queue-admin/retry-all-dlqs': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['retryAllDlqs']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/queue-admin/purge-queue/{queueName}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['purgeQueue']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
   }
   '/service-definitions/prisoner/{prisonerId}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
     /**
      * Retrieve the configuration of the CCRD services for a given prisoner
      * @description Provides a list of services, their configuration and things-to-do for a specified prisoner.
      */
     get: operations['getCcrdConfiguration']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/queue-admin/get-dlq-messages/{dlqName}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['getDlqMessages']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/things-to-do/prisoner/{prisonerId}/evict': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /**
+     * Evict the cached things to do
+     * @description Evict the cached things to do when underlying data has changed.
+     */
+    delete: operations['evictThingsToDo']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
   }
 }
-
 export type webhooks = Record<string, never>
-
 export interface components {
   schemas: {
-    AdaIntercept: {
-      /** @enum {string} */
-      type: 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA' | 'PADAS' | 'FIRST_TIME_WITH_NO_ADJUDICATION'
+    RetryDlqResult: {
       /** Format: int32 */
-      number: number
-      anyProspective: boolean
-      messageArguments: string[]
-      message: string
+      messagesFoundCount: number
     }
-    AdjustmentThingsToDo: {
-      prisonerId: string
-      thingsToDo: 'ADA_INTERCEPT'[]
-      adaIntercept?: components['schemas']['AdaIntercept']
-    }
-    ThingsToDoOld: {
-      prisonerId: string
-      calculationThingsToDo: 'CALCULATION_REQUIRED'[]
-      adjustmentThingsToDo?: components['schemas']['AdjustmentThingsToDo']
-      hasAdjustmentThingsToDo: boolean
-      hasCalculationThingsToDo: boolean
+    PurgeQueueResult: {
+      /** Format: int32 */
+      messagesFoundCount: number
     }
     CcrdServiceDefinition: {
       href: string
@@ -61,12 +136,25 @@ export interface components {
       buttonText: string
       buttonHref: string
       /** @enum {string} */
-      type: 'CALCULATION_REQUIRED' | 'ADA_INTERCEPT'
+      type: 'CALCULATION_REQUIRED' | 'ADA_INTERCEPT' | 'REVIEW_IDENTIFIED_REMAND'
     }
     ThingsToDo: {
       things: components['schemas']['ThingToDo'][]
       /** Format: int32 */
       count: number
+    }
+    DlqMessage: {
+      body: {
+        [key: string]: Record<string, never>
+      }
+      messageId: string
+    }
+    GetDlqResult: {
+      /** Format: int32 */
+      messagesFoundCount: number
+      /** Format: int32 */
+      messagesReturnedCount: number
+      messages: components['schemas']['DlqMessage'][]
     }
   }
   responses: never
@@ -75,53 +163,76 @@ export interface components {
   headers: never
   pathItems: never
 }
-
 export type $defs = Record<string, never>
-
-export type external = Record<string, never>
-
 export interface operations {
-  /**
-   * Retrieve things-to-do for a prisoner
-   * @description Provides a list of things-to-do for a specified prisoner based on their ID.
-   */
-  getThingsToDo: {
+  retryDlq: {
     parameters: {
+      query?: never
+      header?: never
       path: {
-        /**
-         * @description Prisoner's ID (also known as nomsId)
-         * @example A1234AB
-         */
-        prisonerId: string
+        dlqName: string
       }
+      cookie?: never
     }
+    requestBody?: never
     responses: {
-      /** @description Successfully returns the things-to-do list */
+      /** @description OK */
       200: {
-        content: {
-          'application/json': components['schemas']['ThingsToDoOld']
+        headers: {
+          [name: string]: unknown
         }
-      }
-      /** @description Unauthorized - valid Oauth2 token required */
-      401: {
         content: {
-          'application/json': components['schemas']['ThingsToDoOld']
-        }
-      }
-      /** @description Forbidden - requires appropriate role */
-      403: {
-        content: {
-          'application/json': components['schemas']['ThingsToDoOld']
+          '*/*': components['schemas']['RetryDlqResult']
         }
       }
     }
   }
-  /**
-   * Retrieve the configuration of the CCRD services for a given prisoner
-   * @description Provides a list of services, their configuration and things-to-do for a specified prisoner.
-   */
+  retryAllDlqs: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['RetryDlqResult'][]
+        }
+      }
+    }
+  }
+  purgeQueue: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        queueName: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['PurgeQueueResult']
+        }
+      }
+    }
+  }
   getCcrdConfiguration: {
     parameters: {
+      query?: never
+      header?: never
       path: {
         /**
          * @description Prisoner's ID (also known as nomsId)
@@ -129,25 +240,98 @@ export interface operations {
          */
         prisonerId: string
       }
+      cookie?: never
     }
+    requestBody?: never
     responses: {
       /** @description Successfully returns the ccrd service list */
       200: {
+        headers: {
+          [name: string]: unknown
+        }
         content: {
           'application/json': components['schemas']['CcrdServiceDefinitions']
         }
       }
       /** @description Unauthorized - valid Oauth2 token required */
       401: {
+        headers: {
+          [name: string]: unknown
+        }
         content: {
           'application/json': components['schemas']['CcrdServiceDefinitions']
         }
       }
       /** @description Forbidden - requires appropriate role */
       403: {
+        headers: {
+          [name: string]: unknown
+        }
         content: {
           'application/json': components['schemas']['CcrdServiceDefinitions']
         }
+      }
+    }
+  }
+  getDlqMessages: {
+    parameters: {
+      query?: {
+        maxMessages?: number
+      }
+      header?: never
+      path: {
+        dlqName: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['GetDlqResult']
+        }
+      }
+    }
+  }
+  evictThingsToDo: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /**
+         * @description Prisoner's ID (also known as nomsId)
+         * @example A1234AB
+         */
+        prisonerId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successfuly evicted cache. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized - valid Oauth2 token required */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Forbidden - requires appropriate role */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
     }
   }

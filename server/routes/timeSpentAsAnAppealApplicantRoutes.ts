@@ -14,12 +14,15 @@ import TimeSpentAsAnAppealApplicantRemoveModel from '../model/appeal-applicant/t
 import FullPageError from '../model/FullPageError'
 import TimeSpentAsAnAppealApplicantSelectOffencesModel from '../model/appeal-applicant/timeSpentAsAnAppealApplicantSelectOffencesModel'
 import TimeSpentAsAnAppealApplicantOffencesForm from '../model/appeal-applicant/timeSpentAsAnAppealApplicantOffencesForm'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 export default class TimeSpentAsAnAppealApplicantRoutes {
   constructor(
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly adjustmentsService: AdjustmentsService,
     private readonly prisonerService: PrisonerService,
+    private readonly auditService: AuditService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -231,8 +234,20 @@ export default class TimeSpentAsAnAppealApplicantRoutes {
     if (adjustment) {
       if (adjustment.id) {
         await this.adjustmentsService.update(adjustment.id, adjustment, username)
+        await this.auditService.sendAuditMessage(
+          AuditAction.TIME_SPENT_AS_APPEAL_APPLICANT_EDIT,
+          username,
+          adjustment.person,
+          adjustment.id,
+        )
       } else {
         await this.adjustmentsService.create([adjustment], username)
+        await this.auditService.sendAuditMessage(
+          AuditAction.TIME_SPENT_AS_APPEAL_APPLICANT_ADD,
+          username,
+          adjustment.person,
+          adjustment.id,
+        )
       }
 
       const message = {
@@ -273,6 +288,12 @@ export default class TimeSpentAsAnAppealApplicantRoutes {
       days: adjustment.days,
       action: 'REMOVE',
     } as Message)
+    await this.auditService.sendAuditMessage(
+      AuditAction.TIME_SPENT_AS_APPEAL_APPLICANT_DELETE,
+      username,
+      adjustment.person,
+      adjustment.id,
+    )
     return res.redirect(`/${nomsId}/success?message=${message}`)
   }
 

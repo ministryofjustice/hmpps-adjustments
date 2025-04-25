@@ -1,7 +1,7 @@
 import { AdaAdjudicationDetails, Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import { IdentifyRemandDecision, RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import { UnusedDeductionMessageType } from '../services/unusedDeductionsService'
-import { calculateReleaseDatesCheckInformationUrl, daysBetween } from '../utils/utils'
+import { calculateReleaseDatesCheckInformationUrl } from '../utils/utils'
 import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import UnusedDeductionsMessageViewModel from './unused-deductions/unusedDeductionsMessageViewModel'
 
@@ -20,19 +20,21 @@ export default class AdjustmentsHubViewModel {
   constructor(
     public prisonerNumber: string,
     public adjustments: Adjustment[],
-    public relevantRemand: RemandResult,
     public remandDecision: IdentifyRemandDecision,
+    public remandResult: RemandResult,
     public roles: string[],
     public message: Message,
     unusedDeductionsMessageType: UnusedDeductionMessageType,
     private adaAdjudicationDetails: AdaAdjudicationDetails,
     inactiveDeletedAdjustments: Adjustment[],
+    private remandBannerVisible: boolean,
   ) {
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
       prisonerNumber,
       adjustments,
       unusedDeductionsMessageType,
       inactiveDeletedAdjustments,
+      remandBannerVisible,
     )
   }
 
@@ -44,20 +46,28 @@ export default class AdjustmentsHubViewModel {
     return adjustmentTypes.filter(it => !it.deduction)
   }
 
-  public hasRemandToolRole(): boolean {
-    return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
-  }
-
   public showProspectiveAdaLink(adjustmentType: AdjustmentType): boolean {
     return adjustmentType.value === 'ADDITIONAL_DAYS_AWARDED' && !!this.adaAdjudicationDetails?.prospective?.length
   }
 
   public displayAddLink(adjustmentType: AdjustmentType): boolean {
-    return (
-      !this.hasRemandToolRole() ||
-      adjustmentType.value !== 'REMAND' ||
-      (this.remandDecision && !this.remandDecision.accepted)
-    )
+    return !this.remandToolIsAccessible() || !this.isRemand(adjustmentType) || this.isRemandDecisionRejected()
+  }
+
+  private isRemandDecisionRejected(): boolean {
+    return this.remandDecision?.accepted === false
+  }
+
+  private isRemandDecisionAccepted(): boolean {
+    return this.remandDecision?.accepted === true
+  }
+
+  private isRemandDecisionUnanswered(): boolean {
+    return !this.remandDecision
+  }
+
+  private hasRemandToolRole(): boolean {
+    return this.roles.indexOf('REMAND_IDENTIFIER') !== -1
   }
 
   public getTotalDays(adjustmentType: AdjustmentType) {
@@ -78,6 +88,29 @@ export default class AdjustmentsHubViewModel {
 
   public showDetails(adjustmentType: AdjustmentType) {
     return this.getTotalDays(adjustmentType) !== 0
+  }
+
+  public isRemand(adjustmentType: AdjustmentType) {
+    return adjustmentType.value === 'REMAND'
+  }
+
+  public displayReviewRemand(adjustmentType: AdjustmentType): boolean {
+    return (
+      this.remandToolIsAccessible() &&
+      this.isRemand(adjustmentType) &&
+      (this.remandBannerVisible ||
+        this.isRemandDecisionUnanswered() ||
+        this.isRemandDecisionAccepted() ||
+        this.displayReviewRemandForZeroDayRejection(adjustmentType))
+    )
+  }
+
+  public remandToolIsAccessible(): boolean {
+    return this.hasRemandToolRole() && !!this.remandResult
+  }
+
+  private displayReviewRemandForZeroDayRejection(adjustmentType: AdjustmentType): boolean {
+    return this.isRemandDecisionRejected() && this.getTotalDays(adjustmentType) === 0
   }
 
   public getLalAffectsDateText(adjustmentType: AdjustmentType): string {
@@ -123,13 +156,6 @@ export default class AdjustmentsHubViewModel {
     }
 
     return heading
-  }
-
-  public getTotalDaysRelevantRemand() {
-    return this.relevantRemand.adjustments
-      .filter(a => a.status === 'ACTIVE')
-      .map(a => daysBetween(new Date(a.fromDate), new Date(a.toDate)))
-      .reduce((sum, current) => sum + current, 0)
   }
 
   public calculateReleaseDatesUrl() {

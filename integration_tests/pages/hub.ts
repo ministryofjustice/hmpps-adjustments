@@ -43,6 +43,10 @@ export default class HubPage extends AdjustmentsPage {
 
   public viewSpecialRemissionLink = (): PageElement => cy.get('[data-qa=view-special-remission]')
 
+  public addCustodyAbroadLink = (): PageElement => cy.get('[data-qa=add-custody-abroad]')
+
+  public viewCustodyAbroadLink = (): PageElement => cy.get('[data-qa=view-custody-abroad]')
+
   public relevantRemandMessage = (): PageElement => cy.get('[data-qa=relevant-remand-message]')
 
   public successMessage = (): PageElement => cy.get('[data-qa=success-message]')

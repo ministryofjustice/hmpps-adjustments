@@ -27,6 +27,7 @@ export default function routes(service: Services): Router {
     service.unusedDeductionsService,
     service.paramStoreService,
     service.courtCasesReleaseDatesService,
+    service.auditService,
   )
   const remandRoutes = new RemandRoutes(
     service.prisonerService,
@@ -34,15 +35,16 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.calculateReleaseDatesService,
     service.paramStoreService,
-
     service.unusedDeductionsService,
     service.identifyRemandPeriodsService,
+    service.auditService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
     service.prisonerService,
     service.additionalDaysAwardedBackendService,
     service.adjustmentsService,
+    service.auditService,
   )
 
   const taggedBailRoutes = new TaggedBailRoutes(
@@ -52,6 +54,7 @@ export default function routes(service: Services): Router {
     service.calculateReleaseDatesService,
     service.paramStoreService,
     service.unusedDeductionsService,
+    service.auditService,
   )
 
   const manualUnusedDeductionRoutes = new ManualUnusedDeductionRoutes(
@@ -72,18 +75,21 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.adjustmentsService,
     service.prisonerService,
+    service.auditService,
   )
 
   const timeSpentInCustodyAbroadRoutes = new TimeSpentInCustodyAbroadRoutes(
     service.adjustmentsStoreService,
     service.adjustmentsService,
     service.prisonerService,
+    service.auditService,
   )
 
   const timeSpentAsAnAppealApplicantRoutes = new TimeSpentAsAnAppealApplicantRoutes(
     service.adjustmentsStoreService,
     service.adjustmentsService,
     service.prisonerService,
+    service.auditService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)

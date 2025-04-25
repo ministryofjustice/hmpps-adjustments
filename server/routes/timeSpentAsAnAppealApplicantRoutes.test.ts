@@ -8,14 +8,18 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/auditService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const auditService = new AuditService() as jest.Mocked<AuditService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = 'cc3c41bc-1ff9-4568-96e6-7c7de330f0c0'
@@ -74,6 +78,7 @@ beforeEach(() => {
       prisonerService,
       adjustmentsService,
       adjustmentsStoreService,
+      auditService,
     },
   })
 })
@@ -314,6 +319,12 @@ describe('Time spent as an appeal applicant not to count routes', () => {
           ],
           'user1',
         )
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.TIME_SPENT_AS_APPEAL_APPLICANT_ADD,
+          'user1',
+          NOMS_ID,
+          undefined,
+        )
       })
   })
 
@@ -342,6 +353,12 @@ describe('Time spent as an appeal applicant not to count routes', () => {
             timeSpentAsAnAppealApplicant: { courtOfAppealReferenceNumber: 'COA12345' },
           },
           'user1',
+        )
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.TIME_SPENT_AS_APPEAL_APPLICANT_EDIT,
+          'user1',
+          NOMS_ID,
+          '3',
         )
       })
   })
@@ -387,14 +404,22 @@ describe('Time spent as an appeal applicant not to count routes', () => {
       })
   })
 
-  it('POST /{nomsId}/appeal-applicant/remove returns to the hub with the remove message', () => {
+  it('POST /{nomsId}/appeal-applicant/remove returns to the hub with the remove message', async () => {
     adjustmentsService.get.mockResolvedValue(timeSpentAsAnAppealApplicantAdjustment)
-    return request(app)
+
+    await request(app)
       .post(`/${NOMS_ID}/appeal-applicant/remove/${SESSION_ID}`)
       .expect(302)
       .expect(
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22APPEAL_APPLICANT%22,%22days%22:19,%22action%22:%22REMOVE%22%7D`,
       )
+
+    expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+      AuditAction.TIME_SPENT_AS_APPEAL_APPLICANT_DELETE,
+      'user1',
+      NOMS_ID,
+      '3',
+    )
   })
 })
