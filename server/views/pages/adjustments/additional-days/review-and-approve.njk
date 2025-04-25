@@ -66,8 +66,13 @@
           }) }}
         {% else %}
           <p>
-            {% if adasToReview.intercept.type == 'FIRST_TIME' or adasToReview.intercept.type == 'FIRST_TIME_WITH_NO_ADJUDICATION'%}
-              ADA adjustments are based on adjudication records. To apply ADAs, you must confirm that the adjustment information below is correct.
+            {% if adasToReview.awaitingApproval.length > 0 %}
+              ADA adjustments are based on adjudication records. Before you approve ADAs, check that:
+              <br>
+              <ul>
+                <li>ADAs have not been incorrectly recorded as PADAs.</li>
+                <li>The consecutive and concurrent information for each ADA is correct.</li>
+              </ul>
             {% else %}
               Check that the existing ADAs are correct, then review and approve pending ADAs.
             {% endif %}

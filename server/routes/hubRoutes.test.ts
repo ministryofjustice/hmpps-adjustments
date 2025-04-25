@@ -147,6 +147,44 @@ const serviceDefinitionsNoThingsToDo = {
   },
 } as CcrdServiceDefinitions
 
+const serviceDefinitionsRemandThingsToDo = {
+  services: {
+    overview: {
+      href: 'http://localhost:8000/prisoner/AB1234AB/overview',
+      text: 'Overview',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+    adjustments: {
+      href: 'http://localhost:8002/AB1234AB',
+      text: 'Adjustments',
+      thingsToDo: {
+        things: [
+          {
+            title: 'There are periods of remand to review',
+            message:
+              'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
+            buttonText: 'Review remand',
+            buttonHref: 'https://identify-remand-periods-dev.hmpps.service.justice.gov.uk/prisoner/A8902DZ',
+            type: 'REVIEW_IDENTIFIED_REMAND',
+          },
+        ],
+        count: 1,
+      },
+    },
+    releaseDates: {
+      href: 'http://localhost:8004?prisonId=AB1234AB',
+      text: 'Release dates and calculations',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+  },
+} as CcrdServiceDefinitions
+
 const serviceDefinitionsProspectiveThingsToDo = {
   services: {
     overview: {
@@ -222,21 +260,129 @@ describe('GET /:nomsId', () => {
         expect(res.text).toContain('mini-profile-status">Life imprisonment<')
       })
   })
-  it('GET /{nomsId} with remand role', () => {
-    userInTest = userWithRemandRole
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
-    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
-    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
-      'NONE',
-      [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
-    ])
-    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
-    return request(app)
-      .get(`/${NOMS_ID}`)
-      .expect('Content-Type', /html/)
-      .expect(res => {
-        expect(res.text).toContain('Review remand')
+
+  describe('Identify Remand role tests', () => {
+    it('GET /{nomsId} with remand role accepted remand', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+        accepted: true,
       })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+        'NONE',
+        [remandAdjustment],
+      ])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('Review remand')
+          expect(res.text).toContain('View')
+        })
+    })
+    it('GET /{nomsId} with remand role things to do', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+        accepted: true,
+      })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['NONE', []])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('Review remand')
+          expect(res.text).not.toContain('data-qa="add-remand"')
+        })
+    })
+    it('GET /{nomsId} with remand role rejected remand with days remand', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+        accepted: false,
+      })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+        'NONE',
+        [remandAdjustment],
+      ])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('data-qa="add-remand"')
+          expect(res.text).not.toContain('Review remand')
+        })
+    })
+    it('GET /{nomsId} with remand role rejected remand with zero days remand', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue({
+        accepted: false,
+      })
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['NONE', []])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('data-qa="add-remand"')
+          expect(res.text).toContain('Review remand')
+        })
+    })
+    it('GET /{nomsId} with remand role unanswerd remand', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
+        adjustments: [],
+      } as RemandResult)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+        'NONE',
+        [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+      ])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('Review remand')
+          expect(res.text).not.toContain('data-qa="add-remand"')
+        })
+    })
+
+    it('GET /{nomsId} with remand role uncalculable remand', () => {
+      userInTest = userWithRemandRole
+      identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
+      identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(null)
+      adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+      unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+        'NONE',
+        [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }],
+      ])
+      courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsNoThingsToDo)
+      return request(app)
+        .get(`/${NOMS_ID}`)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).not.toContain('Review remand')
+          expect(res.text).toContain('data-qa="add-remand"')
+        })
+    })
   })
   it('GET /{nomsId} - Pada things to do is displayed if there is prospective adas to review', () => {
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['UNKNOWN', []])
@@ -354,7 +500,6 @@ describe('GET /:nomsId', () => {
   })
 
   it('GET /{nomsId} hub with unused deductions', () => {
-    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
     unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
       'NONE',
       [{ ...radaAdjustment, prisonName: 'Leeds', lastUpdatedDate: '2023-04-05' }, remandAdjustment, unusedDeductions],
@@ -489,6 +634,36 @@ describe('GET /:nomsId', () => {
       .expect(res => {
         expect(res.text).toContain(
           `Unused deductions have not been calculated as there are unused deductions in NOMIS - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
+        )
+      })
+  })
+  it('GET /{nomsId} unused deductions banner is suppressed if the user has the remand role and there are remand thingsToDo', () => {
+    const nomisRemandAdjustment = { ...remandAdjustment }
+    nomisRemandAdjustment.source = 'NOMIS'
+    userInTest = userWithRemandRole
+
+    identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(remandResult)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NOMIS_ADJUSTMENT',
+      [nomisRemandAdjustment],
+    ])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    paramStoreService.get.mockReturnValue(false)
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsRemandThingsToDo)
+
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain(
+          `Unused deductions have not been calculated - <a data-qa="review-unused-deductions" href="/ABC123/review-deductions">review remand to calculate</a>`,
+        )
+        expect(res.text).not.toContain(
+          '<div class="govuk-inset-text govuk-!-margin-left-4">\n          \n        </div>',
+        )
+        expect(res.text).toContain('There are periods of remand to review')
+        expect(res.text).toContain(
+          'This service has identified periods of remand that may be relevant. You must review these remand periods before calculating a release date.',
         )
       })
   })

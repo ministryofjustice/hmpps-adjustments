@@ -27,6 +27,7 @@ generic-service:
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api-preprod.hmpps.service.justice.gov.uk"
     TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'true'
     TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'true'
+    RECALLS_URL: 'https://record-a-recall-preprod.hmpps.service.justice.gov.uk'
 
   allowlist:
     cymulate-1: 54.217.50.18/32

@@ -11,6 +11,8 @@ import SessionAdjustment from '../@types/AdjustmentTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -18,6 +20,7 @@ jest.mock('../services/calculateReleaseDatesService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
 jest.mock('../services/unusedDeductionsService')
+jest.mock('../services/auditService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
@@ -25,6 +28,7 @@ const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as j
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
+const auditService = new AuditService() as jest.Mocked<AuditService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '123-abc'
@@ -113,6 +117,7 @@ beforeEach(() => {
       calculateReleaseDatesService,
       paramStoreService,
       unusedDeductionsService,
+      auditService,
     },
   })
 })
@@ -265,6 +270,9 @@ describe('Tagged bail routes tests', () => {
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22CREATE%22,%22days%22:9955%7D`,
       )
+      .expect(() => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(AuditAction.TAGGED_BAIL_ADD, 'user1', NOMS_ID, '1')
+      })
   })
 
   test.each`
@@ -358,6 +366,14 @@ describe('Tagged bail routes tests', () => {
       .post(`/${NOMS_ID}/tagged-bail/edit/${SESSION_ID}`)
       .expect(302)
       .expect('Location', `/${NOMS_ID}/success?message=%7B%22type%22:%22TAGGED_BAIL%22,%22action%22:%22UPDATE%22%7D`)
+      .expect(() => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.TAGGED_BAIL_EDIT,
+          'user1',
+          NOMS_ID,
+          SESSION_ID,
+        )
+      })
   })
 
   it('POST /{nomsId}/tagged-bail/edit/:id nomis adjustment sets tagged bail case ids.', () => {

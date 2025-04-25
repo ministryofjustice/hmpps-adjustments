@@ -18,3 +18,11 @@ $govuk-page-width: $moj-page-width;
   width: 8em;
   word-wrap: break-word;
 }
+
+.nowrap-header {
+  white-space: nowrap;
+}
+
+.remand-rejection-banner-title {
+  margin-bottom: 0;
+}
