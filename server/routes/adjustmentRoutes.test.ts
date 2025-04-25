@@ -12,6 +12,8 @@ import UnusedDeductionsService from '../services/unusedDeductionsService'
 import ParamStoreService from '../services/paramStoreService'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -20,6 +22,7 @@ jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedBackendService')
 jest.mock('../services/unusedDeductionsService')
 jest.mock('../services/paramStoreService')
+jest.mock('../services/auditService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
@@ -31,7 +34,7 @@ const additionalDaysAwardedBackendService = new AdditionalDaysAwardedBackendServ
   null,
 ) as jest.Mocked<AdditionalDaysAwardedBackendService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
-
+const auditService = new AuditService() as jest.Mocked<AuditService>
 const NOMS_ID = 'ABC123'
 
 const radaAdjustment = {
@@ -133,6 +136,7 @@ beforeEach(() => {
       additionalDaysAwardedBackendService,
       unusedDeductionsService,
       paramStoreService,
+      auditService,
     },
   })
 })
@@ -531,6 +535,7 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/review with a rada adjustment with an id', () => {
     adjustmentsStoreService.getOnly.mockReturnValue({ ...radaAdjustment, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...radaAdjustment, id: 'this-is-an-id' })
+    auditService.getAuditAction.mockReturnValue(AuditAction.RESTORATION_OF_ADDITIONAL_DAYS_AWARDED_EDIT)
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)
@@ -539,6 +544,12 @@ describe('Adjustment routes tests', () => {
         `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22UPDATE%22%7D`,
       )
       .expect(res => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.RESTORATION_OF_ADDITIONAL_DAYS_AWARDED_EDIT,
+          'user1',
+          NOMS_ID,
+          'this-is-an-id',
+        )
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
         expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
         expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
@@ -551,6 +562,7 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/review with a UAL adjustment with an id', () => {
     adjustmentsStoreService.getOnly.mockReturnValue({ ...unlawfullyAtLargeTypeRecall, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    auditService.getAuditAction.mockReturnValue(AuditAction.UNLAWFULLY_AT_LARGE_EDIT)
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)
@@ -559,6 +571,12 @@ describe('Adjustment routes tests', () => {
         `/${NOMS_ID}/success?message=%7B%22type%22:%22UNLAWFULLY_AT_LARGE%22,%22days%22:51,%22action%22:%22UPDATE%22%7D`,
       )
       .expect(res => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.UNLAWFULLY_AT_LARGE_EDIT,
+          'user1',
+          NOMS_ID,
+          'this-is-an-id',
+        )
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
         expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
         expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
@@ -571,6 +589,7 @@ describe('Adjustment routes tests', () => {
   it('POST /{nomsId}/review with a LAL adjustment with an id', () => {
     adjustmentsStoreService.getOnly.mockReturnValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
     adjustmentsService.get.mockResolvedValue({ ...lawfullyAtLargeAdjustment, id: 'this-is-an-id' })
+    auditService.getAuditAction.mockReturnValue(AuditAction.LAWFULLY_AT_LARGE_EDIT)
     return request(app)
       .post(`/${NOMS_ID}/review`)
       .expect(302)
@@ -579,6 +598,12 @@ describe('Adjustment routes tests', () => {
         `/${NOMS_ID}/success?message=%7B%22type%22:%22LAWFULLY_AT_LARGE%22,%22days%22:63,%22action%22:%22UPDATE%22%7D`,
       )
       .expect(res => {
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.LAWFULLY_AT_LARGE_EDIT,
+          'user1',
+          NOMS_ID,
+          'this-is-an-id',
+        )
         expect(adjustmentsService.update.mock.calls).toHaveLength(1)
         expect(adjustmentsService.update.mock.calls[0][0]).toStrictEqual('this-is-an-id')
         expect(adjustmentsService.update.mock.calls[0][1]).toStrictEqual({
@@ -955,6 +980,122 @@ describe('Adjustment routes tests', () => {
             omu.specialistsupportteam@justice.gov.uk</a> if you are unsure whether the LAL days
         will delay this person's release dates.`,
         )
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit entered dates overlaps', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeTypeRecall
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+      {
+        id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+        bookingId: 1061607,
+        person: 'G9144UT',
+        adjustmentType: 'UNLAWFULLY_AT_LARGE',
+        toDate: '2024-04-23',
+        fromDate: '2024-02-23',
+      },
+    ])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2024',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2024',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(
+          'The UAL dates from 5 March 2024 to 20 March 2024 overlaps with another UAL period from 23 February 2024 to 23 April 2024.',
+        )
+        expect(res.text).toContain('To continue, edit or remove the UAL days that overlap.')
+      })
+  })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `(
+    'POST /{nomsId}/unlawfully-at-large/addOrEdit no entered dates doesnt trigger overlap validation',
+    async ({ addOrEdit }) => {
+      const adjustments: Record<string, SessionAdjustment> = {}
+      adjustments[85] = unlawfullyAtLargeTypeRecall
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+        {
+          id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+          bookingId: 1061607,
+          person: 'G9144UT',
+          adjustmentType: 'UNLAWFULLY_AT_LARGE',
+          toDate: '2024-04-23',
+          fromDate: '2024-02-23',
+        },
+      ])
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      return request(app)
+        .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+        .send({
+          type: 'IMMIGRATION_DETENTION',
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).not.toContain('The UAL dates from')
+          expect(res.text).not.toContain('To continue, edit or remove the UAL days that overlap.')
+        })
+    },
+  )
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `('POST /{nomsId}/unlawfully-at-large/addOrEdit entered dates does not overlaps', async ({ addOrEdit }) => {
+    const adjustments: Record<string, SessionAdjustment> = {}
+    adjustments[85] = unlawfullyAtLargeTypeRecall
+    adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+    adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+    adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+      {
+        id: '05e9c71d-9cf5-4a54-b7cf-ccb3a29a2ffa',
+        bookingId: 1061607,
+        person: 'G9144UT',
+        adjustmentType: 'UNLAWFULLY_AT_LARGE',
+        toDate: '2024-04-23',
+        fromDate: '2024-02-23',
+      },
+    ])
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    return request(app)
+      .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+      .send({
+        'from-day': '5',
+        'from-month': '3',
+        'from-year': '2025',
+        'to-day': '20',
+        'to-month': '3',
+        'to-year': '2025',
+        type: 'IMMIGRATION_DETENTION',
+      })
+      .type('form')
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).not.toContain('The UAL dates from')
+        expect(res.text).not.toContain('To continue, edit or remove the UAL days that overlap.')
       })
   })
 
