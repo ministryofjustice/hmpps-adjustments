@@ -8,14 +8,18 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import './testutils/toContainInOrder'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
+import AuditService from '../services/auditService'
+import AuditAction from '../enumerations/auditType'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/adjustmentsStoreService')
+jest.mock('../services/auditService')
 
 const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
+const auditService = new AuditService() as jest.Mocked<AuditService>
 
 const NOMS_ID = 'ABC123'
 const SESSION_ID = '873e5aae-c0d8-49f4-901f-33bc92f6d7c9'
@@ -47,6 +51,7 @@ beforeEach(() => {
       prisonerService,
       adjustmentsService,
       adjustmentsStoreService,
+      auditService,
     },
   })
 })
@@ -297,6 +302,12 @@ describe('Special remission routes', () => {
           ],
           'user1',
         )
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.SPECIAL_REMISSION_ADD,
+          'user1',
+          NOMS_ID,
+          undefined,
+        )
       })
   })
 
@@ -367,6 +378,12 @@ describe('Special remission routes', () => {
             },
           },
           'user1',
+        )
+        expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+          AuditAction.SPECIAL_REMISSION_EDIT,
+          'user1',
+          NOMS_ID,
+          '3',
         )
       })
   })
@@ -439,15 +456,24 @@ describe('Special remission routes', () => {
         expect(res.text).toContain(`/${NOMS_ID}/special-remission/view" class="govuk-back-link"`)
       })
   })
-  it('POST /{nomsId}/special-remission/remove returns to the hub with the remove message', () => {
+  it('POST /{nomsId}/special-remission/remove returns to the hub with the remove message', async () => {
     adjustmentsService.get.mockResolvedValue(specialRemissionAdjustment)
-    return request(app)
+    auditService.sendAuditMessage = jest.fn()
+
+    await request(app)
       .post(`/${NOMS_ID}/special-remission/remove/${SESSION_ID}`)
       .expect(302)
       .expect(
         'Location',
         `/${NOMS_ID}/success?message=%7B%22type%22:%22SPECIAL_REMISSION%22,%22days%22:27,%22action%22:%22REMOVE%22%7D`,
       )
+
+    expect(auditService.sendAuditMessage).toHaveBeenCalledWith(
+      AuditAction.SPECIAL_REMISSION_DELETE,
+      'user1',
+      NOMS_ID,
+      SESSION_ID,
+    )
   })
 
   it('GET /{nomsId}/special-remission/view returns correctly for a nomis adjustment', () => {

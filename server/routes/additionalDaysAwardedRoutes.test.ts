@@ -163,6 +163,40 @@ const padasAwaitingApprovalAndQuashed = {
   },
 } as AdasToReview
 
+const onlyADAsToReview = {
+  awaitingApproval: [
+    {
+      dateChargeProved: '2023-08-03',
+      charges: [
+        {
+          chargeNumber: '1525917',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+        },
+      ],
+      total: 5,
+      status: 'PENDING_APPROVAL',
+    },
+  ],
+  suspended: [],
+  awarded: [],
+  quashed: [],
+  totalAwarded: 0,
+  totalQuashed: 0,
+  totalAwaitingApproval: 104,
+  totalSuspended: 0,
+  intercept: {
+    number: 2,
+    type: 'FIRST_TIME',
+    anyProspective: false,
+  },
+  showExistingAdaMessage: false,
+  totalExistingAdas: null,
+} as AdasToReview
+
 const mixPadasAndPending = {
   awaitingApproval: [
     {
@@ -279,6 +313,36 @@ describe('Additional Days Awarded routes tests', () => {
       additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(padasAwaitingApprovalAndQuashed)
 
       return request(app).get(`/${NOMS_ID}/additional-days/review-and-approve`).expect(200)
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve Review message when ADAs need approval', () => {
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(onlyADAsToReview)
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/review-and-approve`)
+        .expect(200)
+        .expect(res => {
+          expect(res.text).toContain(
+            'ADA adjustments are based on adjudication records. Before you approve ADAs, check that:',
+          )
+          expect(res.text).toContain('ADAs have not been incorrectly recorded as PADAs.')
+          expect(res.text).toContain('The consecutive and concurrent information for each ADA is correct.')
+        })
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve No Review message when there are no ADAs to be approved', () => {
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(noAwaitingApproval)
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/review-and-approve`)
+        .expect(200)
+        .expect(res => {
+          expect(res.text).not.toContain(
+            'ADA adjustments are based on adjudication records. Before you approve ADAs, check that:',
+          )
+          expect(res.text).not.toContain('ADAs have not been incorrectly recorded as PADAs.')
+          expect(res.text).not.toContain('The consecutive and concurrent information for each ADA is correct.')
+        })
     })
 
     it('GET /{nomsId}/additional-days/review-and-approve when mix of PADAs and others exist does not redirect', () => {

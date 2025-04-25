@@ -32,6 +32,7 @@ export default class TaggedBailViewModel {
       allAdjustments,
       unusedDeductionsMessageType,
       inactiveWhenDeletedAdjustments,
+      false,
     )
   }
 

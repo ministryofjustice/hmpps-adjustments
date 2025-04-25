@@ -5,12 +5,15 @@ import { Message } from '../model/adjustmentsHubViewModel'
 import PadaForm from '../model/padaForm'
 import AdditionalDaysAwardedBackendService from '../services/additionalDaysAwardedBackendService'
 import AdjustmentsService from '../services/adjustmentsService'
+import AuditAction from '../enumerations/auditType'
+import AuditService from '../services/auditService'
 
 export default class AdditionalDaysAwardedRoutes {
   constructor(
     private readonly prisonerService: PrisonerService,
     private readonly additionalDaysAwardedBackendService: AdditionalDaysAwardedBackendService,
     private readonly adjustmentsService: AdjustmentsService,
+    private readonly auditService: AuditService,
   ) {}
 
   public intercept: RequestHandler = async (req, res): Promise<void> => {
@@ -145,6 +148,12 @@ export default class AdditionalDaysAwardedRoutes {
       res.locals.prisoner,
       username,
       activeCaseLoadId,
+    )
+    await this.auditService.sendAuditMessage(
+      AuditAction.ADDITIONAL_DAYS_AWARDED_APPROVE,
+      username,
+      nomsId,
+      'NOT_APPLICABLE',
     )
 
     const message = {

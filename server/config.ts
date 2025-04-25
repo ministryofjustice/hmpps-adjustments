@@ -151,6 +151,9 @@ export default {
     },
   },
   services: {
+    recallsUI: {
+      url: get('RECALLS_URL', 'http://localhost:8080', requiredInProduction),
+    },
     calculateReleaseDatesUI: {
       url: get('CALCULATE_RELEASE_DATES_URL', 'http://localhost:8080', requiredInProduction),
     },

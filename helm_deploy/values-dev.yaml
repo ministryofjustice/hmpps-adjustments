@@ -10,7 +10,7 @@ generic-service:
       - adjustments-dev.hmpps.service.justice.gov.uk
 
   env:
-    INGRESS_URL: "https://adjust-release-dates-dev.hmpps.service.justice.gov.uk"
+    INGRESS_URL: "https://adjustments-dev.hmpps.service.justice.gov.uk"
     HMPPS_AUTH_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
     TOKEN_VERIFICATION_API_URL: "https://token-verification-api-dev.prison.service.justice.gov.uk"
     PRISON_API_URL: "https://prison-api-dev.prison.service.justice.gov.uk"
@@ -29,6 +29,7 @@ generic-service:
     COURT_CASES_RELEASE_DATES_API_URL: "https://court-cases-release-dates-api-dev.hmpps.service.justice.gov.uk"
     TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'true'
     TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'true'
+    RECALLS_URL: 'https://record-a-recall-dev.hmpps.service.justice.gov.uk'
 
   # Switches off the allow list in the DEV env only.
   allowlist: null
