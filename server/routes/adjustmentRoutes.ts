@@ -21,6 +21,7 @@ import UnusedDeductionsService from '../services/unusedDeductionsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ParamStoreService from '../services/paramStoreService'
 import CourtCasesReleaseDatesService from '../services/courtCasesReleaseDatesService'
+import AuditService from '../services/auditService'
 
 export default class AdjustmentRoutes {
   constructor(
@@ -31,6 +32,7 @@ export default class AdjustmentRoutes {
     private readonly unusedDeductionsService: UnusedDeductionsService,
     private readonly paramStoreService: ParamStoreService,
     private readonly courtCasesReleaseDatesService: CourtCasesReleaseDatesService,
+    private readonly auditService: AuditService,
   ) {}
 
   public entry: RequestHandler = async (req, res): Promise<void> => {
@@ -80,12 +82,12 @@ export default class AdjustmentRoutes {
         : []
 
     let remandDecision
-    let relevantRemand
+    let remandResult
     let remandBannerVisible = false
     if (roles.includes('REMAND_IDENTIFIER')) {
       try {
         remandDecision = await this.identifyRemandPeriodsService.getRemandDecision(nomsId, username)
-        relevantRemand = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, username)
+        remandResult = await this.identifyRemandPeriodsService.calculateRelevantRemand(nomsId, username)
         remandBannerVisible = serviceDefinitions.services.adjustments.thingsToDo.things.some(
           thing => thing.type === 'REVIEW_IDENTIFIED_REMAND',
         )
@@ -99,8 +101,8 @@ export default class AdjustmentRoutes {
       model: new AdjustmentsHubViewModel(
         prisonerNumber,
         adjustments,
-        relevantRemand,
         remandDecision,
+        remandResult,
         roles,
         message && message[0] && (JSON.parse(message[0]) as Message),
         unusedDeductionMessage,
@@ -173,7 +175,10 @@ export default class AdjustmentRoutes {
 
     const adjustmentForm = AdjustmentsFormFactory.fromRequest(req, adjustmentType)
 
-    await adjustmentForm.validate(() => this.prisonerService.getSentencesAndOffences(bookingId, username))
+    await adjustmentForm.validate(
+      () => this.prisonerService.getSentencesAndOffences(bookingId, username),
+      () => this.adjustmentsService.findByPersonOutsideSentenceEnvelope(nomsId, username),
+    )
 
     if (adjustmentForm.errors.length) {
       return res.render('pages/adjustments/form', {
@@ -223,8 +228,17 @@ export default class AdjustmentRoutes {
     if (adjustment) {
       if (adjustment.id) {
         await this.adjustmentsService.update(adjustment.id, adjustment, username)
+        const auditAction = this.auditService.getAuditAction(adjustment.adjustmentType, 'UPDATE')
+        if (auditAction) {
+          await this.auditService.sendAuditMessage(auditAction, username, nomsId, adjustment.id)
+        }
       } else {
         await this.adjustmentsService.create([adjustment], username)
+        const auditAction = this.auditService.getAuditAction(adjustment.adjustmentType, 'CREATE')
+        if (auditAction) {
+          // Assuming `created[0].id` exists
+          await this.auditService.sendAuditMessage(auditAction, username, nomsId, adjustment.id)
+        }
       }
 
       const message = {
@@ -335,6 +349,8 @@ export default class AdjustmentRoutes {
     }
 
     await this.adjustmentsService.delete(id, username)
+    const auditAction = this.auditService.getAuditAction(adjustment.adjustmentType, 'DELETE')
+    await this.auditService.sendAuditMessage(auditAction, username, adjustment.person, id)
     const message = JSON.stringify({
       type: adjustment.adjustmentType,
       days: adjustment.days,

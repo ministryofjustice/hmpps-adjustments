@@ -12,6 +12,7 @@ import FeComponentsService from './feComponentsService'
 import AdditionalDaysAwardedBackendService from './additionalDaysAwardedBackendService'
 import ParamStoreService from './paramStoreService'
 import CourtCasesReleaseDatesService from './courtCasesReleaseDatesService'
+import AuditService from './auditService'
 
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient, feComponentsClient } = dataAccess()
@@ -32,6 +33,7 @@ export const services = () => {
     additionalDaysAwardedStoreService,
   )
   const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService(hmppsAuthClient)
+  const auditService = new AuditService()
 
   return {
     applicationInfo,
@@ -48,6 +50,7 @@ export const services = () => {
     additionalDaysAwardedBackendService,
     paramStoreService,
     courtCasesReleaseDatesService,
+    auditService,
   }
 }
 
