@@ -29,10 +29,10 @@ export default function setUpStaticResources(): Router {
     router.use('/assets', express.static(path.join(process.cwd(), dir), cacheControl))
   })
 
-  const govukPath = path.join(process.cwd(), '/node_modules/govuk-frontend/dist/govuk/assets')
+  const govukPath = path.join(process.cwd(), '/assets')
   router.use('/node_modules/govuk-frontend', express.static(govukPath))
 
-  const frontendPath = path.join(process.cwd(), '/node_modules/@ministryofjustice/frontend')
+  const frontendPath = path.join(process.cwd(), '/assets')
   router.use('/node_modules/@ministryofjustice/frontend', express.static(frontendPath))
 
   // Don't cache dynamic resources
