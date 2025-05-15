@@ -80,15 +80,14 @@
   </div>
 
   <div class="govuk-grid-row">
-    <div class="govuk-!-width-three-quarters">
 
-      <h2 class="govuk-heading-m govuk-!-padding-left-3">
+      <h2 class="govuk-heading-m govuk-!-padding-left-3 govuk-!-width-three-quarters">
         Deductions
       </h2>
 
       {% set unusedDeductionMessage = model.unusedDeductionMessage.getUnusedDeductionMessage() %}
       {% if unusedDeductionMessage != ''  %}
-        <div class="govuk-inset-text govuk-!-margin-left-3">
+        <div class="govuk-inset-text govuk-!-margin-left-3 govuk-!-width-three-quarters">
           {{ unusedDeductionMessage | safe }}
         </div>
       {% endif %}
@@ -109,7 +108,6 @@
           {{ adjustmentCard(adjustmentType, model, prisoner.prisonerNumber) }}
         {% endfor %}
       </div>
-    </div>
   </div>
 
   <div class="govuk-inset-text govuk-!-margin-top-9">
