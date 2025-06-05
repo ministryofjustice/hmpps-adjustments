@@ -16,6 +16,18 @@ The params are wrapped inside the attributes object and are as follows:
   {% set offenderNo = attributes.offenderNo %}
   {% set isEdit = attributes.isEdit %}
 
+  {% if adjustment.fromDate %}
+    {% set fromDateStr = adjustment.fromDate | date("D MMMM YYYY") %}
+  {% else %}
+    {% set fromDateStr = 'Date Not Entered' %}
+  {% endif %}
+
+  {% if adjustment.toDate %}
+    {% set toDateStr = adjustment.toDate | date("D MMMM YYYY") %}
+  {% else %}
+    {% set toDateStr = 'Date Not Entered' %}
+  {% endif %}
+
   {{ govukSummaryList({
     rows: [
       {
@@ -23,7 +35,7 @@ The params are wrapped inside the attributes object and are as follows:
         text: "Remand period"
       },
         value: {
-        text: 'From ' + adjustment.fromDate | date("D MMMM YYYY") + ' to ' + adjustment.toDate | date("D MMMM YYYY")
+        text: 'From ' + fromDateStr + ' to ' + toDateStr
       },
         actions: {
         items: [
