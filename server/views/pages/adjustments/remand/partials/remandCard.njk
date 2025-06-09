@@ -12,18 +12,7 @@
 <div class="adjustment-card full clear govuk-!-margin-bottom-4">
     <div class="govuk-summary-card__title-wrapper adjustment-card-heading">
         <h2 class="govuk-summary-card__title">
-            {% if adjustment.fromDate %}
-              {% set fromDateStr = adjustment.fromDate | date("D MMMM YYYY") %}
-            {% else %}
-              {% set fromDateStr = 'Date Not Entered' %}
-            {% endif %}
-
-            {% if adjustment.toDate %}
-              {% set toDateStr = adjustment.toDate | date("D MMMM YYYY") %}
-            {% else %}
-              {% set toDateStr = 'Date Not Entered' %}
-            {% endif %}
-            From {{ fromDateStr }} to {{ toDateStr }}
+            {{'From ' + adjustment.fromDate | remandDate("D MMMM YYYY") + ' to ' + adjustment.toDate | remandDate("D MMMM YYYY")}}
         </h2>
         {% if showLinks != false %}
           <ul class="govuk-summary-card__actions">
