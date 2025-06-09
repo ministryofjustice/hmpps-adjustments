@@ -23,7 +23,7 @@ The params are wrapped inside the attributes object and are as follows:
         text: "Remand period"
       },
         value: {
-        text: 'From ' + adjustment.fromDate | date("D MMMM YYYY") + ' to ' + adjustment.toDate | date("D MMMM YYYY")
+        text: 'From ' + adjustment.fromDate | remandDate("D MMMM YYYY") + ' to ' + adjustment.toDate | remandDate("D MMMM YYYY")
       },
         actions: {
         items: [
