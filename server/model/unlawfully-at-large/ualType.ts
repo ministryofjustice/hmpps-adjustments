@@ -2,6 +2,7 @@ const ualType = [
   {
     value: 'RECALL',
     text: 'Recall',
+    hint: { text: 'The UAL period should be from the day after being recalled to the day before returning to custody' },
   },
   {
     value: 'ESCAPE',

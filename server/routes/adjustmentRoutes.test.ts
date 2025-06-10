@@ -871,6 +871,9 @@ describe('Adjustment routes tests', () => {
     <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf#page=87"
        class="govuk-link" rel="noreferrer noopener"
        target="_blank">the policy framework</a>.`)
+        expect(res.text).toContain(
+          'The UAL period should be from the day after being recalled to the day before returning to custody',
+        )
       })
   })
 
