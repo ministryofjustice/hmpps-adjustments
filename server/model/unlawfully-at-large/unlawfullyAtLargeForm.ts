@@ -113,7 +113,9 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
       }
     }
 
-    const adjustments = (await getAdjustments()).filter(a => a.adjustmentType === 'UNLAWFULLY_AT_LARGE')
+    const adjustments = (await getAdjustments()).filter(
+      a => a.adjustmentType === 'UNLAWFULLY_AT_LARGE' && a.id !== this.adjustmentId,
+    )
 
     const matchingAdjustments = adjustments
       .map(adjustment =>
