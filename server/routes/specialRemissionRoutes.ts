@@ -76,7 +76,7 @@ export default class SpecialRemissionRoutes {
   public submitCheck: RequestHandler = async (req, res): Promise<void> => {
     const { nomsId, addOrEdit, id } = req.params
 
-    if (!req.body.ppcsDays) {
+    if (!req?.body?.ppcsDays) {
       return res.render('pages/adjustments/special-remission/check', {
         model: new SpecialRemissionCheckModel(nomsId, id, addOrEdit, true),
       })
@@ -136,7 +136,7 @@ export default class SpecialRemissionRoutes {
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
-    if (!req.body.specialRemissionType) {
+    if (!req?.body?.specialRemissionType) {
       return res.render('pages/adjustments/special-remission/type', {
         model: new SpecialRemissionTypeModel(nomsId, id, addOrEdit, adjustment, true),
       })

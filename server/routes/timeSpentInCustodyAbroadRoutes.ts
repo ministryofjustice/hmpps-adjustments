@@ -86,7 +86,7 @@ export default class TimeSpentInCustodyAbroadRoutes {
 
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
 
-    if (!req.body.documentationSource) {
+    if (!req?.body?.documentationSource) {
       return res.render('pages/adjustments/custody-abroad/documentation', {
         model: new TimeSpentInCustodyAbroadDocumentationModel(nomsId, id, addOrEdit, adjustment, true),
       })
