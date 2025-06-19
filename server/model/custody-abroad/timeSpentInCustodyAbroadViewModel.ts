@@ -16,9 +16,9 @@ export default class TimeSpentInCustodyAbroadViewModel {
 
   public columnHeadings() {
     return [
-      { text: 'Entered by' },
       { text: 'Type', classes: 'govuk-!-width-one-third' },
       { text: 'Offences', classes: 'govuk-!-width-one-third' },
+      { text: 'Entered by' },
       { text: 'Days' },
       { text: 'Actions' },
     ]
@@ -32,9 +32,9 @@ export default class TimeSpentInCustodyAbroadViewModel {
           ).text
         : 'Unknown'
       return [
-        { text: it.prisonName },
         { text: displayText },
         { html: this.offenceSummary(it) },
+        { text: it.prisonName },
         { text: it.days },
         this.actionCell(it),
       ]
@@ -56,7 +56,7 @@ export default class TimeSpentInCustodyAbroadViewModel {
 
   public totalRow() {
     const total = this.adjustments.map(it => it.days).reduce((a, b) => a + b, 0)
-    return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: '' }, { html: `<b>${total}</b>` }]]
+    return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: '' }, { html: `<b>${total}</b>` }, { html: '' }]]
   }
 
   private actionCell(adjustment: Adjustment) {
