@@ -77,7 +77,9 @@ export default class AdjustmentsFormFactory {
       return new RestoredAdditionalDaysForm(req.body)
     }
     if (adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
-      return new UnlawfullyAtLargeForm(req.body)
+      const unlawfullyAtLargeForm = new UnlawfullyAtLargeForm(req.body)
+      unlawfullyAtLargeForm.adjustmentId = req.params.id
+      return unlawfullyAtLargeForm
     }
     if (adjustmentType.value === 'LAWFULLY_AT_LARGE') {
       return new LawfullyAtLargeForm(req.body)
