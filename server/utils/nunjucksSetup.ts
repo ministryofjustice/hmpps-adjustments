@@ -77,6 +77,13 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
 
   njkEnv.addFilter('date', (date, format) => dayjs(date).format(format))
 
+  njkEnv.addFilter('remandDate', (date, format) => {
+    if (!date) {
+      return 'Date Not Entered'
+    }
+    return dayjs(date).format(format)
+  })
+
   njkEnv.addFilter('personProfileName', personProfileName)
   njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
   njkEnv.addFilter('personStatus', personStatus)

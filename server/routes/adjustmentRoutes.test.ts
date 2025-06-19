@@ -871,6 +871,9 @@ describe('Adjustment routes tests', () => {
     <a href="https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1083190/sc-annex-a-operational-guidance.pdf#page=87"
        class="govuk-link" rel="noreferrer noopener"
        target="_blank">the policy framework</a>.`)
+        expect(res.text).toContain(
+          'The UAL period should be from the day after being recalled to the day before returning to custody',
+        )
       })
   })
 
@@ -1023,6 +1026,50 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('To continue, edit or remove the UAL days that overlap.')
       })
   })
+
+  test.each`
+    addOrEdit
+    ${'add'}
+    ${'edit'}
+  `(
+    'POST /{nomsId}/unlawfully-at-large/addOrEdit validation is not triggered if the adjustment is edited',
+    async ({ addOrEdit }) => {
+      const adjustments: Record<string, SessionAdjustment> = {}
+      adjustments[85] = unlawfullyAtLargeTypeRecall
+      adjustmentsStoreService.getAll.mockReturnValue(adjustments)
+      adjustmentsStoreService.getById.mockReturnValue(unlawfullyAtLargeTypeRecall)
+      adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([
+        {
+          id: '85',
+          bookingId: 1061607,
+          person: 'G9144UT',
+          adjustmentType: 'UNLAWFULLY_AT_LARGE',
+          toDate: '2024-04-23',
+          fromDate: '2024-02-23',
+        },
+      ])
+      prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+      return request(app)
+        .post(`/${NOMS_ID}/unlawfully-at-large/${addOrEdit}/85`)
+        .send({
+          'from-day': '23',
+          'from-month': '2',
+          'from-year': '2024',
+          'to-day': '23',
+          'to-month': '4',
+          'to-year': '2024',
+          type: 'IMMIGRATION_DETENTION',
+        })
+        .type('form')
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).not.toContain(
+            'The UAL dates from 5 March 2024 to 20 March 2024 overlaps with another UAL period from 23 February 2024 to 23 April 2024.',
+          )
+          expect(res.text).not.toContain('To continue, edit or remove the UAL days that overlap.')
+        })
+    },
+  )
 
   test.each`
     addOrEdit

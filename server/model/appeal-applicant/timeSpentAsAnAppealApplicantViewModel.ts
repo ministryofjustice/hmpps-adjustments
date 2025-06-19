@@ -15,9 +15,9 @@ export default class TimeSpentAsAnAppealApplicantViewModel {
 
   public columnHeadings() {
     return [
-      { text: 'Entered by' },
       { text: 'Court of Appeal reference number' },
       { text: 'Offences', classes: 'govuk-!-width-one-third' },
+      { text: 'Entered by' },
       { text: 'Days' },
       { text: 'Actions' },
     ]
@@ -26,9 +26,9 @@ export default class TimeSpentAsAnAppealApplicantViewModel {
   public rows() {
     return this.adjustments.map(it => {
       return [
-        { text: it.prisonName },
         { text: it.timeSpentAsAnAppealApplicant?.courtOfAppealReferenceNumber || 'Unknown' },
         { html: this.offenceSummary(it) },
+        { text: it.prisonName },
         { text: it.days },
         this.actionCell(it),
       ]
