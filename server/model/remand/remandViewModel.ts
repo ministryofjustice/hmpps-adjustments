@@ -36,8 +36,8 @@ export default class RemandViewModel {
     return [
       ...this.adjustmentsWithOffences().map(it => {
         return [
-          { text: `${dayjs(it.fromDate).format('D MMMM YYYY')}` },
-          { text: `${dayjs(it.toDate).format('D MMMM YYYY')}` },
+          { text: it.fromDate ? `${dayjs(it.fromDate).format('D MMMM YYYY')}` : 'Date Not Entered' },
+          { text: it.toDate ? `${dayjs(it.toDate).format('D MMMM YYYY')}` : 'Date Not Entered' },
           { text: it.days },
           { html: it.offences ? it.offences.map(offence => offence.offenceDescription).join('<br>') : 'No offences' },
           {
