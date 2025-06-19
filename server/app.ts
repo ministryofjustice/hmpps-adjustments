@@ -40,9 +40,14 @@ export default function createApp(services: Services): express.Application {
   app.use(authorisationMiddleware(['ROLE_RELEASE_DATES_CALCULATOR']))
   app.use(setUpCsrf())
   app.use(setUpCurrentUser(services))
-  app.get('*', getFrontendComponents(services))
+
+  app.use((req, res, next) => {
+    if (req.method === 'GET') return getFrontendComponents(services)(req, res, next)
+    if (req.method === 'POST') return supportUserReadonlyMiddleware()(req, res, next)
+    return next()
+  })
+
   app.use('/:nomsId', populateCurrentPrisoner(services.prisonerSearchService))
-  app.post('*', supportUserReadonlyMiddleware())
 
   app.use(routes(services))
 
