@@ -174,4 +174,5 @@ export default {
     timeSpentInCustodyAbroadEnabled: get('TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED', 'true') === 'true',
     timeSpentAsAnAppealApplicantEnabled: get('TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED', 'true') === 'true',
   },
+  blockSupportUsersFromEdit: get('BLOCK_SUPPORT_USERS_FROM_EDIT', 'true') === 'true',
 }
