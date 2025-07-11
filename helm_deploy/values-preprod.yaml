@@ -28,6 +28,7 @@ generic-service:
     TIME_SPENT_IN_CUSTODY_ABROAD_ENABLED: 'true'
     TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'true'
     RECALLS_URL: 'https://record-a-recall-preprod.hmpps.service.justice.gov.uk'
+    BLOCK_SUPPORT_USERS_FROM_EDIT: 'false'
 
   allowlist:
     cymulate-1: 54.217.50.18/32
