@@ -20,27 +20,29 @@ export default class ViewModel {
   ) {
     this.adjustments = allAdjustments
       .filter(it => it.adjustmentType === adjustmentType.value)
-      // Keep all UAL adjustments except RECALL
-      .filter(it => !it.recallId)
       .sort((a, b) => {
         if (a.fromDate == null) return 1
         if (b.fromDate == null) return -1
         return a.fromDate.localeCompare(b.fromDate)
       })
 
-    this.recallAdjustments = allAdjustments
-      .filter(it => it.recallId && it.adjustmentType === adjustmentType.value)
-      .map(it => ({
-        ...it,
-        fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'),
-        toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'),
-      }))
+    if (roles.includes('RECALL_MAINTAINER')) {
+      this.adjustments = this.adjustments.filter(it => !it.recallId)
 
-      .sort((a, b) => {
-        if (a.fromDate == null) return 1
-        if (b.fromDate == null) return -1
-        return a.fromDate.localeCompare(b.fromDate)
-      })
+      this.recallAdjustments = allAdjustments
+        .filter(it => it.recallId && it.adjustmentType === adjustmentType.value)
+        .map(it => ({
+          ...it,
+          fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'),
+          toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'),
+        }))
+
+        .sort((a, b) => {
+          if (a.fromDate == null) return 1
+          if (b.fromDate == null) return -1
+          return a.fromDate.localeCompare(b.fromDate)
+        })
+    }
   }
 
   public table() {

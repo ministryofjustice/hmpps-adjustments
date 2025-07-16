@@ -1,6 +1,6 @@
 import type { Express } from 'express'
 import request from 'supertest'
-import { appWithAllRoutes } from './testutils/appSetup'
+import { appWithAllRoutes, user } from './testutils/appSetup'
 import PrisonerService from '../services/prisonerService'
 import AdjustmentsService from '../services/adjustmentsService'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
@@ -124,9 +124,15 @@ const sentenceAndOffenceBaseRecord = {
 
 const stubbedSentencesAndOffences = [sentenceAndOffenceBaseRecord]
 
+const defaultUser = user
+const recallUser = { ...user, roles: ['RECALL_MAINTAINER'] }
+
+let userInTest = defaultUser
+
 let app: Express
 
 beforeEach(() => {
+  userInTest = defaultUser
   app = appWithAllRoutes({
     services: {
       prisonerService,
@@ -138,6 +144,7 @@ beforeEach(() => {
       paramStoreService,
       auditService,
     },
+    userSupplier: () => userInTest,
   })
 })
 
@@ -700,7 +707,8 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/unlawfully-at-large/view', () => {
+  it('GET /{nomsId}/unlawfully-at-large/view with RECALL_MAINTAINER role', () => {
+    userInTest = recallUser
     adjustmentsService.findByPerson.mockResolvedValue([
       {
         ...unlawfullyAtLargeTypeRecall,
@@ -734,6 +742,41 @@ describe('Adjustment routes tests', () => {
         expect(res.text).toContain('26 July 2023')
         expect(res.text).toContain('Type')
         expect(res.text).toContain('UAL from recalls')
+        expect(res.text).toContain('Recall')
+      })
+  })
+
+  it('GET /{nomsId}/unlawfully-at-large/view without RECALL_MAINTAINER role', () => {
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeTypeRecall,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+        recallId: 'recall-id',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).not.toContain(`/person/${NOMS_ID}/edit-recall/recall-id?entrypoint=adj_unlawfully-at-large`)
+        expect(res.text).toContain('remove/this-is-an-id')
+        expect(res.text).toContain('Total days')
+        expect(res.text).not.toContain('Date of revocation')
+        expect(res.text).not.toContain('Arrest date')
+        expect(res.text).toContain('5 June 2023')
+        expect(res.text).toContain('25 July 2023')
+        expect(res.text).toContain('Type')
+        expect(res.text).not.toContain('UAL from recalls')
         expect(res.text).toContain('Recall')
       })
   })
@@ -850,6 +893,20 @@ describe('Adjustment routes tests', () => {
         `/${NOMS_ID}/success?message=%7B%22type%22:%22RESTORATION_OF_ADDITIONAL_DAYS_AWARDED%22,%22days%22:24,%22action%22:%22REMOVE%22%7D`,
       )
       .expect(res => {
+        expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
+        expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
+      })
+  })
+
+  it('POST /{nomsId}/{adjustmentType}/remove/{id} remove recall UAL clears recall id if the user is not RECALL_MAINTAINER', () => {
+    const ualWithRecallId = unlawfullyAtLargeTypeRecall
+    ualWithRecallId.recallId = 'a-recall-id'
+    adjustmentsService.get.mockResolvedValue(ualWithRecallId)
+
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
+      .expect(res => {
+        expect(adjustmentsService.update.mock.calls[0][1].recallId).toEqual(null)
         expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
         expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
       })

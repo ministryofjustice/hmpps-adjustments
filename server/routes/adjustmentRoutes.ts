@@ -333,7 +333,7 @@ export default class AdjustmentRoutes {
   }
 
   public submitRemove: RequestHandler = async (req, res): Promise<void> => {
-    const { username } = res.locals.user
+    const { username, roles } = res.locals.user
     const { nomsId, id } = req.params
 
     if (this.paramStoreService.get(req, id)) {
@@ -346,6 +346,11 @@ export default class AdjustmentRoutes {
     if (returnToReviewDeductions) {
       this.adjustmentsStoreService.store(req, nomsId, id, { ...adjustment, delete: true })
       return res.redirect(`/${nomsId}/review-deductions`)
+    }
+
+    if (!roles.includes('RECALL_MAINTAINER') && adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
+      adjustment.recallId = null
+      await this.adjustmentsService.update(id, adjustment, username)
     }
 
     await this.adjustmentsService.delete(id, username)
