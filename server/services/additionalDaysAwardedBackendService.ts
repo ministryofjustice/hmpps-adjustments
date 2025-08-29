@@ -82,9 +82,11 @@ export default class AdditionalDaysAwardedBackendService {
       activeCaseLoadId,
     )
 
-    const quashedAdjustments = quashed.map(it => {
-      return allAdaAdjustments.find(adjustment => this.adjustmentMatchesAdjudication(it, adjustment))
-    })
+    const quashedAdjustments = quashed
+      .map(it => {
+        return allAdaAdjustments.find(adjustment => this.adjustmentMatchesAdjudication(it, adjustment))
+      })
+      .filter(it => !!it)
     return new ReviewAndSubmitAdaViewModel(adjustmentsToCreate, allAdaAdjustments, quashedAdjustments)
   }
 
