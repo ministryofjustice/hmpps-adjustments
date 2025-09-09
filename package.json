@@ -104,7 +104,7 @@
     "@microsoft/applicationinsights-web": "^3.3.9",
     "@ministryofjustice/frontend": "^5.1.5",
     "@ministryofjustice/hmpps-audit-client": "^1.1.1",
-    "@ministryofjustice/hmpps-court-cases-release-dates-design": "^4.11.0",
+    "@ministryofjustice/hmpps-court-cases-release-dates-design": "^4.14.1",
     "agentkeepalive": "^4.6.0",
     "applicationinsights": "^2.9.7",
     "body-parser": "^2.2.0",
