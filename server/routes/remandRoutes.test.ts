@@ -772,6 +772,42 @@ describe('Remand routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/remand/remove check banner no longer references NOMIS', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([blankAdjustment])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('This will change the amount of unused deductions.')
+        expect(res.text).toContain('Check the unused remand alert on the prisoner profile on DPS.')
+        expect(res.text).not.toContain('Check the unused remand alert on NOMIS')
+      })
+  })
+
+  it('GET /{nomsId}/remand/edit check banner no longer references NOMIS', () => {
+    prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([blankAdjustment])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('The updates will change the amount of unused deductions.')
+        expect(res.text).toContain('Check the unused remand alert on the prisoner profile on DPS.')
+        expect(res.text).not.toContain('Check the unused remand alert on NOMIS')
+      })
+  })
+
   it('POST /{nomsId}/remand/remove', () => {
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
