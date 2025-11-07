@@ -238,8 +238,31 @@ describe('Tagged bail routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Delete tagged bail')
         expect(res.text).toContain(
-          'The updates will change the amount of unused deductions. Check the unused remand alert on NOMIS',
+          'The updates will change the amount of unused deductions. Check the unused remand alert on the prisoner profile on DPS',
         )
+        expect(res.text).not.toContain('Check the unused remand alert on NOMIS')
+        expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 August 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/edit shows unused deductions message', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
+    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([blankAdjustment])
+    calculateReleaseDatesService.unusedDeductionsHandlingCRDError.mockResolvedValue({
+      unusedDeductions: 50,
+      validationMessages: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/edit/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain(
+          'The updates will change the amount of unused deductions. Check the unused remand alert on the prisoner profile on DPS',
+        )
+        expect(res.text).not.toContain('Check the unused remand alert on NOMIS')
         expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 August 2021')
         expect(res.text).toContain('9955')
       })
