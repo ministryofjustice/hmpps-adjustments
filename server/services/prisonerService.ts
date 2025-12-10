@@ -121,6 +121,7 @@ export default class PrisonerService {
     '14FTR_ORA',
     'FTR',
     'FTR_ORA',
+    'FTR_56ORA',
     'FTR_SCH15',
     'FTRSCH15_ORA',
     'FTRSCH18',
