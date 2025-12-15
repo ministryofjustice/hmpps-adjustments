@@ -34,10 +34,11 @@
     "generate-identify-remand-period-types": "openapi-typescript https://identify-remand-periods-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/identifyRemandPeriods/index.d.ts",
     "generate-prison-api-types": "openapi-typescript https://prison-api-dev.prison.service.justice.gov.uk/v3/api-docs > ../server/@types/prisonApi/index.d.ts",
     "generate-prisoner-search-api-types": "openapi-typescript https://prisoner-search-dev.prison.service.justice.gov.uk/v3/api-docs > ./server/@types/prisonerSearchApi/index.d.ts",
-    "rebuild": "npm run clean && npm i && npm run build"
+    "rebuild": "npm run clean && npm i && npm run build",
+    "setup": "npm ci && hmpps-npm-script-run-allowlist"
   },
   "engines": {
-    "node": "^20",
+    "node": "^22",
     "npm": "^10"
   },
   "jest": {
@@ -151,6 +152,7 @@
     "@types/passport-oauth2": "^1.8.0",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^6.0.3",
+    "@ministryofjustice/hmpps-npm-script-allowlist": "0.0.3",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
     "autoprefixer": "^10.4.22",
