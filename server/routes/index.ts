@@ -13,7 +13,6 @@ import SpecialRemissionRoutes from './specialRemissionRoutes'
 import TimeSpentInCustodyAbroadRoutes from './timeSpentInCustodyAbroadRoutes'
 import TimeSpentAsAnAppealApplicantRoutes from './timeSpentAsAnAppealApplicantRoutes'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function routes(service: Services): Router {
   const router = Router()
   const get = (path: string | string[], handler: RequestHandler) => router.get(path, asyncMiddleware(handler))
