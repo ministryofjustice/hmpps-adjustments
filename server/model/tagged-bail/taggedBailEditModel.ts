@@ -1,7 +1,8 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
-import { dateToString, getSentenceRecallTagHTML, isSentenceRecalled } from '../../utils/utils'
+import { dateToString, getSentenceRecallTagHTML } from '../../utils/utils'
 import SessionAdjustment from '../../@types/AdjustmentTypes'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class TaggedBailEditModel {
   constructor(
@@ -11,6 +12,7 @@ export default class TaggedBailEditModel {
     public numberOfCases: number,
     public showUnusedMessage: boolean,
     public reviewDeductions: boolean = false,
+    public remandAndSentencingService: RemandAndSentencingService,
   ) {}
 
   public summary() {
@@ -58,7 +60,7 @@ export default class TaggedBailEditModel {
   }
 
   private getCaseDetailsCell(): string {
-    return `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`
+    return `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${this.remandAndSentencingService.isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`
   }
 
   private getCourtName(): string {

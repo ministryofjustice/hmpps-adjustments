@@ -1,8 +1,8 @@
 import SessionAdjustment from '../../@types/AdjustmentTypes'
 import { PrisonApiOffence, PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
-import PrisonerService from '../../services/prisonerService'
 import { daysBetween, groupBy } from '../../utils/utils'
 import RemandOffencesForm from './remandOffencesForm'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class RemandSelectOffencesModel {
   public cases: Map<number, PrisonApiOffenderSentenceAndOffences[]>
@@ -14,6 +14,7 @@ export default class RemandSelectOffencesModel {
     public form: RemandOffencesForm,
     sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     public addOrEdit: string = null,
+    public remandAndSentencingService: RemandAndSentencingService,
   ) {
     this.cases = groupBy(sentencesAndOffences, (sent: PrisonApiOffenderSentenceAndOffences) => sent.caseSequence)
   }
@@ -36,7 +37,7 @@ export default class RemandSelectOffencesModel {
     return sentence.offences.map(off => {
       return {
         ...off,
-        recall: PrisonerService.recallTypes.includes(sentence.sentenceCalculationType),
+        recall: this.remandAndSentencingService.isSentenceRecalled(sentence.sentenceCalculationType),
         isChecked: this.form.isChecked(off.offenderChargeId),
       }
     })

@@ -13,18 +13,20 @@ import AdditionalDaysAwardedBackendService from './additionalDaysAwardedBackendS
 import ParamStoreService from './paramStoreService'
 import CourtCasesReleaseDatesService from './courtCasesReleaseDatesService'
 import AuditService from './auditService'
+import RemandAndSentencingService from './remandAndSentencingService'
 
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient, feComponentsClient } = dataAccess()
 
-  const prisonerService = new PrisonerService(hmppsAuthClient)
+  const remandAndSentencingService = new RemandAndSentencingService(hmppsAuthClient)
+  const prisonerService = new PrisonerService(hmppsAuthClient, remandAndSentencingService)
   const userService = new UserService(manageUsersApiClient, prisonerService)
   const adjustmentsService = new AdjustmentsService(hmppsAuthClient)
   const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(hmppsAuthClient)
   const adjustmentsStoreService = new AdjustmentsStoreService()
   const paramStoreService = new ParamStoreService()
   const additionalDaysAwardedStoreService = new AdditionalDaysAwardedStoreService()
-  const calculateReleaseDatesService = new CalculateReleaseDatesService(hmppsAuthClient)
+  const calculateReleaseDatesService = new CalculateReleaseDatesService(hmppsAuthClient, remandAndSentencingService)
   const unusedDeductionsService = new UnusedDeductionsService(adjustmentsService, prisonerService)
   const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
   const feComponentsService = new FeComponentsService(feComponentsClient)
@@ -51,6 +53,7 @@ export const services = () => {
     paramStoreService,
     courtCasesReleaseDatesService,
     auditService,
+    remandAndSentencingService,
   }
 }
 

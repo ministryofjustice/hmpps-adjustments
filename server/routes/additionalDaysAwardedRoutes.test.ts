@@ -9,14 +9,17 @@ import AdditionalDaysAwardedBackendService from '../services/additionalDaysAward
 import { AdasToReview, PadasToReview } from '../@types/AdaTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import ReviewAndSubmitAdaViewModel from '../model/reviewAndSubmitAdaViewModel'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/additionalDaysAwardedBackendService')
+jest.mock('../services/remandAndSentencingService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const remandAndSentencingService = new RemandAndSentencingService(null) as jest.Mocked<RemandAndSentencingService>
+const prisonerService = new PrisonerService(null, remandAndSentencingService) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
@@ -282,6 +285,7 @@ beforeEach(() => {
       identifyRemandPeriodsService,
       adjustmentsStoreService,
       additionalDaysAwardedBackendService,
+      remandAndSentencingService,
     },
     userSupplier: () => userInTest,
   })

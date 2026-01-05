@@ -3,19 +3,24 @@ import config from '../config'
 import PrisonerService from './prisonerService'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import HmppsAuthClient from '../data/hmppsAuthClient'
+import RemandAndSentencingService from './remandAndSentencingService'
 
 jest.mock('../data/hmppsAuthClient')
 
 describe('Prisoner service related tests', () => {
   let hmppsAuthClient: jest.Mocked<HmppsAuthClient>
+  let remandAndSentencingService: jest.Mocked<RemandAndSentencingService>
   let prisonerService: PrisonerService
   let fakeApi: nock.Scope
   beforeEach(() => {
     config.apis.prisonApi.url = 'http://localhost:8100'
     fakeApi = nock(config.apis.prisonApi.url)
+    remandAndSentencingService = {
+      isSentenceRecalled: jest.fn(),
+    } as unknown as jest.Mocked<RemandAndSentencingService>
     hmppsAuthClient = new HmppsAuthClient(null) as jest.Mocked<HmppsAuthClient>
     hmppsAuthClient.getSystemClientToken.mockResolvedValue('token')
-    prisonerService = new PrisonerService(hmppsAuthClient)
+    prisonerService = new PrisonerService(hmppsAuthClient, remandAndSentencingService)
   })
   afterEach(() => {
     nock.cleanAll()
@@ -34,7 +39,9 @@ describe('Prisoner service related tests', () => {
             sentenceCalculationType: 'LR',
           } as PrisonApiOffenderSentenceAndOffences,
         ])
-
+        remandAndSentencingService.isSentenceRecalled.mockImplementation(sentenceType => {
+          return sentenceType === 'LR'
+        })
         const result = await prisonerService.getStartOfSentenceEnvelope('9991', 'username')
 
         expect(result.earliestExcludingRecalls.toISOString().substring(0, 10)).toBe('2023-02-01')

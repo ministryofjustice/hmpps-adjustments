@@ -7,7 +7,7 @@ import {
   CalculateReleaseDatesValidationMessage,
   UnusedDeductionCalculationResponse,
 } from '../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
-import PrisonerService from '../services/prisonerService'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 const properCase = (word: string): string =>
   word.length >= 1 ? word[0].toUpperCase() + word.toLowerCase().slice(1) : word
@@ -110,8 +110,10 @@ export const dateToString = (date: Date): string => dayjs(date).format('D MMMM Y
 export function offencesForRemandAdjustment(
   adjustment: Adjustment,
   sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+  remandAndSentencingService: RemandAndSentencingService,
 ): (PrisonApiOffence & { courtDescription: string; recall?: boolean })[] {
   return sentencesAndOffences.flatMap(so => {
+    const isRecalled = remandAndSentencingService.isSentenceRecalled(so.sentenceCalculationType) // Assuming a synchronous alternative
     return so.offences
       .filter(off => {
         if (adjustment.remand?.chargeId?.length) {
@@ -120,7 +122,7 @@ export function offencesForRemandAdjustment(
         return adjustment.sentenceSequence === so.sentenceSequence
       })
       .map(off => {
-        return { ...off, courtDescription: so.courtDescription, recall: isSentenceRecalled(so.sentenceCalculationType) }
+        return { ...off, courtDescription: so.courtDescription, recall: isRecalled }
       })
   })
 }
@@ -167,15 +169,6 @@ export function offencesForTimeSpentAsAnAppealApplicantAdjustment(
 export type SentencesByCaseSequence = {
   caseSequence: number
   sentences: PrisonApiOffenderSentenceAndOffences[]
-}
-
-/**
- * Used to determine if the given sentence calculation type is a recall type.
- * @param sentenceCalculationType The calculation type to check.
- * @returns true if the calculation type is a recall type.
- */
-export function isSentenceRecalled(sentenceCalculationType: string): boolean {
-  return PrisonerService.recallTypes.includes(sentenceCalculationType)
 }
 
 /**

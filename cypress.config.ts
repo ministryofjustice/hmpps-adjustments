@@ -9,6 +9,7 @@ import identifyRemandApi from './integration_tests/mockApis/identifyRemandApi'
 import prisonerSearchApi from './integration_tests/mockApis/prisonerSearchApi'
 import components from './integration_tests/mockApis/components'
 import courtCasesReleaseDatesApi from './integration_tests/mockApis/courtCasesReleaseDatesApi'
+import rasAPI from './integration_tests/mockApis/rasAPI'
 
 export default defineConfig({
   chromeWebSecurity: false,
@@ -33,6 +34,7 @@ export default defineConfig({
         ...prisonerSearchApi,
         ...courtCasesReleaseDatesApi,
         ...components,
+        ...rasAPI,
       })
     },
     baseUrl: 'http://localhost:3007',

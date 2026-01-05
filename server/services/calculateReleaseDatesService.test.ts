@@ -6,6 +6,7 @@ import SessionAdjustment from '../@types/AdjustmentTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import HmppsAuthClient from '../data/hmppsAuthClient'
+import RemandAndSentencingService from './remandAndSentencingService'
 
 jest.mock('../data/hmppsAuthClient')
 
@@ -66,6 +67,7 @@ const stubbedSentencesAndOffences = [
 
 describe('Prisoner service related tests', () => {
   let hmppsAuthClient: jest.Mocked<HmppsAuthClient>
+  let remandAndSentencingService: jest.Mocked<RemandAndSentencingService>
   let calculateReleaseDateService: CalculateReleaseDatesService
   let fakeApi: nock.Scope
   let unusedDeductionCalculationResponse: UnusedDeductionCalculationResponse
@@ -75,7 +77,7 @@ describe('Prisoner service related tests', () => {
     fakeApi = nock(config.apis.calculateReleaseDates.url)
     hmppsAuthClient = new HmppsAuthClient(null) as jest.Mocked<HmppsAuthClient>
     hmppsAuthClient.getSystemClientToken.mockResolvedValue('token')
-    calculateReleaseDateService = new CalculateReleaseDatesService(hmppsAuthClient)
+    calculateReleaseDateService = new CalculateReleaseDatesService(hmppsAuthClient, remandAndSentencingService)
     unusedDeductionCalculationResponse = { unusedDeductions: 50, validationMessages: [] }
     id = '1'
   })

@@ -20,6 +20,7 @@ import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsServi
 import { RemandResult } from '../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import AuditService from '../services/auditService'
 import AuditAction from '../enumerations/auditType'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -29,10 +30,15 @@ jest.mock('../services/paramStoreService')
 jest.mock('../services/unusedDeductionsService')
 jest.mock('../services/identifyRemandPeriodsService')
 jest.mock('../services/auditService')
+jest.mock('../services/remandAndSentencingService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const remandAndSentencingService = new RemandAndSentencingService(null) as jest.Mocked<RemandAndSentencingService>
+const prisonerService = new PrisonerService(null, remandAndSentencingService) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
-const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
+const calculateReleaseDatesService = new CalculateReleaseDatesService(
+  null,
+  remandAndSentencingService,
+) as jest.Mocked<CalculateReleaseDatesService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
@@ -148,6 +154,7 @@ beforeEach(() => {
       unusedDeductionsService,
       identifyRemandPeriodsService,
       auditService,
+      remandAndSentencingService,
     },
     userSupplier: () => userInTest,
   })
@@ -164,6 +171,7 @@ describe('Remand routes tests', () => {
       'NONE',
       [remandAdjustment],
     ])
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
@@ -189,6 +197,7 @@ describe('Remand routes tests', () => {
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
       adjustments: [],
     } as RemandResult)
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
@@ -213,6 +222,7 @@ describe('Remand routes tests', () => {
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue({
       adjustments: [],
     } as RemandResult)
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
@@ -234,6 +244,7 @@ describe('Remand routes tests', () => {
     ])
     identifyRemandPeriodsService.getRemandDecision.mockResolvedValue(null)
     identifyRemandPeriodsService.calculateRelevantRemand.mockResolvedValue(null)
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)
@@ -569,6 +580,7 @@ describe('Remand routes tests', () => {
       adjustments[SESSION_ID] = blankAdjustment
       prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
       adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDates)
+      remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
       return request(app)
         .get(`/${NOMS_ID}/remand/offences/${addOrEdit}/${SESSION_ID}`)
         .expect('Content-Type', /html/)
@@ -758,7 +770,7 @@ describe('Remand routes tests', () => {
       unusedDeductions: 50,
       validationMessages: [],
     })
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -780,6 +792,7 @@ describe('Remand routes tests', () => {
       unusedDeductions: 50,
       validationMessages: [],
     })
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/remove/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -798,6 +811,7 @@ describe('Remand routes tests', () => {
       unusedDeductions: 50,
       validationMessages: [],
     })
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -835,7 +849,7 @@ describe('Remand routes tests', () => {
       unusedDeductions: 50,
       validationMessages: [],
     })
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -854,7 +868,7 @@ describe('Remand routes tests', () => {
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -870,7 +884,7 @@ describe('Remand routes tests', () => {
     adjustmentsService.get.mockResolvedValue(adjustmentWithDatesAndCharges)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -885,7 +899,7 @@ describe('Remand routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -900,7 +914,7 @@ describe('Remand routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue({ ...adjustmentWithDatesAndCharges, remand: { chargeId: [1] } })
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -915,7 +929,7 @@ describe('Remand routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue(blankAdjustment)
     adjustmentsService.findByPersonOutsideSentenceEnvelope.mockResolvedValue([])
     calculateReleaseDatesService.calculateUnusedDeductions.mockRejectedValue('REJECTED')
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect(200)
@@ -954,7 +968,7 @@ describe('Remand routes tests', () => {
   it('POST /{nomsId}/remand/edit/:id nomis adjustment sets charge ids.', () => {
     adjustmentsStoreService.getById.mockReturnValue(nomisAdjustment)
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .post(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(302)
@@ -980,7 +994,7 @@ describe('Remand routes tests', () => {
     adjustmentsStoreService.getById.mockReturnValue(adjustmentWithDatesAndCharges)
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(200)
@@ -999,7 +1013,7 @@ describe('Remand routes tests', () => {
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
     paramStoreService.get.mockReturnValue(true)
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(200)
@@ -1020,7 +1034,7 @@ describe('Remand routes tests', () => {
     const modifiedAdjustmentWithDatesAndCharges = { ...adjustmentWithDatesAndCharges }
     modifiedAdjustmentWithDatesAndCharges.fromDate = '2023-01-07'
     adjustmentsService.get.mockResolvedValue(modifiedAdjustmentWithDatesAndCharges)
-
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${SESSION_ID}`)
       .expect(200)
@@ -1046,6 +1060,7 @@ describe('Remand routes tests', () => {
     )
     adjustmentsStoreService.getAll.mockReturnValue(adjustments)
     adjustmentsService.getAdjustmentsExceptOneBeingEdited.mockResolvedValue([adjustmentWithDatesAndCharges])
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/edit/${ADJUSTMENT_ID}`)
       .expect('Content-Type', /html/)
@@ -1065,6 +1080,7 @@ describe('Remand routes tests', () => {
       [adjustmentWithDatesAndCharges],
     ])
     prisonerService.getSentencesAndOffencesFilteredForRemand.mockResolvedValue(stubbedSentencesAndOffences)
+    remandAndSentencingService.isSentenceRecalled.mockReturnValue(false)
     return request(app)
       .get(`/${NOMS_ID}/remand/view`)
       .expect(200)

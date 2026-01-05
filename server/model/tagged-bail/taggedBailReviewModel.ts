@@ -1,11 +1,7 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 import SessionAdjustment from '../../@types/AdjustmentTypes'
-import {
-  dateToString,
-  getMostRecentSentenceAndOffence,
-  getSentenceRecallTagHTML,
-  isSentenceRecalled,
-} from '../../utils/utils'
+import { dateToString, getMostRecentSentenceAndOffence, getSentenceRecallTagHTML } from '../../utils/utils'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class TaggedBailReviewModel {
   constructor(
@@ -15,6 +11,7 @@ export default class TaggedBailReviewModel {
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     public adjustment: SessionAdjustment,
     public showUnusedMessage: boolean,
+    private remandAndSentencingService: RemandAndSentencingService,
   ) {}
 
   public backlink(): string {
@@ -28,6 +25,6 @@ export default class TaggedBailReviewModel {
       ),
     )
 
-    return `${selectedCase.courtDescription} <span class="vertical-bar"></span> ${selectedCase.caseReference || ''} ${isSentenceRecalled(selectedCase.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${dateToString(new Date(selectedCase.sentenceDate))}`
+    return `${selectedCase.courtDescription} <span class="vertical-bar"></span> ${selectedCase.caseReference || ''} ${this.remandAndSentencingService.isSentenceRecalled(selectedCase.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${dateToString(new Date(selectedCase.sentenceDate))}`
   }
 }

@@ -18,7 +18,7 @@ import setUpWebSession from './middleware/setUpWebSession'
 
 import routes from './routes'
 import type { Services } from './services'
-import populateCurrentPrisoner from './middleware/populateCurrentPrisoner'
+import populateCurrentPrisonerAndSentenceTypes from './middleware/populateCurrentPrisonerAndSentenceTypes'
 import getFrontendComponents from './middleware/getFeComponents'
 import supportUserReadonlyMiddleware from './middleware/supportUserReadonlyMiddleware'
 
@@ -47,7 +47,10 @@ export default function createApp(services: Services): express.Application {
     return next()
   })
 
-  app.use('/:nomsId', populateCurrentPrisoner(services.prisonerSearchService))
+  app.use(
+    '/:nomsId',
+    populateCurrentPrisonerAndSentenceTypes(services.prisonerSearchService, services.remandAndSentencingService),
+  )
 
   app.use(routes(services))
 
