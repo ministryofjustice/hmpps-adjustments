@@ -162,7 +162,7 @@
     "aws-sdk-client-mock": "^4.1.0",
     "concurrently": "^9.2.1",
     "cookie-session": "^2.1.1",
-    "cypress": "^15.7.1",
+    "cypress": "^15.8.1",
     "cypress-axe": "^1.7.0",
     "cypress-multi-reporters": "^2.0.5",
     "dotenv": "^17.2.3",
