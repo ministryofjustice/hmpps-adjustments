@@ -11,6 +11,7 @@ import {
 } from '../../utils/utils'
 import ReviewRemandForm from '../reviewRemandForm'
 import { CalculateReleaseDatesValidationMessage } from '../../@types/calculateReleaseDates/calculateReleaseDatesClientTypes'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class RemandReviewModel {
   adjustmentIds: string[]
@@ -21,6 +22,7 @@ export default class RemandReviewModel {
     private sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     private calculateReleaseDatesValidationMessages: CalculateReleaseDatesValidationMessage[],
     public form: ReviewRemandForm,
+    private remandAndSentencingService: RemandAndSentencingService,
   ) {
     this.adjustmentIds = Object.keys(adjustments)
   }
@@ -65,7 +67,7 @@ export default class RemandReviewModel {
 
   public adjustmentSummary(id: string) {
     const adjustment = this.adjustments[id]
-    const offences = offencesForRemandAdjustment(adjustment, this.sentencesAndOffences)
+    const offences = offencesForRemandAdjustment(adjustment, this.sentencesAndOffences, this.remandAndSentencingService)
     const adjustmentFromDate = dayjs(adjustment.fromDate).format('D MMMM YYYY')
     const adjustmentToDate = dayjs(adjustment.toDate).format('D MMMM YYYY')
     return {

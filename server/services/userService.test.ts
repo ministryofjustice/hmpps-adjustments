@@ -3,12 +3,14 @@ import ManageUsersApiClient, { type User } from '../data/manageUsersApiClient'
 import createUserToken from '../testutils/createUserToken'
 import PrisonerService from './prisonerService'
 import { PrisonApiUserCaseloads } from '../@types/prisonApi/prisonClientTypes'
+import RemandAndSentencingService from './remandAndSentencingService'
 
 jest.mock('../data/manageUsersApiClient')
 jest.mock('./prisonerService')
 
 describe('User service', () => {
   let manageUsersApiClient: jest.Mocked<ManageUsersApiClient>
+  let remandAndSentencingService: jest.Mocked<RemandAndSentencingService>
   let prisonerService: jest.Mocked<PrisonerService>
   let userService: UserService
 
@@ -18,7 +20,7 @@ describe('User service', () => {
     } as PrisonApiUserCaseloads
     beforeEach(() => {
       manageUsersApiClient = new ManageUsersApiClient() as jest.Mocked<ManageUsersApiClient>
-      prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+      prisonerService = new PrisonerService(null, remandAndSentencingService) as jest.Mocked<PrisonerService>
       userService = new UserService(manageUsersApiClient, prisonerService)
     })
 

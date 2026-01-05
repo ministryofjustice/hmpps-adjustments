@@ -9,9 +9,13 @@ import {
 } from '../@types/prisonApi/prisonClientTypes'
 import FullPageError from '../model/FullPageError'
 import { HmppsAuthClient } from '../data'
+import RemandAndSentencingService from './remandAndSentencingService'
 
 export default class PrisonerService {
-  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+  constructor(
+    private readonly hmppsAuthClient: HmppsAuthClient,
+    private remandAndSentencingService: RemandAndSentencingService,
+  ) {}
 
   async getSentencesAndOffencesFilteredForRemand(
     bookingId: string,
@@ -66,7 +70,9 @@ export default class PrisonerService {
     const sentencesAndOffences = await this.getSentencesAndOffences(bookingId, username)
     return {
       earliestExcludingRecalls: this.findStartOfSentenceEvelope(
-        sentencesAndOffences.filter(it => !PrisonerService.recallTypes.includes(it.sentenceCalculationType)),
+        sentencesAndOffences.filter(
+          it => !this.remandAndSentencingService.isSentenceRecalled(it.sentenceCalculationType),
+        ),
       ),
       earliestSentence: this.findStartOfSentenceEvelope(sentencesAndOffences),
       sentencesAndOffences,
@@ -103,48 +109,6 @@ export default class PrisonerService {
   private aFineCantHaveRemand(sentence: PrisonApiOffenderSentenceAndOffences, offence: PrisonApiOffence) {
     return sentence.sentenceCalculationType === 'A/FINE' && offence.offenceStatute === 'ZZ01'
   }
-
-  public static recallTypes = [
-    'LR',
-    'LR_ORA',
-    'LR_YOI_ORA',
-    'LR_SEC91_ORA',
-    'LRSEC250_ORA',
-    'LR_EDS18',
-    'LR_EDS21',
-    'LR_EDSU18',
-    'LR_LASPO_AR',
-    'LR_LASPO_DR',
-    'LR_SEC236A',
-    'LR_SOPC18',
-    'LR_SOPC21',
-    '14FTR_ORA',
-    'FTR',
-    'FTR_ORA',
-    'FTR_56ORA',
-    'FTR_SCH15',
-    'FTRSCH15_ORA',
-    'FTRSCH18',
-    'FTRSCH18_ORA',
-    '14FTRHDC_ORA',
-    'FTR_HDC_ORA',
-    'CUR',
-    'CUR_ORA',
-    'HDR',
-    'HDR_ORA',
-    'FTR_HDC',
-    'LR_DPP',
-    'LR_DLP',
-    'LR_ALP',
-    'LR_ALP_LASPO',
-    'LR_ALP_CDE18',
-    'LR_ALP_CDE21',
-    'LR_LIFE',
-    'LR_EPP',
-    'LR_IPP',
-    'LR_MLP',
-    'LR_ES',
-  ]
 
   private async getSystemClientToken(username: string): Promise<string> {
     return this.hmppsAuthClient.getSystemClientToken(username)

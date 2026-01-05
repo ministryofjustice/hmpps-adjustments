@@ -32,6 +32,7 @@ context('Review Unused Deductions', () => {
     cy.task('stubComponents')
     cy.task('stubDeleteAdjustment')
     cy.task('stubGetThingsToDo')
+    cy.task('stubGetSentenceTypeAndItsDetails')
     cy.task('stubEvictCache')
   })
 

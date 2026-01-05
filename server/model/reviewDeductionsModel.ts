@@ -8,6 +8,7 @@ import {
   SentencesByCaseSequence,
 } from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 export default class ReviewDeductionsModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]
@@ -16,6 +17,7 @@ export default class ReviewDeductionsModel {
     public prisonerNumber: string,
     public adjustments: SessionAdjustment[],
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
+    public remandAndSentencingService: RemandAndSentencingService,
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
   }
@@ -63,7 +65,7 @@ export default class ReviewDeductionsModel {
         return {
           ...it,
           daysToDisplay: it.days,
-          offences: offencesForRemandAdjustment(it, this.sentencesAndOffences),
+          offences: offencesForRemandAdjustment(it, this.sentencesAndOffences, this.remandAndSentencingService),
         }
       })
   }

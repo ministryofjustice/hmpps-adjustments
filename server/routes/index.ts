@@ -37,6 +37,7 @@ export default function routes(service: Services): Router {
     service.unusedDeductionsService,
     service.identifyRemandPeriodsService,
     service.auditService,
+    service.remandAndSentencingService,
   )
 
   const additionalDaysAwardedRoutes = new AdditionalDaysAwardedRoutes(
@@ -54,6 +55,7 @@ export default function routes(service: Services): Router {
     service.paramStoreService,
     service.unusedDeductionsService,
     service.auditService,
+    service.remandAndSentencingService,
   )
 
   const manualUnusedDeductionRoutes = new ManualUnusedDeductionRoutes(
@@ -68,6 +70,7 @@ export default function routes(service: Services): Router {
     service.adjustmentsStoreService,
     service.paramStoreService,
     service.calculateReleaseDatesService,
+    service.remandAndSentencingService,
   )
 
   const specialRemissionRoutes = new SpecialRemissionRoutes(

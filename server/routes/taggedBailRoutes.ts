@@ -23,6 +23,7 @@ import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 import UnusedDeductionsService from '../services/unusedDeductionsService'
 import AuditAction from '../enumerations/auditType'
 import AuditService from '../services/auditService'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 export default class TaggedBailRoutes {
   constructor(
@@ -33,6 +34,7 @@ export default class TaggedBailRoutes {
     private readonly paramStoreService: ParamStoreService,
     private readonly unusedDeductionsService: UnusedDeductionsService,
     private readonly auditService: AuditService,
+    private readonly remandAndSentencingService: RemandAndSentencingService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -61,12 +63,20 @@ export default class TaggedBailRoutes {
     const { bookingId, prisonerNumber } = res.locals.prisoner
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
     const adjustment = this.adjustmentsStoreService.getById(req, nomsId, id)
+
     if (!adjustment) {
       return res.redirect(`/${nomsId}`)
     }
 
     return res.render('pages/adjustments/tagged-bail/select-case', {
-      model: new TaggedBailSelectCaseModel(prisonerNumber, sentencesAndOffences, addOrEdit, id, adjustment),
+      model: new TaggedBailSelectCaseModel(
+        prisonerNumber,
+        sentencesAndOffences,
+        addOrEdit,
+        id,
+        adjustment,
+        this.remandAndSentencingService,
+      ),
     })
   }
 
@@ -139,6 +149,7 @@ export default class TaggedBailRoutes {
         sentencesAndOffences,
         unusedDeductionMessage,
         inactiveDeletedAdjustments,
+        this.remandAndSentencingService,
       ),
     })
   }
@@ -194,6 +205,7 @@ export default class TaggedBailRoutes {
         adjustment,
         sentenceAndOffence,
         showUnusedMessage,
+        this.remandAndSentencingService,
         reviewDeductions,
       ),
     })
@@ -231,6 +243,7 @@ export default class TaggedBailRoutes {
         sentencesAndOffences,
         adjustment,
         !!unusedDeductions?.unusedDeductions,
+        this.remandAndSentencingService,
       ),
     })
   }
@@ -311,6 +324,7 @@ export default class TaggedBailRoutes {
         sentencesByCaseSequence.length,
         showUnusedMessage,
         this.paramStoreService.get(req, 'returnToReviewDeductions'),
+        this.remandAndSentencingService,
       ),
     })
   }

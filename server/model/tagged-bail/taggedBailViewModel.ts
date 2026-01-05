@@ -4,12 +4,12 @@ import {
   getActiveSentencesByCaseSequence,
   getMostRecentSentenceAndOffence,
   getSentenceRecallTagHTML,
-  isSentenceRecalled,
   relevantSentenceForTaggedBailAdjustment,
   SentencesByCaseSequence,
 } from '../../utils/utils'
 import UnusedDeductionsMessageViewModel from '../unused-deductions/unusedDeductionsMessageViewModel'
 import { UnusedDeductionMessageType } from '../../services/unusedDeductionsService'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class TaggedBailViewModel {
   private sentencesByCaseSequence: SentencesByCaseSequence[]
@@ -24,6 +24,7 @@ export default class TaggedBailViewModel {
     public sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
     unusedDeductionsMessageType: UnusedDeductionMessageType,
     inactiveWhenDeletedAdjustments: Adjustment[],
+    public remandAndSentencingService: RemandAndSentencingService,
   ) {
     this.sentencesByCaseSequence = getActiveSentencesByCaseSequence(this.sentencesAndOffences)
     this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'TAGGED_BAIL')
@@ -51,7 +52,9 @@ export default class TaggedBailViewModel {
       )
       const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
 
-      const recall = isSentenceRecalled(sentencesForCaseSequence.sentences[0].sentenceCalculationType)
+      const recall = this.remandAndSentencingService.isSentenceRecalled(
+        sentencesForCaseSequence.sentences[0].sentenceCalculationType,
+      )
       const descriptionRow = recall
         ? { html: `${sentenceAndOffence.courtDescription} ${getSentenceRecallTagHTML()}` }
         : { text: sentenceAndOffence.courtDescription }

@@ -6,6 +6,7 @@ import UnusedDeductionsMessageViewModel from '../unused-deductions/unusedDeducti
 import { UnusedDeductionMessageType } from '../../services/unusedDeductionsService'
 import { IdentifyRemandDecision, RemandResult } from '../../@types/identifyRemandPeriods/identifyRemandPeriodsTypes'
 import config from '../../config'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class RemandViewModel {
   public adjustments: Adjustment[]
@@ -21,6 +22,7 @@ export default class RemandViewModel {
     public roles: string[],
     public remandDecision: IdentifyRemandDecision,
     public remandResult: RemandResult,
+    public remandAndSentencingService: RemandAndSentencingService,
   ) {
     this.adjustments = allAdjustments.filter(it => it.adjustmentType === 'REMAND')
     this.unusedDeductionMessage = new UnusedDeductionsMessageViewModel(
@@ -72,7 +74,7 @@ export default class RemandViewModel {
       return {
         ...it,
         daysToDisplay: it.days,
-        offences: offencesForRemandAdjustment(it, this.sentencesAndOffences),
+        offences: offencesForRemandAdjustment(it, this.sentencesAndOffences, this.remandAndSentencingService),
       }
     })
   }

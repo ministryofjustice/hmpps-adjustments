@@ -10,13 +10,17 @@ import {
 } from '../utils/utils'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import { HmppsAuthClient } from '../data'
+import RemandAndSentencingService from './remandAndSentencingService'
 
 const expectedUnusedDeductionsValidations = [
   'CUSTODIAL_PERIOD_EXTINGUISHED_TAGGED_BAIL',
   'CUSTODIAL_PERIOD_EXTINGUISHED_REMAND',
 ]
 export default class CalculateReleaseDatesService {
-  constructor(private readonly hmppsAuthClient: HmppsAuthClient) {}
+  constructor(
+    private readonly hmppsAuthClient: HmppsAuthClient,
+    private remandAndSentencingService: RemandAndSentencingService,
+  ) {}
 
   async calculateUnusedDeductions(
     prisonerId: string,
@@ -62,7 +66,9 @@ export default class CalculateReleaseDatesService {
       if (it.adjustmentType === 'REMAND') {
         let chargeId
         if (!it.remand?.chargeId?.length) {
-          chargeId = offencesForRemandAdjustment(it, sentencesAndOffence).map(off => off.offenderChargeId)
+          chargeId = offencesForRemandAdjustment(it, sentencesAndOffence, this.remandAndSentencingService).map(
+            off => off.offenderChargeId,
+          )
         } else {
           chargeId = it.remand.chargeId
         }

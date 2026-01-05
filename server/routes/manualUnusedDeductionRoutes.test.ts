@@ -11,6 +11,7 @@ import AdjustmentsStoreService from '../services/adjustmentsStoreService'
 import ParamStoreService from '../services/paramStoreService'
 import SessionAdjustment from '../@types/AdjustmentTypes'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
@@ -19,14 +20,19 @@ jest.mock('../services/unusedDeductionsService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/paramStoreService')
 jest.mock('../services/calculateReleaseDatesService')
+jest.mock('../services/remandAndSentencingService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const remandAndSentencingService = new RemandAndSentencingService(null) as jest.Mocked<RemandAndSentencingService>
+const prisonerService = new PrisonerService(null, remandAndSentencingService) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const identifyRemandPeriodsService = new IdentifyRemandPeriodsService(null) as jest.Mocked<IdentifyRemandPeriodsService>
 const unusedDeductionsService = new UnusedDeductionsService(null, null) as jest.Mocked<UnusedDeductionsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const paramStoreService = new ParamStoreService() as jest.Mocked<ParamStoreService>
-const calculateReleaseDatesService = new CalculateReleaseDatesService(null) as jest.Mocked<CalculateReleaseDatesService>
+const calculateReleaseDatesService = new CalculateReleaseDatesService(
+  null,
+  remandAndSentencingService,
+) as jest.Mocked<CalculateReleaseDatesService>
 
 const unusedDeductions = {
   id: '1',
@@ -59,6 +65,7 @@ beforeEach(() => {
       adjustmentsStoreService,
       paramStoreService,
       calculateReleaseDatesService,
+      remandAndSentencingService,
     },
     userSupplier: () => userInTest,
   })

@@ -8,6 +8,7 @@ import ReviewDeductionsModel from '../model/reviewDeductionsModel'
 import ParamStoreService from '../services/paramStoreService'
 import CalculateReleaseDatesService from '../services/calculateReleaseDatesService'
 import UnusedDeductionsConfirmModel from '../model/unused-deductions/unusedDeductionsConfirmModel'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 export default class ReviewUnusedDeductionRoutes {
   constructor(
@@ -16,6 +17,7 @@ export default class ReviewUnusedDeductionRoutes {
     private readonly adjustmentsStoreService: AdjustmentsStoreService,
     private readonly paramStoreService: ParamStoreService,
     private readonly calculateReleaseDatesService: CalculateReleaseDatesService,
+    private readonly remandAndSentencingService: RemandAndSentencingService,
   ) {}
 
   public review: RequestHandler = async (req, res): Promise<void> => {
@@ -62,7 +64,12 @@ export default class ReviewUnusedDeductionRoutes {
     const sentencesAndOffences = await this.prisonerService.getSentencesAndOffences(bookingId, username)
 
     return res.render('pages/adjustments/unused-deductions/review-deductions', {
-      model: new ReviewDeductionsModel(prisonerNumber, sessionAdjustments, sentencesAndOffences),
+      model: new ReviewDeductionsModel(
+        prisonerNumber,
+        sessionAdjustments,
+        sentencesAndOffences,
+        this.remandAndSentencingService,
+      ),
     })
   }
 

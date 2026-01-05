@@ -4,6 +4,7 @@ import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/pri
 import { offencesForRemandAdjustment } from '../../utils/utils'
 import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
+import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm> {
   chargeId: string | string[]
@@ -31,9 +32,12 @@ export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm>
   static fromAdjustment(
     adjustment: Adjustment,
     sentencesAndOffence: PrisonApiOffenderSentenceAndOffences[],
+    remandAndSentencingService: RemandAndSentencingService,
   ): RemandOffencesForm {
     return new RemandOffencesForm({
-      chargeId: offencesForRemandAdjustment(adjustment, sentencesAndOffence).map(it => it.offenderChargeId.toString()),
+      chargeId: offencesForRemandAdjustment(adjustment, sentencesAndOffence, remandAndSentencingService).map(it =>
+        it.offenderChargeId.toString(),
+      ),
     })
   }
 }

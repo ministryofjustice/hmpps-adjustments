@@ -26,6 +26,7 @@ import UnusedDeductionsService from '../services/unusedDeductionsService'
 import IdentifyRemandPeriodsService from '../services/identifyRemandPeriodsService'
 import AuditAction from '../enumerations/auditType'
 import AuditService from '../services/auditService'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 export default class RemandRoutes {
   constructor(
@@ -37,6 +38,7 @@ export default class RemandRoutes {
     private readonly unusedDeductionsService: UnusedDeductionsService,
     private readonly identifyRemandPeriodsService: IdentifyRemandPeriodsService,
     private readonly auditService: AuditService,
+    private readonly remandAndSentencingService: RemandAndSentencingService,
   ) {}
 
   public add: RequestHandler = async (req, res): Promise<void> => {
@@ -138,10 +140,18 @@ export default class RemandRoutes {
       bookingId,
       username,
     )
-    const form = RemandOffencesForm.fromAdjustment(adjustment, sentencesAndOffences)
+    const form = RemandOffencesForm.fromAdjustment(adjustment, sentencesAndOffences, this.remandAndSentencingService)
 
     return res.render('pages/adjustments/remand/offences', {
-      model: new RemandSelectOffencesModel(id, prisonerNumber, adjustment, form, sentencesAndOffences, addOrEdit),
+      model: new RemandSelectOffencesModel(
+        id,
+        prisonerNumber,
+        adjustment,
+        form,
+        sentencesAndOffences,
+        addOrEdit,
+        this.remandAndSentencingService,
+      ),
     })
   }
 
@@ -172,6 +182,7 @@ export default class RemandRoutes {
           adjustmentForm,
           sentencesAndOffences,
           addOrEdit,
+          this.remandAndSentencingService,
         ),
       })
     }
@@ -225,6 +236,7 @@ export default class RemandRoutes {
         sentencesAndOffences,
         unusedDeductions?.validationMessages || [],
         new ReviewRemandForm({}),
+        this.remandAndSentencingService,
       ),
     })
   }
@@ -257,6 +269,7 @@ export default class RemandRoutes {
           sentencesAndOffences,
           unusedDeductions?.validationMessages || [],
           form,
+          this.remandAndSentencingService,
         ),
       })
     }
@@ -359,6 +372,7 @@ export default class RemandRoutes {
         roles,
         remandDecision,
         remandResult,
+        this.remandAndSentencingService,
       ),
     })
   }
@@ -400,7 +414,15 @@ export default class RemandRoutes {
     )
 
     return res.render('pages/adjustments/remand/remove', {
-      model: new RemandChangeModel(adjustment, null, sentencesAndOffences, unusedDeductions, showUnusedMessage),
+      model: new RemandChangeModel(
+        adjustment,
+        null,
+        sentencesAndOffences,
+        unusedDeductions,
+        showUnusedMessage,
+        false,
+        this.remandAndSentencingService,
+      ),
     })
   }
 
@@ -456,6 +478,7 @@ export default class RemandRoutes {
         unusedDeductions,
         showUnusedMessage,
         this.paramStoreService.get(req, 'returnToReviewDeductions'),
+        this.remandAndSentencingService,
       ),
     })
   }
@@ -478,7 +501,9 @@ export default class RemandRoutes {
         username,
       )
       adjustment.remand = {
-        chargeId: offencesForRemandAdjustment(adjustment, sentencesAndOffences).map(it => it.offenderChargeId),
+        chargeId: offencesForRemandAdjustment(adjustment, sentencesAndOffences, this.remandAndSentencingService).map(
+          it => it.offenderChargeId,
+        ),
       }
     }
 

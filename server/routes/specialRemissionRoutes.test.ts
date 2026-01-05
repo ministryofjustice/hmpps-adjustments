@@ -10,13 +10,16 @@ import SessionAdjustment from '../@types/AdjustmentTypes'
 import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prisonClientTypes'
 import AuditService from '../services/auditService'
 import AuditAction from '../enumerations/auditType'
+import RemandAndSentencingService from '../services/remandAndSentencingService'
 
 jest.mock('../services/adjustmentsService')
 jest.mock('../services/prisonerService')
 jest.mock('../services/adjustmentsStoreService')
 jest.mock('../services/auditService')
+jest.mock('../services/remandAndSentencingService')
 
-const prisonerService = new PrisonerService(null) as jest.Mocked<PrisonerService>
+const remandAndSentencingService = new RemandAndSentencingService(null) as jest.Mocked<RemandAndSentencingService>
+const prisonerService = new PrisonerService(null, remandAndSentencingService) as jest.Mocked<PrisonerService>
 const adjustmentsService = new AdjustmentsService(null) as jest.Mocked<AdjustmentsService>
 const adjustmentsStoreService = new AdjustmentsStoreService() as jest.Mocked<AdjustmentsStoreService>
 const auditService = new AuditService() as jest.Mocked<AuditService>
@@ -52,6 +55,7 @@ beforeEach(() => {
       adjustmentsService,
       adjustmentsStoreService,
       auditService,
+      remandAndSentencingService,
     },
   })
 })
