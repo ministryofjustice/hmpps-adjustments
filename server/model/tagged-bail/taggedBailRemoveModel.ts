@@ -1,7 +1,6 @@
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
 import { dateToString, getSentenceRecallTagHTML } from '../../utils/utils'
-import PrisonerService from '../../services/prisonerService'
 import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
 export default class TaggedBailRemoveModel {
