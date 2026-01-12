@@ -721,6 +721,18 @@ describe('Adjustment routes tests', () => {
         status: 'ACTIVE',
         prisonName: 'Leeds',
         recallId: 'recall-id',
+        createdDate: '2023-06-01',
+      },
+      {
+        ...unlawfullyAtLargeTypeRecall,
+        id: 'earlier-id',
+        lastUpdatedBy: 'John Doe',
+        status: 'INACTIVE',
+        prisonName: 'Manchester',
+        recallId: 'earlier-recall-id',
+        fromDate: '2023-01-01',
+        toDate: '2023-02-01',
+        createdDate: '2023-01-01',
       },
     ])
 
@@ -735,6 +747,9 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Leeds')
         expect(res.text).toContain(`/person/${NOMS_ID}/edit-recall/recall-id?entrypoint=adj_unlawfully-at-large`)
+        expect(res.text).not.toContain(
+          `/person/${NOMS_ID}/edit-recall/earlier-recall-id?entrypoint=adj_unlawfully-at-large`,
+        )
         expect(res.text).not.toContain('remove/this-is-an-id')
         expect(res.text).toContain('Total days')
         expect(res.text).toContain('Date of revocation')

@@ -38,9 +38,7 @@ export default class ViewModel {
         }))
 
         .sort((a, b) => {
-          if (a.fromDate == null) return 1
-          if (b.fromDate == null) return -1
-          return a.fromDate.localeCompare(b.fromDate)
+          return b.createdDate.localeCompare(a.createdDate)
         })
     }
   }
@@ -130,14 +128,15 @@ export default class ViewModel {
   }
 
   public recallRows() {
-    return this.recallAdjustments.map(it => {
+    return this.recallAdjustments.map((it, index) => {
+      const isLastestRecord = index === 0
       return [
         { html: dayjs(it.fromDate).format('D MMMM YYYY') },
         { text: dayjs(it.toDate).format('D MMMM YYYY') },
         { text: it.prisonName || 'Unknown' },
         { text: 'Recall', classes: 'table-ual-column-type' },
         { text: it.days },
-        this.recallActionCell(it),
+        isLastestRecord ? this.recallActionCell(it) : { text: '' },
       ]
     })
   }
