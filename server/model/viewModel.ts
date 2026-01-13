@@ -128,17 +128,31 @@ export default class ViewModel {
   }
 
   public recallRows() {
-    return this.recallAdjustments.map((it, index) => {
-      const isLastestRecord = index === 0
+    return this.recallAdjustments.map(it => {
+      const isLatestRecall = it.id === this.getLatestUALRecallAdjustment()
       return [
         { html: dayjs(it.fromDate).format('D MMMM YYYY') },
         { text: dayjs(it.toDate).format('D MMMM YYYY') },
         { text: it.prisonName || 'Unknown' },
         { text: 'Recall', classes: 'table-ual-column-type' },
         { text: it.days },
-        isLastestRecord ? this.recallActionCell(it) : { text: '' },
+        isLatestRecall ? this.recallActionCell(it) : { text: '' },
       ]
     })
+  }
+
+  public getLatestUALRecallAdjustment(): string | undefined {
+    let allUALRecallAdjustments = [
+      ...this.adjustments.filter(it => it.unlawfullyAtLarge !== null && it.unlawfullyAtLarge.type === 'RECALL'),
+    ]
+    if (this.recallAdjustments) {
+      allUALRecallAdjustments = [...allUALRecallAdjustments, ...this.recallAdjustments]
+    }
+    const latestAdjustment = allUALRecallAdjustments.reduce((latest, current) => {
+      return dayjs(current.createdDate).isAfter(dayjs(latest.createdDate)) ? current : latest
+    }, allUALRecallAdjustments[0])
+
+    return latestAdjustment?.id
   }
 
   public rows() {
@@ -154,6 +168,7 @@ export default class ViewModel {
     }
     if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return this.adjustments.map(it => {
+        const isLatestRecall = it.id === this.getLatestUALRecallAdjustment()
         return [
           { html: dayjs(it.fromDate).format('D MMMM YYYY') },
           { text: dayjs(it.toDate).format('D MMMM YYYY') },
@@ -163,7 +178,9 @@ export default class ViewModel {
             classes: 'table-ual-column-type',
           },
           { text: it.days },
-          this.actionCell(it),
+          isLatestRecall || (it.unlawfullyAtLarge && it.unlawfullyAtLarge.type !== 'RECALL') || !it.unlawfullyAtLarge
+            ? this.actionCell(it)
+            : { text: '' },
         ]
       })
     }
