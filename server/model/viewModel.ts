@@ -129,7 +129,7 @@ export default class ViewModel {
 
   public recallRows() {
     return this.recallAdjustments.map(it => {
-      const isLatestRecall = it.adjustmentType === 'UNLAWFULLY_AT_LARGE' && it.id === this.getLatestRecallAdjustment()
+      const isLatestRecall = it.id === this.getLatestUALRecallAdjustment()
       return [
         { html: dayjs(it.fromDate).format('D MMMM YYYY') },
         { text: dayjs(it.toDate).format('D MMMM YYYY') },
@@ -141,14 +141,16 @@ export default class ViewModel {
     })
   }
 
-  public getLatestRecallAdjustment(): string | undefined {
-    let allAdjustments = [...this.adjustments]
+  public getLatestUALRecallAdjustment(): string | undefined {
+    let allUALRecallAdjustments = [
+      ...this.adjustments.filter(it => it.unlawfullyAtLarge !== null && it.unlawfullyAtLarge.type === 'RECALL'),
+    ]
     if (this.recallAdjustments) {
-      allAdjustments = [...allAdjustments, ...this.recallAdjustments]
+      allUALRecallAdjustments = [...allUALRecallAdjustments, ...this.recallAdjustments]
     }
-    const latestAdjustment = allAdjustments.reduce((latest, current) => {
+    const latestAdjustment = allUALRecallAdjustments.reduce((latest, current) => {
       return dayjs(current.createdDate).isAfter(dayjs(latest.createdDate)) ? current : latest
-    }, allAdjustments[0])
+    }, allUALRecallAdjustments[0])
 
     return latestAdjustment?.id
   }
@@ -166,11 +168,7 @@ export default class ViewModel {
     }
     if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return this.adjustments.map(it => {
-        const isLatestRecall =
-          it.adjustmentType === 'UNLAWFULLY_AT_LARGE' &&
-          it.unlawfullyAtLarge !== null &&
-          it.unlawfullyAtLarge.type === 'RECALL' &&
-          it.id === this.getLatestRecallAdjustment()
+        const isLatestRecall = it.id === this.getLatestUALRecallAdjustment()
         return [
           { html: dayjs(it.fromDate).format('D MMMM YYYY') },
           { text: dayjs(it.toDate).format('D MMMM YYYY') },
