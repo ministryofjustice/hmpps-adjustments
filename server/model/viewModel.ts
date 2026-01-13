@@ -128,17 +128,29 @@ export default class ViewModel {
   }
 
   public recallRows() {
-    return this.recallAdjustments.map((it, index) => {
-      const isLastestRecord = index === 0
+    return this.recallAdjustments.map(it => {
+      const isLatestRecall = it.adjustmentType === 'UNLAWFULLY_AT_LARGE' && it.id === this.getLatestRecallAdjustment()
       return [
         { html: dayjs(it.fromDate).format('D MMMM YYYY') },
         { text: dayjs(it.toDate).format('D MMMM YYYY') },
         { text: it.prisonName || 'Unknown' },
         { text: 'Recall', classes: 'table-ual-column-type' },
         { text: it.days },
-        isLastestRecord ? this.recallActionCell(it) : { text: '' },
+        isLatestRecall ? this.recallActionCell(it) : { text: '' },
       ]
     })
+  }
+
+  public getLatestRecallAdjustment(): string | undefined {
+    let allAdjustments = [...this.adjustments]
+    if (this.recallAdjustments) {
+      allAdjustments = [...allAdjustments, ...this.recallAdjustments]
+    }
+    const latestAdjustment = allAdjustments.reduce((latest, current) => {
+      return dayjs(current.createdDate).isAfter(dayjs(latest.createdDate)) ? current : latest
+    }, allAdjustments[0])
+
+    return latestAdjustment?.id
   }
 
   public rows() {
@@ -154,6 +166,11 @@ export default class ViewModel {
     }
     if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return this.adjustments.map(it => {
+        const isLatestRecall =
+          it.adjustmentType === 'UNLAWFULLY_AT_LARGE' &&
+          it.unlawfullyAtLarge !== null &&
+          it.unlawfullyAtLarge.type === 'RECALL' &&
+          it.id === this.getLatestRecallAdjustment()
         return [
           { html: dayjs(it.fromDate).format('D MMMM YYYY') },
           { text: dayjs(it.toDate).format('D MMMM YYYY') },
@@ -163,7 +180,9 @@ export default class ViewModel {
             classes: 'table-ual-column-type',
           },
           { text: it.days },
-          this.actionCell(it),
+          isLatestRecall || (it.unlawfullyAtLarge && it.unlawfullyAtLarge.type !== 'RECALL') || !it.unlawfullyAtLarge
+            ? this.actionCell(it)
+            : { text: '' },
         ]
       })
     }

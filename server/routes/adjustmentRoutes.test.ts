@@ -711,6 +711,48 @@ describe('Adjustment routes tests', () => {
       })
   })
 
+  it('GET /{nomsId}/unlawfully-at-large/view restrict editing to latest recall ual period across tables', () => {
+    userInTest = recallUser
+    adjustmentsService.findByPerson.mockResolvedValue([
+      {
+        ...unlawfullyAtLargeTypeRecall,
+        id: 'this-is-an-id',
+        lastUpdatedBy: 'Doris McNealy',
+        status: 'ACTIVE',
+        prisonName: 'Leeds',
+        createdDate: '2023-06-01',
+      },
+      {
+        ...unlawfullyAtLargeTypeRecall,
+        id: 'earlier-id',
+        lastUpdatedBy: 'John Doe',
+        status: 'INACTIVE',
+        prisonName: 'Manchester',
+        recallId: 'earlier-recall-id',
+        fromDate: '2023-01-01',
+        toDate: '2023-02-01',
+        createdDate: '2023-01-01',
+      },
+    ])
+
+    prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({
+      earliestExcludingRecalls: new Date(),
+      earliestSentence: new Date(),
+      sentencesAndOffences: [],
+    })
+    return request(app)
+      .get(`/${NOMS_ID}/unlawfully-at-large/view`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('Leeds')
+        expect(res.text).toContain(`/ABC123/unlawfully-at-large/edit/this-is-an-id`)
+        expect(res.text).toContain(`/ABC123/unlawfully-at-large/remove/this-is-an-id`)
+        expect(res.text).not.toContain(
+          `/person/${NOMS_ID}/edit-recall/earlier-recall-id?entrypoint=adj_unlawfully-at-large`,
+        )
+      })
+  })
+
   it('GET /{nomsId}/unlawfully-at-large/view with RECALL_MAINTAINER role', () => {
     userInTest = recallUser
     adjustmentsService.findByPerson.mockResolvedValue([
@@ -824,6 +866,8 @@ describe('Adjustment routes tests', () => {
       .expect(res => {
         expect(res.text).toContain('Type')
         expect(res.text).toContain('Unknown')
+        expect(res.text).toContain('/ABC123/unlawfully-at-large/edit/this-is-an-id')
+        expect(res.text).toContain('/ABC123/unlawfully-at-large/remove/this-is-an-id')
       })
   })
 
