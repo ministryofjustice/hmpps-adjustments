@@ -26,21 +26,19 @@ export default class ViewModel {
         return a.fromDate.localeCompare(b.fromDate)
       })
 
-    if (roles.includes('RECALL_MAINTAINER')) {
-      this.adjustments = this.adjustments.filter(it => !it.recallId)
+    this.adjustments = this.adjustments.filter(it => !it.recallId)
 
-      this.recallAdjustments = allAdjustments
-        .filter(it => it.recallId && it.adjustmentType === adjustmentType.value)
-        .map(it => ({
-          ...it,
-          fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'),
-          toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'),
-        }))
+    this.recallAdjustments = allAdjustments
+      .filter(it => it.recallId && it.adjustmentType === adjustmentType.value)
+      .map(it => ({
+        ...it,
+        fromDate: dayjs(it.fromDate).subtract(1, 'day').format('D MMMM YYYY'),
+        toDate: dayjs(it.toDate).add(1, 'day').format('D MMMM YYYY'),
+      }))
 
-        .sort((a, b) => {
-          return b.createdDate.localeCompare(a.createdDate)
-        })
-    }
+      .sort((a, b) => {
+        return b.createdDate.localeCompare(a.createdDate)
+      })
   }
 
   public table() {
@@ -122,7 +120,7 @@ export default class ViewModel {
       { text: 'Arrest date' },
       { text: 'Entered by' },
       { text: 'Type', classes: 'table-ual-column-type' },
-      { text: 'Number of days', format: 'numeric' },
+      { text: 'Number of days' },
       { text: 'Actions' },
     ]
   }
@@ -136,7 +134,7 @@ export default class ViewModel {
         { text: it.prisonName || 'Unknown' },
         { text: 'Recall', classes: 'table-ual-column-type' },
         { text: it.days },
-        isLatestRecall ? this.recallActionCell(it) : { text: '' },
+        isLatestRecall && this.roles.includes('RECALL_MAINTAINER') ? this.recallActionCell(it) : { text: '' },
       ]
     })
   }
