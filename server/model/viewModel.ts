@@ -265,7 +265,7 @@ export default class ViewModel {
   private recallActionCell(adjustment: Adjustment) {
     return {
       html: `
-        <a class="govuk-link govuk-!-white-space-nowrap" href="${config.services.recallsUI.url}/person/${adjustment.person}/edit-recall/${adjustment.recallId}?entrypoint=adj_${this.adjustmentType.url}" data-qa="edit-recall-${adjustment.id}">
+        <a class="govuk-link govuk-!-white-space-nowrap" href="${config.services.recallsUI.url}/person/${adjustment.person}/recall/edit/${adjustment.recallId}/start?entrypoint=adj_${this.adjustmentType.url}" data-qa="edit-recall-${adjustment.id}">
           Edit recall<span class="govuk-visually-hidden"> ${this.getVisuallyHiddenTagContent(adjustment)}</span>
         </a>
       `,
