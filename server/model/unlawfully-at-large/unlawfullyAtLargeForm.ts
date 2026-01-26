@@ -209,9 +209,8 @@ export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtL
 
   private getMinSentenceDate(sentencesWithOffenceDates: PrisonApiOffenderSentenceAndOffences[]) {
     return new Date(
-      sentencesWithOffenceDates.reduce((a, b) =>
-        new Date(a.sentenceDate) < new Date(b.sentenceDate) ? a : b,
-      ).sentenceDate,
+      sentencesWithOffenceDates.reduce((a, b) => (new Date(a.sentenceDate) < new Date(b.sentenceDate) ? a : b))
+        .sentenceDate,
     )
   }
 

@@ -240,9 +240,8 @@ export default class SpecialRemissionRoutes {
 
     if (sentencesWithSentenceDate.length) {
       fromDate = new Date(
-        sentencesWithSentenceDate.reduce((a, b) =>
-          new Date(a.sentenceDate) < new Date(b.sentenceDate) ? a : b,
-        ).sentenceDate,
+        sentencesWithSentenceDate.reduce((a, b) => (new Date(a.sentenceDate) < new Date(b.sentenceDate) ? a : b))
+          .sentenceDate,
       )
     }
     return fromDate
