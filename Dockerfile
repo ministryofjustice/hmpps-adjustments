@@ -1,6 +1,6 @@
 
 # Stage: base image
-FROM node:20.19-bookworm-slim as base
+FROM ghcr.io/ministryofjustice/hmpps-node:24-alpine as base
 
 ARG BUILD_NUMBER
 ARG GIT_REF
