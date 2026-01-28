@@ -25,7 +25,6 @@ ARG GIT_BRANCH
 
 COPY package*.json ./
 RUN npm run setup
-ENV NODE_ENV='production'
 
 COPY . .
 RUN npm run build
