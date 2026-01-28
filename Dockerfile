@@ -6,6 +6,8 @@ ARG BUILD_NUMBER
 ARG GIT_REF
 ARG GIT_BRANCH
 
+WORKDIR /app
+
 # Cache breaking and ensure required build / git args defined
 RUN test -n "$BUILD_NUMBER" || (echo "BUILD_NUMBER not set" && false)
 RUN test -n "$GIT_REF" || (echo "GIT_REF not set" && false)
@@ -25,7 +27,6 @@ ARG GIT_BRANCH
 
 COPY package*.json ./
 RUN npm run setup
-ENV NODE_ENV='production'
 
 COPY . .
 RUN npm run build
