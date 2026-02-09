@@ -166,7 +166,6 @@ export default class ViewModel {
     }
     if (this.adjustmentType.value === 'UNLAWFULLY_AT_LARGE') {
       return this.adjustments.map(it => {
-        const isLatestRecall = it.id === this.getLatestUALRecallAdjustment()
         return [
           { html: dayjs(it.fromDate).format('D MMMM YYYY') },
           { text: dayjs(it.toDate).format('D MMMM YYYY') },
@@ -176,9 +175,7 @@ export default class ViewModel {
             classes: 'table-ual-column-type',
           },
           { text: it.days },
-          isLatestRecall || (it.unlawfullyAtLarge && it.unlawfullyAtLarge.type !== 'RECALL') || !it.unlawfullyAtLarge
-            ? this.actionCell(it)
-            : { text: '' },
+          this.actionCell(it),
         ]
       })
     }
