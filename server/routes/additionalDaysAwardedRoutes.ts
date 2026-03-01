@@ -47,6 +47,10 @@ export default class AdditionalDaysAwardedRoutes {
       return res.redirect(`/${nomsId}/additional-days/review-and-submit?referrer=REVIEW_PROSPECTIVE`)
     }
 
+    if (this.onlyPotentialExist(adasToReview)) {
+      return res.redirect(`/${nomsId}/additional-days/view-potential`)
+    }
+
     return res.render('pages/adjustments/additional-days/review-and-approve', {
       adasToReview,
     })
@@ -59,6 +63,17 @@ export default class AdditionalDaysAwardedRoutes {
       adasToReview.awarded.length === 0 &&
       adasToReview.awaitingApproval.length &&
       !adasToReview.awaitingApproval.some(a => a.charges.some(c => c.status !== 'PROSPECTIVE'))
+    )
+  }
+
+  private onlyPotentialExist(adasToReview: AdasToReview): boolean {
+    return (
+      adasToReview.quashed.length === 0 &&
+      adasToReview.suspended.length === 0 &&
+      adasToReview.awarded.length === 0 &&
+      adasToReview.awaitingApproval.length === 0 &&
+      (adasToReview.adjustmentsToRemove?.length ?? 0) === 0 &&
+      adasToReview.potential.length > 0
     )
   }
 
@@ -171,6 +186,24 @@ export default class AdditionalDaysAwardedRoutes {
     return res.render('pages/adjustments/additional-days/add-warning', {
       model: {
         startOfSentenceEnvelope,
+      },
+    })
+  }
+
+  public viewPotential: RequestHandler = async (req, res): Promise<void> => {
+    const { username, activeCaseLoadId } = res.locals.user
+    const { nomsId } = req.params
+
+    const adasToReview: AdasToReview = await this.additionalDaysAwardedBackendService.getAdasToApprove(
+      req,
+      nomsId,
+      username,
+      activeCaseLoadId,
+    )
+    return res.render('pages/adjustments/additional-days/view-only-potential-adas', {
+      model: {
+        potential: adasToReview.potential,
+        totalPotential: adasToReview.totalPotential,
       },
     })
   }
