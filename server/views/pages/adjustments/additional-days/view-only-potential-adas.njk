@@ -32,5 +32,12 @@
         {% endif %}
       </div>
     </div>
+    <div class="govuk-!-margin-top-8">
+    {{ govukButton({
+      text: "Return to adjustments hub",
+      href: "/" + prisoner.prisonerNumber,
+      classes: "govuk-button--secondary"
+    }) }}
+    </div>
   </div>
 {% endblock %}
