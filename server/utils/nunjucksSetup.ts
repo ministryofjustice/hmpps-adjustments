@@ -11,6 +11,7 @@ import {
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
+import ualType from '../model/unlawfully-at-large/ualType'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -87,4 +88,5 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   njkEnv.addFilter('personProfileName', personProfileName)
   njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
   njkEnv.addFilter('personStatus', personStatus)
+  njkEnv.addFilter('formatUalType', type => ualType.find(it => it.value === type).text)
 }

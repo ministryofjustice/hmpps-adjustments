@@ -315,3 +315,13 @@ export function remandRelatedValidationSummary(messages: CalculateReleaseDatesVa
     },
   }
 }
+
+export const safeArray = (val: string | string[] | undefined): string[] | undefined => {
+  if (val === undefined) {
+    return []
+  }
+  if (Array.isArray(val)) {
+    return val
+  }
+  return [val]
+}

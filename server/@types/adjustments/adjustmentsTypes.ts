@@ -11,3 +11,6 @@ export type AdaAdjudicationDetails = components['schemas']['AdaAdjudicationDetai
 export type AdasByDateCharged = components['schemas']['AdasByDateCharged']
 export type ProspectiveAdaRejection = components['schemas']['ProspectiveAdaRejectionDto']
 export type UnusedDeductionsCalculationResult = components['schemas']['UnusedDeductionsCalculationResultDto']
+export type PreviousUnlawfullyAtLargeAdjustmentForReview =
+  components['schemas']['PreviousUnlawfullyAtLargeAdjustmentForReview']
+export type PreviousUnlawfullyAtLargeReviewRequest = components['schemas']['PreviousUnlawfullyAtLargeReviewRequest']

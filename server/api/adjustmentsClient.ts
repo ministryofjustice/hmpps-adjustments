@@ -6,6 +6,8 @@ import {
   AdjustmentStatus,
   CreateResponse,
   ManualUnusedDeduction,
+  PreviousUnlawfullyAtLargeAdjustmentForReview,
+  PreviousUnlawfullyAtLargeReviewRequest,
   ProspectiveAdaRejection,
   RestoreAdjustments,
   UnusedDeductionsCalculationResult,
@@ -85,6 +87,24 @@ export default class AdjustmentsClient {
     return this.restClient.post({
       path: `/adjustments/additional-days/${person}/reject-prospective-ada`,
       data: prospectiveAdaRejection,
+    })
+  }
+
+  async getPreviousUnlawfullyAtLargeAdjustmentForReview(
+    person: string,
+  ): Promise<PreviousUnlawfullyAtLargeAdjustmentForReview[]> {
+    return this.restClient.get<PreviousUnlawfullyAtLargeAdjustmentForReview[]>({
+      path: `/adjustments/person/${person}/review-previous-ual`,
+    })
+  }
+
+  async submitPreviousUnlawfullyAtLargeReviewRequest(
+    person: string,
+    request: PreviousUnlawfullyAtLargeReviewRequest,
+  ): Promise<void> {
+    return this.restClient.put({
+      path: `/adjustments/person/${person}/review-previous-ual`,
+      data: request,
     })
   }
 }

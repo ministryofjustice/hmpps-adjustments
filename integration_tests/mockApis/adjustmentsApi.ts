@@ -890,4 +890,75 @@ export default {
       },
     })
   },
+  stubGetPreviousPeriodsOfUal: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'GET',
+        urlPattern: '/adjustments-api/adjustments/person/A1234AB/review-previous-ual',
+      },
+      response: {
+        status: 200,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+        jsonBody: [
+          {
+            id: '1',
+            fromDate: '2020-01-01',
+            toDate: '2020-01-03',
+            days: 3,
+            type: 'RECALL',
+            prisonName: 'Brixton (HMP)',
+            prisonId: 'BXI',
+          },
+          {
+            id: '2',
+            fromDate: '2020-02-01',
+            toDate: '2020-02-04',
+            days: 4,
+            type: 'ESCAPE',
+            prisonName: 'Brixton (HMP)',
+            prisonId: 'BXI',
+          },
+          {
+            id: '3',
+            fromDate: '2020-03-01',
+            toDate: '2020-03-05',
+            days: 5,
+            type: 'SENTENCED_IN_ABSENCE',
+            prisonName: 'Brixton (HMP)',
+            prisonId: 'BXI',
+          },
+          {
+            id: '4',
+            fromDate: '2020-04-01',
+            toDate: '2020-04-06',
+            days: 6,
+            type: 'RELEASE_IN_ERROR',
+            prisonName: 'Brixton (HMP)',
+            prisonId: 'BXI',
+          },
+          {
+            id: '5',
+            fromDate: '2020-05-01',
+            toDate: '2020-05-07',
+            days: 7,
+            type: 'IMMIGRATION_DETENTION',
+            prisonName: 'Brixton (HMP)',
+            prisonId: 'BXI',
+          },
+        ],
+      },
+    })
+  },
+  stubPutPreviousPeriodsOfUal: (): SuperAgentRequest => {
+    return stubFor({
+      request: {
+        method: 'PUT',
+        urlPattern: '/adjustments-api/adjustments/person/A1234AB/review-previous-ual',
+      },
+      response: {
+        status: 202,
+        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      },
+    })
+  },
 }
