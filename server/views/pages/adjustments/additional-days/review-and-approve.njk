@@ -116,6 +116,20 @@
             emptyTitle: 'No ADA records waiting for approval exist for this offender'
             }) }}
 
+          {% if adasToReview.totalPotential > 0 %}
+            <h2 class="govuk-heading-m">Potential ADAs</h2>
+            <p class="govuk-body">These ADAs can potentially have an impact on HDC recall calculations.</p>
+
+            {{ adaTable({
+              tableId: 'potential-adas',
+              adas: adasToReview.potential,
+              total: adasToReview.totalPotential,
+              totalText: 'Total ADAs',
+              mainTitle: '',
+              emptyTitle: ''
+            }) }}
+          {% endif %}
+
           {% if adasToReview.quashed | length %}
             <h2 class="govuk-heading-m">Quashed ADAs</h2>
             {{ adaTable({

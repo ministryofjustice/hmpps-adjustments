@@ -1,0 +1,43 @@
+{% extends "../../../partials/layout.njk" %}
+{% from "../../../macros/adaTable.njk" import adaTable %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = applicationName %}
+{% set mainClasses = "app-container govuk-body" %}
+
+{% block content %}
+
+  <a href="/{{prisoner.prisonerNumber}}" class="govuk-back-link">Back</a>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="govuk-form-group">
+        <h1 class="govuk-heading-l">
+          <span class="govuk-caption-xl">Adjustments</span>
+        </h1>
+        {% if model.totalPotential > 0 %}
+            <h2 class="govuk-heading-m">View Potential ADAs</h2>
+            <p class="govuk-body">These ADAs can potentially have an impact on HDC recall calculations.</p>
+            <div class="govuk-inset-text">
+                If you think some information is wrong, ask the team responsible for adjudications in your prison to correct it, then <a href="">reload this page.</a>
+            </div>
+            {{ adaTable({
+              tableId: 'potential-adas',
+              adas: model.potential,
+              total: model.totalPotential,
+              totalText: 'Total ADAs',
+              mainTitle: '',
+              emptyTitle: ''
+            }) }}
+        {% endif %}
+      </div>
+    </div>
+    <div class="govuk-!-margin-top-8">
+    {{ govukButton({
+      text: "Return to adjustments hub",
+      href: "/" + prisoner.prisonerNumber,
+      classes: "govuk-button--secondary"
+    }) }}
+    </div>
+  </div>
+{% endblock %}

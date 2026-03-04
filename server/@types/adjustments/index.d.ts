@@ -269,26 +269,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/legacy/adjustments/{adjustmentId}/current-term': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    /**
-     * Set the current term of an adjustment
-     * @description Temporary endpoint to migrate the current term value of an adjustment.
-     */
-    patch: operations['setCurrentTerm']
-    trace?: never
-  }
   '/things-to-do/prisoner/{prisonerId}': {
     parameters: {
       query?: never
@@ -412,7 +392,10 @@ export interface components {
       comment?: string
       /** @description The NOMIS active or inactive flag */
       active: boolean
-      /** @description Has the prisoner been released from the NOMIS booking */
+      /**
+       * @deprecated
+       * @description Has the prisoner been released from the NOMIS booking
+       */
       bookingReleased: boolean
       /** @description The ID of the agency the prisoner is located */
       agencyId?: string
@@ -434,9 +417,9 @@ export interface components {
       id?: string
       /**
        * Format: int64
-       * @description The NOMIS booking ID of the adjustment
+       * @description The NOMIS booking ID of the adjustment. If not specified, the latest booking is used.
        */
-      bookingId: number
+      bookingId?: number
       /** @description The NOMIS ID of the person this adjustment applies to */
       person: string
       /**
@@ -469,13 +452,21 @@ export interface components {
        * @description The number of days of the adjustment
        */
       days?: number
+      /** @description The details of a remand adjustment */
       remand?: components['schemas']['RemandDto']
+      /** @description The details of an additional days awarded adjustments (ADA) */
       additionalDaysAwarded?: components['schemas']['AdditionalDaysAwardedDto']
+      /** @description Additional details of a UAL adjustment */
       unlawfullyAtLarge?: components['schemas']['UnlawfullyAtLargeDto']
+      /** @description Additional info for a LAL adjustment */
       lawfullyAtLarge?: components['schemas']['LawfullyAtLargeDto']
+      /** @description Additional info for a Special Remission adjustment */
       specialRemission?: components['schemas']['SpecialRemissionDto']
+      /** @description The details of a tagged-bail adjustment */
       taggedBail?: components['schemas']['TaggedBailDto']
+      /** @description The details of a time spent in custody abroad adjustment */
       timeSpentInCustodyAbroad?: components['schemas']['TimeSpentInCustodyAbroadDto']
+      /** @description The details of a time spent as an appeal applicant adjustment */
       timeSpentAsAnAppealApplicant?: components['schemas']['TimeSpentAsAnAppealApplicantDto']
       /**
        * Format: int32
@@ -678,24 +669,24 @@ export interface components {
        */
       dateChargeProved: string
     }
-    /** @description Will be populated if there is a ADA_INTERCEPT in the thingsToDo */
     AdaIntercept: {
       /** @enum {string} */
-      type: 'NONE' | 'FIRST_TIME_WITH_NO_ADJUDICATION' | 'FIRST_TIME' | 'UPDATE' | 'PADAS' | 'PADA'
+      type: 'NONE' | 'FIRST_TIME_WITH_NO_ADJUDICATION' | 'FIRST_TIME' | 'UPDATE' | 'PADAS' | 'PADA' | 'POTENTIAL'
       /** Format: int32 */
       number: number
       anyProspective: boolean
       messageArguments: string[]
       message?: string
-    } | null
+    }
     ThingsToDo: {
       prisonerId: string
       thingsToDo: 'ADA_INTERCEPT'[]
+      /** @description Will be populated if there is a ADA_INTERCEPT in the thingsToDo */
       adaIntercept?: components['schemas']['AdaIntercept']
     }
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never>
+        [key: string]: unknown
       }
       messageId: string
     }
@@ -750,6 +741,9 @@ export interface components {
       earliestNonRecallSentenceDate?: string
       /** Format: date */
       earliestRecallDate?: string
+      potential: components['schemas']['AdasByDateCharged'][]
+      /** Format: int32 */
+      totalPotential: number
     }
     AdasByDateCharged: {
       /** Format: date */
@@ -758,7 +752,7 @@ export interface components {
       /** Format: int32 */
       total?: number
       /** @enum {string} */
-      status?: 'AWARDED' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
+      status?: 'POTENTIAL' | 'AWARDED' | 'PENDING_APPROVAL' | 'SUSPENDED' | 'QUASHED' | 'PROSPECTIVE'
       /** Format: uuid */
       adjustmentId?: string
     }
@@ -1140,8 +1134,6 @@ export interface operations {
         status?: ('ACTIVE' | 'INACTIVE' | 'DELETED' | 'INACTIVE_WHEN_DELETED')[]
         /** @description Only get the adjustments linked to the current period of custody. Defaults to true */
         currentPeriodOfCustody?: boolean
-        /** @description The earliest sentence date to filter adjustments by. Defaults to earliest active sentence date */
-        sentenceEnvelopeDate?: string
         /** @description The recall ID to filter adjustments by. */
         recallId?: string
       }
@@ -1380,45 +1372,6 @@ export interface operations {
     }
     responses: {
       /** @description Reject a prospective ADA */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description Unauthorised, requires a valid Oauth2 token */
-      401: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description Adjustment not found */
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  setCurrentTerm: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description The adjustment UUID */
-        adjustmentId: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/vnd.nomis-offence+json': components['schemas']['LegacyAdjustment']
-      }
-    }
-    responses: {
-      /** @description Adjustment updated */
       200: {
         headers: {
           [name: string]: unknown

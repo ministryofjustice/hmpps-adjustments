@@ -166,6 +166,94 @@ const padasAwaitingApprovalAndQuashed = {
   },
 } as AdasToReview
 
+const onlyADAsToReviewWithPotential = {
+  awaitingApproval: [
+    {
+      dateChargeProved: '2023-08-03',
+      charges: [
+        {
+          chargeNumber: '1525917',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+        },
+      ],
+      total: 5,
+      status: 'PENDING_APPROVAL',
+    },
+  ],
+  suspended: [],
+  awarded: [],
+  quashed: [],
+  totalAwarded: 0,
+  totalQuashed: 0,
+  totalAwaitingApproval: 104,
+  totalSuspended: 0,
+  intercept: {
+    number: 2,
+    type: 'FIRST_TIME',
+    anyProspective: false,
+  },
+  showExistingAdaMessage: false,
+  totalExistingAdas: null,
+  potential: [
+    {
+      dateChargeProved: '2023-08-03',
+      charges: [
+        {
+          chargeNumber: '1525917',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+        },
+      ],
+      total: 5,
+      status: 'AWARDED',
+    },
+  ],
+  totalPotential: 5,
+} as AdasToReview
+
+const onlyPotentialADAs = {
+  awaitingApproval: [],
+  suspended: [],
+  awarded: [],
+  quashed: [],
+  totalAwarded: 0,
+  totalQuashed: 0,
+  totalAwaitingApproval: 0,
+  totalSuspended: 0,
+  intercept: {
+    number: 2,
+    type: 'FIRST_TIME',
+    anyProspective: false,
+  },
+  showExistingAdaMessage: false,
+  totalExistingAdas: null,
+  potential: [
+    {
+      dateChargeProved: '2023-08-03',
+      charges: [
+        {
+          chargeNumber: '1525917',
+          dateChargeProved: '2023-08-03',
+          days: 5,
+          heardAt: 'Moorland (HMP & YOI)',
+          status: 'AWARDED_OR_PENDING',
+          toBeServed: 'Concurrent',
+        },
+      ],
+      total: 5,
+      status: 'AWARDED',
+    },
+  ],
+  totalPotential: 5,
+} as AdasToReview
+
 const onlyADAsToReview = {
   awaitingApproval: [
     {
@@ -331,6 +419,49 @@ describe('Additional Days Awarded routes tests', () => {
           )
           expect(res.text).toContain('ADAs have not been incorrectly recorded as PADAs.')
           expect(res.text).toContain('The consecutive and concurrent information for each ADA is correct.')
+          expect(res.text).not.toContain('Potential ADAs')
+          expect(res.text).not.toContain('These ADAs can potentially have an impact on HDC recall calculations.')
+        })
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve Review message when ADAs need approval and there are also potential ADAs', () => {
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(onlyADAsToReviewWithPotential)
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/review-and-approve`)
+        .expect(200)
+        .expect(res => {
+          expect(res.text).toContain(
+            'ADA adjustments are based on adjudication records. Before you approve ADAs, check that:',
+          )
+          expect(res.text).toContain('ADAs have not been incorrectly recorded as PADAs.')
+          expect(res.text).toContain('The consecutive and concurrent information for each ADA is correct.')
+          expect(res.text).toContain('Potential ADAs')
+          expect(res.text).toContain('These ADAs can potentially have an impact on HDC recall calculations.')
+        })
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve Review redirect when there is only potential ADAs', () => {
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(onlyPotentialADAs)
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/review-and-approve`)
+        .expect(302)
+        .expect('Location', `/${NOMS_ID}/additional-days/view-potential`)
+    })
+
+    it('GET /{nomsId}/additional-days/review-and-approve Review message when there is only potential ADAs', () => {
+      additionalDaysAwardedBackendService.getAdasToApprove.mockResolvedValue(onlyPotentialADAs)
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/view-potential`)
+        .expect(200)
+        .expect(res => {
+          expect(res.text).toContain('View Potential ADAs')
+          expect(res.text).toContain('These ADAs can potentially have an impact on HDC recall calculations.')
+          expect(res.text).toContain(
+            'If you think some information is wrong, ask the team responsible for adjudications in your prison to correct it, then ',
+          )
         })
     })
 

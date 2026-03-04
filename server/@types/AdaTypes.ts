@@ -8,6 +8,8 @@ type AdasToReview = {
   quashed: AdasByDateCharged[]
   totalQuashed: number
   awaitingApproval: AdasByDateCharged[]
+  potential: AdasByDateCharged[]
+  totalPotential: number
   totalAwaitingApproval: number
   intercept: AdaIntercept
   totalExistingAdas: number
@@ -27,7 +29,14 @@ type PadasToReview = {
   totalProspective: number
 }
 
-type InterceptType = 'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA' | 'PADAS' | 'FIRST_TIME_WITH_NO_ADJUDICATION'
+type InterceptType =
+  | 'NONE'
+  | 'FIRST_TIME'
+  | 'UPDATE'
+  | 'PADA'
+  | 'PADAS'
+  | 'FIRST_TIME_WITH_NO_ADJUDICATION'
+  | 'POTENTIAL'
 
 type AdaIntercept = {
   type: InterceptType
