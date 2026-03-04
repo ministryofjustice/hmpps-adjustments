@@ -10,6 +10,7 @@ import prisonerSearchApi from './integration_tests/mockApis/prisonerSearchApi'
 import components from './integration_tests/mockApis/components'
 import courtCasesReleaseDatesApi from './integration_tests/mockApis/courtCasesReleaseDatesApi'
 import rasAPI from './integration_tests/mockApis/rasAPI'
+import logAccessibilityViolations from './integration_tests/support/accessibilityViolations'
 
 export default defineConfig({
   chromeWebSecurity: false,
@@ -35,6 +36,7 @@ export default defineConfig({
         ...courtCasesReleaseDatesApi,
         ...components,
         ...rasAPI,
+        ...logAccessibilityViolations,
       })
     },
     baseUrl: 'http://localhost:3007',

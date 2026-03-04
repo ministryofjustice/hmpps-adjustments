@@ -14,6 +14,7 @@ import ParamStoreService from './paramStoreService'
 import CourtCasesReleaseDatesService from './courtCasesReleaseDatesService'
 import AuditService from './auditService'
 import RemandAndSentencingService from './remandAndSentencingService'
+import PreviousUnlawfullyAtLargeReviewStoreService from './previousUnlawfullyAtLargeReviewStoreService'
 
 export const services = () => {
   const { applicationInfo, hmppsAuthClient, manageUsersApiClient, feComponentsClient } = dataAccess()
@@ -35,6 +36,7 @@ export const services = () => {
     additionalDaysAwardedStoreService,
   )
   const courtCasesReleaseDatesService = new CourtCasesReleaseDatesService(hmppsAuthClient)
+  const previousUnlawfullyAtLargeReviewStoreService = new PreviousUnlawfullyAtLargeReviewStoreService()
   const auditService = new AuditService()
 
   return {
@@ -54,6 +56,7 @@ export const services = () => {
     courtCasesReleaseDatesService,
     auditService,
     remandAndSentencingService,
+    previousUnlawfullyAtLargeReviewStoreService,
   }
 }
 

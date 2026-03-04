@@ -1,3 +1,5 @@
+import { checkAxeAccessibility } from '../support/accessibilityViolations'
+
 export type PageElement = Cypress.Chainable<JQuery>
 
 export default abstract class Page {
@@ -14,8 +16,7 @@ export default abstract class Page {
   checkOnPage(): void {
     cy.get('h1').should('contain.text', this.title)
     if (!this.skipAxe()) {
-      cy.injectAxe()
-      cy.checkA11y()
+      checkAxeAccessibility()
     }
   }
 

@@ -1,6 +1,7 @@
 import SessionAdjustment from '../AdjustmentTypes'
 import type { UserDetails } from '../../services/userService'
 import { PrisonerSearchApiPrisoner } from '../prisonerSearchApi/prisonerSearchTypes'
+import { PreviousUnlawfullyAtLargeReviewRequest } from '../adjustments/adjustmentsTypes'
 
 export default {}
 
@@ -12,6 +13,7 @@ declare module 'express-session' {
     adjustments?: Record<string, Record<string, SessionAdjustment>>
     additionalDayApprovals?: Record<string, Date>
     additionalDayPadas?: Record<string, string[]>
+    previousUalReview?: Record<string, PreviousUnlawfullyAtLargeReviewRequest>
     params?: Record<string, boolean>
   }
 }

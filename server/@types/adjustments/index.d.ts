@@ -108,6 +108,30 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/adjustments/person/{person}/review-previous-ual': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Get UAL from previous periods of custody requiring review
+     * @description Get any UAL from a previous period of custody that might still be relevant to the current period and requires review
+     */
+    get: operations['findPreviousUalToReview']
+    /**
+     * Confirm or reject previous UAL
+     * @description Confirm or reject previous UAL. Once confirmed or rejected it will not be shown again. Confirming UAL create new adjustments for the current period of custody.
+     */
+    put: operations['confirmPreviousUal']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/legacy/adjustments': {
     parameters: {
       query?: never
@@ -582,6 +606,13 @@ export interface components {
        */
       type?: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR' | 'IMMIGRATION_DETENTION'
     }
+    /** @description A request to confirm previous UAL adjustments */
+    PreviousUnlawfullyAtLargeReviewRequest: {
+      /** @description The IDs of any adjustments that should be recreated for the latest period of custody */
+      acceptedAdjustmentIds: string[]
+      /** @description The IDs of any adjustments that should not be recreated or referenced again in future reviews */
+      rejectedAdjustmentIds: string[]
+    }
     LegacyAdjustmentCreatedResponse: {
       /** Format: uuid */
       adjustmentId: string
@@ -703,6 +734,44 @@ export interface components {
       calculationAt: string
       /** @enum {string} */
       status: 'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'RECALL' | 'UNKNOWN' | 'CALCULATED' | 'IN_PROGRESS'
+    }
+    /** @description A UAL adjustment from a previous period of custody */
+    PreviousUnlawfullyAtLargeAdjustmentForReview: {
+      /**
+       * Format: uuid
+       * @description The ID of the adjustment
+       */
+      id: string
+      /**
+       * Format: date
+       * @description The start date of the UAL
+       */
+      fromDate: string
+      /**
+       * Format: date
+       * @description The end date of the UAL
+       */
+      toDate: string
+      /**
+       * Format: int32
+       * @description The number of days of the adjustment
+       */
+      days: number
+      /**
+       * @description The type of UAL
+       * @enum {string}
+       */
+      type?: 'RECALL' | 'ESCAPE' | 'SENTENCED_IN_ABSENCE' | 'RELEASE_IN_ERROR' | 'IMMIGRATION_DETENTION'
+      /**
+       * @description The name name of the prison where the prisoner was located at the time the adjustment was created
+       * @example Leeds
+       */
+      readonly prisonName?: string
+      /**
+       * @description The prison where the prisoner was located at the time the adjustment was created (a 3 character code identifying the prison)
+       * @example LDS
+       */
+      readonly prisonId?: string
     }
     Ada: {
       /** Format: date */
@@ -1052,6 +1121,70 @@ export interface operations {
       }
       /** @description Adjustment not found */
       404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+    }
+  }
+  findPreviousUalToReview: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The noms ID of the person */
+        person: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Adjustments found */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PreviousUnlawfullyAtLargeAdjustmentForReview'][]
+        }
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PreviousUnlawfullyAtLargeAdjustmentForReview'][]
+        }
+      }
+    }
+  }
+  confirmPreviousUal: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The noms ID of the person */
+        person: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PreviousUnlawfullyAtLargeReviewRequest']
+      }
+    }
+    responses: {
+      /** @description Adjustments created or marked as reviewed and rejected */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorised, requires a valid Oauth2 token */
+      401: {
         headers: {
           [name: string]: unknown
         }

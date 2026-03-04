@@ -12,6 +12,7 @@ import ReviewUnusedDeductionRoutes from './reviewUnusedDeductionRoutes'
 import SpecialRemissionRoutes from './specialRemissionRoutes'
 import TimeSpentInCustodyAbroadRoutes from './timeSpentInCustodyAbroadRoutes'
 import TimeSpentAsAnAppealApplicantRoutes from './timeSpentAsAnAppealApplicantRoutes'
+import ReviewPreviousUalRoutes from './reviewPreviousUalRoutes'
 
 export default function routes(service: Services): Router {
   const router = Router()
@@ -92,6 +93,11 @@ export default function routes(service: Services): Router {
     service.adjustmentsService,
     service.prisonerService,
     service.auditService,
+  )
+
+  const reviewPreviousUalRoutes = new ReviewPreviousUalRoutes(
+    service.adjustmentsService,
+    service.previousUnlawfullyAtLargeReviewStoreService,
   )
 
   const prisonerImageRoutes = new PrisonerImageRoutes(service.prisonerService)
@@ -216,5 +222,14 @@ export default function routes(service: Services): Router {
   post('/:nomsId/recall', adjustmentRoutes.recallSubmit)
 
   get('/:nomsId/remand', adjustmentRoutes.remand)
+
+  get('/:nomsId/review-previous-unlawfully-at-large-periods', reviewPreviousUalRoutes.reviewPreviousUal)
+  post('/:nomsId/review-previous-unlawfully-at-large-periods', reviewPreviousUalRoutes.submitReviewPreviousUal)
+  get('/:nomsId/review-unlawfully-at-large-to-apply', reviewPreviousUalRoutes.reviewUalToApply)
+  post('/:nomsId/review-unlawfully-at-large-to-apply', reviewPreviousUalRoutes.submitReviewUalToApply)
+  get('/:nomsId/confirm-inapplicable-unlawfully-at-large-periods', reviewPreviousUalRoutes.viewConfirmRejectAllUal)
+  post('/:nomsId/confirm-inapplicable-unlawfully-at-large-periods', reviewPreviousUalRoutes.submitConfirmRejectAllUal)
+  get('/:nomsId/cancel-review-previous-unlawfully-at-large-periods', reviewPreviousUalRoutes.cancel)
+
   return router
 }

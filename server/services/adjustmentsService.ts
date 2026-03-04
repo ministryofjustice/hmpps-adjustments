@@ -4,6 +4,8 @@ import {
   Adjustment,
   AdjustmentStatus,
   CreateResponse,
+  PreviousUnlawfullyAtLargeAdjustmentForReview,
+  PreviousUnlawfullyAtLargeReviewRequest,
   ProspectiveAdaRejection,
   RestoreAdjustments,
   UnusedDeductionsCalculationResult,
@@ -89,6 +91,25 @@ export default class AdjustmentsService {
       selectedPadas,
       activeCaseLoadId,
     )
+  }
+
+  public async getPreviousUnlawfullyAtLargeAdjustmentForReview(
+    person: string,
+    username: string,
+  ): Promise<PreviousUnlawfullyAtLargeAdjustmentForReview[]> {
+    return new AdjustmentsClient(
+      await this.getSystemClientToken(username),
+    ).getPreviousUnlawfullyAtLargeAdjustmentForReview(person)
+  }
+
+  public async submitPreviousUnlawfullyAtLargeReviewRequest(
+    person: string,
+    request: PreviousUnlawfullyAtLargeReviewRequest,
+    username: string,
+  ): Promise<void> {
+    return new AdjustmentsClient(
+      await this.getSystemClientToken(username),
+    ).submitPreviousUnlawfullyAtLargeReviewRequest(person, request)
   }
 
   public async rejectProspectiveAda(
