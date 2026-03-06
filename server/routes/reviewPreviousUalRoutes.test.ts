@@ -145,6 +145,32 @@ describe('Review previous UAL routes', () => {
           expectRow(rows.eq(4), true, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'Immigration detention', '7')
         })
     })
+
+    it('Should handle legacy UAL with no UAL type', () => {
+      adjustmentsService.getPreviousUnlawfullyAtLargeAdjustmentForReview.mockResolvedValue([
+        {
+          id: '1',
+          fromDate: '2020-01-01',
+          toDate: '2020-01-03',
+          days: 3,
+          type: null,
+          prisonName: 'Brixton (HMP)',
+          prisonId: 'BXI',
+        },
+      ])
+      return request(app)
+        .get(`/${NOMS_ID}/review-previous-unlawfully-at-large-periods`)
+        .expect(200)
+        .expect(res => {
+          const $ = cheerio.load(res.text)
+          const table = $('[data-qa=previous-ual-periods-table]')
+          expect(table).toHaveLength(1)
+
+          const rows = table.find('tbody tr')
+          expect(rows).toHaveLength(1)
+          expectRow(rows.eq(0), true, '1 January 2020', '3 January 2020', 'Brixton (HMP)', 'Unknown', '3')
+        })
+    })
   })
   describe('POST /{nomsId}/review-previous-unlawfully-at-large-periods', () => {
     it('should render the page with errors if validation fails', () => {
@@ -390,7 +416,38 @@ describe('Review previous UAL routes', () => {
           expect(rows.eq(2).find('td').eq(4).text().trim()).toStrictEqual('10') // '1' has 3 and '5' has 7 days
         })
     })
+
+    it('Should handle legacy UAL with no UAL type', () => {
+      previousUnlawfullyAtLargeReviewStoreService.getReview.mockReturnValue({
+        acceptedAdjustmentIds: ['1'],
+        rejectedAdjustmentIds: [],
+      })
+      adjustmentsService.getPreviousUnlawfullyAtLargeAdjustmentForReview.mockResolvedValue([
+        {
+          id: '1',
+          fromDate: '2020-01-01',
+          toDate: '2020-01-03',
+          days: 3,
+          type: null,
+          prisonName: 'Brixton (HMP)',
+          prisonId: 'BXI',
+        },
+      ])
+      return request(app)
+        .get(`/${NOMS_ID}/review-unlawfully-at-large-to-apply`)
+        .expect(200)
+        .expect(res => {
+          const $ = cheerio.load(res.text)
+          const table = $('[data-qa=previous-ual-periods-to-apply-table]')
+          expect(table).toHaveLength(1)
+
+          const rows = table.find('tbody tr')
+          expect(rows).toHaveLength(2)
+          expectRow(rows.eq(0), false, '1 January 2020', '3 January 2020', 'Brixton (HMP)', 'Unknown', '3')
+        })
+    })
   })
+
   describe('POST /{nomsId}/review-unlawfully-at-large-to-apply', () => {
     it('should submit the review to the backend and redirect to home with a success banner', () => {
       const storedReview: PreviousUnlawfullyAtLargeReviewRequest = {

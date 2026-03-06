@@ -88,5 +88,5 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   njkEnv.addFilter('personProfileName', personProfileName)
   njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
   njkEnv.addFilter('personStatus', personStatus)
-  njkEnv.addFilter('formatUalType', type => ualType.find(it => it.value === type).text)
+  njkEnv.addFilter('formatUalType', type => ualType.find(it => it.value === type)?.text ?? 'Unknown')
 }
