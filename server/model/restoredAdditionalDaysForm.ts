@@ -5,7 +5,12 @@ import adjustmentTypes, { AdjustmentType } from './adjustmentTypes'
 import { PrisonerSearchApiPrisoner } from '../@types/prisonerSearchApi/prisonerSearchTypes'
 import { Adjustment } from '../@types/adjustments/adjustmentsTypes'
 
-export default class RestoredAdditionalDaysForm extends AdjustmentsForm<RestoredAdditionalDaysForm> {
+export default class RestoredAdditionalDaysForm extends AdjustmentsForm {
+  constructor(params: Partial<RestoredAdditionalDaysForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   'from-day': string
 
   'from-month': string

@@ -25,7 +25,7 @@ context('Enter an ADA', () => {
     cy.task('stubEvictCache')
   })
 
-  it('Enter an AADA', () => {
+  it('Enter an ADA', () => {
     cy.signIn()
     const hubPage = HubPage.goTo('A1234AB')
     hubPage.reviewLink().click()

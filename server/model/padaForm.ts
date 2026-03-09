@@ -1,7 +1,12 @@
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
 
-export default class PadaForm extends AbstractForm<PadaForm> {
+export default class PadaForm extends AbstractForm {
+  constructor(params: Partial<PadaForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   prospective: string | string[]
 
   none: string

@@ -9,7 +9,12 @@ import { PrisonerSearchApiPrisoner } from '../../@types/prisonerSearchApi/prison
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 import ValidationError from '../validationError'
 
-export default class UnlawfullyAtLargeForm extends AdjustmentsForm<UnlawfullyAtLargeForm> {
+export default class UnlawfullyAtLargeForm extends AdjustmentsForm {
+  constructor(params: Partial<UnlawfullyAtLargeForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   'from-day': string
 
   'from-month': string

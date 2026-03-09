@@ -5,19 +5,14 @@
   "repository": "git@github.com:ministryofjustice/hmpps-adjustments.git",
   "license": "MIT",
   "scripts": {
-    "prepare": "husky",
-    "copy-views": "cp -R server/views dist/server/",
-    "compile-sass": "sass --quiet-deps --no-source-map --load-path=node_modules/govuk-frontend/dist --load-path=node_modules/@ministryofjustice/frontend --load-path=node_modules/@ministryofjustice/hmpps-court-cases-release-dates-design --load-path=. assets/scss/application.scss:./assets/stylesheets/application.css --style compressed",
+    "prepare": "hmpps-precommit-hooks-prepare",
     "watch-ts": "tsc -w",
-    "watch-views": "nodemon --watch server/views -e html,njk -x npm run copy-views",
-    "watch-node": "DEBUG=gov-starter-server* nodemon -r dotenv/config --watch dist/ dist/server.js | bunyan -o short",
-    "watch-sass": "npm run compile-sass -- --watch",
-    "build": "node esbuild/esbuild.config.js --build",
+    "build": "node esbuild/esbuild",
     "start": "node $NODE_OPTIONS dist/server.js | bunyan -o short",
-    "start:dev": "concurrently -k -p \"[{name}]\" -n \"Views,TypeScript,ESBuild,Node,Sass\" -c \"yellow.bold,cyan.bold,green.bold,blue.bold\" \"node esbuild/esbuild.config.js --build --watch\" \"node esbuild/esbuild.config.js --dev-server\"",
-    "start-feature": "export $(cat feature.env) && node $NODE_DEBUG_OPTION dist/server.js | bunyan -o short",
-    "watch-node-feature": "export $(cat feature.env) && nodemon --watch dist/ $NODE_DEBUG_OPTION dist/server.js | bunyan -o short",
-    "start-feature:dev": "export $(cat feature.env) && concurrently -k -p \"[{name}]\" -n \"Views,TypeScript,ESBuild,Node,Sass\" -c \"yellow.bold,cyan.bold\" \"node esbuild/esbuild.config.js --build --watch\" \"node esbuild/esbuild.config.js --feature-dev-server\"",
+    "start:debug": "node --inspect --env-file=.env dist/server.js | bunyan -o short",
+    "start:dev": "node --inspect esbuild/esbuild --watch",
+    "start-feature": " node $NODE_DEBUG_OPTION --env-file=feature.env dist/server.js | bunyan -o short",
+    "start-feature:dev": "node esbuild/esbuild --watch --env feature.env",
     "lint": "eslint . --cache --max-warnings 0",
     "lint-fix": "eslint . --cache --max-warnings 0 --fix",
     "typecheck": "tsc && tsc -p integration_tests",
@@ -26,7 +21,9 @@
     "security_audit": "npx audit-ci --config audit-ci.json",
     "int-test": "cypress run --config video=false",
     "int-test-ui": "cypress open --e2e --browser chrome",
-    "clean": "rm -rf dist build node_modules stylesheets",
+    "clean": "rm -rf dist test_results",
+    "rebuild": "npm run clean && npm run setup && npm run build",
+    "setup": "npm ci && hmpps-npm-script-run-allowlist",
     "generate-adjudication-types": "openapi-typescript https://manage-adjudications-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/adjudications/index.d.ts",
     "generate-adjustments-api-types": "openapi-typescript https://adjustments-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/adjustments/index.d.ts",
     "generate-calculate-release-dates-api-types": "openapi-typescript https://calculate-release-dates-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/calculateReleaseDates/index.d.ts",
@@ -34,79 +31,18 @@
     "generate-identify-remand-period-types": "openapi-typescript https://identify-remand-periods-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/identifyRemandPeriods/index.d.ts",
     "generate-prison-api-types": "openapi-typescript https://prison-api-dev.prison.service.justice.gov.uk/v3/api-docs > ../server/@types/prisonApi/index.d.ts",
     "generate-prisoner-search-api-types": "openapi-typescript https://prisoner-search-dev.prison.service.justice.gov.uk/v3/api-docs > ./server/@types/prisonerSearchApi/index.d.ts",
-    "generate-ras-api-types": "openapi-typescript https://remand-and-sentencing-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/remandAndSentencingApi/index.d.ts",
-    "rebuild": "npm run clean && npm i && npm run build",
-    "setup": "npm ci && hmpps-npm-script-run-allowlist"
+    "generate-ras-api-types": "openapi-typescript https://remand-and-sentencing-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/remandAndSentencingApi/index.d.ts"
   },
   "engines": {
     "node": "^24",
     "npm": "^11"
   },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": [
-        "ts-jest",
-        {
-          "isolatedModules": true
-        }
-      ]
-    },
-    "collectCoverageFrom": [
-      "server/**/*.{ts,js,jsx,mjs}"
-    ],
-    "testMatch": [
-      "<rootDir>/(server|job)/**/?(*.)(cy|test).{ts,js,jsx,mjs}"
-    ],
-    "testEnvironment": "node",
-    "reporters": [
-      "default",
-      [
-        "jest-junit",
-        {
-          "outputDirectory": "test_results/jest/"
-        }
-      ],
-      [
-        "./node_modules/jest-html-reporter",
-        {
-          "outputPath": "test_results/unit-test-reports.html"
-        }
-      ]
-    ],
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "json",
-      "node",
-      "ts"
-    ]
-  },
-  "nodemonConfig": {
-    "ignore": [
-      ".circleci/*",
-      "migrations/*",
-      "node_modules/*",
-      "test/*",
-      "integration_tests/*"
-    ],
-    "delay": 2500,
-    "ext": "js,json,html,njk"
-  },
-  "lint-staged": {
-    "*.{ts,js,css}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.json": [
-      "prettier --write"
-    ]
-  },
   "dependencies": {
     "@microsoft/applicationinsights-clickanalytics-js": "^3.3.11",
     "@microsoft/applicationinsights-web": "^3.3.11",
-    "@ministryofjustice/frontend": "^8.0.0",
     "@ministryofjustice/hmpps-audit-client": "^1.1.1",
-    "@ministryofjustice/hmpps-court-cases-release-dates-design": "^4.15.2",
+    "@ministryofjustice/frontend": "^9.0.0",
+    "@ministryofjustice/hmpps-court-cases-release-dates-design": "^5.0.0",
     "agentkeepalive": "^4.6.0",
     "applicationinsights": "^2.9.8",
     "axe-core": "4.11.1",
@@ -124,7 +60,7 @@
     "express": "^5.2.1",
     "express-prom-bundle": "^8.0.0",
     "express-session": "^1.18.2",
-    "govuk-frontend": "^5.14.0",
+    "govuk-frontend": "^6.1.0",
     "helmet": "^8.1.0",
     "http-errors": "^2.0.1",
     "jwt-decode": "^4.0.0",
@@ -140,8 +76,11 @@
   },
   "devDependencies": {
     "@jgoz/esbuild-plugin-typecheck": "^4.0.4",
-    "@ministryofjustice/eslint-config-hmpps": "^1.0.2",
+    "@ministryofjustice/eslint-config-hmpps": "^1.0.3",
+    "@ministryofjustice/frontend-types": "1.0.0-alpha.2",
     "@ministryofjustice/hmpps-npm-script-allowlist": "0.0.3",
+    "@ministryofjustice/hmpps-precommit-hooks": "2.0.2",
+    "@tsconfig/node24": "^24.0.4",
     "@types/bunyan": "^1.8.11",
     "@types/bunyan-format": "^0.2.9",
     "@types/compression": "^1.8.1",
@@ -157,8 +96,6 @@
     "@types/passport-oauth2": "^1.8.0",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^6.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.53.1",
-    "@typescript-eslint/parser": "^8.53.1",
     "audit-ci": "^7.1.0",
     "autoprefixer": "^10.4.23",
     "aws-sdk-client-mock": "^4.1.0",
@@ -166,28 +103,18 @@
     "cookie-session": "^2.1.1",
     "cypress": "^15.9.0",
     "cypress-axe": "^1.7.0",
-    "cypress-multi-reporters": "^2.0.5",
+    "del": "8.0.1",
     "dotenv": "^17.2.3",
-    "esbuild": "^0.27.2",
-    "esbuild-plugin-clean": "^1.0.1",
+    "esbuild": "^0.27.3",
     "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-manifest": "^1.0.5",
     "esbuild-sass-plugin": "^3.6.0",
-    "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-cypress": "^3.6.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-no-only-tests": "^3.3.0",
-    "eslint-plugin-prettier": "^5.5.5",
     "glob": "^13.0.6",
-    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-html-reporter": "^4.3.0",
     "jest-junit": "^16.0.0",
     "jsonwebtoken": "^9.0.3",
-    "lint-staged": "^16.2.7",
-    "mocha-junit-reporter": "^2.2.1",
+    "lint-staged": "^16.3.2",
     "nock": "^14.0.10",
     "nodemon": "^3.1.11",
     "openapi-typescript": "7.10.1",

@@ -3,7 +3,12 @@ import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
 import { Adjustment } from '../../@types/adjustments/adjustmentsTypes'
 
-export default class UnusedDeductionsDaysForm extends AbstractForm<UnusedDeductionsDaysForm> {
+export default class UnusedDeductionsDaysForm extends AbstractForm {
+  constructor(params: Partial<UnusedDeductionsDaysForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   days: string
 
   totalRemandAndTaggedBailDays: number

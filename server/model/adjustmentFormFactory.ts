@@ -9,7 +9,7 @@ import LawfullyAtLargeForm from './lawfully-at-large/lawfullyAtLargeForm'
 import UnlawfullyAtLargeForm from './unlawfully-at-large/unlawfullyAtLargeForm'
 
 export default class AdjustmentsFormFactory {
-  static fromAdjustment<T extends AdjustmentsForm<unknown>>(adjustment: Adjustment): AdjustmentsForm<T> {
+  static fromAdjustment(adjustment: Adjustment): AdjustmentsForm {
     if (adjustment.adjustmentType === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return new RestoredAdditionalDaysForm({
         'from-day': dayjs(adjustment.fromDate).get('date').toString(),
@@ -54,7 +54,7 @@ export default class AdjustmentsFormFactory {
     })
   }
 
-  static fromType<T extends AdjustmentsForm<unknown>>(adjustmentType: AdjustmentType): AdjustmentsForm<T> {
+  static fromType(adjustmentType: AdjustmentType): AdjustmentsForm {
     if (adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return new RestoredAdditionalDaysForm({})
     }
@@ -69,10 +69,7 @@ export default class AdjustmentsFormFactory {
     })
   }
 
-  static fromRequest<T extends AdjustmentsForm<unknown>>(
-    req: Request,
-    adjustmentType: AdjustmentType,
-  ): AdjustmentsForm<T> {
+  static fromRequest(req: Request, adjustmentType: AdjustmentType): AdjustmentsForm {
     if (adjustmentType.value === 'RESTORATION_OF_ADDITIONAL_DAYS_AWARDED') {
       return new RestoredAdditionalDaysForm(req.body)
     }

@@ -1,7 +1,12 @@
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
 
-export default class ConfirmRejectPreviousPeriodsOfUalForm extends AbstractForm<ConfirmRejectPreviousPeriodsOfUalForm> {
+export default class ConfirmRejectPreviousPeriodsOfUalForm extends AbstractForm {
+  constructor(params: Partial<ConfirmRejectPreviousPeriodsOfUalForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   confirm: 'yes' | 'no'
 
   async validation(): Promise<ValidationError[]> {

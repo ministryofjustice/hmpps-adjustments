@@ -7,11 +7,7 @@ import { PrisonApiOffenderSentenceAndOffences } from '../@types/prisonApi/prison
 
 dayjs.extend(customParseFormat)
 
-export default abstract class AbstractForm<T> {
-  constructor(params: Partial<T>) {
-    Object.assign(this, params)
-  }
-
+export default abstract class AbstractForm {
   errors: ValidationError[] = []
 
   async validate(

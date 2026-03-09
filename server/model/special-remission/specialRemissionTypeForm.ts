@@ -3,7 +3,12 @@ import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
 import SessionAdjustment from '../../@types/AdjustmentTypes'
 
-export default class SpecialRemissionTypeForm extends AbstractForm<SpecialRemissionTypeForm> {
+export default class SpecialRemissionTypeForm extends AbstractForm {
+  constructor(params: Partial<SpecialRemissionTypeForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   days: string
 
   isEdit: boolean

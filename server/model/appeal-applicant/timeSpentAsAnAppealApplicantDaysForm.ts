@@ -3,7 +3,12 @@ import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
 import SessionAdjustment from '../../@types/AdjustmentTypes'
 
-export default class TimeSpentAsAnAppealApplicantDaysForm extends AbstractForm<TimeSpentAsAnAppealApplicantDaysForm> {
+export default class TimeSpentAsAnAppealApplicantDaysForm extends AbstractForm {
+  constructor(params: Partial<TimeSpentAsAnAppealApplicantDaysForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   days: string
 
   isEdit: boolean
