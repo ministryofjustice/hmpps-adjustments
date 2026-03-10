@@ -6,7 +6,12 @@ import ValidationError from '../validationError'
 import { dateItems, dateToString, daysBetween, fieldsToDate, isDateInFuture, isFromAfterTo } from '../../utils/utils'
 import { PrisonApiOffenderSentenceAndOffences } from '../../@types/prisonApi/prisonClientTypes'
 
-export default class RemandDatesForm extends AbstractForm<RemandDatesForm> {
+export default class RemandDatesForm extends AbstractForm {
+  constructor(params: Partial<RemandDatesForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   'from-day': string
 
   'from-month': string

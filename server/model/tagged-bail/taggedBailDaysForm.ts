@@ -3,7 +3,12 @@ import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
 import SessionAdjustment from '../../@types/AdjustmentTypes'
 
-export default class TaggedBailDaysForm extends AbstractForm<TaggedBailDaysForm> {
+export default class TaggedBailDaysForm extends AbstractForm {
+  constructor(params: Partial<TaggedBailDaysForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   days: string
 
   isEdit: boolean

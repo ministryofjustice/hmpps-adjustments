@@ -4,16 +4,15 @@ $path: "/assets/images/";
 $moj-page-width: 1170px;
 $govuk-page-width: $moj-page-width;
 
-@import 'govuk-frontend/dist/govuk/all';
-@import '@ministryofjustice/frontend/moj/all';
+@import "govuk-frontend/dist/govuk/index";
+@import "@ministryofjustice/frontend/moj/all";
 @import '@ministryofjustice/hmpps-court-cases-release-dates-design/hmpps/all';
 
 @import './components/adjustment-card';
 @import './components/previous-ual';
 @import './components/review-list';
 @import './components/header-bar';
-@import 'assets/scss/local';
-
+@import './overrides/local';
 
 .table-ual-column-type {
   width: 8em;

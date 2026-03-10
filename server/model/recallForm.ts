@@ -1,7 +1,12 @@
 import AbstractForm from './abstractForm'
 import ValidationError from './validationError'
 
-export default class RecallForm extends AbstractForm<RecallForm> {
+export default class RecallForm extends AbstractForm {
+  constructor(params: Partial<RecallForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   adjustments: string | string[]
 
   async validation(): Promise<ValidationError[]> {

@@ -6,7 +6,12 @@ import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
 import RemandAndSentencingService from '../../services/remandAndSentencingService'
 
-export default class RemandOffencesForm extends AbstractForm<RemandOffencesForm> {
+export default class RemandOffencesForm extends AbstractForm {
+  constructor(params: Partial<RemandOffencesForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   chargeId: string | string[]
 
   toAdjustment(adjustment: Adjustment): SessionAdjustment {

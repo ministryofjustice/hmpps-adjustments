@@ -43,4 +43,4 @@ type AdaIntercept = {
   number: number
   anyProspective: boolean
 }
-export { AdasByDateCharged, AdasToReview, InterceptType, AdaIntercept, PadasToReview, AdasToView }
+export type { AdasByDateCharged, AdasToReview, InterceptType, AdaIntercept, PadasToReview, AdasToView }

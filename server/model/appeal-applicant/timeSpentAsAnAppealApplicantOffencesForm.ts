@@ -5,7 +5,12 @@ import { offencesForTimeSpentAsAnAppealApplicantAdjustment } from '../../utils/u
 import AbstractForm from '../abstractForm'
 import ValidationError from '../validationError'
 
-export default class TimeSpentAsAnAppealApplicantOffencesForm extends AbstractForm<TimeSpentAsAnAppealApplicantOffencesForm> {
+export default class TimeSpentAsAnAppealApplicantOffencesForm extends AbstractForm {
+  constructor(params: Partial<TimeSpentAsAnAppealApplicantOffencesForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   chargeId: string | string[]
 
   toAdjustment(adjustment: Adjustment): SessionAdjustment {

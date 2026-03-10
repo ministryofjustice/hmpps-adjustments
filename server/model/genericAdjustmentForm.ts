@@ -12,7 +12,12 @@ export type GenericAdjustmentFormOptions = {
   hasSentence: boolean
   adjustmentType: AdjustmentTypes
 }
-export default class GenericAdjustmentForm extends AdjustmentsForm<GenericAdjustmentForm> {
+export default class GenericAdjustmentForm extends AdjustmentsForm {
+  constructor(params: Partial<GenericAdjustmentForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   'from-day': string
 
   'from-month': string

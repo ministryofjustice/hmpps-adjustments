@@ -8,10 +8,12 @@ import {
   personProfileName,
   personStatus,
 } from '@ministryofjustice/hmpps-court-cases-release-dates-design/hmpps/utils/utils'
+import fs from 'fs'
 import { initialiseName } from './utils'
 import { ApplicationInfo } from '../applicationInfo'
 import config from '../config'
 import ualType from '../model/unlawfully-at-large/ualType'
+import logger from '../../logger'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -47,13 +49,25 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
       return next()
     })
   }
+  let assetManifest: Record<string, string> = {}
 
+  try {
+    const assetMetadataPath = path.resolve(__dirname, '../../assets/manifest.json')
+    assetManifest = JSON.parse(fs.readFileSync(assetMetadataPath, 'utf8'))
+  } catch (e) {
+    if (process.env.NODE_ENV !== 'test') {
+      logger.error(e, 'Could not read asset manifest file')
+    }
+  }
   const njkEnv = nunjucks.configure(
     [
       path.join(__dirname, '../../server/views'),
       'node_modules/govuk-frontend/dist/',
+      'node_modules/govuk-frontend/dist/components/',
       'node_modules/@ministryofjustice/frontend/',
+      'node_modules/@ministryofjustice/frontend/moj/components/',
       'node_modules/@ministryofjustice/hmpps-court-cases-release-dates-design/',
+      'node_modules/@ministryofjustice/hmpps-court-cases-release-dates-design/hmpps/components/',
     ],
     {
       autoescape: true,
@@ -89,4 +103,5 @@ export default function nunjucksSetup(app: express.Express, applicationInfo: App
   njkEnv.addFilter('personDateOfBirth', personDateOfBirth)
   njkEnv.addFilter('personStatus', personStatus)
   njkEnv.addFilter('formatUalType', type => ualType.find(it => it.value === type)?.text ?? 'Unknown')
+  njkEnv.addFilter('assetMap', (url: string) => assetManifest[url] || url)
 }

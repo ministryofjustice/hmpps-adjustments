@@ -9,7 +9,12 @@ import ValidationError from '../validationError'
 import adjustmentTypes, { AdjustmentType } from '../adjustmentTypes'
 import lalAffectsReleaseDates from './lalAffectsReleaseDates'
 
-export default class LawfullyAtLargeForm extends AdjustmentsForm<LawfullyAtLargeForm> {
+export default class LawfullyAtLargeForm extends AdjustmentsForm {
+  constructor(params: Partial<LawfullyAtLargeForm>) {
+    super()
+    Object.assign(this, params)
+  }
+
   'from-day': string
 
   'from-month': string

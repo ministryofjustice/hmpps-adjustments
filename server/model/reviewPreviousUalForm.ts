@@ -7,12 +7,11 @@ const NOTHING_SELECTED_ERROR = 'Select the UAL that applies to the release date 
 const BOTH_NONE_AND_A_PERIOD_SELECTED_ERROR =
   'Select the UAL that applies to the release date calculation or select ‘No previous periods of UAL apply’'
 
-export default class ReviewPreviousUalForm extends AbstractForm<ReviewPreviousUalForm> {
+export default class ReviewPreviousUalForm extends AbstractForm {
   constructor(params: Partial<ReviewPreviousUalForm>) {
-    super({
-      selectedUalPeriod: safeArray(params.selectedUalPeriod),
-      reviewedUalPeriod: safeArray(params.reviewedUalPeriod),
-    })
+    super()
+    this.selectedUalPeriod = safeArray(params.selectedUalPeriod)
+    this.reviewedUalPeriod = safeArray(params.reviewedUalPeriod)
   }
 
   selectedUalPeriod: string[]
