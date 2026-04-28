@@ -15,6 +15,7 @@ context('Enter Appeal Applicant Not To Count', () => {
     cy.task('stubGetPrisonerDetails')
     cy.task('stubGetUserCaseloads')
     cy.task('stubGetAdjustments')
+    cy.task('stubGetSentenceTypeAndItsDetails')
     cy.task('subAdaDetailsNoIntercept')
     cy.task('stubGetSentencesAndOffences')
     cy.task('stubGetSentencesAndOffencesForAppealApplicant')

@@ -184,4 +184,5 @@ export default {
     timeSpentAsAnAppealApplicantEnabled: get('TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED', 'true') === 'true',
   },
   blockSupportUsersFromEdit: get('BLOCK_SUPPORT_USERS_FROM_EDIT', 'true') === 'true',
+  maintenanceMode: get('MAINTENANCE_MODE', 'false') === 'true',
 }
