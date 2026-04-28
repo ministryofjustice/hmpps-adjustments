@@ -21,6 +21,8 @@ import type { Services } from './services'
 import populateCurrentPrisonerAndSentenceTypes from './middleware/populateCurrentPrisonerAndSentenceTypes'
 import getFrontendComponents from './middleware/getFeComponents'
 import supportUserReadonlyMiddleware from './middleware/supportUserReadonlyMiddleware'
+import config from './config'
+import maintenanceMiddleware from './middleware/maintenanceMiddleware'
 
 export default function createApp(services: Services): express.Application {
   const app = express()
@@ -52,7 +54,11 @@ export default function createApp(services: Services): express.Application {
     populateCurrentPrisonerAndSentenceTypes(services.prisonerSearchService, services.remandAndSentencingService),
   )
 
-  app.use(routes(services))
+  if (config.maintenanceMode) {
+    app.use(maintenanceMiddleware)
+  } else {
+    app.use(routes(services))
+  }
 
   app.use((req, res, next) => next(createError(404, 'Not found')))
   app.use(errorHandler(process.env.NODE_ENV === 'production'))

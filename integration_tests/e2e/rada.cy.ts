@@ -13,6 +13,7 @@ context('Enter a RADA', () => {
     cy.task('stubGetPrisonerDetails')
     cy.task('stubGetUserCaseloads')
     cy.task('stubGetAdjustments')
+    cy.task('stubGetSentenceTypeAndItsDetails')
     cy.task('stubGetRelevantRemand')
     cy.task('stubValidateAdjustmentWithWarning')
     cy.task('stubCreateAdjustment')
@@ -36,7 +37,10 @@ context('Enter a RADA', () => {
     form.enterFromDate('2023-04-05')
     form.enterDays('25')
     form.submitButton().click()
-    const warning = WarningPage.verifyOnPage(WarningPage)
+    const warning = WarningPage.verifyOnPage(
+      WarningPage,
+      'Are you sure, as this reduction is more than 50% of the total additional days awarded?',
+    )
     warning.yesRadio().click({ force: true })
     warning.submit().click()
     const review = ReviewPage.verifyOnPage(ReviewPage)
@@ -69,7 +73,10 @@ context('Enter a RADA', () => {
     const form = FormPage.verifyOnPage<FormPage>(FormPage, 'Edit RADA details')
     form.enterDays('26')
     form.submitButton().click()
-    const warning = WarningPage.verifyOnPage(WarningPage)
+    const warning = WarningPage.verifyOnPage(
+      WarningPage,
+      'Are you sure, as this reduction is more than 50% of the total additional days awarded?',
+    )
     warning.yesRadio().click({ force: true })
     warning.submit().click()
     const review = ReviewPage.verifyOnPage(ReviewPage)

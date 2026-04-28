@@ -7,8 +7,9 @@ export default abstract class Page {
     this.checkOnPage()
   }
 
-  static verifyOnPage<T>(constructor: new (...args: unknown[]) => T, ...args: unknown[]): T {
-    return new constructor(args)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static verifyOnPage<T>(constructor: new (...args: any[]) => T, ...args: any[]): T {
+    return new constructor(...args)
   }
 
   abstract skipAxe(): boolean
