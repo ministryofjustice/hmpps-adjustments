@@ -49,14 +49,13 @@ export default function createApp(services: Services): express.Application {
     return next()
   })
 
-  app.use(
-    '/:nomsId',
-    populateCurrentPrisonerAndSentenceTypes(services.prisonerSearchService, services.remandAndSentencingService),
-  )
-
   if (config.maintenanceMode) {
     app.use(maintenanceMiddleware)
   } else {
+    app.use(
+      '/:nomsId',
+      populateCurrentPrisonerAndSentenceTypes(services.prisonerSearchService, services.remandAndSentencingService),
+    )
     app.use(routes(services))
   }
 
