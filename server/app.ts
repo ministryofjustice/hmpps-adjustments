@@ -43,20 +43,18 @@ export default function createApp(services: Services): express.Application {
   app.use(setUpCsrf())
   app.use(setUpCurrentUser(services))
 
-  app.use((req, res, next) => {
-    if (req.method === 'GET') return getFrontendComponents(services)(req, res, next)
-    if (req.method === 'POST') return supportUserReadonlyMiddleware()(req, res, next)
-    return next()
-  })
-
-  app.use(
-    '/:nomsId',
-    populateCurrentPrisonerAndSentenceTypes(services.prisonerSearchService, services.remandAndSentencingService),
-  )
-
   if (config.maintenanceMode) {
     app.use(maintenanceMiddleware)
   } else {
+    app.use((req, res, next) => {
+      if (req.method === 'GET') return getFrontendComponents(services)(req, res, next)
+      if (req.method === 'POST') return supportUserReadonlyMiddleware()(req, res, next)
+      return next()
+    })
+    app.use(
+      '/:nomsId',
+      populateCurrentPrisonerAndSentenceTypes(services.prisonerSearchService, services.remandAndSentencingService),
+    )
     app.use(routes(services))
   }
 
