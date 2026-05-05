@@ -34,7 +34,10 @@
       envelope.tags["ai.cloud.role"] = "{{ appInsightsApplicationName }}"
       envelope.tags["ai.application.ver"] = "{{ buildNumber }}"
     });
-    appInsights.trackPageView();
+    appInsights.trackPageView(null, {
+       username: '{{ user.username | default("") | safe }}',
+       caseloadId: '{{ prisoner.prisonId | default("") | safe }}'
+    })
   </script>
   {% endif %}
   {% if tagManagerContainerId %}
@@ -96,7 +99,7 @@
   {% else %}
     {% include "./header.njk" %}
   {% endif %}
-  {{ 
+  {{
       serviceHeader({
       environment: environment,
       prisonNumber: prisoner.prisonerNumber
@@ -121,13 +124,13 @@
 
 {% block footer %}
   {% if feComponents.enabled %}
-    {{ 
-      footer({ 
-        environment: environment, 
+    {{
+      footer({
+        environment: environment,
         attributes: {
           "data-qa": "ccrds-footer"
-        } 
-      }) 
+        }
+      })
     }}
   {% else %}
     {{ super() }}
