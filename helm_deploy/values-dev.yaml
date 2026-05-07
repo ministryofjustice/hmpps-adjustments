@@ -32,10 +32,11 @@ generic-service:
     TIME_SPENT_AS_AN_APPEAL_APPLICANT_ENABLED: 'true'
     RECALLS_URL: 'https://record-a-recall-dev.hmpps.service.justice.gov.uk'
     BLOCK_SUPPORT_USERS_FROM_EDIT: 'false'
+    MAINTENANCE_MODE: 'true'
 
   # Switches off the allow list in the DEV env only.
   allowlist: null
-  
+
 generic-prometheus-alerts:
   businessHoursOnly: true
   alertSeverity: legacy-replacement-alerts-non-prod
