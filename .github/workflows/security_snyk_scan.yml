@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: "22 5 * * *"
       # 05:22 every day
+
 jobs:
   security-snyk-check:
     permissions:
