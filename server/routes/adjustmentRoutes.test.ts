@@ -753,7 +753,7 @@ describe('Adjustment routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/unlawfully-at-large/view with RECALL_MAINTAINER role', () => {
+  it('GET /{nomsId}/unlawfully-at-large/view for UAL created in Recalls', () => {
     userInTest = recallUser
     adjustmentsService.findByPerson.mockResolvedValue([
       {
@@ -788,11 +788,14 @@ describe('Adjustment routes tests', () => {
       .expect('Content-Type', /html/)
       .expect(res => {
         expect(res.text).toContain('Leeds')
-        expect(res.text).toContain(`/person/${NOMS_ID}/recall/edit/recall-id/start?entrypoint=adj_unlawfully-at-large`)
+        expect(res.text).not.toContain(
+          `/person/${NOMS_ID}/recall/edit/recall-id/start?entrypoint=adj_unlawfully-at-large`,
+        )
         expect(res.text).not.toContain(
           `/person/${NOMS_ID}/edit-recall/earlier-recall-id?entrypoint=adj_unlawfully-at-large`,
         )
-        expect(res.text).not.toContain('remove/this-is-an-id')
+        expect(res.text).toContain(`/${NOMS_ID}/unlawfully-at-large/edit/this-is-an-id`)
+        expect(res.text).toContain(`/${NOMS_ID}/unlawfully-at-large/remove/this-is-an-id`)
         expect(res.text).toContain('Total days')
         expect(res.text).toContain('Date of revocation')
         // this is the day after as its rev date
