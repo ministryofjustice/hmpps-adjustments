@@ -127,14 +127,13 @@ export default class ViewModel {
 
   public recallRows() {
     return this.recallAdjustments.map(it => {
-      const isLatestRecall = it.id === this.getLatestUALRecallAdjustment()
       return [
         { html: dayjs(it.fromDate).format('D MMMM YYYY') },
         { text: dayjs(it.toDate).format('D MMMM YYYY') },
         { text: it.prisonName || 'Unknown' },
         { text: 'Recall', classes: 'table-ual-column-type' },
         { text: it.days },
-        isLatestRecall && this.roles.includes('RECALL_MAINTAINER') ? this.recallActionCell(it) : { text: '' },
+        this.actionCell(it),
       ]
     })
   }
