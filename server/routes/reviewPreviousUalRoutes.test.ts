@@ -142,7 +142,7 @@ describe('Review previous UAL routes', () => {
           )
           expectRow(rows.eq(2), true, '1 March 2020', '5 March 2020', 'Brixton (HMP)', 'Sentenced in absence', '5')
           expectRow(rows.eq(3), true, '1 April 2020', '6 April 2020', 'Brixton (HMP)', 'Release in error', '6')
-          expectRow(rows.eq(4), true, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'Immigration detention', '7')
+          expectRow(rows.eq(4), true, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'ERS return', '7')
         })
     })
 
@@ -319,7 +319,7 @@ describe('Review previous UAL routes', () => {
           )
           expectRow(rows.eq(2), false, '1 March 2020', '5 March 2020', 'Brixton (HMP)', 'Sentenced in absence', '5')
           expectRow(rows.eq(3), false, '1 April 2020', '6 April 2020', 'Brixton (HMP)', 'Release in error', '6')
-          expectRow(rows.eq(4), false, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'Immigration detention', '7')
+          expectRow(rows.eq(4), false, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'ERS return', '7')
           expect(rows.eq(5).find('td').eq(4).text().trim()).toStrictEqual('25')
         })
     })
@@ -412,7 +412,7 @@ describe('Review previous UAL routes', () => {
           const rows = table.find('tbody tr')
           expect(rows).toHaveLength(3)
           expectRow(rows.eq(0), false, '1 January 2020', '3 January 2020', 'Brixton (HMP)', 'Recall', '3')
-          expectRow(rows.eq(1), false, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'Immigration detention', '7')
+          expectRow(rows.eq(1), false, '1 May 2020', '7 May 2020', 'Brixton (HMP)', 'ERS return', '7')
           expect(rows.eq(2).find('td').eq(4).text().trim()).toStrictEqual('10') // '1' has 3 and '5' has 7 days
         })
     })
