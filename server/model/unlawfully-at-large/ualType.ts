@@ -18,7 +18,7 @@ const ualType = [
   },
   {
     value: 'IMMIGRATION_DETENTION',
-    text: 'Immigration detention',
+    text: 'ERS return',
   },
 ]
 
