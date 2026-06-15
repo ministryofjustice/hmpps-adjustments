@@ -179,6 +179,7 @@ const serviceDefinitionsRemandThingsToDo = {
           },
         ],
         count: 1,
+        severity: 'REQUIRED_BEFORE_CALCULATION',
       },
     },
     releaseDates: {
@@ -220,6 +221,7 @@ const serviceDefinitionsProspectiveThingsToDo = {
           },
         ],
         count: 1,
+        severity: 'REQUIRED_BEFORE_CALCULATION',
       },
     },
     releaseDates: {
