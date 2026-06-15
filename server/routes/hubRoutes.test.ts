@@ -148,6 +148,10 @@ const serviceDefinitionsNoThingsToDo = {
       },
     },
   },
+  maintenanceAlert: {
+    enabled: false,
+    message: 'placeholder',
+  },
 } as CcrdServiceDefinitions
 
 const serviceDefinitionsRemandThingsToDo = {
@@ -186,6 +190,10 @@ const serviceDefinitionsRemandThingsToDo = {
       },
     },
   },
+  maintenanceAlert: {
+    enabled: false,
+    message: 'placeholder',
+  },
 } as CcrdServiceDefinitions
 
 const serviceDefinitionsProspectiveThingsToDo = {
@@ -222,6 +230,43 @@ const serviceDefinitionsProspectiveThingsToDo = {
         count: 0,
       },
     },
+  },
+  maintenanceAlert: {
+    enabled: false,
+    message: 'placeholder',
+  },
+} as CcrdServiceDefinitions
+
+const serviceDefinitionsMaintenanceEnabled = {
+  services: {
+    overview: {
+      href: 'http://localhost:8000/prisoner/AB1234AB/overview',
+      text: 'Overview',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+    adjustments: {
+      href: 'http://localhost:8002/AB1234AB',
+      text: 'Adjustments',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+    releaseDates: {
+      href: 'http://localhost:8004?prisonId=AB1234AB',
+      text: 'Release dates and calculations',
+      thingsToDo: {
+        things: [],
+        count: 0,
+      },
+    },
+  },
+  maintenanceAlert: {
+    enabled: true,
+    message: 'There is due to be an outage in the future',
   },
 } as CcrdServiceDefinitions
 
@@ -783,6 +828,18 @@ describe('GET /:nomsId', () => {
       .expect(res => {
         expect(res.text).not.toContain('These days will affect the release dates')
         expect(res.text).not.toContain('These additional days will not adjust the release dates')
+      })
+  })
+  it('GET /{nomsId} display maintenance banner', () => {
+    adjustmentsService.findByPersonAndStatus.mockResolvedValue([])
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue(['NONE', []])
+    adjustmentsService.getAdaAdjudicationDetails.mockResolvedValue(noInterceptAdjudication)
+    courtCasesReleaseDatesService.getServiceDefinitions.mockResolvedValue(serviceDefinitionsMaintenanceEnabled)
+    return request(app)
+      .get(`/${NOMS_ID}`)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain(serviceDefinitionsMaintenanceEnabled.maintenanceAlert.message)
       })
   })
 })
