@@ -130,6 +130,10 @@ const serviceDefinitionsNoThingsToDo = {
         things: [],
         count: 0,
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     adjustments: {
       href: 'http://localhost:8002/AB1234AB',
@@ -138,6 +142,10 @@ const serviceDefinitionsNoThingsToDo = {
         things: [],
         count: 0,
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     releaseDates: {
       href: 'http://localhost:8004?prisonId=AB1234AB',
@@ -145,6 +153,10 @@ const serviceDefinitionsNoThingsToDo = {
       thingsToDo: {
         things: [],
         count: 0,
+      },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
       },
     },
   },
@@ -162,6 +174,10 @@ const serviceDefinitionsRemandThingsToDo = {
       thingsToDo: {
         things: [],
         count: 0,
+      },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
       },
     },
     adjustments: {
@@ -181,6 +197,10 @@ const serviceDefinitionsRemandThingsToDo = {
         count: 1,
         severity: 'REQUIRED_BEFORE_CALCULATION',
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     releaseDates: {
       href: 'http://localhost:8004?prisonId=AB1234AB',
@@ -188,6 +208,10 @@ const serviceDefinitionsRemandThingsToDo = {
       thingsToDo: {
         things: [],
         count: 0,
+      },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
       },
     },
   },
@@ -206,6 +230,10 @@ const serviceDefinitionsProspectiveThingsToDo = {
         things: [],
         count: 0,
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     adjustments: {
       href: 'http://localhost:8002/AB1234AB',
@@ -223,6 +251,10 @@ const serviceDefinitionsProspectiveThingsToDo = {
         count: 1,
         severity: 'REQUIRED_BEFORE_CALCULATION',
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     releaseDates: {
       href: 'http://localhost:8004?prisonId=AB1234AB',
@@ -230,6 +262,10 @@ const serviceDefinitionsProspectiveThingsToDo = {
       thingsToDo: {
         things: [],
         count: 0,
+      },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
       },
     },
   },
@@ -248,6 +284,10 @@ const serviceDefinitionsMaintenanceEnabled = {
         things: [],
         count: 0,
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     adjustments: {
       href: 'http://localhost:8002/AB1234AB',
@@ -256,6 +296,10 @@ const serviceDefinitionsMaintenanceEnabled = {
         things: [],
         count: 0,
       },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
+      },
     },
     releaseDates: {
       href: 'http://localhost:8004?prisonId=AB1234AB',
@@ -263,6 +307,10 @@ const serviceDefinitionsMaintenanceEnabled = {
       thingsToDo: {
         things: [],
         count: 0,
+      },
+      maintenanceAlert: {
+        enabled: false,
+        message: 'placeholder',
       },
     },
   },
