@@ -129,6 +129,11 @@ export interface components {
       services: {
         [key: string]: components['schemas']['CcrdServiceDefinition']
       }
+      maintenanceAlert: components['schemas']['MaintenanceAlert']
+    }
+    MaintenanceAlert: {
+      enabled: boolean
+      message: string
     }
     ThingToDo: {
       title: string
@@ -136,16 +141,23 @@ export interface components {
       buttonText: string
       buttonHref: string
       /** @enum {string} */
-      type: 'CALCULATION_REQUIRED' | 'ADA_INTERCEPT' | 'REVIEW_IDENTIFIED_REMAND'
+      type:
+        | 'CALCULATION_REQUIRED'
+        | 'ADA_INTERCEPT'
+        | 'REVIEW_IDENTIFIED_REMAND'
+        | 'PREVIOUS_PERIOD_OF_UAL_FOR_REVIEW'
+        | 'HMCTS_API_DOCUMENT_RECEIVED'
     }
     ThingsToDo: {
       things: components['schemas']['ThingToDo'][]
       /** Format: int32 */
       count: number
+      /** @enum {string|null} */
+      severity?: 'NOTIFICATION' | 'REQUIRED_BEFORE_CALCULATION' | null
     }
     DlqMessage: {
       body: {
-        [key: string]: Record<string, never>
+        [key: string]: unknown
       }
       messageId: string
     }

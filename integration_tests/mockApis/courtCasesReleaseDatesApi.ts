@@ -35,6 +35,7 @@ export default {
                     type: 'ADA_INTERCEPT',
                   },
                 ],
+                severity: 'REQUIRED_BEFORE_CALCULATION',
               },
             },
             releaseDates: {

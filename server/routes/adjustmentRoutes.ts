@@ -98,6 +98,7 @@ export default class AdjustmentRoutes {
 
     return res.render('pages/adjustments/hub', {
       serviceDefinitions,
+      displayMaintenanceAlert: true,
       model: new AdjustmentsHubViewModel(
         prisonerNumber,
         adjustments,
