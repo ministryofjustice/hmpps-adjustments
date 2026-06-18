@@ -176,7 +176,9 @@ export default class TaggedBailRoutes {
       relevantSentenceForTaggedBailAdjustment(it, adjustment),
     )
 
-    const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
+    const sentenceAndOffence = sentencesForCaseSequence
+      ? getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
+      : null
 
     const adjustments = await this.adjustmentsService.getAdjustmentsExceptOneBeingEdited(
       { [id]: adjustment },
@@ -203,9 +205,9 @@ export default class TaggedBailRoutes {
       model: new TaggedBailRemoveModel(
         prisonerNumber,
         adjustment,
-        sentenceAndOffence,
         showUnusedMessage,
         this.remandAndSentencingService,
+        sentenceAndOffence,
         reviewDeductions,
       ),
     })

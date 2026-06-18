@@ -203,7 +203,24 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
+  it('GET /{nomsId}/tagged-bail/view NOMIS adjustment with inactive sentence displays correctly and only allows delete', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    unusedDeductionsService.getCalculatedUnusedDeductionsMessageAndAdjustments.mockResolvedValue([
+      'NONE',
+      [{ ...nomisAdjustment, sentenceSequence: 99 }],
+    ])
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/view`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Tagged bail overview')
+        expect(res.text).toContain('Unknown')
+        expect(res.text).not.toContain('Edit')
+        expect(res.text).toContain('Delete')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows correct information for DPS adjustment', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([populatedAdjustment])
     adjustmentsService.get.mockResolvedValue(populatedAdjustment)
@@ -217,16 +234,31 @@ describe('Tagged bail routes tests', () => {
       })
   })
 
-  it('GET /{nomsId}/tagged-bail/remove shows correct information', () => {
+  it('GET /{nomsId}/tagged-bail/remove shows correct information for NOMIS adjustment', () => {
     prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
     adjustmentsService.findByPerson.mockResolvedValue([nomisAdjustment])
-    adjustmentsService.get.mockResolvedValue(populatedAdjustment)
+    adjustmentsService.get.mockResolvedValue(nomisAdjustment)
     return request(app)
       .get(`/${NOMS_ID}/tagged-bail/remove/1`)
       .expect(200)
       .expect(res => {
         expect(res.text).toContain('Delete tagged bail')
         expect(res.text).toContain('Court 2 <span class="vertical-bar"></span> CASE001 <br>19 August 2021')
+        expect(res.text).toContain('9955')
+      })
+  })
+
+  it('GET /{nomsId}/tagged-bail/remove shows correct information for NOMIS adjustment against inactive sentence', () => {
+    prisonerService.getSentencesAndOffences.mockResolvedValue(stubbedSentencesAndOffences)
+    const nomisAdjustmentAgainstInactiveSentence = { ...nomisAdjustment, sentenceSequence: 99 }
+    adjustmentsService.findByPerson.mockResolvedValue([nomisAdjustmentAgainstInactiveSentence])
+    adjustmentsService.get.mockResolvedValue(nomisAdjustmentAgainstInactiveSentence)
+    return request(app)
+      .get(`/${NOMS_ID}/tagged-bail/remove/1`)
+      .expect(200)
+      .expect(res => {
+        expect(res.text).toContain('Delete tagged bail')
+        expect(res.text).toContain('Unknown <span class="vertical-bar"></span> Unknown')
         expect(res.text).toContain('9955')
       })
   })
