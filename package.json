@@ -44,7 +44,7 @@
     "@ministryofjustice/frontend": "^9.0.0",
     "@ministryofjustice/hmpps-court-cases-release-dates-design": "^5.2.1",
     "agentkeepalive": "^4.6.0",
-    "applicationinsights": "^2.9.8",
+    "applicationinsights": "^3.15.0",
     "axe-core": "4.11.2",
     "body-parser": "^2.2.2",
     "bunyan": "^1.8.15",
