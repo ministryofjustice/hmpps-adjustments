@@ -7,9 +7,9 @@ export default class TaggedBailRemoveModel {
   constructor(
     public prisonerNumber: string,
     public adjustment: Adjustment,
-    public sentenceAndOffence: PrisonApiOffenderSentenceAndOffences,
     public showUnusedMessage: boolean,
     public remandAndSentencingService: RemandAndSentencingService,
+    public sentenceAndOffence?: PrisonApiOffenderSentenceAndOffences,
     public reviewDeductions?: boolean,
   ) {}
 
@@ -26,7 +26,7 @@ export default class TaggedBailRemoveModel {
       [
         { text: 'Case details' },
         {
-          html: `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${this.remandAndSentencingService.isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`,
+          html: `${this.getCourtName()} <span class="vertical-bar"></span> ${this.getCaseReference()} ${this.sentenceAndOffence && this.remandAndSentencingService.isSentenceRecalled(this.sentenceAndOffence.sentenceCalculationType) ? getSentenceRecallTagHTML() : ''}<br>${this.getSentenceDate()}`,
         },
       ],
       [{ text: 'Number of days' }, { text: this.getTaggedBailDays() }],
@@ -46,7 +46,7 @@ export default class TaggedBailRemoveModel {
       return this.sentenceAndOffence.courtDescription
     }
 
-    return null
+    return 'Unknown'
   }
 
   private getTaggedBailDays(): number {
@@ -62,7 +62,7 @@ export default class TaggedBailRemoveModel {
       return dateToString(new Date(this.sentenceAndOffence.sentenceDate))
     }
 
-    return null
+    return ''
   }
 
   private getCaseReference(): string {
@@ -70,6 +70,6 @@ export default class TaggedBailRemoveModel {
       return this.sentenceAndOffence.caseReference || ''
     }
 
-    return null
+    return 'Unknown'
   }
 }

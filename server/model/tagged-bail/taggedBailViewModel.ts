@@ -50,20 +50,34 @@ export default class TaggedBailViewModel {
       const sentencesForCaseSequence = this.sentencesByCaseSequence.find(sentencesByCaseSequence =>
         relevantSentenceForTaggedBailAdjustment(sentencesByCaseSequence, it),
       )
-      const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
+      let recall = false
+      let caseReference: string
+      let courtDescription: string
+      let canEdit: boolean
+      if (sentencesForCaseSequence) {
+        const sentenceAndOffence = getMostRecentSentenceAndOffence(sentencesForCaseSequence.sentences)
 
-      const recall = this.remandAndSentencingService.isSentenceRecalled(
-        sentencesForCaseSequence.sentences[0].sentenceCalculationType,
-      )
+        recall = this.remandAndSentencingService.isSentenceRecalled(
+          sentencesForCaseSequence.sentences[0].sentenceCalculationType,
+        )
+        caseReference = sentenceAndOffence.caseReference
+        courtDescription = sentenceAndOffence.courtDescription
+        canEdit = true
+      } else {
+        caseReference = 'Unknown'
+        courtDescription = 'Unknown'
+        canEdit = false
+      }
+
       const descriptionRow = recall
-        ? { html: `${sentenceAndOffence.courtDescription} ${getSentenceRecallTagHTML()}` }
-        : { text: sentenceAndOffence.courtDescription }
+        ? { html: `${courtDescription} ${getSentenceRecallTagHTML()}` }
+        : { text: courtDescription }
 
       return [
         descriptionRow,
-        { text: sentenceAndOffence.caseReference },
+        { text: caseReference },
         { text: it.days },
-        this.actionCell(it, sentenceAndOffence.caseReference, sentenceAndOffence.courtDescription),
+        this.actionCell(it, caseReference, courtDescription, canEdit),
       ]
     })
   }
@@ -81,20 +95,23 @@ export default class TaggedBailViewModel {
     return [[{ html: '<b>Total days</b>' }, { html: '' }, { html: `<b>${total}</b>` }, { text: '' }]]
   }
 
-  private actionCell(adjustment: Adjustment, caseReference: string, courtDescription: string) {
+  private actionCell(adjustment: Adjustment, caseReference: string, courtDescription: string, canEdit: boolean) {
     const visuallyHiddenText = caseReference
       ? `tagged bail for case ${caseReference} at ${courtDescription}`
       : `${adjustment.days} days of tagged bail at ${courtDescription}`
 
-    return {
-      html: `
+    let html = ''
+    if (canEdit) {
+      html += `
       <div class="govuk-grid-column-one-quarter govuk-!-margin-right-2 govuk-!-padding-0">
         <a class="govuk-link" href="/${adjustment.person}/tagged-bail/edit/${adjustment.id}" data-qa="edit-${adjustment.id}">Edit<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
-      </div>
+      </div>`
+    }
+    html += `
       <div class="govuk-grid-column-one-half govuk-!-padding-0">
         <a class="govuk-link" href="/${adjustment.person}/tagged-bail/remove/${adjustment.id}" data-qa="delete-${adjustment.id}">Delete<span class="govuk-visually-hidden"> ${visuallyHiddenText}</span></a><br />
       </div>
-    `,
-    }
+    `
+    return { html }
   }
 }
