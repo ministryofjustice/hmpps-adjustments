@@ -2,7 +2,7 @@ import { URLSearchParams } from 'url'
 
 import superagent from 'superagent'
 
-import type TokenStore from './tokenStore/tokenStore'
+import { TokenStore } from '@ministryofjustice/hmpps-auth-clients'
 import logger from '../../logger'
 import config from '../config'
 import generateOauthClientToken from '../authentication/clientCredentials'
