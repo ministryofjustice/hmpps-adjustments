@@ -3,8 +3,6 @@ import config from '../config'
 import RemandAndSentencingApi from './remandAndSentencingApiClient'
 import { SentenceTypesAndItsDetails } from '../@types/remandAndSentencingApi/remandAndSentencingApiTypes'
 
-jest.mock('../data/tokenStore/redisTokenStore')
-
 const token = { access_token: 'token-1', expires_in: 300 }
 
 describe('getSentenceTypesAndItsDetails', () => {
