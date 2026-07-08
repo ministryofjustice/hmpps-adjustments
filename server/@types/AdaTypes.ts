@@ -30,13 +30,7 @@ type PadasToReview = {
 }
 
 type InterceptType =
-  | 'NONE'
-  | 'FIRST_TIME'
-  | 'UPDATE'
-  | 'PADA'
-  | 'PADAS'
-  | 'FIRST_TIME_WITH_NO_ADJUDICATION'
-  | 'POTENTIAL'
+  'NONE' | 'FIRST_TIME' | 'UPDATE' | 'PADA' | 'PADAS' | 'FIRST_TIME_WITH_NO_ADJUDICATION' | 'POTENTIAL'
 
 type AdaIntercept = {
   type: InterceptType
