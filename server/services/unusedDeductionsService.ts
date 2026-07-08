@@ -4,12 +4,7 @@ import AdjustmentsService from './adjustmentsService'
 import PrisonerService from './prisonerService'
 
 export type UnusedDeductionMessageType =
-  | 'NOMIS_ADJUSTMENT'
-  | 'VALIDATION'
-  | 'UNSUPPORTED'
-  | 'RECALL'
-  | 'UNKNOWN'
-  | 'NONE'
+  'NOMIS_ADJUSTMENT' | 'VALIDATION' | 'UNSUPPORTED' | 'RECALL' | 'UNKNOWN' | 'NONE'
 
 export default class UnusedDeductionsService {
   private maxTries = 6 // 3 seconds max wait
