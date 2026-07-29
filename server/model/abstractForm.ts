@@ -72,6 +72,10 @@ export default abstract class AbstractForm {
     return Number.isNaN(Number(value)) || Number(value) <= 0 || !Number.isInteger(Number(value))
   }
 
+  isNotZeroOrPositiveInteger(value: string): boolean {
+    return Number.isNaN(Number(value)) || Number(value) < 0 || !Number.isInteger(Number(value))
+  }
+
   fieldHasError(field: string): boolean {
     return fieldHasErrors(this.errors, field)
   }
