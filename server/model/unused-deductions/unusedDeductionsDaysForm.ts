@@ -28,10 +28,10 @@ export default class UnusedDeductionsDaysForm extends AbstractForm {
         },
       ]
     }
-    if (this.isNotPositiveInteger(this.days)) {
+    if (this.isNotZeroOrPositiveInteger(this.days)) {
       return [
         {
-          text: 'Enter a positive whole number for the number of unused deductions',
+          text: 'You must enter a number for the unused deductions',
           fields: ['days'],
         },
       ]
