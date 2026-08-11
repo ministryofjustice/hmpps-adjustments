@@ -149,8 +149,8 @@ export default class RemandRoutes {
         adjustment,
         form,
         sentencesAndOffences,
-        addOrEdit,
         this.remandAndSentencingService,
+        addOrEdit,
       ),
     })
   }
@@ -181,8 +181,8 @@ export default class RemandRoutes {
           adjustment,
           adjustmentForm,
           sentencesAndOffences,
-          addOrEdit,
           this.remandAndSentencingService,
+          addOrEdit,
         ),
       })
     }
@@ -419,9 +419,9 @@ export default class RemandRoutes {
         null,
         sentencesAndOffences,
         unusedDeductions,
+        this.remandAndSentencingService,
         showUnusedMessage,
         false,
-        this.remandAndSentencingService,
       ),
     })
   }
@@ -476,9 +476,9 @@ export default class RemandRoutes {
         dbAdjustment,
         sentencesAndOffences,
         unusedDeductions,
+        this.remandAndSentencingService,
         showUnusedMessage,
         this.paramStoreService.get(req, 'returnToReviewDeductions'),
-        this.remandAndSentencingService,
       ),
     })
   }
