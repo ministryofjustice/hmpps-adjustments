@@ -129,6 +129,7 @@ const stubbedSentencesAndOffences = [sentenceAndOffenceBaseRecord]
 
 const defaultUser = user
 const recallUser = { ...user, roles: ['RECALL_MAINTAINER'] }
+const courtCasesUser = { ...user, roles: ['COURT_CASES'] }
 
 let userInTest = defaultUser
 
@@ -972,6 +973,34 @@ describe('Adjustment routes tests', () => {
       .post(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
       .expect(res => {
         expect(adjustmentsService.update.mock.calls[0][1].recallId).toEqual(null)
+        expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
+        expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
+      })
+  })
+
+  it('POST /{nomsId}/{adjustmentType}/remove/{id} remove recall UAL does not clear recall id if user has COURT_CASES role', () => {
+    userInTest = courtCasesUser
+    const ualWithRecallId = { ...unlawfullyAtLargeTypeRecall, recallId: 'a-recall-id' }
+    adjustmentsService.get.mockResolvedValue(ualWithRecallId)
+
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
+      .expect(res => {
+        expect(adjustmentsService.update).not.toHaveBeenCalled()
+        expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
+        expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
+      })
+  })
+
+  it('POST /{nomsId}/{adjustmentType}/remove/{id} remove recall UAL does not clear recall id if user has RECALL_MAINTAINER role', () => {
+    userInTest = recallUser
+    const ualWithRecallId = { ...unlawfullyAtLargeTypeRecall, recallId: 'a-recall-id' }
+    adjustmentsService.get.mockResolvedValue(ualWithRecallId)
+
+    return request(app)
+      .post(`/${NOMS_ID}/restored-additional-days/remove/this-is-an-id`)
+      .expect(res => {
+        expect(adjustmentsService.update).not.toHaveBeenCalled()
         expect(adjustmentsService.delete.mock.calls).toHaveLength(1)
         expect(adjustmentsService.delete.mock.calls[0][0]).toStrictEqual('this-is-an-id')
       })

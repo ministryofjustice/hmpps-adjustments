@@ -349,7 +349,11 @@ export default class AdjustmentRoutes {
       return res.redirect(`/${nomsId}/review-deductions`)
     }
 
-    if (!roles.includes('RECALL_MAINTAINER') && adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE') {
+    const recallRoles = ['RECALL_MAINTAINER', 'COURT_CASES']
+    if (
+      roles.every((role: string) => !recallRoles.includes(role)) &&
+      adjustment.adjustmentType === 'UNLAWFULLY_AT_LARGE'
+    ) {
       adjustment.recallId = null
       await this.adjustmentsService.update(id, adjustment, username)
     }
