@@ -13,8 +13,8 @@ export default class RemandSelectOffencesModel {
     public adjustment: SessionAdjustment,
     public form: RemandOffencesForm,
     sentencesAndOffences: PrisonApiOffenderSentenceAndOffences[],
-    public addOrEdit: string = null,
     public remandAndSentencingService: RemandAndSentencingService,
+    public addOrEdit: string = null,
   ) {
     this.cases = groupBy(sentencesAndOffences, (sent: PrisonApiOffenderSentenceAndOffences) => sent.caseSequence)
   }

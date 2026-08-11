@@ -325,8 +325,8 @@ export default class TaggedBailRoutes {
         sentenceAndOffence,
         sentencesByCaseSequence.length,
         showUnusedMessage,
-        this.paramStoreService.get(req, 'returnToReviewDeductions'),
         this.remandAndSentencingService,
+        this.paramStoreService.get(req, 'returnToReviewDeductions'),
       ),
     })
   }
