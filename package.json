@@ -131,7 +131,7 @@
     "@opentelemetry/core": "2.11.0",
     "form-data": "4.0.6",
     "js-yaml": "5.4.2",
-    "undici": "7.30.0",
+    "undici": "8.11.0",
     "proxy-addr": "2.0.8",
     "moment": "2.31.0"
   }
