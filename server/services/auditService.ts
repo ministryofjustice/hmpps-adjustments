@@ -1,9 +1,9 @@
-import { auditService } from '@ministryofjustice/hmpps-audit-client'
+import { AuditServiceFactory, AuditService as HmppsAuditService } from '@ministryofjustice/hmpps-audit-client'
 import logger from '../../logger'
 import AuditAction from '../enumerations/auditType'
 
 export default class AuditService {
-  private serviceName = 'adjustments'
+  private hmppsAuditService: HmppsAuditService = AuditServiceFactory.configureFromEnv(logger)
 
   getAuditAction(adjustmentType: string, operation: 'CREATE' | 'UPDATE' | 'DELETE'): AuditAction | undefined {
     try {
@@ -83,17 +83,15 @@ export default class AuditService {
 
   async sendAuditMessage(action: AuditAction, user: string, subjectId: string, adjustmentId: string) {
     try {
-      const details = JSON.stringify({
+      const details = {
         nomisId: subjectId,
         adjustmentId: adjustmentId ?? 'NOT_APPLICABLE',
-      })
-      const subjectType: string = 'NOT_APPLICABLE'
-      await auditService.sendAuditMessage({
-        action,
+      }
+      await this.hmppsAuditService.logAuditEvent({
+        what: action,
         who: user,
         subjectId,
-        subjectType,
-        service: this.serviceName,
+        subjectType: 'NOT_APPLICABLE',
         details,
       })
     } catch (error) {
