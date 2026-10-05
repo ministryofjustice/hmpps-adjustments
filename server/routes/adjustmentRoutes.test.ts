@@ -158,6 +158,17 @@ afterEach(() => {
 })
 
 describe('Adjustment routes tests', () => {
+  it('GET /{nomsId}/restored-additional-days/{addOrEdit} with invalid addOrEdit shows the current support email address', () => {
+    return request(app)
+      .get(`/${NOMS_ID}/restored-additional-days/invalid`)
+      .expect(404)
+      .expect('Content-Type', /html/)
+      .expect(res => {
+        expect(res.text).toContain('CourtCasesandReleaseDates@justice.gov.uk')
+        expect(res.text).not.toContain('calculatereleasedates@digital.justice.gov.uk')
+      })
+  })
+
   it('GET /{nomsId}/restored-additional-days/add', () => {
     adjustmentsService.findByPerson.mockResolvedValue([adaAdjustment])
     prisonerService.getStartOfSentenceEnvelope.mockResolvedValue({

@@ -833,4 +833,19 @@ describe('Additional Days Awarded routes tests', () => {
         expect(res.text).toContain('15')
       })
   })
+
+  describe('Add warning tests', () => {
+    it('GET /{nomsId}/additional-days/add shows the current support email address', () => {
+      prisonerService.getStartOfSentenceEnvelope.mockResolvedValue(null)
+
+      return request(app)
+        .get(`/${NOMS_ID}/additional-days/add`)
+        .expect(200)
+        .expect('Content-Type', /html/)
+        .expect(res => {
+          expect(res.text).toContain('CourtCasesandReleaseDates@justice.gov.uk')
+          expect(res.text).not.toContain('calculatereleasedates@digital.justice.gov.uk')
+        })
+    })
+  })
 })
