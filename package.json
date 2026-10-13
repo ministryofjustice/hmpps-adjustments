@@ -100,7 +100,7 @@
     "audit-ci": "^7.1.0",
     "autoprefixer": "^10.6.1",
     "aws-sdk-client-mock": "^4.1.0",
-    "concurrently": "^10.0.5",
+    "concurrently": "^10.0.6",
     "cookie-session": "^2.1.1",
     "cypress": "^15.21.1",
     "cypress-axe": "^1.7.0",
