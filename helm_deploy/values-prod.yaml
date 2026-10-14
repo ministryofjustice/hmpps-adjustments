@@ -31,4 +31,4 @@ generic-service:
     BLOCK_SUPPORT_USERS_FROM_EDIT: 'true'
 
 generic-prometheus-alerts:
-  alertSeverity: legacy-replacement-alerts
+  alertSeverityOverride: legacy-replacement-alerts

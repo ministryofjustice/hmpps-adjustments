@@ -7,12 +7,12 @@ generic-service:
 
   image:
     repository: ghcr.io/ministryofjustice/hmpps-adjustments
-    tag: app_version # override at deployment time
+    tag: app_version  # override at deployment time
     port: 3000
 
   ingress:
     enabled: true
-    host: app-hostname.local # override per environment
+    host: app-hostname.local  # override per environment
     tlsSecretName: hmpps-adjustments-cert
 
   livenessProbe:
