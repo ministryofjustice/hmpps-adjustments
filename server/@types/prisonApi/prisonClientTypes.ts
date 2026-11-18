@@ -1,8 +1,15 @@
-import { components } from './index'
+import type {
+  BookingAndSentenceAdjustments,
+  CaseLoad,
+  CourtDateResult,
+  OffenderOffence,
+  OffenderSentenceAndOffences,
+  SentenceAdjustmentValues,
+} from './index'
 
-export type PrisonApiUserCaseloads = components['schemas']['CaseLoad']
-export type PrisonApiCourtDateResult = components['schemas']['CourtDateResult']
-export type PrisonApiBookingAndSentenceAdjustments = components['schemas']['BookingAndSentenceAdjustments']
-export type PrisonApiSentenceAdjustments = components['schemas']['SentenceAdjustmentValues']
-export type PrisonApiOffenderSentenceAndOffences = components['schemas']['OffenderSentenceAndOffences']
-export type PrisonApiOffence = components['schemas']['OffenderOffence']
+export type PrisonApiUserCaseloads = CaseLoad
+export type PrisonApiCourtDateResult = CourtDateResult
+export type PrisonApiBookingAndSentenceAdjustments = BookingAndSentenceAdjustments
+export type PrisonApiSentenceAdjustments = SentenceAdjustmentValues
+export type PrisonApiOffenderSentenceAndOffences = OffenderSentenceAndOffences
+export type PrisonApiOffence = OffenderOffence

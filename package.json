@@ -24,14 +24,14 @@
     "clean": "rm -rf dist test_results",
     "rebuild": "npm run clean && npm run setup && npm run build",
     "setup": "npm ci && hmpps-npm-script-run-allowlist",
-    "generate-adjudication-types": "openapi-typescript https://manage-adjudications-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/adjudications/index.d.ts",
-    "generate-adjustments-api-types": "openapi-typescript https://adjustments-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/adjustments/index.d.ts",
-    "generate-calculate-release-dates-api-types": "openapi-typescript https://calculate-release-dates-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/calculateReleaseDates/index.d.ts",
-    "generate-court-cases-release-dates-api-types": "openapi-typescript https://court-cases-release-dates-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/courtCasesReleaseDatesApi/index.d.ts && eslint . --cache --max-warnings 0 --fix \"./server/@types/courtCasesReleaseDatesApi/index.d.ts\"",
-    "generate-identify-remand-period-types": "openapi-typescript https://identify-remand-periods-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/identifyRemandPeriods/index.d.ts",
-    "generate-prison-api-types": "openapi-typescript https://prison-api-dev.prison.service.justice.gov.uk/v3/api-docs > ../server/@types/prisonApi/index.d.ts",
-    "generate-prisoner-search-api-types": "openapi-typescript https://prisoner-search-dev.prison.service.justice.gov.uk/v3/api-docs > ./server/@types/prisonerSearchApi/index.d.ts",
-    "generate-ras-api-types": "openapi-typescript https://remand-and-sentencing-api-dev.hmpps.service.justice.gov.uk/v3/api-docs > ./server/@types/remandAndSentencingApi/index.d.ts"
+    "generate-adjudication-types": "openapi-ts -i https://manage-adjudications-api-dev.hmpps.service.justice.gov.uk/v3/api-docs -o ./server/@types/adjudications -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/adjudications/types.gen.ts\"",
+    "generate-adjustments-api-types": "openapi-ts -i https://adjustments-api-dev.hmpps.service.justice.gov.uk/v3/api-docs -o ./server/@types/adjustments -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/adjustments/types.gen.ts\"",
+    "generate-calculate-release-dates-api-types": "openapi-ts -i https://calculate-release-dates-api-dev.hmpps.service.justice.gov.uk/v3/api-docs -o ./server/@types/calculateReleaseDates -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/calculateReleaseDates/types.gen.ts\"",
+    "generate-court-cases-release-dates-api-types": "openapi-ts -i https://court-cases-release-dates-api-dev.hmpps.service.justice.gov.uk/v3/api-docs -o ./server/@types/courtCasesReleaseDatesApi -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/courtCasesReleaseDatesApi/types.gen.ts\"",
+    "generate-identify-remand-period-types": "openapi-ts -i https://identify-remand-periods-api-dev.hmpps.service.justice.gov.uk/v3/api-docs -o ./server/@types/identifyRemandPeriods -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/identifyRemandPeriods/types.gen.ts\"",
+    "generate-prison-api-types": "openapi-ts -i https://prison-api-dev.prison.service.justice.gov.uk/v3/api-docs -o ./server/@types/prisonApi -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/prisonApi/types.gen.ts\"",
+    "generate-prisoner-search-api-types": "openapi-ts -i https://prisoner-search-dev.prison.service.justice.gov.uk/v3/api-docs -o ./server/@types/prisonerSearchApi -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/prisonerSearchApi/types.gen.ts\"",
+    "generate-ras-api-types": "openapi-ts -i https://remand-and-sentencing-api-dev.hmpps.service.justice.gov.uk/v3/api-docs -o ./server/@types/remandAndSentencingApi -p @hey-api/typescript && eslint . --cache --max-warnings 0 --fix \"./server/@types/remandAndSentencingApi/types.gen.ts\""
   },
   "engines": {
     "node": "^26",
@@ -76,6 +76,7 @@
     "uuid": "^14.0.3"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.97.3",
     "@jgoz/esbuild-plugin-typecheck": "^5.0.0",
     "@ministryofjustice/eslint-config-hmpps": "^1.0.4",
     "@ministryofjustice/frontend-types": "2.0.3",
@@ -118,7 +119,6 @@
     "lint-staged": "^17.6.0",
     "nock": "^14.0.17",
     "nodemon": "^3.1.14",
-    "openapi-typescript": "7.13.0",
     "postcss-preset-env": "^11.6.2",
     "prettier": "^3.9.10",
     "prettier-plugin-jinja-template": "^2.2.0",

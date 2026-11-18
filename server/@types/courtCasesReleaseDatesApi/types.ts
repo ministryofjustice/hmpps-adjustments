@@ -1,3 +1,3 @@
-import { components } from './index'
+import type { CcrdServiceDefinitions as GeneratedCcrdServiceDefinitions } from './index'
 
-export type CcrdServiceDefinitions = components['schemas']['CcrdServiceDefinitions']
+export type CcrdServiceDefinitions = GeneratedCcrdServiceDefinitions

@@ -1,4 +1,4 @@
-import { components } from './index'
+import type { IdentifyRemandDecisionDto, RemandResult as GeneratedRemandResult } from './index'
 
-export type RemandResult = components['schemas']['RemandResult']
-export type IdentifyRemandDecision = components['schemas']['IdentifyRemandDecisionDto']
+export type RemandResult = GeneratedRemandResult
+export type IdentifyRemandDecision = IdentifyRemandDecisionDto

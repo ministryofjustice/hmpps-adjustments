@@ -1,4 +1,7 @@
-import { components } from './index'
+import type {
+  UnusedDeductionCalculationResponse as GeneratedUnusedDeductionCalculationResponse,
+  ValidationMessage,
+} from './index'
 
-export type UnusedDeductionCalculationResponse = components['schemas']['UnusedDeductionCalculationResponse']
-export type CalculateReleaseDatesValidationMessage = components['schemas']['ValidationMessage']
+export type UnusedDeductionCalculationResponse = GeneratedUnusedDeductionCalculationResponse
+export type CalculateReleaseDatesValidationMessage = ValidationMessage
