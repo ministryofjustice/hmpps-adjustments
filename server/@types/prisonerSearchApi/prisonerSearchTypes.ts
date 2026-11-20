@@ -1,3 +1,3 @@
-import { components } from './index'
+import type { Prisoner } from './index'
 
-export type PrisonerSearchApiPrisoner = components['schemas']['Prisoner']
+export type PrisonerSearchApiPrisoner = Prisoner

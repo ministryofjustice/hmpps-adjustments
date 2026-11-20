@@ -1,3 +1,3 @@
-import { components } from './index'
+import type { LegacySentenceTypeGroupingSummary } from './index'
 
-export type SentenceTypesAndItsDetails = components['schemas']['LegacySentenceTypeGroupingSummary'][]
+export type SentenceTypesAndItsDetails = LegacySentenceTypeGroupingSummary[]

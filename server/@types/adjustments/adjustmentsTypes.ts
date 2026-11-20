@@ -1,16 +1,27 @@
-import { components } from './index'
+import type {
+  AdaAdjudicationDetails as GeneratedAdaAdjudicationDetails,
+  AdasByDateCharged as GeneratedAdasByDateCharged,
+  AdjustmentDto,
+  CreateResponseDto,
+  ManualUnusedDeductionsDto,
+  PreviousUnlawfullyAtLargeAdjustmentForReview as GeneratedPreviousUnlawfullyAtLargeAdjustmentForReview,
+  PreviousUnlawfullyAtLargeReviewRequest as GeneratedPreviousUnlawfullyAtLargeReviewRequest,
+  ProspectiveAdaRejectionDto,
+  RestoreAdjustmentsDto,
+  UnusedDeductionsCalculationResultDto,
+  ValidationMessage as GeneratedValidationMessage,
+} from './index'
 
-export type AdjustmentTypes = components['schemas']['AdjustmentDto']['adjustmentType']
-export type Adjustment = components['schemas']['AdjustmentDto']
-export type ManualUnusedDeduction = components['schemas']['ManualUnusedDeductionsDto']
-export type CreateResponse = components['schemas']['CreateResponseDto']
-export type ValidationMessage = components['schemas']['ValidationMessage']
-export type AdjustmentStatus = components['schemas']['AdjustmentDto']['status']
-export type RestoreAdjustments = components['schemas']['RestoreAdjustmentsDto']
-export type AdaAdjudicationDetails = components['schemas']['AdaAdjudicationDetails']
-export type AdasByDateCharged = components['schemas']['AdasByDateCharged']
-export type ProspectiveAdaRejection = components['schemas']['ProspectiveAdaRejectionDto']
-export type UnusedDeductionsCalculationResult = components['schemas']['UnusedDeductionsCalculationResultDto']
-export type PreviousUnlawfullyAtLargeAdjustmentForReview =
-  components['schemas']['PreviousUnlawfullyAtLargeAdjustmentForReview']
-export type PreviousUnlawfullyAtLargeReviewRequest = components['schemas']['PreviousUnlawfullyAtLargeReviewRequest']
+export type AdjustmentTypes = AdjustmentDto['adjustmentType']
+export type Adjustment = AdjustmentDto
+export type ManualUnusedDeduction = ManualUnusedDeductionsDto
+export type CreateResponse = CreateResponseDto
+export type ValidationMessage = GeneratedValidationMessage
+export type AdjustmentStatus = AdjustmentDto['status']
+export type RestoreAdjustments = RestoreAdjustmentsDto
+export type AdaAdjudicationDetails = GeneratedAdaAdjudicationDetails
+export type AdasByDateCharged = GeneratedAdasByDateCharged
+export type ProspectiveAdaRejection = ProspectiveAdaRejectionDto
+export type UnusedDeductionsCalculationResult = UnusedDeductionsCalculationResultDto
+export type PreviousUnlawfullyAtLargeAdjustmentForReview = GeneratedPreviousUnlawfullyAtLargeAdjustmentForReview
+export type PreviousUnlawfullyAtLargeReviewRequest = GeneratedPreviousUnlawfullyAtLargeReviewRequest
